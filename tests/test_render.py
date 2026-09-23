@@ -68,7 +68,7 @@ def test_cursor_never_blinks_out_mid_story(tmp_path, category):
     tl = build_timeline(category, "a verdict")
     clip = tmp_path / "c.mp4"
     render_clip(tl, clip, font_path=resolve_font())
-    w, h = 1080, 1920
+    w = 1080
     raw = subprocess.run(
         ["ffmpeg", "-v", "error", "-i", str(clip), "-vf", f"crop={w}:240:0:{int(Layout().center_y) - 120}",
          "-f", "rawvideo", "-pix_fmt", "gray", "-"],

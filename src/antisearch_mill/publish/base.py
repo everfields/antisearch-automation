@@ -5,14 +5,14 @@ from __future__ import annotations
 import json
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from ..config import CREDENTIALS, PlatformCredentials
+from ..config import CREDENTIALS, PlatformCredentials, env
 from ..ledger import ClipRow, Ledger, PublishRow, now_iso
 from ..render import ClipInfo, probe
-from .http import HttpResponse, RecordingTransport, Request, Transport
+from .http import HttpError, HttpResponse, RecordingTransport, Request, Transport
 
 DRY_RUN = "dry-run"
 LIVE = "live"
@@ -26,7 +26,6 @@ class PlatformSpec:
     max_bytes: int
     max_w: int
     max_h: int
-    containers: tuple[str, ...] = ("mp4",)
 
 
 @dataclass
@@ -35,7 +34,6 @@ class PublishContext:
     mode: str
     transport: Transport | None = None
     sleep: Callable[[float], None] = time.sleep
-    notes: list[str] = field(default_factory=list)
 
 
 class PublishFailed(RuntimeError):
@@ -76,8 +74,6 @@ class Publisher(ABC):
         """Run the platform flow over ctx.transport. Returns (remote_id, remote_url)."""
 
     def resolve_creds(self, mode: str) -> tuple[dict[str, str], list[str]]:
-        from ..config import env
-
         present = self.credentials.present_set()
         if present:
             return {n: env(n) for n in present}, []
@@ -173,8 +169,6 @@ class Publisher(ABC):
 
 
 def expect_ok(req: Request, resp: HttpResponse) -> HttpResponse:
-    from .http import HttpError
-
     if not resp.ok:
         raise HttpError(req, resp)
     return resp
