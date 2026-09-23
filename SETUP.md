@@ -45,6 +45,7 @@ without printing values.
 - [ ] Add the X + LinkedIn secrets above to the repo's GitHub Actions secrets (names identical)
 - [ ] Decide ledger persistence for scheduled runs: `out/clips.csv` + `out/publish.csv` are the idempotency record. Today `mill.yml` only uploads them as an artifact, so a scheduled live run needs them committed back or stored in a bucket first.
 - [ ] Captions: `caption` column in the queue (GTM owns this; empty = video-only post)
+  - captions that quote the input quote the bare phrase (`dry shampoo`), never "best …"; see README → Input shape
 
 ## Going live (once the boxes above are ticked)
 
