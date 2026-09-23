@@ -1,0 +1,43 @@
+name: mill
+
+# Manual mill run. Dry-run unless `live` is ticked; live posting also needs the
+# secrets listed in SETUP.md. The run's out/ dir is uploaded as an artifact.
+on:
+  workflow_dispatch:
+    inputs:
+      queue:
+        description: Queue CSV
+        default: queue/sample_queue.csv
+      live:
+        description: Really publish to X / LinkedIn
+        type: boolean
+        default: false
+
+jobs:
+  mill:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter
+      - run: python -m pip install -e '.[dev]'
+      - name: produce (live oracle)
+        run: mill --out out produce --queue "${{ inputs.queue }}"
+      - name: publish
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_KEY_SECRET: ${{ secrets.X_API_KEY_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
+        run: mill --out out publish ${{ inputs.live && '--live' || '' }}
+      - run: mill --out out verify && mill --out out status
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mill-out-${{ github.run_id }}
+          path: out/
+          retention-days: 30
