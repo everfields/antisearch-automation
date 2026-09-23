@@ -5,7 +5,7 @@ scaled 3x to 1080x1920 (exact 9:16):
 
   body       bg #0A0A0A, fg #E8E4D8, 18px system sans, line-height 1.5, padding 20px
   .terminal  centered at 38% of viewport height, width 100% - 40px, text-align center
-  .cursor    inline-block 0.6ch x 1.05em, translateY(0.18em), blink 1.05s steps(1)
+  .cursor    inline-block 0.6ch x 1.05em, translateY(0.18em), blink 1.05s steps(1), 51% on
   .footer    "antisearch.ai", 11px, fg at 30% alpha, 14px from the bottom
 
 No captions, no branding beyond the product's own footer: caption work is GTM's.
@@ -230,9 +230,15 @@ def build_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: 
     for idx, (p, ranges) in enumerate(text_ranges.items()):
         filters.append(drawtext(p, lay.font_px, FG, _ranges_expr(_merge(ranges)), idx))
 
-    blink = f"lt(mod(t,{BLINK_PERIOD_S}),{BLINK_PERIOD_S * BLINK_ON_FRACTION:.4f})"
+    # Blink phase restarts at every keystroke and at submit (native caret behaviour).
+    # The product's free-running CSS blink would otherwise land a 0.5s blackout on the
+    # lone-cursor submit beat of a <=4s clip, depending only on typing speed.
+    on_s = BLINK_PERIOD_S * BLINK_ON_FRACTION
     for box, ranges in cursor_ranges.items():
-        enable = f"({_ranges_expr(_merge(ranges))})*{blink}"
+        enable = "+".join(
+            f"between(n,{a},{b - 1})*lt(mod(t-{a / timeline.fps:.4f},{BLINK_PERIOD_S}),{on_s:.4f})"
+            for a, b in sorted(ranges)
+        )
         filters.append(
             f"drawbox=x={box.x}:y={box.y}:w={box.w}:h={box.h}:color={FG}:t=fill:enable={_q(enable)}"
         )

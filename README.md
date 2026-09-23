@@ -75,6 +75,8 @@ Global: `--out DIR` (default `$MILL_OUT_DIR` or `out/`), `--env-file .env`.
 - the product CSS evaluated on a 360×640 CSS-px phone at 3×: `#0A0A0A` background, `#E8E4D8` text,
   18px→54px sans (Inter), centered at 38% height, `0.6ch × 1.05em` block cursor blinking at 1.05s,
   dim `antisearch.ai` footer
+- the blink phase restarts on every keystroke and on submit (native caret behaviour), so the
+  cursor never blinks out during typing or the lone-cursor submit beat of a ≤4s clip
 - timeline: 0.3s idle cursor → jittered typing (≤1.5s, seeded by category, so deterministic) →
   0.22s hold → submit (input vanishes, lone cursor 0.45s) → verdict holds to the end (≥1s)
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long

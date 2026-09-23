@@ -59,6 +59,24 @@ def test_clip_contract_and_monolith_pixels(tmp_path):
     assert bright_pixels_in_rows(verdict_frame, cy + 120, 1700) == 0
 
 
+def test_cursor_never_blinks_out_mid_story(tmp_path):
+    """Typing and the lone-cursor submit beat must show something in every frame."""
+    tl = build_timeline("best running shoes", "asics superblast 2")
+    clip = tmp_path / "c.mp4"
+    render_clip(tl, clip, font_path=resolve_font())
+    w, h = 1080, 1920
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(clip), "-vf", f"crop={w}:240:0:{int(Layout().center_y) - 120}",
+         "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+        capture_output=True, check=True,
+    ).stdout
+    size = w * 240
+    frames = [raw[i:i + size] for i in range(0, len(raw), size)]
+    assert len(frames) == tl.total_frames
+    dark = [n for n, f in enumerate(frames) if max(f) < 150]
+    assert dark == [], f"frames with nothing on screen: {dark}"
+
+
 @pytest.mark.parametrize("category,verdict", [
     ("l'oréal: 100% best, [really]; \\ok", "o'neill's \"best\" : 50%"),
     ("best café crème", "ümlaut verdict — with dash"),
