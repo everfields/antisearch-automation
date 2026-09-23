@@ -86,5 +86,5 @@ def test_dotenv_loader(tmp_path, monkeypatch):
 def test_live_oracle_round_trip():
     from antisearch_mill.oracle import LiveOracle
 
-    v = LiveOracle("https://antisearch.ai/verdict").ask("best running shoes")
+    v = LiveOracle("https://antisearch.ai/verdict").ask("thing")
     assert v.source == "live" and v.verdict and v.verdict == v.verdict.lower()

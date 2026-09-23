@@ -35,7 +35,7 @@ def bright_pixels_in_rows(buf: bytes, y0: int, y1: int, w=1080) -> int:
 
 
 def test_clip_contract_and_monolith_pixels(tmp_path):
-    tl = build_timeline("best running shoes", "asics superblast 2")
+    tl = build_timeline("running shoes", "asics superblast 2")
     clip = tmp_path / "c.mp4"
     info = render_clip(tl, clip, font_path=resolve_font(), metadata={"comment": "capture=synthetic-oracle"})
     assert (info.width, info.height) == (1080, 1920)
@@ -60,8 +60,8 @@ def test_clip_contract_and_monolith_pixels(tmp_path):
 
 
 @pytest.mark.parametrize("category", [
-    "best running shoes", "best chef knife", "best espresso machine", "best mechanical keyboard",
-    "best noise cancelling headphones", "best carry on luggage", "x" * 55,
+    "thing", "pizza", "dry shampoo", "running shoes", "federico valverde",
+    "restaurant in barcelona", "noise cancelling headphones", "x" * 55,
 ])
 def test_cursor_never_blinks_out_mid_story(tmp_path, category):
     """Typing and the lone-cursor submit beat must show something in every frame."""
@@ -82,8 +82,8 @@ def test_cursor_never_blinks_out_mid_story(tmp_path, category):
 
 
 @pytest.mark.parametrize("category,verdict", [
-    ("l'oréal: 100% best, [really]; \\ok", "o'neill's \"best\" : 50%"),
-    ("best café crème", "ümlaut verdict — with dash"),
+    ("l'oréal: 100% pure, [really]; \\ok", "o'neill's \"pure\" : 50%"),
+    ("café crème", "ümlaut verdict — with dash"),
 ])
 def test_hostile_characters_render(tmp_path, category, verdict):
     tl = build_timeline(category, verdict)
@@ -92,7 +92,7 @@ def test_hostile_characters_render(tmp_path, category, verdict):
 
 
 def test_render_is_deterministic(tmp_path):
-    tl = build_timeline("best chef knife", "a knife")
+    tl = build_timeline("chef knife", "a knife")
     a = render_clip(tl, tmp_path / "a.mp4", font_path=resolve_font())
     b = render_clip(tl, tmp_path / "b.mp4", font_path=resolve_font())
     assert (tmp_path / "a.mp4").read_bytes() == (tmp_path / "b.mp4").read_bytes()
