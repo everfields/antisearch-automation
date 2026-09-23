@@ -80,9 +80,13 @@ def build_timeline(category: str, verdict: str, *, fps: int = 30, seconds: float
     hold = round(HOLD_AFTER_TYPING_S * fps)
     loading = round(LOADING_S * fps)
     min_result = round(MIN_RESULT_S * fps)
-    typing_budget_frames = total - lead - hold - loading - min_result
+    fixed = lead + hold + loading + min_result
+    if total - fixed < len(category):
+        # one keystroke per frame is the floor; long inputs borrow up to the 4s cap
+        total = min(fixed + len(category), round(MAX_SECONDS * fps))
+    typing_budget_frames = total - fixed
     if typing_budget_frames < len(category):
-        raise ValueError(f"category too long to type within {seconds}s: {len(category)} chars")
+        raise ValueError(f"category too long to type within {MAX_SECONDS}s: {len(category)} chars")
 
     intervals = char_intervals(category, fps, typing_budget_frames / fps)
 

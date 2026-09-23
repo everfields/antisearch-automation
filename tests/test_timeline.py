@@ -40,11 +40,17 @@ def test_deterministic_per_category():
     assert [s.start for s in a.states] != [s.start for s in c.states][: len(a.states)]
 
 
-def test_max_length_input_still_fits_under_four_seconds():
+@pytest.mark.parametrize("seconds", [3.0, 3.8, MAX_SECONDS])
+def test_max_length_input_still_fits_under_four_seconds(seconds):
     category = "a" * 55
-    tl = build_timeline(category, "verdict", seconds=MAX_SECONDS)
-    assert tl.duration_s <= MAX_SECONDS
+    tl = build_timeline(category, "verdict", seconds=seconds)
+    assert seconds <= tl.duration_s <= MAX_SECONDS
     assert [s.text for s in tl.states if s.kind == "typing"][-1] == category
+    assert (tl.states[-1].end - tl.states[-1].start) / tl.fps >= 1.0
+
+
+def test_default_length_is_kept_for_normal_inputs():
+    assert build_timeline("best chef knife", "v").duration_s == pytest.approx(3.8)
 
 
 @pytest.mark.parametrize("seconds", [2.9, 4.1])

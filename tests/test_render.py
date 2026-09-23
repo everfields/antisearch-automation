@@ -59,9 +59,13 @@ def test_clip_contract_and_monolith_pixels(tmp_path):
     assert bright_pixels_in_rows(verdict_frame, cy + 120, 1700) == 0
 
 
-def test_cursor_never_blinks_out_mid_story(tmp_path):
+@pytest.mark.parametrize("category", [
+    "best running shoes", "best chef knife", "best espresso machine", "best mechanical keyboard",
+    "best noise cancelling headphones", "best carry on luggage", "x" * 55,
+])
+def test_cursor_never_blinks_out_mid_story(tmp_path, category):
     """Typing and the lone-cursor submit beat must show something in every frame."""
-    tl = build_timeline("best running shoes", "asics superblast 2")
+    tl = build_timeline(category, "a verdict")
     clip = tmp_path / "c.mp4"
     render_clip(tl, clip, font_path=resolve_font())
     w, h = 1080, 1920

@@ -31,7 +31,7 @@ queue/sample_queue.csv ──produce──▶ POST antisearch.ai/verdict ──�
 
 ```bash
 make install        # pip install -e '.[dev]'  (needs ffmpeg + a sans font, see SETUP.md)
-make test           # 60 tests, no network, no tokens
+make test           # 70 tests, no network, no tokens (live-oracle test opt-in: MILL_TEST_NETWORK=1)
 make dry-run        # proof: fresh out-dry-run/, live oracle, publish dry-run, verify, contact sheets
 make dry-run-offline  # same with the fixture oracle (no network)
 make doctor         # tools, font, live oracle ping, which credentials are missing
@@ -78,7 +78,8 @@ Global: `--out DIR` (default `$MILL_OUT_DIR` or `out/`), `--env-file .env`.
 - the blink phase restarts on every keystroke and on submit (native caret behaviour), so the
   cursor never blinks out during typing or the lone-cursor submit beat of a ≤4s clip
 - timeline: 0.3s idle cursor → jittered typing (≤1.5s, seeded by category, so deterministic) →
-  0.22s hold → submit (input vanishes, lone cursor 0.45s) → verdict holds to the end (≥1s)
+  0.22s hold → submit (input vanishes, lone cursor 0.45s) → verdict holds to the end (≥1s);
+  inputs too long to type at one keystroke per frame stretch the clip toward the 4.0s cap
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long
 - mp4 metadata: `title=<verdict>`, `comment=capture=synthetic-oracle;oracle=<live|fixture>;category=<...>`
 - renders are byte-identical for the same (category, verdict)

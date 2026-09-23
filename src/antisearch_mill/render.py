@@ -233,11 +233,13 @@ def build_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: 
     # Blink phase restarts at every keystroke and at submit (native caret behaviour).
     # The product's free-running CSS blink would otherwise land a 0.5s blackout on the
     # lone-cursor submit beat of a <=4s clip, depending only on typing speed.
-    on_s = BLINK_PERIOD_S * BLINK_ON_FRACTION
+    # Integer frame arithmetic: a rounded float anchor can make t-anchor slightly
+    # negative, and ffmpeg's floor-based mod() then wraps it into the off phase.
+    period_f = BLINK_PERIOD_S * timeline.fps
+    on_f = period_f * BLINK_ON_FRACTION
     for box, ranges in cursor_ranges.items():
         enable = "+".join(
-            f"between(n,{a},{b - 1})*lt(mod(t-{a / timeline.fps:.4f},{BLINK_PERIOD_S}),{on_s:.4f})"
-            for a, b in sorted(ranges)
+            f"between(n,{a},{b - 1})*lt(mod(n-{a},{period_f:g}),{on_f:g})" for a, b in sorted(ranges)
         )
         filters.append(
             f"drawbox=x={box.x}:y={box.y}:w={box.w}:h={box.h}:color={FG}:t=fill:enable={_q(enable)}"
