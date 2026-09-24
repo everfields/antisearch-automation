@@ -1,0 +1,19 @@
+{
+  "id": "p-time",
+  "clip_id": "p-time-03541ddf",
+  "network": "tiktok",
+  "input": "time",
+  "verdict": "now",
+  "handle": "",
+  "handle_rule": "no tag: unowned word or not a brand; caption empty",
+  "caption": "",
+  "slot": "2026-09-25 00:07 America/New_York (06:07 Madrid)",
+  "cover": "tiktok-p-time-cover.png",
+  "cover_frame_ms": 3550,
+  "duration_s": 3.8,
+  "size": "1080x1920",
+  "sha256": "f025453269c7fc2c8536e62f44f043fc509952136a4eba9879166ce515acb80d",
+  "oracle": "live, one honest run, frozen 2026-09-24T22:40:26+00:00",
+  "account": "AntiSearch TikTok",
+  "route": "buffer web UI (GTM), manual this once"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "p-love",
+  "clip_id": "p-love-e71af99c",
+  "network": "instagram",
+  "input": "love",
+  "verdict": "unconditional love",
+  "handle": "",
+  "handle_rule": "no tag: unowned word or not a brand; caption empty",
+  "caption": "",
+  "slot": "2026-09-24 22:07 America/New_York (2026-09-25 04:07 Madrid)",
+  "cover": "instagram-p-love-cover.png",
+  "cover_frame_ms": 3550,
+  "duration_s": 3.8,
+  "size": "1080x1920",
+  "sha256": "8a04c9563231826cb6e35e1e7d3927c029cf9d448bde0480b6d039b1da72d26b",
+  "oracle": "live, one honest run, frozen 2026-09-24T22:40:30+00:00",
+  "account": "AntiSearch IG Business",
+  "route": "buffer web UI (GTM), manual this once"
+}

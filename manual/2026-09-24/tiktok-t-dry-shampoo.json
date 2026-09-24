@@ -1,0 +1,19 @@
+{
+  "id": "t-dry-shampoo",
+  "clip_id": "t-dry-shampoo-4ea56ea1",
+  "network": "tiktok",
+  "input": "dry shampoo",
+  "verdict": "k18 airwash dry shampoo",
+  "handle": "@k18hair",
+  "handle_rule": "tag only if TikTok shows @k18hair as the verified/official K18 account (bio links k18hair.com); otherwise leave the caption empty",
+  "caption": "",
+  "slot": "2026-09-24 22:07 America/New_York (2026-09-25 04:07 Madrid)",
+  "cover": "tiktok-t-dry-shampoo-cover.png",
+  "cover_frame_ms": 3550,
+  "duration_s": 3.8,
+  "size": "1080x1920",
+  "sha256": "3c94d0e8d4db0ab99e4743c9c50de4b6d0f49447cdaf86d8be06d50eda564293",
+  "oracle": "live, one honest run, frozen 2026-09-24T22:40:23+00:00",
+  "account": "AntiSearch TikTok",
+  "route": "buffer web UI (GTM), manual this once"
+}

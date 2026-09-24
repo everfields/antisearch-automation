@@ -1,0 +1,19 @@
+{
+  "id": "p-dog",
+  "clip_id": "p-dog-54e517c1",
+  "network": "linkedin",
+  "input": "dog",
+  "verdict": "golden retriever",
+  "handle": "",
+  "handle_rule": "no tag: unowned word or not a brand; caption empty",
+  "caption": "",
+  "slot": "2026-09-25 09:07 America/New_York (15:07 Madrid)",
+  "cover": "linkedin-p-dog-cover.png",
+  "cover_frame_ms": 3550,
+  "duration_s": 3.8,
+  "size": "1080x1920",
+  "sha256": "68801b6c5a7e17e0373928c78ea47ba722d7f08666642ae73a52dad9ad85318c",
+  "oracle": "live, one honest run, frozen 2026-09-24T22:40:33+00:00",
+  "account": "antisearch Page 99258814",
+  "route": "buffer web UI (GTM), manual this once"
+}
