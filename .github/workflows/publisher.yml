@@ -44,9 +44,14 @@ jobs:
     env:
       LIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.live) || (github.event_name == 'schedule' && vars.PUBLISHER_CRON == 'live') }}
       IGNORE_SLOTS: ${{ github.event_name == 'workflow_dispatch' && inputs.ignore_slots }}
-      QUEUE: ${{ vars.PUBLISHER_QUEUE || 'queue/bluesky_trial.csv queue/tiktok_trial.csv' }}
+      QUEUE: ${{ vars.PUBLISHER_QUEUE || 'queue/bluesky_trial.csv queue/tiktok_trial.csv queue/surprise_trial.csv' }}
       NETWORK: ${{ inputs.network }}
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
+      PUBLISHER_TREND_NETWORKS: ${{ vars.PUBLISHER_TREND_NETWORKS }}
+      PUBLISHER_TREND_CAP: ${{ vars.PUBLISHER_TREND_CAP }}
+      PUBLISHER_REPLY_NETWORKS: ${{ vars.PUBLISHER_REPLY_NETWORKS }}
+      PUBLISHER_REPLY_CAP: ${{ vars.PUBLISHER_REPLY_CAP }}
+      PUBLISHER_WATCH_BLUESKY: ${{ vars.PUBLISHER_WATCH_BLUESKY }}
       PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
       PUBLISHER_LANGUAGE: ${{ vars.PUBLISHER_LANGUAGE }}
       PUBLISHER_SLOTS_BLUESKY: ${{ vars.PUBLISHER_SLOTS_BLUESKY }}
@@ -102,6 +107,10 @@ jobs:
             git -C state remote add origin "$remote"
           fi
 
+      - name: Replies (Bluesky, verdict only, capped; every hour, no ffmpeg needed)
+        if: contains(vars.PUBLISHER_REPLY_NETWORKS, 'bluesky')
+        run: mill replies --state state/posts.csv $([ "$LIVE" = "true" ] && echo --live)
+
       - name: Anything due? (scheduled runs stop here when not)
         id: due
         run: |
@@ -121,12 +130,11 @@ jobs:
           [ -n "$NETWORK" ] && flags+=(--network "$NETWORK")
           mill --out out post --state state/posts.csv "${flags[@]}"
 
-      - name: Save the post log
-        if: always() && env.LIVE == 'true' && steps.due.outputs.go == 'true'
+      - name: Save the state (post log, frozen verdicts, replies, the day's trend list)
+        if: always() && env.LIVE == 'true'
         run: |
           cd state
-          compgen -G '*.csv' >/dev/null || exit 0
-          git add -A -- '*.csv'
+          git add -A .
           git diff --cached --quiet && exit 0
           git -c user.name=antisearch-publisher -c user.email=actions@users.noreply.github.com \
             commit --quiet -m "post log $(date -u +%FT%TZ)"

@@ -21,7 +21,7 @@ from .render import Layout, RenderError, contact_sheet, probe
 
 DEFAULT_QUEUE = "queue/sample_queue.csv"
 DEFAULT_FIXTURES = "fixtures/oracle_fixtures.json"
-DEFAULT_POST_QUEUES = "queue/bluesky_trial.csv queue/tiktok_trial.csv"
+DEFAULT_POST_QUEUES = "queue/bluesky_trial.csv queue/tiktok_trial.csv queue/surprise_trial.csv"
 DEFAULT_POOLS = "queue/pools"
 
 
@@ -116,6 +116,7 @@ def cmd_post(args, settings: Settings) -> int:
     from .publisher.pools import pool_jobs, pool_networks
     from .publisher.registry import resolve_adapters
     from .publisher.run import run_posts
+    from .publisher.trends import daily_candidates, trend_cap, trend_jobs, trend_networks
     from .publisher.verdicts import DryRunOracle, FrozenOracle
 
     env = dict(os.environ)
@@ -129,6 +130,12 @@ def cmd_post(args, settings: Settings) -> int:
     log, store = _publisher_state(args, settings, env)
     pools_dir = Path(args.pools)
     claimed = {j.category for j in jobs}
+    nets = trend_networks(env)
+    if nets:
+        from .publish.http import RequestsTransport
+
+        candidates = daily_candidates(log.path.parent, posting_day(now_et()), RequestsTransport())
+        jobs += trend_jobs(candidates, nets, posting_day(now_et()), log, store.categories(), claimed, trend_cap(env))
     for net in pool_networks(pools_dir):
         jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY)
 
@@ -164,6 +171,47 @@ def cmd_post(args, settings: Settings) -> int:
     counts = Counter(r.status for r in rows)
     print(f"post: {dict(counts)}")
     return 1 if counts.get("failed") or counts.get("dry_run_failed") else 0
+
+
+def cmd_trends(args, settings: Settings) -> int:
+    from .publish.http import RequestsTransport
+    from .publisher.guard import now_et, posting_day
+    from .publisher.trends import daily_candidates, rank
+
+    env = dict(os.environ)
+    day = posting_day(now_et())
+    if args.fresh:
+        kept, decisions = rank(RequestsTransport(), day)
+        for d in decisions:
+            print(f"  {'KEEP' if d['skipped'] is None else 'skip':<4} {d['title'][:48]:<48} {d['input'] or '':<30} {d['skipped'] or ''}")
+    else:
+        log, _ = _publisher_state(args, settings, env)
+        kept = daily_candidates(log.path.parent, day, RequestsTransport())
+    print(f"trends {day}: {', '.join(c.input for c in kept) or 'none'}")
+    return 0
+
+
+def cmd_replies(args, settings: Settings) -> int:
+    from .publish.http import RequestsTransport
+    from .publisher.guard import approved_networks, now_et
+    from .publisher.replies import BlueskyReplier, ReplyLog, run_replies
+    from .publisher.verdicts import DryRunOracle, FrozenOracle
+
+    env = dict(os.environ)
+    log, store = _publisher_state(args, settings, env)
+    live = args.live
+    if live and "bluesky" not in {n.strip() for n in (env.get("PUBLISHER_REPLY_NETWORKS") or "").split(",")}:
+        print("replies: live needs bluesky in PUBLISHER_REPLY_NETWORKS", file=sys.stderr)
+        return 2
+    oracle = FrozenOracle(_oracle(args, settings), store) if live else DryRunOracle(store)
+    replies = ReplyLog(log.path.with_name("replies.csv"))
+    rows = run_replies(BlueskyReplier(RequestsTransport(), env), oracle, replies, now=now_et(), env=env, live=live,
+                       alerts_path=log.path.with_name("alerts.jsonl"))
+    for r in rows:
+        print(f"  {r.status:<8} @{r.author:<28} {r.input!r} -> {r.verdict!r}  {r.post_uri}")
+    print(f"replies: {len(rows)} ({'live' if live else 'dry-run'}); today {replies.replied_today(now_et())}/"
+          f"{env.get('PUBLISHER_REPLY_CAP') or 3}")
+    return 1 if any(r.status == "failed" for r in rows) else 0
 
 
 def cmd_due(args, settings: Settings) -> int:
@@ -435,6 +483,17 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
     sp.add_argument("--pools", default=DEFAULT_POOLS)
     sp.set_defaults(func=cmd_networks)
+
+    sp = sub.add_parser("trends", help="today's trend-lane candidates (frozen once per posting day)")
+    sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
+    sp.add_argument("--fresh", action="store_true", help="refetch and show every article with its keep/skip reason")
+    sp.set_defaults(func=cmd_trends)
+
+    sp = sub.add_parser("replies", help="Bluesky reply lane: verdict-only answers to 'what is the ... X?' (dry-run unless --live)")
+    sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
+    sp.add_argument("--live", action="store_true", help="really reply (needs bluesky in PUBLISHER_REPLY_NETWORKS)")
+    oracle_opts(sp)
+    sp.set_defaults(func=cmd_replies)
 
     sub.add_parser("buffer-channels", help="print the Buffer channel ids to pin as BUFFER_CHANNEL_* variables"
                    ).set_defaults(func=cmd_buffer_channels)
