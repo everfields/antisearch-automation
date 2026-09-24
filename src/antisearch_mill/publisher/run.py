@@ -15,10 +15,11 @@ from ..ledger import ClipRow, Job, Ledger, now_iso
 from ..publish.http import RecordingTransport, RequestsTransport, Transport
 from .base import IMAGE, VIDEO, Adapter, Media
 from .guard import (
-    DONE, FAILED, HOLD_FOR_TAG, PENDING, PER_RUN_PER_NETWORK, PostLog, PostRow, approved_networks, caption_problem,
-    effective_caption, frozen_by, next_slot, open_now, posting_day, slots_for,
+    DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, PostLog, PostRow, approved_networks,
+    caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now, posting_day, slots_for,
 )
 from .media_host import GitHubPagesHost
+from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
 from .registry import ADAPTERS
 
@@ -65,6 +66,7 @@ def run_posts(
     allowance: dict[str, int] = {}
     waiting: dict[str, str] = {}
     reported: set[tuple[str, str]] = set()
+    used_inputs = log.used_inputs()
     live_transport = transport or (RequestsTransport() if live else None)
     out: list[Outcome] = []
 
@@ -106,6 +108,14 @@ def run_posts(
         if prior and prior["status"] == FAILED and not retry_failed:
             out.append(Outcome(job.id, net, "skipped_failed_before", detail=prior["detail"]))
             continue
+        if job.category in used_inputs:
+            out.append(Outcome(job.id, net, "skipped_input_used",
+                               detail=f"{job.category!r} already went out; an input is never repeated"))
+            continue
+        problem = input_problem(job.category, env)
+        if problem:
+            out.append(Outcome(job.id, net, "rejected_input", detail=problem))
+            continue
 
         if net in waiting:
             once(job, net, "skipped_waiting_for_tag", f"{waiting[net]} comes first on {net} and is waiting for its tag")
@@ -124,6 +134,11 @@ def run_posts(
                 once(job, net, "skipped_not_due", f"next {net} slot {nxt:%Y-%m-%d %H:%M %Z}" if nxt else "no slots")
             else:
                 once(job, net, "skipped_one_per_run", f"one {net} post per run")
+            continue
+        last = log.last_attempt(net)
+        if enforce_slots and last is not None and now - last < MIN_GAP:
+            once(job, net, "skipped_min_gap", f"last {net} post at {last.astimezone(now.tzinfo):%H:%M %Z}; "
+                                              f"{MIN_GAP.seconds // 60} min between posts")
             continue
         problem = caption_problem(job.caption, job.category, net)
         if problem:
@@ -170,10 +185,15 @@ def run_posts(
 
         media = media_for(clip, kind)
         allowance[net] -= 1
+        used_inputs.add(job.category)
+        due_at = None
+        zone = local_tz(job.category) if net in LOCAL_MORNING_NETWORKS and cls.route == "buffer" else None
+        if zone is not None:
+            due_at = local_morning_after(now, zone)
         if live:
-            out.append(_post_live(cls, job, clip, media, log, env, live_transport, sleep, now))
+            out.append(_post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at))
         else:
-            out.append(_post_dry(cls, job, clip, media, ledger, env, missing))
+            out.append(_post_dry(cls, job, clip, media, ledger, env, missing, due_at))
     return out
 
 
@@ -184,11 +204,13 @@ def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep) -> GitHu
 
 
 def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, transport, sleep,
-               now: datetime) -> Outcome:
+               now: datetime, due_at: datetime | None = None) -> Outcome:
     net = cls.name
     at = now.astimezone(timezone.utc).isoformat(timespec="seconds")
-    log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at))
+    log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
+    if due_at is not None:
+        adapter.due_at = due_at
     try:
         host = _host(cls, env, transport, sleep)
         if host:
@@ -196,17 +218,22 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
         result = adapter.post(media, effective_caption(job.caption))
     except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
         detail = f"{exc.__class__.__name__}: {exc}"
-        log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at))
+        log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
+                           category=job.category))
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
-    log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at))
+    log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
+                       job.category))
     return Outcome(job.id, net, result.state, result.url, detail)
 
 
-def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, missing: list[str]) -> Outcome:
+def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, missing: list[str],
+              due_at: datetime | None = None) -> Outcome:
     net = cls.name
     dry_env = {**cls.placeholder_env(), **{k: v for k, v in env.items() if v}}
     adapter = cls(None, dry_env, sleep=lambda _s: None, idempotency_key=f"antisearch-{job.id}")
+    if due_at is not None:
+        adapter.due_at = due_at
     host = _host(cls, dry_env, None, lambda _s: None)
     recorder = RecordingTransport(
         lambda req: host.dry_run_responder(req) if host and host.handles(req) else adapter.dry_run_responder(req))
@@ -230,6 +257,7 @@ def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, m
         "source": job.notes or "queue",
         "bare_input": job.category,
         "caption": effective_caption(job.caption),
+        "scheduled_for": due_at.isoformat() if due_at else None,
         "clip_id": clip.clip_id,
         "verdict": clip.verdict,
         "oracle_source": clip.oracle_source,

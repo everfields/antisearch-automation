@@ -75,6 +75,23 @@ def test_every_pool_input_is_a_bare_phrase(pool):
     assert bad == {}
 
 
+def test_every_queued_or_pooled_input_passes_the_publisher_guard():
+    from antisearch_mill.publisher.guard import input_problem
+    from antisearch_mill.publisher.pools import read_pool
+
+    inputs = [j.category for q in QUEUES for j in read_queue(q)] + [c for p in POOLS for c, _ in read_pool(p)]
+    bad = {c: input_problem(c, {}) for c in inputs if input_problem(c, {})}
+    assert bad == {}
+
+
+def test_publisher_inputs_are_unique_across_queues_and_pools():
+    from antisearch_mill.publisher.pools import read_pool
+
+    publisher_queues = [q for q in QUEUES if q.name != "sample_queue.csv"]
+    inputs = [j.category for q in publisher_queues for j in read_queue(q)] + [c for p in POOLS for c, _ in read_pool(p)]
+    assert sorted(c for c in set(inputs) if inputs.count(c) > 1) == []
+
+
 def test_pools_exist_for_the_four_trial_networks():
     assert {p.stem for p in POOLS} >= {"unowned", "bluesky", "linkedin", "instagram", "tiktok"}
 

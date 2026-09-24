@@ -29,22 +29,41 @@ TZ = "America/New_York"
 DAY_START = time(9, 0)
 MAX_PER_NETWORK_PER_DAY = 5
 PER_RUN_PER_NETWORK = 1
+SLOT_MINUTE = 7  # every slot sits on the hourly cron tick: fixed, off the hour
+MIN_GAP = timedelta(minutes=90)  # between two posts on the same network
 SLOT_GRACE = timedelta(hours=2)  # a missed slot can still be served this long; after that it expires
 
 # Business networks lean to the US morning, leisure networks to the afternoon and night (ET).
-DEFAULT_SLOTS: dict[str, tuple[str, ...]] = {
-    "bluesky": ("09:00", "11:00", "13:00", "16:00", "19:00"),
-    "linkedin": ("09:00", "10:00", "12:00", "14:00", "17:00"),
-    "instagram": ("12:00", "17:00", "19:00", "21:00", "23:00"),
-    "tiktok": ("14:00", "18:00", "20:00", "22:00", "00:00"),
-    "threads": ("12:00", "17:00", "19:00", "21:00", "23:00"),
-    "mastodon": ("09:00", "11:00", "13:00", "16:00", "19:00"),
-    "reddit": ("10:00", "13:00", "16:00", "19:00", "22:00"),
+# `PUBLISHER_CADENCE` picks a preset; `PUBLISHER_SLOTS_<NETWORK>` overrides one network.
+CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
+    "carlos": {  # 5 per network per day
+        "bluesky": ("09:07", "11:07", "13:07", "16:07", "19:07"),
+        "x": ("09:07", "11:07", "13:07", "16:07", "19:07"),
+        "linkedin": ("09:07", "11:07", "13:07", "15:07", "17:07"),
+        "instagram": ("12:07", "16:07", "19:07", "21:07", "23:07"),
+        "tiktok": ("14:07", "18:07", "20:07", "22:07", "00:07"),
+        "threads": ("12:07", "16:07", "19:07", "21:07", "23:07"),
+        "mastodon": ("09:07", "11:07", "13:07", "16:07", "19:07"),
+        "reddit": ("10:07", "13:07", "16:07", "19:07", "22:07"),
+    },
+    "soul": {  # TikTok 5, X 5, Bluesky 3, Instagram 3, LinkedIn 1
+        "bluesky": ("09:07", "13:07", "18:07"),
+        "x": ("09:07", "11:07", "13:07", "16:07", "19:07"),
+        "linkedin": ("09:07",),
+        "instagram": ("13:07", "19:07", "22:07"),
+        "tiktok": ("14:07", "18:07", "20:07", "22:07", "00:07"),
+        "threads": ("13:07", "19:07", "22:07"),
+        "mastodon": ("09:07", "13:07", "18:07"),
+        "reddit": ("13:07", "19:07"),
+    },
 }
+DEFAULT_CADENCE = "carlos"
 
 RANKED = re.compile(r"^(the\s+)?(best|top|greatest|#1)\b", re.I)
 HANDLE = re.compile(r"^@[A-Za-z0-9][A-Za-z0-9._-]{0,99}$")
 HHMM = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
+SERIAL = re.compile(r"(^|\s)(day|part|episode|ep|no\.?|vol\.?|#)\s*\d+|\b\d+\s*/\s*\d+\b", re.I)
+ENGLISH_CHARS = re.compile(r"^[a-z0-9 .,'&+\-/]+$")
 
 STAND_IN_FOR = {"bluesky": "x"}
 HOLD_FOR_TAG = "@?"  # queue caption: freeze the verdict, post nothing until a human sets the tag
@@ -52,7 +71,7 @@ NO_CAPTION = "-"  # queue caption: explicitly none (e.g. after a hold, when no v
 
 PENDING = "pending"
 FAILED = "failed"
-DONE = ("published", "drafted")
+DONE = ("published", "drafted", "scheduled")
 
 
 def caption_problem(caption: str, bare_input: str, network: str = "") -> str | None:
@@ -68,6 +87,18 @@ def caption_problem(caption: str, bare_input: str, network: str = "") -> str | N
     if c == bare_input.strip() or HANDLE.match(c):
         return None
     return "caption must be empty, the bare input, or an @handle"
+
+
+def input_problem(category: str, env: dict[str, str]) -> str | None:
+    """Inputs are bare, never serial, and English unless Carlos changes PUBLISHER_LANGUAGE."""
+    if RANKED.search(category):
+        return "input starts with a ranking word"
+    if SERIAL.search(category):
+        return "numbered / serial inputs are not allowed"
+    language = (env.get("PUBLISHER_LANGUAGE") or "en").strip().lower()
+    if language == "en" and not ENGLISH_CHARS.match(category):
+        return "inputs are English by default (PUBLISHER_LANGUAGE=en): plain ascii words only"
+    return None
 
 
 def effective_caption(caption: str) -> str:
@@ -102,12 +133,20 @@ def _after_start(t: time) -> tuple[int, time]:
     return (0 if t >= DAY_START else 1, t)
 
 
+def cadence(env: dict[str, str]) -> str:
+    name = (env.get("PUBLISHER_CADENCE") or DEFAULT_CADENCE).strip().lower()
+    if name not in CADENCES:
+        raise ValueError(f"PUBLISHER_CADENCE={name!r}; choose one of {', '.join(CADENCES)}")
+    return name
+
+
 def slots_for(network: str, env: dict[str, str]) -> list[time]:
-    """The network's slots (ET), in posting-day order. `PUBLISHER_SLOTS_<NETWORK>` overrides."""
+    """The network's slots (ET), in posting-day order: the cadence preset, or `PUBLISHER_SLOTS_<NETWORK>`."""
     raw = (env.get(f"PUBLISHER_SLOTS_{network.upper()}") or "").strip()
     if raw.lower() in ("off", "none", "0"):
         return []
-    items = [s.strip() for s in re.split(r"[,\s]+", raw) if s.strip()] if raw else list(DEFAULT_SLOTS.get(network, ()))
+    preset = CADENCES[cadence(env)].get(network, CADENCES[cadence(env)]["bluesky"])
+    items = [s.strip() for s in re.split(r"[,\s]+", raw) if s.strip()] if raw else list(preset)
     slots = []
     for s in items:
         m = HHMM.match(s)
@@ -117,6 +156,13 @@ def slots_for(network: str, env: dict[str, str]) -> list[time]:
     slots = sorted(set(slots), key=_after_start)
     if len(slots) > MAX_PER_NETWORK_PER_DAY:
         raise ValueError(f"{network}: {len(slots)} slots, the cap is {MAX_PER_NETWORK_PER_DAY} per network per day")
+    off_tick = [f"{t:%H:%M}" for t in slots if t.minute != SLOT_MINUTE]
+    if off_tick:
+        raise ValueError(f"{network}: slots must sit on the :{SLOT_MINUTE:02d} cron tick, got {', '.join(off_tick)}")
+    times = slot_times(date(2026, 1, 5), slots)
+    for a, b in zip(times, times[1:]):
+        if b - a < MIN_GAP:
+            raise ValueError(f"{network}: {a:%H:%M} and {b:%H:%M} are closer than {MIN_GAP.seconds // 60} minutes")
     return slots
 
 
@@ -158,6 +204,7 @@ class PostRow:
     url: str = ""
     detail: str = ""
     at: str = field(default_factory=now_iso)
+    category: str = ""
 
 
 COLUMNS = [f.name for f in fields(PostRow)]
@@ -205,6 +252,17 @@ class PostLog:
                 started[r["job_id"]] = (posting_day(datetime.fromisoformat(r["at"])), r["network"])
         return sum(1 for job, (d, net) in started.items()
                    if d == day and final.get(job) != FAILED and (network is None or net == network))
+
+    def last_attempt(self, network: str) -> datetime | None:
+        """When `network` last posted (or may have): pending rows whose job did not end in failure."""
+        final = {job: r["status"] for job, r in self.latest_by_job().items()}
+        times = [datetime.fromisoformat(r["at"]) for r in self.rows()
+                 if r["network"] == network and r["status"] == PENDING and final.get(r["job_id"]) != FAILED]
+        return max(times) if times else None
+
+    def used_inputs(self) -> set[str]:
+        """Inputs that went (or may have gone) out anywhere: an input is never repeated, ever."""
+        return {r.get("category", "") for r in self.latest_by_job().values() if r["status"] != FAILED} - {""}
 
     def lifetime(self, network: str) -> int:
         """Posts on `network` that went (or may have gone) out, ever; drives the unowned-word rhythm."""

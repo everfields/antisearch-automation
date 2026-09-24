@@ -149,3 +149,32 @@ def test_routes_default_to_buffer_for_ig_linkedin_tiktok():
     assert route_for("linkedin", {"PUBLISHER_ROUTE_LINKEDIN": "direct"}) == "direct"
     with pytest.raises(ValueError):
         route_for("bluesky", {"PUBLISHER_ROUTE_BLUESKY": "buffer"})
+
+
+def test_scheduled_post_uses_custom_time_and_skips_status_polls(clip):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    a = BufferLinkedIn(None, {**KEY, "BUFFER_CHANNEL_LINKEDIN": "ch-li"}, sleep=lambda s: None)
+    a.due_at = datetime(2026, 9, 26, 9, 7, tzinfo=ZoneInfo("Europe/Madrid"))
+    a.transport = RecordingTransport(a.dry_run_responder)
+    res = a.post(clip, "")
+    (req,) = a.transport.requests
+    payload = req.json["variables"]["input"]
+    assert payload["mode"] == "customScheduled" and payload["dueAt"] == "2026-09-26T07:07:00.000Z"
+    assert res.state == "scheduled" and "Europe/Madrid" in res.note
+
+
+def test_places_map_country_rows_to_their_timezone():
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from antisearch_mill.publisher.places import local_morning_after, local_tz
+
+    assert str(local_tz("employer in barcelona")) == "Europe/Madrid"
+    assert str(local_tz("employer in new york")) == "America/New_York"
+    assert local_tz("company to work for") is None and local_tz("employer in atlantis") is None
+    ny = ZoneInfo("America/New_York")
+    assert local_morning_after(datetime(2026, 9, 25, 9, 9, tzinfo=ny), ny) is None  # it's that morning: share now
+    assert local_morning_after(datetime(2026, 9, 25, 9, 9, tzinfo=ny), ZoneInfo("Asia/Tokyo")) == \
+        datetime(2026, 9, 26, 9, 7, tzinfo=ZoneInfo("Asia/Tokyo"))

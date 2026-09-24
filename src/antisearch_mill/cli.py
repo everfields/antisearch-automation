@@ -212,15 +212,20 @@ def cmd_buffer_channels(args, settings: Settings) -> int:
 def cmd_networks(args, settings: Settings) -> int:
     from zoneinfo import ZoneInfo
 
-    from .publisher.guard import approved_networks, now_et, posting_day, slot_times, slots_for
+    from .publisher.guard import approved_networks, cadence, now_et, posting_day, slot_times, slots_for
     from .publisher.pools import runway
     from .publisher.registry import resolve_adapters, route_for
 
     env = dict(os.environ)
     approved = approved_networks(env)
-    _, store = _publisher_state(args, settings, env)
+    log, store = _publisher_state(args, settings, env)
     day = posting_day(now_et())
     madrid = ZoneInfo("Europe/Madrid")
+    unposted = sorted(store.categories() - log.used_inputs())
+    print(f"cadence {cadence(env)} (PUBLISHER_CADENCE); language {env.get('PUBLISHER_LANGUAGE') or 'en'} "
+          f"(PUBLISHER_LANGUAGE); frozen verdicts not yet posted: {len(unposted)}"
+          + (f" -> {', '.join(unposted[:8])}" if unposted else "")
+          + "  (held rows must go out with a tag or '-', never be dropped)")
     for i, (name, cls) in enumerate(resolve_adapters(env).items(), start=1):
         missing = cls.missing(env)
         creds = "present" if not missing else "missing " + ",".join(missing)

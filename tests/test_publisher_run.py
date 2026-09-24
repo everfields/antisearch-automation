@@ -97,50 +97,89 @@ def test_slots_follow_dst_not_fixed_offsets():
 
 def test_midnight_slot_belongs_to_the_day_that_started_at_nine():
     slots = slots_for("tiktok", {})
-    assert slots[-1] == time(0, 0)
+    assert slots[-1] == time(0, 7)
     last = slot_times(date(2026, 9, 25), slots)[-1]
-    assert last == datetime(2026, 9, 26, 0, 0, tzinfo=ET)
-    assert slots_due(datetime(2026, 9, 26, 0, 5, tzinfo=ET), slots) == 5
-    assert open_now(datetime(2026, 9, 26, 0, 5, tzinfo=ET), slots, 4) == 1
-    assert next_slot(datetime(2026, 9, 26, 0, 5, tzinfo=ET), slots) == datetime(2026, 9, 26, 14, 0, tzinfo=ET)
+    assert last == datetime(2026, 9, 26, 0, 7, tzinfo=ET)
+    assert slots_due(datetime(2026, 9, 26, 0, 10, tzinfo=ET), slots) == 5
+    assert open_now(datetime(2026, 9, 26, 0, 10, tzinfo=ET), slots, 4) == 1
+    assert next_slot(datetime(2026, 9, 26, 0, 10, tzinfo=ET), slots) == datetime(2026, 9, 26, 14, 7, tzinfo=ET)
 
 
 def test_missed_slots_expire_instead_of_piling_up():
-    slots = slots_for("bluesky", {})  # 09 11 13 16 19
-    assert open_now(datetime(2026, 9, 25, 11, 7, tzinfo=ET), slots, 0) == 2  # the 09:00 run was missed: catch up
-    assert open_now(datetime(2026, 9, 25, 15, 30, tzinfo=ET), slots, 1) == 0  # 13:00 is past its grace window
+    slots = slots_for("bluesky", {})  # 09:07 11:07 13:07 16:07 19:07
+    assert open_now(datetime(2026, 9, 25, 11, 10, tzinfo=ET), slots, 0) == 2  # the 09:07 run was missed: catch up
+    assert open_now(datetime(2026, 9, 25, 15, 30, tzinfo=ET), slots, 1) == 0  # 13:07 is past its grace window
     assert open_now(datetime(2026, 9, 26, 8, 30, tzinfo=ET), slots, 0) == 0  # never dump yesterday at night
 
 
 def test_slot_overrides_and_limits():
-    assert slots_for("linkedin", {"PUBLISHER_SLOTS_LINKEDIN": "12:00, 09:00"}) == [time(9, 0), time(12, 0)]
+    assert slots_for("linkedin", {"PUBLISHER_SLOTS_LINKEDIN": "12:07, 09:07"}) == [time(9, 7), time(12, 7)]
     assert slots_for("instagram", {"PUBLISHER_SLOTS_INSTAGRAM": "off"}) == []
     with pytest.raises(ValueError, match="cap is 5"):
-        slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "09:00,10:00,11:00,12:00,13:00,14:00"})
+        slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "09:07,11:07,13:07,15:07,17:07,19:07"})
     with pytest.raises(ValueError, match="HH:MM"):
         slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "9am"})
+    with pytest.raises(ValueError, match=":07 cron tick"):
+        slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "09:00"})
+    with pytest.raises(ValueError, match="closer than 90"):
+        slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "09:07,10:07"})
+    with pytest.raises(ValueError, match="PUBLISHER_CADENCE"):
+        slots_for("bluesky", {"PUBLISHER_CADENCE": "loud"})
 
 
-def test_every_default_network_has_five_slots_business_morning_leisure_night():
-    for net in ("bluesky", "linkedin", "instagram", "tiktok"):
-        assert len(slots_for(net, {})) == 5
-    assert sum(t.hour < 13 for t in slots_for("linkedin", {})) >= 3
-    assert sum(t.hour >= 17 or t.hour < 9 for t in slots_for("tiktok", {})) >= 3
+def test_cadence_presets_carlos_and_soul():
+    counts = {c: {n: len(slots_for(n, {"PUBLISHER_CADENCE": c})) for n in ("tiktok", "x", "bluesky", "instagram", "linkedin")}
+              for c in ("carlos", "soul")}
+    assert counts["carlos"] == {"tiktok": 5, "x": 5, "bluesky": 5, "instagram": 5, "linkedin": 5}
+    assert counts["soul"] == {"tiktok": 5, "x": 5, "bluesky": 3, "instagram": 3, "linkedin": 1}
+    assert slots_for("bluesky", {}) == slots_for("bluesky", {"PUBLISHER_CADENCE": "carlos"})
+
+
+def test_business_morning_leisure_night_off_the_hour():
+    for c in ("carlos", "soul"):
+        env = {"PUBLISHER_CADENCE": c}
+        assert all(t.minute == 7 for n in ("bluesky", "linkedin", "instagram", "tiktok") for t in slots_for(n, env))
+        assert slots_for("linkedin", env)[0] == time(9, 7)
+        assert all(t.hour >= 12 or t.hour < 9 for n in ("instagram", "tiktok") for t in slots_for(n, env))
 
 
 # --- cadence -------------------------------------------------------------------------
 
-def test_one_post_per_network_per_run_up_to_five_a_day(ledger, log):
+def test_one_post_per_slot_up_to_the_cap(ledger, log):
     b = fake_adapter()
     jobs = [job(f"j-{i}") for i in range(7)]
     for j in jobs:
         clip(ledger, j.id)
-    statuses = [[o.status for o in go(jobs, ledger, log, {"bluesky": b}) if o.status != "skipped_already_posted"]
-                for _ in range(6)]
+    runs = [datetime(2026, 9, 25, h, 9, tzinfo=ET) for h in (9, 11, 13, 16, 19, 21)]
+    statuses = [[o.status for o in go(jobs, ledger, log, {"bluesky": b}, now=t) if o.status != "skipped_already_posted"]
+                for t in runs]
     assert [s[0] for s in statuses[:5]] == ["published"] * 5
-    assert statuses[0][1] == "skipped_one_per_run"
+    assert statuses[0][1] == "skipped_not_due"
     assert statuses[5] == ["skipped_network_daily_cap"]
     assert log.used_on(date(2026, 9, 25), "bluesky") == 5
+
+
+def test_soul_cadence_is_one_variable(ledger, log):
+    li = fake_adapter("linkedin")
+    jobs = [job(f"e-{i}", ("linkedin",)) for i in range(3)]
+    for j in jobs:
+        clip(ledger, j.id)
+    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "linkedin", "PUBLISHER_CADENCE": "soul"}
+    first = go(jobs, ledger, log, {"linkedin": li}, env=env, now=datetime(2026, 9, 25, 9, 9, tzinfo=ET))
+    assert first[0].status == "published"
+    later = go(jobs, ledger, log, {"linkedin": li}, env=env, now=datetime(2026, 9, 25, 17, 9, tzinfo=ET))
+    assert [o.status for o in later if o.status != "skipped_already_posted"] == ["skipped_network_daily_cap"]
+
+
+def test_ninety_minutes_between_posts_on_a_network(ledger, log):
+    b = fake_adapter()
+    jobs = [job("thing"), job("silence")]
+    for j in jobs:
+        clip(ledger, j.id)
+    go(jobs, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 25, 10, 50, tzinfo=ET))  # late catch-up of 09:07
+    out = go(jobs, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 25, 11, 9, tzinfo=ET))
+    assert [o.status for o in out if o.job_id == "silence"] == ["skipped_min_gap"]
+    assert go(jobs, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 25, 12, 25, tzinfo=ET))[-1].status == "published"
 
 
 def test_live_waits_for_the_slot(ledger, log):
@@ -148,19 +187,18 @@ def test_live_waits_for_the_slot(ledger, log):
     jobs = [job("thing"), job("silence")]
     for j in jobs:
         clip(ledger, j.id)
-    morning = datetime(2026, 9, 25, 10, 30, tzinfo=ET)
-    first = go(jobs, ledger, log, {"bluesky": b}, now=morning)
+    first = go(jobs, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 25, 9, 9, tzinfo=ET))
     assert first[0].status == "published"
-    second = go(jobs, ledger, log, {"bluesky": b}, now=morning)
+    second = go(jobs, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 25, 10, 50, tzinfo=ET))
     assert [o.status for o in second if o.job_id == "silence"] == ["skipped_not_due"]
-    assert "11:00" in next(o.detail for o in second if o.job_id == "silence")
-    assert go(jobs, ledger, log, {"bluesky": b}, now=morning.replace(hour=11, minute=7))[-1].status == "published"
+    assert "11:07" in next(o.detail for o in second if o.job_id == "silence")
+    assert go(jobs, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 25, 11, 9, tzinfo=ET))[-1].status == "published"
 
 
 def test_ignore_slots_posts_now_but_keeps_the_cap(ledger, log):
     clip(ledger, "thing")
     early = datetime(2026, 9, 25, 9, 5, tzinfo=ET)
-    env = {**LIVE_ENV, "PUBLISHER_SLOTS_BLUESKY": "19:00"}
+    env = {**LIVE_ENV, "PUBLISHER_SLOTS_BLUESKY": "19:07"}
     assert go([job("thing")], ledger, log, {"bluesky": fake_adapter()}, env=env, now=early)[0].status == "skipped_not_due"
     assert go([job("thing")], ledger, log, {"bluesky": fake_adapter()}, env=env, now=early,
               ignore_slots=True)[0].status == "published"
@@ -305,3 +343,69 @@ def test_trial_queues_match_the_converged_plan():
     assert {j.caption for j in bsky if j.id.startswith("c-")} == {"@?"}
     (tt,) = read_queue(ROOT / "queue" / "tiktok_trial.csv")
     assert (tt.category, tt.platforms, tt.caption) == ("dry shampoo", ("tiktok",), "@?")
+
+
+# --- rules at volume ------------------------------------------------------------------
+
+def test_an_input_is_never_repeated_on_any_network(ledger, log):
+    b, m = fake_adapter(), fake_adapter("mastodon")
+    clip(ledger, "thing")
+    clip(ledger, "thing-again", verdict="love")
+    jobs = [job("thing"), Job(id="thing-again", category="thing", platforms=("mastodon",))]
+    out = go(jobs, ledger, log, {"bluesky": b, "mastodon": m})
+    assert [o.status for o in out] == ["published", "skipped_input_used"]
+    later = go([Job(id="requeued", category="thing", platforms=("mastodon",))], ledger, log, {"mastodon": m})
+    assert later[0].status == "skipped_input_used" and m.calls == []
+    assert log.used_inputs() == {"thing"}
+
+
+@pytest.mark.parametrize("category,ok", [("restaurant in barcelona", True), ("gift for a new mom", True),
+                                         ("champú seco", False), ("día de muertos", False),
+                                         ("day 3", False), ("thing #4", False), ("part 2 of love", False), ("1/5", False)])
+def test_inputs_are_english_and_never_serial(ledger, log, category, ok):
+    clip(ledger, "x-1")
+    (o,) = go([Job(id="x-1", category=category, platforms=("bluesky",))], ledger, log, {"bluesky": fake_adapter()})
+    assert (o.status == "published") is ok, o
+
+
+def test_other_languages_only_when_carlos_changes_the_lock(ledger, log):
+    clip(ledger, "x-1")
+    env = {**LIVE_ENV, "PUBLISHER_LANGUAGE": "es"}
+    (o,) = go([Job(id="x-1", category="champú seco", platforms=("bluesky",))], ledger, log, {"bluesky": fake_adapter()}, env=env)
+    assert o.status == "published"
+
+
+def test_linkedin_country_rows_are_scheduled_for_that_countrys_morning(ledger, log):
+    from antisearch_mill.publisher.buffer import BufferLinkedIn
+
+    class Scheduled(BufferLinkedIn):
+        seen: list = []
+
+        def _post(self, media, caption):
+            type(self).seen.append(self.due_at)
+            return PostResult("buffer:1", "1", "scheduled")
+
+    clip(ledger, "employer-in-madrid")
+    clip(ledger, "employer-in-tokyo")
+    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "linkedin", "PUBLISHER_SLOTS_LINKEDIN": "09:07,13:07",
+           "BUFFER_API_KEY": "k", "PUBLISHER_MEDIA_REPO": "r", "PUBLISHER_MEDIA_TOKEN": "t",
+           "PUBLISHER_PUBLIC_BASE_URL": "https://clips.example"}
+    jobs = [job("employer-in-madrid", ("linkedin",)), job("employer-in-tokyo", ("linkedin",))]
+    import antisearch_mill.publisher.run as run_mod
+
+    class NoHost:
+        def __init__(self, *a, **k): ...
+        @staticmethod
+        def missing(env): return []
+        def publish(self, media): return "https://clips.example/clips/x.mp4"
+
+    orig, run_mod.GitHubPagesHost = run_mod.GitHubPagesHost, NoHost
+    try:
+        go(jobs, ledger, log, {"linkedin": Scheduled}, env=env, now=datetime(2026, 9, 25, 9, 9, tzinfo=ET))
+        go(jobs, ledger, log, {"linkedin": Scheduled}, env=env, now=datetime(2026, 9, 25, 13, 9, tzinfo=ET))
+    finally:
+        run_mod.GitHubPagesHost = orig
+    madrid, tokyo = Scheduled.seen
+    assert madrid == datetime(2026, 9, 26, 9, 7, tzinfo=ZoneInfo("Europe/Madrid"))
+    assert tokyo == datetime(2026, 9, 26, 9, 7, tzinfo=ZoneInfo("Asia/Tokyo"))
+    assert [r["status"] for r in log.rows()][-1] == "scheduled"

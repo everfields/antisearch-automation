@@ -46,6 +46,8 @@ jobs:
       QUEUE: ${{ vars.PUBLISHER_QUEUE || 'queue/bluesky_trial.csv queue/tiktok_trial.csv' }}
       NETWORK: ${{ inputs.network }}
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
+      PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
+      PUBLISHER_LANGUAGE: ${{ vars.PUBLISHER_LANGUAGE }}
       PUBLISHER_SLOTS_BLUESKY: ${{ vars.PUBLISHER_SLOTS_BLUESKY }}
       PUBLISHER_SLOTS_LINKEDIN: ${{ vars.PUBLISHER_SLOTS_LINKEDIN }}
       PUBLISHER_SLOTS_INSTAGRAM: ${{ vars.PUBLISHER_SLOTS_INSTAGRAM }}

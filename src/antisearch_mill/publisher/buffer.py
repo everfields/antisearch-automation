@@ -10,6 +10,8 @@ must be at a public URL (the media host provides it).
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from ..publish.http import HttpResponse, Request
 from .base import VIDEO, Adapter, Media, PostResult, PublisherError
 
@@ -34,6 +36,7 @@ class BufferRoute(Adapter):
     route = "buffer"
     kinds = frozenset({VIDEO})
     needs_public_url = True
+    due_at: datetime | None = None  # set by the runner to schedule in a local morning instead of sharing now
 
     @classmethod
     def channel_var(cls) -> str:
@@ -73,6 +76,9 @@ class BufferRoute(Adapter):
             "mode": "shareNow",
             "assets": [{"video": self._video(media)}],
         }
+        if self.due_at is not None:
+            payload["mode"] = "customScheduled"
+            payload["dueAt"] = self.due_at.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
         meta = self._metadata()
         if meta:
             payload["metadata"] = {self.service: meta}
@@ -80,6 +86,9 @@ class BufferRoute(Adapter):
         if result.get("__typename") != "PostActionSuccess":
             raise PublisherError(f"buffer: {result.get('message', result)}")
         post = result["post"]
+        if self.due_at is not None:
+            return PostResult(f"buffer:{post['id']}", post["id"], "scheduled",
+                              f"scheduled in Buffer for {self.due_at:%Y-%m-%d %H:%M %Z} ({self.due_at.tzinfo})")
 
         for i in range(STATUS_POLLS):
             if post.get("status") == "sent":
