@@ -7,6 +7,11 @@ and/or as GitHub Actions secrets (for `.github/workflows/mill.yml`), and/or as
 Cursor Cloud Agent secrets. `mill doctor` shows what is present/missing
 without printing values.
 
+For the ~20-day organic trial none of the platform API values below are needed:
+posting goes through Buffer (free) and accounts are opened in one setup sitting.
+See [docs/AUTONOMY_AND_SETUP.md](docs/AUTONOMY_AND_SETUP.md) before asking anyone
+for X / LinkedIn / TikTok / Instagram keys.
+
 ## Bulk checklist
 
 ### Host (already satisfied on CI / cloud agent image)
