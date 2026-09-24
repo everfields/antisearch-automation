@@ -46,6 +46,100 @@ Buffer only accepts media by public URL, so each clip is committed to a public r
 (`everfields/antisearch-clips`) and served by GitHub Pages. That's free, needs no
 card, and stays first-party.
 
+**Status (2026-09-24):**
+- The LinkedIn Page `antisearch` is connected in Buffer free (`antisearch@outlook.com`),
+  1 of 3 channels.
+- Carlos is connecting Instagram (Business) and TikTok (the existing AntiSearch
+  account) from his own laptop, which fills the other two.
+- Bluesky stays on our publisher. **X later can't join Buffer free** (3 channels,
+  all used). At unhold it goes through our own adapter (X's pay-per-use API) or a
+  paid Buffer channel; Bluesky freezes the same day.
+
+### How a frozen clip reaches Buffer, with no human
+
+Buffer's API is available to free accounts today (checked 2026-09-24): 1 personal key,
+3,000 requests per 30 days, GraphQL at `api.buffer.com`. At each network's slot, the
+GitHub Actions run (never the box) does this:
+
+1. **Pick** the next row in blind order (queue, then pool), after the guard passes.
+2. **Freeze:** ask the oracle once; the verdict goes into `verdicts.csv` before
+   anything else (one honest run).
+3. **Render** the ≤4s 9:16 clip from the frozen verdict. Renders are byte-identical,
+   so retries post the same file.
+4. **Host:** commit the clip to `everfields/antisearch-clips` and wait until GitHub
+   Pages serves it (a stable public URL, as Buffer requires).
+5. **Hand over:** Buffer `createPost`, `mode: shareNow` (LinkedIn country rows:
+   `customScheduled` for 09:07 local), with the verdict-frame thumbnail on
+   IG/TikTok and IG `type: reel`.
+6. **Record:** the post log gets `pending` before the call and `published` (with the
+   network link) or `scheduled` after. It's committed to the `publisher-state`
+   branch.
+
+**Queue refill is not needed on this path.** Buffer never holds more than the post
+being sent (plus at most one scheduled LinkedIn country row), so the ~10-post queue
+limit never binds. The only thing to keep stocked is our own pools; `mill networks`
+shows the runway.
+
+**API budget:**
+- `carlos` cadence: 15 Buffer posts a day × 3 requests ≈ 1,350 a month.
+- `soul` cadence: 9 a day ≈ 810 a month.
+- Both are far under 3,000. Pin the channel IDs (`mill buffer-channels`) so lookups
+  cost nothing.
+
+**Known unknowns:**
+- Buffer's per-channel daily posting limit on the free plan isn't published. If it's
+  hit, the post is logged `failed` with Buffer's message and waits for
+  `--retry-failed`; it never double-posts.
+- A post that Buffer accepts but the network later rejects shows up only in Buffer
+  (we log `handed to Buffer` after two status checks). A daily read-only
+  reconciliation, one request per post, is a small follow-up if that happens.
+
+### Checks when connecting (Carlos, on his own laptop)
+
+- **Each channel shows automatic publishing** in Buffer, not reminders or
+  notifications.
+- **TikTok:** if Buffer offers only reminders for the existing account, switch it to
+  a Business account in the TikTok app (free; our clips have no music, so the
+  business music limits don't matter).
+- **Instagram:** a Business account connected so that Buffer auto-publishes Reels.
+  If Buffer insists on a Facebook Page, prefer its Instagram-login option if it
+  offers one.
+
+### Fallback if the Buffer API path fails
+
+**When:** the API key is rejected, API access disappears from the free plan, or
+`createPost` fails for 24h. Until then, don't touch it.
+
+1. **Same pipe, different trigger (no human, no box).** If only `shareNow` misbehaves
+   but the API is up, switch to `customScheduled` batches. Once a day the workflow
+   creates the next 24 hours of posts with `dueAt` set to each slot (a small code
+   change, not built unless needed).
+2. **Last resort: GTM loads the Buffer web UI on the box.** It's slow, but it works
+   if the API is gone.
+   - Set each Buffer channel's posting schedule to **America/New_York** with our
+     slot times, so "Add to queue" lands on the slots.
+   - Once a day the workflow freezes and renders the next 24h of clips (one honest
+     run, in blind order) and publishes them as a list.
+   - GTM uploads them in that order, never choosing or skipping.
+   - GTM records each upload in the post log (a `mill record` command, to build if
+     this path is triggered).
+   - Buffer is logged into from the box only for this; the social accounts
+     themselves are never touched from the box.
+
+   **Refill cadence (fallback only):** refill **daily with exactly the next 24h**,
+   so the queue never holds more than one day's posts (well under the ~10 cap) and
+   a mistake is at most one day deep.
+
+   | Network | Posts/day `carlos` | A full 10-queue lasts | Posts/day `soul` | A full 10-queue lasts |
+   | --- | --- | --- | --- | --- |
+   | TikTok | 5 | 2 days | 5 | 2 days |
+   | Instagram | 5 | 2 days | 3 (1 in week 1) | 3 days (10 in week 1) |
+   | LinkedIn Page | 5 | 2 days | 1 | 10 days |
+
+3. **Per-network escape hatch:** `PUBLISHER_ROUTE_<NETWORK>=direct` uses our own
+   adapter where a wall has come down (for example the LinkedIn Page API, if a
+   registered company appears).
+
 ## Cadence: America/New_York, DST from the tz database, one variable
 
 - A posting day runs **09:00 ET → 09:00 ET**; a 00:07 slot belongs to the day that
@@ -172,12 +266,12 @@ That's 12 posts a day (17 with X), instead of 20–25.
 **Buffer** (Instagram, LinkedIn Page, TikTok)
 
 5. **[HUMAN IP]** Buffer (signed in as `antisearch@outlook.com`) → connect:
-   - **Instagram**, as a Business or Creator account;
-   - the **LinkedIn Page**, as its admin;
-   - **TikTok**.
+   - the **LinkedIn Page**: **done** (2026-09-24);
+   - **Instagram**, as a Business account;
+   - **TikTok**, the existing AntiSearch account.
 
-   Check that each channel shows automatic publishing. If one only offers reminders,
-   switch that account to Business in its app.
+   Instagram and TikTok are in progress from Carlos's laptop. Check that each
+   channel shows automatic publishing (see "Checks when connecting").
 6. **[HUMAN IP]** publish.buffer.com/settings/api → create the API key (the org owner
    only) → secret `BUFFER_API_KEY`.
 7. CoS: `mill buffer-channels` → set the variables `BUFFER_CHANNEL_INSTAGRAM`,
