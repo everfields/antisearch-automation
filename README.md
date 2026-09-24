@@ -41,6 +41,28 @@ make doctor         # tools, font, live oracle ping, which credentials are missi
 Credentials: see **[SETUP.md](SETUP.md)**, a single checklist of everything to
 add before `--live`. Nothing blocks without them.
 
+## Own publisher (`mill post`)
+
+Official APIs only, one adapter per network behind `post(media, caption) -> url`:
+Bluesky, Threads, LinkedIn, TikTok, Instagram, Reddit, Mastodon
+(`src/antisearch_mill/publisher/`). Dry-run unless `--live`.
+- **Guard:** ≤2 posts/day total (Madrid), one clip → one network, caption = empty /
+  bare input / @handle, live only for networks in `PUBLISHER_LIVE_NETWORKS`.
+- **Post log:** a `pending` row is written before every API call, so nothing
+  double-posts.
+- **Scheduling:** `.github/workflows/publisher.yml` (manual + cron, off by default)
+  runs it without the Grok Bot box.
+
+```bash
+mill networks                        # what's configured, what's blocked, what each API can't do
+mill post --queue q.csv              # dry-run plans -> out/dry_run_posts/<network>/<job>.json
+mill post --queue q.csv --live --state state/posts.csv
+```
+
+Setup, exact env vars and the honest limits per network:
+**[docs/PUBLISHER_SETUP.md](docs/PUBLISHER_SETUP.md)**. `mill publish` (below) is
+the older X/LinkedIn path and stays as it was.
+
 ## CLI
 
 `mill` (or `PYTHONPATH=src python3 -m antisearch_mill`):
