@@ -45,12 +45,22 @@ today.
    - If the brand reposts, that repost is the distribution.
    - Never ask, DM, reply, follow up or thank.
 
+## Update 2026-09-24 night (Carlos): cadence and routes
+
+- **5 posts a day per network**, at America/New_York slots: business networks lean to
+  the morning, leisure networks to the evening. The ≤2/day trial cap is superseded.
+- **Instagram, the LinkedIn Page and TikTok now exist**, and all three go through
+  Buffer's API, driven by our scheduler.
+- Slots, routes, queue sizing, cost and the recommended IG ramp / LinkedIn 2/day are
+  in [`PUBLISHER_SETUP.md`](PUBLISHER_SETUP.md). The rules above are unchanged.
+- The old IG first-posts order (disfrutar → aman → psg) names verdicts. Under one
+  honest run we can only choose inputs (`restaurant in barcelona` and `hotel` head
+  the Instagram pool), and the wall still opens with an unowned word.
+
 ## Decision: Bluesky is the one stand-in for held X
 
-This week only TikTok (beauty, inbox drafts) can publish among the locked verticals:
-IG is suspended, X is held (no SIM), and the LinkedIn Page API needs a registered
-company. **Bluesky opens now as the single stand-in for the X vertical; everything
-else stays in reserve.**
+**Bluesky is the single stand-in for the X vertical.** Threads, Mastodon, Reddit and
+YouTube stay in reserve.
 
 Conditions (all enforced in code unless marked):
 - **Posts the same frozen ≤4s 9:16 verdict video the mill renders.** No text-only
@@ -59,8 +69,8 @@ Conditions (all enforced in code unless marked):
   Queue: `thing`, `password manager`, `silence`, `note-taking app`, `a year`.
 - **Freezes when X unholds,** so one vertical never runs on two networks. Adding
   `x` to `PUBLISHER_LIVE_NETWORKS` stops Bluesky.
-- **One post a day**; TikTok takes the other slot of the ≤2/day total. The first
-  post goes out at 10:07 Madrid.
+- **5 a day**, at 09:00, 11:00, 13:00, 16:00 and 19:00 ET (15:00–01:00 Madrid).
+  The first post goes out at the first open slot after go-live.
 - *Profile (human steps):*
   - handle `antisearch.ai` via DNS TXT (`antisearch.bsky.social` meanwhile);
   - avatar = the cursor block `#E8E4D8` on `#0A0A0A`
@@ -92,7 +102,7 @@ Status: **now** = this week; **vertical** = a locked vertical behind a wall;
 | **3** | **Show HN, cold, once** | One plain post by Carlos; no replies in the thread; gated on the og fix and the cost check | now, gated |
 | 4 | Handle = domain | `@antisearch.ai` on Bluesky | now |
 | 5 | Contested inputs | Crowns for things people argue about, inside each vertical brief, no comment | now |
-| 6 | TikTok inbox drafts | Beauty inputs by API to the TikTok inbox; one human tap posts them | vertical, works |
+| 6 | TikTok via Buffer | Beauty inputs posted publicly through Buffer's API at the TikTok slots | vertical, works |
 | 7 | Employer verdicts, zero copy | LinkedIn verdict clip, no words | vertical, blocked |
 | 8 | Ask by mention, once a day | Mention with a thing, get the verdict in a daily batch | reserve (edge of "no chat") |
 | 9 | One-word README | A public repo whose README is today's verdict | reserve |
@@ -123,25 +133,28 @@ thanking or reposting brands that repost us.
 
 ```csv
 id,category,platforms,caption,notes
-u-thing,thing,bluesky,,unowned; opens the wall 10:07 madrid
+u-thing,thing,bluesky,,unowned; opens the wall
 c-password-manager,password manager,bluesky,@?,companies; tag only a verified domain handle
 u-silence,silence,bluesky,,unowned
 c-note-taking-app,note-taking app,bluesky,@?,companies; tag only a verified domain handle
 u-a-year,a year,bluesky,,unowned
 ```
 
-- First post: the frozen verdict **clip** for `thing`, caption empty, 10:07 Madrid.
+- First post: the frozen verdict **clip** for `thing`, caption empty, at the first open Bluesky slot.
 - Nobody asks the oracle `thing` before that. If the answer isn't `love`, it goes
   out as it is.
 - `@?` rows: the live run freezes the verdict and holds. CoS sets the caption to the
   crowned company's verified domain handle, or `-` for none. The next run posts it.
 
-### 2. Brands see themselves: the first tagged crown (TikTok, as written)
+### 2. Brands see themselves: the first tagged crown (TikTok, through Buffer)
 
-- [`queue/tiktok_trial.csv`](../queue/tiktok_trial.csv): input `dry shampoo`,
-  TikTok inbox draft.
-- The honest run happens when the draft is made.
-- Instruction for whoever taps Post in the TikTok app, verbatim:
+- [`queue/tiktok_trial.csv`](../queue/tiktok_trial.csv): input `dry shampoo`, caption
+  `@?`.
+- The honest run freezes the verdict and holds the row. CoS sets the caption to the
+  crowned brand's verified TikTok handle, or `-` if the verdict isn't a brand or has
+  no verified account. The next TikTok slot posts it through Buffer; nobody taps
+  anything.
+- The rule, verbatim:
 
 ```text
 caption: only @<the crowned brand's verified TikTok handle>. if the verdict isn't a brand, or it has no verified account, leave the caption empty. nothing else, ever.
