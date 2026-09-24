@@ -309,6 +309,9 @@ everything that can post natively.
 | `PUBLISHER_CRON` | variable | unset = off; `dry-run`; `live` |
 | `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere) or `soul` (TikTok 5, X 5, Bluesky 3, IG 3, LinkedIn 1) |
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
+| `PUBLISHER_TREND_NETWORKS`, `PUBLISHER_TREND_CAP` | variable, optional | Trend lane: networks + rows per network per day (default 1, max 3). See `TREND_AND_REPLY_LANES.md` |
+| `PUBLISHER_WINNER_NETWORKS`, `PUBLISHER_WINNER_CAP` | variable, optional | Winner lane: networks + posts per day across networks (default 2, max 3); handles in `queue/winners/handles.json` |
+| `PUBLISHER_REPLY_NETWORKS`, `PUBLISHER_REPLY_CAP`, `PUBLISHER_WATCH_BLUESKY` | variable, optional | Reply lane (Bluesky): `bluesky` to go live, ≤3 a day, handles to watch |
 | `PUBLISHER_LANGUAGE` | variable, optional | `en` (default, Carlos's lock); anything else lifts the English check |
 | `PUBLISHER_BRIDGE` | variable, optional | `buffer` = Instagram, LinkedIn and TikTok via Buffer free. Unset = Buffer gone, all native |
 | `PUBLISHER_ROUTE_<NETWORK>` | variable, optional | `direct` (native, the default) or `buffer`; overrides the bridge for one network |

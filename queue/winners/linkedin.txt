@@ -1,0 +1,11 @@
+# Winner lane, LinkedIn (companies, employers). LinkedIn tags need organization URNs: these post untagged for now.
+us company
+european company
+tech company
+car company
+chip company
+cloud company
+sportswear brand
+coffee chain
+university
+ceo

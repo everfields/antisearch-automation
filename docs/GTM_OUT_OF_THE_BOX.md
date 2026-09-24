@@ -74,6 +74,130 @@ today.
   honest run we can only choose inputs (`restaurant in barcelona` and `hotel` head
   the Instagram pool), and the wall still opens with an unowned word.
 
+## Winner lane (Carlos, 2026-09-25; repo memory)
+
+**The idea.** Every input names one answer. When the answer is a real entity with an
+official account (a brand, a country's tourism board, a hotel, a company, a public
+figure in a neutral category), being named by the oracle is a free prestige award.
+We post the locked clip and the **only text is the winner's verified @handle**.
+- The repost is theirs to give; we never ask.
+- It's proven: Salesforce, the Plaza Hotel and Dyson reposted early iterations two
+  years ago. What was missing was a route, maintenance and a team.
+- Carlos's transcript is kept verbatim in
+  [`founder-notes/2026-09-25-winner-lane.md`](founder-notes/2026-09-25-winner-lane.md).
+
+**How it runs (built):**
+- About 46 curated seeds in `queue/winners/<network>.txt`, for example:
+  - Instagram: `country for having fun`, `sunset`, `luxury hotel`;
+  - TikTok: `squirrel`, `calisthenics influencer`, `sneaker brand`;
+  - LinkedIn: `us company`, `ceo`;
+  - Bluesky: `ai lab`, `football club`.
+- They're drawn in file order, never repeated, English and bare.
+- After the honest run, the verdict is looked up in `queue/winners/handles.json`. Only
+  handles a human verified are ever used; unknown or unverified winners post with no
+  tag.
+
+**Guardrails:**
+- Never alter or reroll a verdict to reach a bigger account.
+- Politics, tragedies, minors and private individuals are withheld (the verdict
+  stays frozen and nothing posts). Living public figures only in neutral categories.
+- The oracle's `no` posts nothing.
+- **≤ 2 winner posts a day across all networks** (`PUBLISHER_WINNER_CAP`).
+- The blind queue and the 1-in-4 unowned rhythm are unchanged; winners are a
+  separate lane.
+
+**Sibling: the reverse oracle** (below) picks the winner first. Winner seeds stay
+the blind, main version.
+
+**One flag for Carlos:** his own example, `ceo` → Elon Musk, would be **withheld**
+under the politics guardrail (Musk is marked sensitive in the map). Lifting that is
+one line in `handles.json`, and it's his call.
+
+## Reverse oracle (Carlos, 2026-09-25 00:52; exploration, not the main line)
+
+**The idea.** Output first:
+1. Pick a high-reach winner (a brand, a company, or a person in a neutral category).
+2. Privately find a short, natural input that makes the oracle name them.
+3. Publish **one fresh live run** of that input, and tag the winner (or, on Bluesky,
+   reply to one of their posts with the clip) only if that fresh run names them.
+
+Example: target Bad Bunny, candidate `reggaeton artist`.
+
+**The tension, stated plainly.** Our locked rule is "humans choose inputs, nobody
+chooses verdicts, and a test ask spends the input". Searching for inputs by the
+winner they produce is a form of choosing, and it's what Soul's "never sort by which
+brand might repost" was guarding against. Carlos's honesty rule is the line that
+keeps it true. We run it as a **separate, logged lane**; the blind queue, pools,
+trends and winner seeds stay exactly as they are.
+
+**Honesty rule (non-negotiable; Soul co-signs):**
+- **Search is private and logged:** every search ask goes to
+  `state/reverse/<target>.csv` (input, verdict, time).
+- **Search verdicts are not frozen in `verdicts.csv`.** So the published run is a
+  **new** oracle call, not a replay of the search.
+- **The published clip is that fresh run, filmed as is:** no splice, no edit, no
+  reroll on camera.
+  - If the fresh run doesn't name the target: post it **untagged** (default) or not
+    at all (`PUBLISHER_REVERSE_ON_MISS=skip`).
+  - Either way, the input is spent, as always.
+- **The input must be something a person could plausibly type:**
+  - ≤ 55 characters, ≤ 6 words, English, bare, never "best";
+  - no target name, no year or birth date, no contrived qualifiers ("… from puerto
+    rico born 1994").
+- **Never a target who is** a private individual, a minor, a politician (or
+  politically active), or tied to a tragedy.
+
+**Design:**
+1. **Target list builder (free signals only).**
+   - **Reach:**
+     - Bluesky `app.bsky.actor.getProfile` gives follower counts (public, no login;
+       e.g. bsky.app has 35M).
+     - Wikipedia pageviews (REST API) give a person's or brand's attention;
+       most-read gives what's trending.
+     - Instagram follower counts of other *business* accounts come free through the
+       Graph API's `business_discovery`, once our Meta app exists.
+     - TikTok has no free API for other accounts: we use Wikipedia/Wikidata as the
+       proxy.
+   - **Brand vs person, and the exclusions, come from Wikidata** (free):
+     - `P31 = human` → person;
+     - date of death → skip;
+     - birth date under 18 years ago → skip;
+     - occupation politician or any political office held → skip.
+   - **Official handles:** Wikidata lists them (Instagram `P2003`, TikTok `P7085`,
+     X `P2002`). Duolingo has six Instagram handles, for example, so these are
+     candidates only. A human verifies the main account before `handles.json` gets
+     `verified: true`, the same as the winner lane.
+2. **Inverse search (offline, private).**
+   - An agent (CoS or a Cloud Agent, not a paid LLM API) proposes up to **10
+     candidate inputs per target**.
+   - `mill reverse search` (to build) scores each candidate, then asks the real
+     oracle for the top candidates, one call each, logging everything. It stops at
+     the first natural hit or at 10 calls.
+   - **Naturalness score:** word count, no digits, no target tokens, no
+     "from/born/who/that" clauses, and a plain-noun head.
+   - **Hit:** the verdict equals the target or one of its aliases.
+   - **Budget:** ≤ 10 oracle calls per target, ≤ 100 per week. Every call is logged
+     with its time.
+   - The oracle's per-call cost is still unknown. That's the Show HN gate question,
+     so confirm it before scaling past the dry run. Agent proposal time is inside
+     the €500/month compute ceiling.
+3. **Publish:** the chosen input goes into `queue/reverse_trial.csv` (network, target,
+   input). The publisher posts it in a normal slot, with **one fresh live run**.
+   - Tag rule: the fresh verdict names the target **and** its handle is verified →
+     tag. Otherwise untagged, or skip.
+   - Reverse posts **share the winner-lane cap** (≤ 2 a day across networks), so the
+     two prestige lanes together stay small.
+4. **Engagement actions, per network:**
+   - **Instagram and TikTok:** a tag in the caption only. Their APIs can't reply to a
+     post with a video.
+   - **Bluesky:** a domain-handle tag, or one reply-with-clip to the target's latest
+     post. That reply counts toward the ≤ 3/day reply cap and follows the reply-lane
+     rules (fresh top-level post, never unsafe, one per author per week).
+   - **LinkedIn:** untagged until organization mentions exist.
+   - **X:** design only (the API is paid).
+
+**First 10-target dry run:** see `BACKLOG.md` → Reverse oracle.
+
 ## Decision: Bluesky is the one stand-in for held X
 
 **Bluesky is the single stand-in for the X vertical.** Threads, Mastodon, Reddit and

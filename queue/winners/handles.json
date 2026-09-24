@@ -1,0 +1,38 @@
+{
+  "_readme": "Winner -> official handle per network. A handle is used ONLY when verified is true: a human (CoS/GTM) opened the account, saw the platform's verified badge or the brand's own site linking to it, and set verified=true, checked=YYYY-MM-DD, by=<who>. Unknown or unverified winners post with no tag. sensitive=true withholds the post entirely (politics, tragedy, minors, private individuals). Never add an entry to chase a bigger account; the verdict comes first.",
+  "spain": {
+    "aliases": ["españa", "espana", "kingdom of spain"],
+    "instagram": {"handle": "@spain", "verified": false, "note": "Turespaña (Spain's official tourism board); confirm badge"},
+    "tiktok": {"handle": "@spain", "verified": false, "note": "Turespaña; confirm it's the official account"}
+  },
+  "brazil": {
+    "aliases": ["brasil"],
+    "instagram": {"handle": "@visitbrasil", "verified": false, "note": "Embratur official tourism account; confirm badge"}
+  },
+  "apple": {
+    "aliases": ["apple inc", "apple inc."],
+    "instagram": {"handle": "@apple", "verified": false, "note": "confirm badge"}
+  },
+  "nvidia": {
+    "instagram": {"handle": "@nvidia", "verified": false, "note": "confirm badge"}
+  },
+  "salesforce": {
+    "instagram": {"handle": "@salesforce", "verified": false, "note": "reposted early iterations; confirm badge"}
+  },
+  "dyson": {
+    "instagram": {"handle": "@dyson", "verified": false, "note": "reposted early iterations; confirm badge"},
+    "tiktok": {"handle": "@dyson", "verified": false, "note": "confirm badge"}
+  },
+  "the plaza": {
+    "aliases": ["the plaza hotel", "plaza hotel", "the plaza new york"],
+    "instagram": {"handle": "@theplazahotel", "verified": false, "note": "reposted early iterations; confirm badge"}
+  },
+  "k18": {
+    "aliases": ["k18 airwash dry shampoo", "k18 hair", "k18 airwash"],
+    "tiktok": {"handle": "@k18hair", "verified": false, "note": "official (bio links k18hair.com); badge unconfirmed as of 2026-09-24"}
+  },
+  "elon musk": {
+    "sensitive": true,
+    "why": "politically active public figure (politics guardrail); Carlos can lift this explicitly"
+  }
+}

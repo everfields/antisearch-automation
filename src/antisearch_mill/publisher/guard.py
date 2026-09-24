@@ -67,16 +67,18 @@ ENGLISH_CHARS = re.compile(r"^[a-z0-9 .,'&+\-/]+$")
 
 STAND_IN_FOR = {"bluesky": "x"}
 HOLD_FOR_TAG = "@?"  # queue caption: freeze the verdict, post nothing until a human sets the tag
+WINNER = "@winner"  # queue caption: tag the verdict's verified handle from the winner map, or nothing
 NO_CAPTION = "-"  # queue caption: explicitly none (e.g. after a hold, when no verified handle exists)
 
 PENDING = "pending"
 FAILED = "failed"
-DONE = ("published", "drafted", "scheduled")
+WITHHELD = "withheld"  # the verdict was frozen but deliberately not posted (a sensitive winner)
+DONE = ("published", "drafted", "scheduled", WITHHELD)
 
 
 def caption_problem(caption: str, bare_input: str, network: str = "") -> str | None:
     c = caption.strip()
-    if not c or c in (HOLD_FOR_TAG, NO_CAPTION):
+    if not c or c in (HOLD_FOR_TAG, NO_CAPTION, WINNER):
         return None
     if RANKED.search(c):
         return "caption starts with a ranking word"
@@ -267,4 +269,4 @@ class PostLog:
     def lifetime(self, network: str) -> int:
         """Posts on `network` that went (or may have gone) out, ever; drives the unowned-word rhythm."""
         final: dict[str, dict[str, str]] = self.latest_by_job()
-        return sum(1 for r in final.values() if r["network"] == network and r["status"] != FAILED)
+        return sum(1 for r in final.values() if r["network"] == network and r["status"] not in (FAILED, WITHHELD))
