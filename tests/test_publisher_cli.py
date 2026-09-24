@@ -15,7 +15,7 @@ def test_tiktok_authorize_url():
     url = oauth.authorize_url("tiktok", {"TIKTOK_CLIENT_KEY": "ck"}, state="s1")
     q = {k: v[0] for k, v in parse_qs(urlsplit(url).query).items()}
     assert url.startswith("https://www.tiktok.com/v2/auth/authorize/?")
-    assert q == {"client_key": "ck", "response_type": "code", "scope": "user.info.basic,video.upload,video.publish",
+    assert q == {"client_key": "ck", "response_type": "code", "scope": "user.info.basic,video.upload",
                  "redirect_uri": "https://antisearch.ai/", "state": "s1"}
 
 

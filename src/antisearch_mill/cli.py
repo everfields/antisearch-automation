@@ -92,18 +92,32 @@ def cmd_publish(args, settings: Settings) -> int:
 def cmd_post(args, settings: Settings) -> int:
     from .publisher.guard import PostLog, daily_cap, local_today
     from .publisher.run import run_posts
+    from .publisher.verdicts import DryRunOracle, FrozenOracle, VerdictStore
 
     ledger = Ledger(settings.out_dir)
+    queues = [q for raw in (args.queue or [DEFAULT_QUEUE]) for q in raw.replace(",", " ").split()]
+    jobs, seen = [], set()
     try:
-        jobs = read_queue(args.queue)
+        for q in queues:
+            for job in read_queue(q):
+                if job.id in seen:
+                    raise QueueError(f"{q}: id {job.id!r} also appears in an earlier queue (ids key the post log)")
+                seen.add(job.id)
+                jobs.append(job)
     except QueueError as exc:
         print(f"queue error: {exc}", file=sys.stderr)
         return 2
     env = dict(os.environ)
-    state = args.state or env.get("PUBLISHER_STATE") or str(settings.out_dir / "posts.csv")
+    state = Path(args.state or env.get("PUBLISHER_STATE") or str(settings.out_dir / "posts.csv"))
     log = PostLog(state, env.get("PUBLISHER_TZ") or "Europe/Madrid")
+    store = VerdictStore(state.with_name("verdicts.csv"))
     today = local_today(env)
-    oracle = _oracle(args, settings)
+    if args.oracle == "fixture":
+        oracle = _oracle(args, settings)
+    elif args.live:
+        oracle = FrozenOracle(_oracle(args, settings), store)
+    else:
+        oracle = DryRunOracle(store)
 
     def produce(job):
         (result,) = produce_all([job], oracle, ledger, font=settings.font_path, seconds=settings.clip_seconds, force=True)
@@ -111,8 +125,8 @@ def cmd_post(args, settings: Settings) -> int:
             raise RuntimeError(result.detail)
         return ledger.clip_for_job(job.id)
 
-    print(f"post: mode={'LIVE' if args.live else 'dry-run'} queue={args.queue} state={state} "
-          f"day={today} used={log.used_on(today)}/{daily_cap(env)}")
+    print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} queue={' '.join(queues)} "
+          f"state={state} day={today} used={log.used_on(today)}/{daily_cap(env)}")
     try:
         rows = run_posts(
             jobs, ledger, log, today=today, live=args.live, networks=_split(args.network), only=_split(args.only),
@@ -306,15 +320,18 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--clip", action="append", help="clip id(s), comma separated")
     sp.set_defaults(func=cmd_publish)
 
-    sp = sub.add_parser("post", help="own publisher: queue rows -> official APIs (dry-run unless --live)")
-    sp.add_argument("--queue", default=DEFAULT_QUEUE)
+    sp = sub.add_parser(
+        "post", help="own publisher: queue rows -> official APIs (dry-run unless --live; "
+                     "only --live asks the real oracle, once per input, frozen in <state dir>/verdicts.csv)")
+    sp.add_argument("--queue", action="append",
+                    help="queue CSV(s), in priority order; repeat or separate with commas/spaces")
     oracle_opts(sp)
     sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
     sp.add_argument("--live", action="store_true", help="really post (needs credentials + PUBLISHER_LIVE_NETWORKS)")
     sp.add_argument("--network", action="append", help="only these networks, comma separated")
     sp.add_argument("--only", action="append", help="job id(s), comma separated")
     sp.add_argument("--kind", choices=("video", "image"), default="video",
-                    help="video = the clip; image = the verdict frame (raw screenshot)")
+                    help="video = the frozen clip (default; Bluesky takes nothing else); image = the verdict frame")
     sp.add_argument("--retry-failed", action="store_true", help="retry rows whose last live attempt failed")
     sp.add_argument("--max", type=int, help="attempt at most N posts this run (the daily cap still applies)")
     sp.set_defaults(func=cmd_post)

@@ -83,13 +83,32 @@ def test_daily_cap_is_two_across_networks(ledger, log):
 
 
 def test_max_per_run_spreads_the_daily_cap(ledger, log):
-    b = fake_adapter()
-    jobs = [job("thing"), job("emotion")]
+    adapters = {"bluesky": fake_adapter(), "mastodon": fake_adapter("mastodon")}
+    jobs = [job("thing"), job("emotion", ("mastodon",))]
     for j in jobs:
         clip(ledger, j.id)
-    assert [o.status for o in go(jobs, ledger, log, {"bluesky": b}, max_posts=1)] == ["published", "skipped_daily_cap"]
-    assert [o.status for o in go(jobs, ledger, log, {"bluesky": b}, max_posts=1)] == ["skipped_already_posted", "published"]
+    assert [o.status for o in go(jobs, ledger, log, adapters, max_posts=1)] == ["published", "skipped_daily_cap"]
+    assert [o.status for o in go(jobs, ledger, log, adapters, max_posts=1)] == ["skipped_already_posted", "published"]
     assert log.used_on(TODAY) == 2
+
+
+def test_one_post_per_network_per_day(ledger, log):
+    jobs = [job("thing"), job("silence")]
+    for j in jobs:
+        clip(ledger, j.id)
+    out = go(jobs, ledger, log, {"bluesky": fake_adapter()})
+    assert [o.status for o in out] == ["published", "skipped_network_daily_cap"]
+    assert log.used_on(TODAY, "bluesky") == 1 and log.used_on(TODAY, "mastodon") == 0
+
+
+def test_bluesky_freezes_once_x_is_live_again(ledger, log):
+    clip(ledger, "thing")
+    b = fake_adapter()
+    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "bluesky,x"}
+    (o,) = go([job("thing")], ledger, log, {"bluesky": b}, env=env)
+    assert o.status == "skipped_frozen_stand_in" and b.calls == []
+    (o,) = go([job("thing")], ledger, log, {"bluesky": b}, env={"PUBLISHER_LIVE_NETWORKS": "x"}, live=False)
+    assert o.status == "skipped_frozen_stand_in"
 
 
 def test_cap_env_can_lower_but_never_raise_the_trial_limit():
@@ -141,14 +160,39 @@ def test_one_clip_one_network(ledger, log):
     assert o.status == "skipped_one_clip_one_network" and b.calls == []
 
 
-@pytest.mark.parametrize("caption,ok", [("", True), ("thing", True), ("@antisearch.ai", True),
+@pytest.mark.parametrize("caption,ok", [("", True), ("thing", True), ("@antisearch", True), ("-", True),
                                         ("love this", False), ("best thing", False), ("thing #ai", False)])
 def test_caption_rule(ledger, log, caption, ok):
     clip(ledger, "thing")
-    (o,) = go([job("thing", caption=caption)], ledger, log, {"bluesky": fake_adapter()})
+    m = fake_adapter("mastodon")
+    (o,) = go([job("thing", ("mastodon",), caption=caption)], ledger, log, {"mastodon": m})
     assert (o.status == "published") is ok, o
     if not ok:
         assert o.status == "rejected_caption"
+    if caption == "-":
+        assert m.calls[0][2] == ""
+
+
+@pytest.mark.parametrize("caption,ok", [("", True), ("@1password.com", True), ("@antisearch.ai", True),
+                                        ("thing", False), ("@someone.bsky.social", False), ("@bitwarden", False)])
+def test_bluesky_tags_only_verified_domain_handles(ledger, log, caption, ok):
+    clip(ledger, "thing")
+    (o,) = go([job("thing", caption=caption)], ledger, log, {"bluesky": fake_adapter()})
+    assert (o.status == "published") is ok, o
+
+
+def test_hold_for_tag_freezes_then_posts_after_the_caption_is_set(ledger, log):
+    b = fake_adapter()
+    clip(ledger, "password-manager", verdict="1password")
+    clip(ledger, "silence")
+    jobs = [job("password-manager", caption="@?"), job("silence")]
+    out = go(jobs, ledger, log, {"bluesky": b})
+    assert [o.status for o in out] == ["held_for_tag", "skipped_waiting_for_tag"]
+    assert "1password" in out[0].detail and b.calls == [] and log.rows() == []
+    jobs[0] = job("password-manager", caption="@1password.com")
+    out = go(jobs, ledger, log, {"bluesky": b})
+    assert [o.status for o in out] == ["published", "skipped_network_daily_cap"]
+    assert b.calls[0][2] == "@1password.com"
 
 
 def test_live_needs_approval_and_credentials(ledger, log):
@@ -183,13 +227,25 @@ def test_produces_just_in_time_and_posts_the_verdict_frame(ledger, log):
 
 
 def test_drafts_count_as_done_and_toward_the_cap(ledger, log):
-    t = fake_adapter("tiktok", state=DRAFTED)
-    jobs = [job("a-1", ("tiktok",)), job("a-2", ("tiktok",)), job("a-3", ("tiktok",))]
+    adapters = {"tiktok": fake_adapter("tiktok", state=DRAFTED), "bluesky": fake_adapter(), "mastodon": fake_adapter("mastodon")}
+    jobs = [job("a-1", ("tiktok",)), job("a-2", ("bluesky",)), job("a-3", ("mastodon",))]
     for j in jobs:
         clip(ledger, j.id)
-    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "tiktok"}
-    assert [o.status for o in go(jobs, ledger, log, {"tiktok": t}, env=env)] == ["drafted", "drafted", "skipped_daily_cap"]
-    assert go(jobs[:1], ledger, log, {"tiktok": t}, env=env)[0].status == "skipped_already_posted"
+    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "tiktok,bluesky,mastodon"}
+    assert [o.status for o in go(jobs, ledger, log, adapters, env=env)] == ["drafted", "published", "skipped_daily_cap"]
+    assert go(jobs[:1], ledger, log, adapters, env=env)[0].status == "skipped_already_posted"
+
+
+def test_live_rerenders_a_clip_that_did_not_come_from_the_real_oracle(ledger, log):
+    clip(ledger, "thing", source="dry-run")
+    made = []
+
+    def produce(j):
+        made.append(j.id)
+        return clip(ledger, j.id, verdict="love", source="live")
+
+    (o,) = go([job("thing")], ledger, log, {"bluesky": fake_adapter()}, produce=produce)
+    assert made == ["thing"] and o.status == "published"
 
 
 def test_rows_for_other_paths_are_ignored(ledger, log):
@@ -207,3 +263,16 @@ def test_dry_run_writes_a_plan_and_never_touches_the_log(ledger, log):
     assert plan["requests"][-1]["url"].endswith("com.atproto.repo.createRecord")
     assert plan["simulated_result"]["url"].startswith("https://bsky.app/profile/")
     assert not log.path.exists()
+
+
+def test_trial_queues_match_the_converged_plan():
+    from antisearch_mill.ledger import read_queue
+    from conftest import ROOT
+
+    bsky = read_queue(ROOT / "queue" / "bluesky_trial.csv")
+    assert [j.category for j in bsky] == ["thing", "password manager", "silence", "note-taking app", "a year"]
+    assert all(j.platforms == ("bluesky",) for j in bsky)
+    assert {j.caption for j in bsky if j.id.startswith("c-")} == {"@?"}
+    assert {j.caption for j in bsky if j.id.startswith("u-")} == {""}
+    (tt,) = read_queue(ROOT / "queue" / "tiktok_trial.csv")
+    assert (tt.category, tt.platforms) == ("dry shampoo", ("tiktok",))

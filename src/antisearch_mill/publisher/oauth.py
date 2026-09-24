@@ -22,7 +22,7 @@ PROVIDERS = {
         "client_id_param": "client_key",
         "client_id_env": "TIKTOK_CLIENT_KEY",
         "client_secret_env": "TIKTOK_CLIENT_SECRET",
-        "scope": "user.info.basic,video.upload,video.publish",
+        "scope": "user.info.basic,video.upload",  # add video.publish only for TIKTOK_MODE=direct
     },
     "linkedin": {
         "authorize": "https://www.linkedin.com/oauth/v2/authorization",

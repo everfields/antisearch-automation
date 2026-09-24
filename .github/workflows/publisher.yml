@@ -6,8 +6,9 @@ name: publisher
 #   Cron:   runs only when the repo variable PUBLISHER_CRON is `dry-run` or `live`.
 # Live posting also needs the network listed in the repo variable
 # PUBLISHER_LIVE_NETWORKS (recorded first-of-class yes) and its secrets
-# (docs/PUBLISHER_SETUP.md). The guard caps everything at 2 posts/day (Madrid).
-# The post log lives on the `publisher-state` branch, so runs never double-post.
+# (docs/PUBLISHER_SETUP.md). The guard caps everything at 2 posts/day (Madrid),
+# 1 per network. The post log and the frozen verdicts (one honest oracle run per
+# input) live on the `publisher-state` branch, so runs never double-post or re-ask.
 
 on:
   workflow_dispatch:
@@ -17,16 +18,11 @@ on:
         type: boolean
         default: false
       queue:
-        description: Queue CSV (empty = repo variable PUBLISHER_QUEUE)
+        description: Queue CSV(s), space separated, priority order (empty = repo variable PUBLISHER_QUEUE)
         default: ""
       network:
         description: Only this network (empty = all own-publisher networks)
         default: ""
-      kind:
-        description: video = the clip, image = the verdict frame
-        type: choice
-        options: [video, image]
-        default: video
   schedule:
     - cron: "7 8 * * *"   # 10:07 Madrid in summer time, 09:07 in winter
     - cron: "7 17 * * *"  # 19:07 / 18:07
@@ -44,9 +40,8 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       LIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.live) || (github.event_name == 'schedule' && vars.PUBLISHER_CRON == 'live') }}
-      QUEUE: ${{ inputs.queue || vars.PUBLISHER_QUEUE || 'queue/sample_queue.csv' }}
+      QUEUE: ${{ inputs.queue || vars.PUBLISHER_QUEUE || 'queue/bluesky_trial.csv queue/tiktok_trial.csv' }}
       NETWORK: ${{ inputs.network }}
-      KIND: ${{ inputs.kind || vars.PUBLISHER_KIND || 'video' }}
       PER_RUN: ${{ github.event_name == 'schedule' && '1' || '' }}
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
       PUBLISHER_DAILY_CAP: ${{ vars.PUBLISHER_DAILY_CAP }}
@@ -92,22 +87,24 @@ jobs:
             git -C state remote add origin "$remote"
           fi
 
-      - name: Post
+      - name: Post (only a live run asks the real oracle; its verdict is frozen in state/verdicts.csv)
         run: |
           flags=()
+          for q in ${QUEUE//,/ }; do flags+=(--queue "$q"); done
           [ "$LIVE" = "true" ] && flags+=(--live)
           [ -n "$NETWORK" ] && flags+=(--network "$NETWORK")
           [ -n "$PER_RUN" ] && flags+=(--max "$PER_RUN")
-          mill --out out post --queue "$QUEUE" --state state/posts.csv --kind "$KIND" "${flags[@]}"
+          mill --out out post --state state/posts.csv "${flags[@]}"
 
       - name: Save the post log
         if: always() && env.LIVE == 'true'
         run: |
           cd state
-          [ -f posts.csv ] || exit 0
-          git add posts.csv
+          compgen -G '*.csv' >/dev/null || exit 0
+          git add -A -- '*.csv'
+          git diff --cached --quiet && exit 0
           git -c user.name=antisearch-publisher -c user.email=actions@users.noreply.github.com \
-            commit --quiet -m "post log $(date -u +%FT%TZ)" || exit 0
+            commit --quiet -m "post log $(date -u +%FT%TZ)"
           git push --quiet origin publisher-state
 
       - uses: actions/upload-artifact@v4
@@ -118,6 +115,6 @@ jobs:
             out/dry_run_posts/
             out/clips/
             out/logs/
-            state/posts.csv
+            state/*.csv
           if-no-files-found: ignore
           retention-days: 14

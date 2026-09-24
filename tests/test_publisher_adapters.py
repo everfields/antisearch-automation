@@ -101,21 +101,40 @@ def test_bluesky_video_needs_confirmed_email(video):
         run(BlueskyAdapter, BSKY, video, override=override)
 
 
-def test_bluesky_image_and_size_limit(image, tmp_path):
-    _, t, _ = run(BlueskyAdapter, BSKY, image)
-    blob = next(r for r in t.requests if path(r).endswith("uploadBlob"))
-    assert blob.headers["Content-Type"] == "image/png"
-    assert t.requests[-1].json["record"]["embed"]["$type"] == "app.bsky.embed.images"
+def test_bluesky_takes_only_the_frozen_clip(image, tmp_path):
+    with pytest.raises(PublisherError, match="cannot post image"):
+        run(BlueskyAdapter, BSKY, image)
+    long = Media.video(tmp_path / "x.mp4", 1080, 1920, 4.5)
+    (tmp_path / "x.mp4").write_bytes(b"v")
+    with pytest.raises(PublisherError, match="9:16"):
+        run(BlueskyAdapter, BSKY, long)
+    square = Media.video(tmp_path / "x.mp4", 1080, 1080, 3.8)
+    with pytest.raises(PublisherError, match="9:16"):
+        run(BlueskyAdapter, BSKY, square)
 
-    big = tmp_path / "big.png"
-    big.write_bytes(b"x" * 1_000_001)
-    with pytest.raises(PublisherError, match="limit"):
-        run(BlueskyAdapter, BSKY, Media.image(big, 1080, 1920))
+
+def test_bluesky_brand_tag_becomes_a_real_mention(video):
+    _, t, _ = run(BlueskyAdapter, BSKY, video, "@1password.com")
+    resolve = next(r for r in t.requests if path(r).endswith("resolveHandle"))
+    assert resolve.params == {"handle": "1password.com"} and urlsplit(resolve.url).netloc == "bsky.social"
+    facet = t.requests[-1].json["record"]["facets"][0]
+    assert facet["index"] == {"byteStart": 0, "byteEnd": 14}
+    assert facet["features"][0]["did"] == "did:plc:dryrunbrand"
+
+
+def test_bluesky_refuses_a_dead_tag(video):
+    def override(req):
+        if path(req).endswith("resolveHandle"):
+            return HttpResponse.of_json(400, {"error": "InvalidRequest", "message": "Unable to resolve handle"})
+        return None
+
+    with pytest.raises(PublisherError, match="does not resolve"):
+        _, t, _ = run(BlueskyAdapter, BSKY, video, "@notacompany.example", override=override)
 
 
 def test_mention_facets_use_utf8_byte_offsets():
-    assert mention_facets("ñ @a.b", "a.b", "did:x")[0]["index"] == {"byteStart": 3, "byteEnd": 7}
-    assert mention_facets("thing", "a.b", "did:x") == []
+    assert mention_facets("ñ @a.b", {"a.b": "did:x"})[0]["index"] == {"byteStart": 3, "byteEnd": 7}
+    assert mention_facets("thing", {"a.b": "did:x"}) == []
 
 
 META = {"PUBLISHER_PUBLIC_BASE_URL": "https://media.antisearch.example/clips/"}
