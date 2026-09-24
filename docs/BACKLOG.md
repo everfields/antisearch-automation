@@ -47,9 +47,50 @@ Updated 2026-09-25.
 | Trend lane | Dev | live in code | `publisher/trends.py`; switch on with `PUBLISHER_TREND_NETWORKS` |
 | Reply watcher + "what's the … X?" answers (Bluesky) | Dev | live in code | `publisher/replies.py`; switch on with `PUBLISHER_REPLY_NETWORKS=bluesky` after the account exists |
 | Winner lane | Dev | live in code | `publisher/winners.py`: seeds, verified-only handle resolver, withheld sensitive winners, cross-network cap |
+| Reverse oracle: `mill reverse search` + target builder | Dev | todo (exploration) | Design in `GTM_OUT_OF_THE_BOX.md` → Reverse oracle: sandbox log outside `verdicts.csv`, ≤10 calls per target, naturalness score, Wikidata brand/person/exclusion check, handles as candidates only |
 | LinkedIn winner tags | Dev | parked | Needs organization mentions in the Posts API (`@[Name](urn:li:organization:id)`) and a verified name→URN map; until then LinkedIn winners go untagged |
 | X watcher / replies | Dev | parked | Design in `TREND_AND_REPLY_LANES.md`; needs X spend |
 | `mill record` for manual uploads | Dev | todo if needed | Only if the Buffer-web-UI fallback becomes routine |
 | Buffer post reconciliation | Dev | todo if needed | One read per post, to catch network-side rejections on the bridge |
 | Native LinkedIn country mornings | Dev | parked | Needs cron around the clock (+720 Actions min/month); decide after LinkedIn approval |
 | Pulse telemetry | C | blocked | `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` in Cursor Cloud Agent secrets |
+
+## Reverse oracle: first 10-target dry run (exploration)
+
+**Goal:** learn whether natural inputs reliably name high-reach, reply-friendly
+accounts, before anything is published.
+- **Budget:** ≤ 10 oracle calls per target, **≤ 100 in total**, all logged in
+  `state/reverse/`.
+- **Who:** candidates are proposed by CoS or a Cloud Agent. Nothing is published in
+  the dry run.
+- **Uniqueness:** inputs already used in any lane (winner seeds included) are
+  excluded; alternatives below.
+
+| # | Target | Kind | Where | First candidate inputs (≤10 per target, natural, no names) |
+| --- | --- | --- | --- | --- |
+| 1 | Duolingo | brand, famously playful on TikTok | TikTok, IG | `language app`, `app to learn spanish`, `owl mascot` |
+| 2 | Ryanair | brand, famous TikTok banter | TikTok | `budget airline`, `cheap flight` |
+| 3 | Spotify | brand | IG, TikTok | `music app`, `playlist app` |
+| 4 | IKEA | brand | IG | `furniture store`, `flat pack furniture` |
+| 5 | LEGO | brand | IG, TikTok | `toy`, `building blocks` |
+| 6 | Airbnb | brand | IG | `vacation rental`, `place to stay abroad` |
+| 7 | Bad Bunny | person (music, neutral) | TikTok, IG | `reggaeton artist`, `latin trap song` |
+| 8 | MrBeast | person (creator, neutral) | TikTok | `youtuber`, `youtube channel` |
+| 9 | Lionel Messi | person (sport, neutral) | IG | `footballer`, `soccer player`, `number 10` |
+| 10 | Rosalía | person (music, Spain) | IG, TikTok | `spanish singer`, `flamenco pop` |
+
+**Per target, record:**
+- hit (y/n);
+- calls used;
+- the winning input and its naturalness score;
+- whether it's stable (to check, re-ask that input **once more in the sandbox**: a
+  hit that flips is a weak bet, because the published run is a fresh one).
+
+**Go / kill:**
+- **Go:** ≥ 5 of 10 targets have a natural, stable hit within budget. Then publish
+  the 2 strongest, one per day inside the winner cap, and watch 72h for any reaction
+  from the target.
+- **Kill:** fewer than 3 natural hits, or hits only with contrived inputs. Drop the
+  lane; winner seeds remain the main prestige route.
+- **Exclusions:** every target passes the Wikidata check first (alive, adult, not a
+  politician, no tragedy). Handles are verified by a human before any tag.
