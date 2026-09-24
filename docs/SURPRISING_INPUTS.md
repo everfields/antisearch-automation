@@ -33,6 +33,13 @@ lowercase verdict, full stop.
 All 20 pass the input guard: bare, English, not serial, never "best", unique
 against the pools.
 
+**The second family: winner seeds.** The winner lane (`queue/winners/`, see
+`GTM_OUT_OF_THE_BOX.md` → Winner lane) is the other kind of surprise: inputs whose
+single answer is an entity with an official account (`country for having fun`,
+`squirrel`, `us company`, `calisthenics influencer`). Its signal is different: did
+the tagged account react or repost within 72h. Kill it if 10 tagged posts get no
+reaction from any winner.
+
 ## Self-run test (we run it; no need to ask Carlos)
 
 **What goes out:** six of them, from `queue/surprise_trial.csv`, at the normal slots

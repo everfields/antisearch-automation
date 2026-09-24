@@ -18,7 +18,7 @@ ASKING = re.compile(r"^(what|which|who|recommend|give me|find me)\b", re.I)
 DOC_OFFENDER = re.compile(r"""[`"'](the\s+)?(best|top|greatest)\s+[^\W\d_]""", re.I)
 
 QUEUES = sorted((ROOT / "queue").glob("*.csv"))
-POOLS = sorted((ROOT / "queue" / "pools").glob("*.txt"))
+POOLS = sorted((ROOT / "queue" / "pools").glob("*.txt")) + sorted((ROOT / "queue" / "winners").glob("*.txt"))
 FIXTURES = sorted((ROOT / "fixtures").glob("*.json"))
 DOCS = [ROOT / "README.md", ROOT / "SETUP.md"]
 
@@ -93,7 +93,7 @@ def test_publisher_inputs_are_unique_across_queues_and_pools():
 
 
 def test_pools_exist_for_the_four_trial_networks():
-    assert {p.stem for p in POOLS} >= {"unowned", "bluesky", "linkedin", "instagram", "tiktok"}
+    assert {p.stem for p in POOLS if p.parent.name == "pools"} >= {"unowned", "bluesky", "linkedin", "instagram", "tiktok"}
 
 
 @pytest.mark.parametrize("fixture", FIXTURES, ids=lambda p: p.name)

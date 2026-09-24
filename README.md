@@ -54,7 +54,9 @@ One adapter per network behind `post(media, caption) -> url`
   `PUBLISHER_CADENCE=carlos|soul` switches presets.
 - **Fill:** queue rows first, then (optional) one trend row per network per day, then
   `queue/pools/`; unowned words open each wall and come back one in four.
-- **Lanes:** `mill trends` (a timely noun input from free sources, strictly filtered)
+- **Lanes:** `mill winners` (inputs likely to crown an entity; the only text is its
+  human-verified @handle, ≤2 a day), `mill trends` (a timely noun input from free
+  sources, strictly filtered)
   and `mill replies` (Bluesky, a verdict-only answer to "what's the … X?", ≤3 a
   day). See `docs/TREND_AND_REPLY_LANES.md`.
 - **Guard:** one clip → one network; an input never repeats; inputs English and never

@@ -15,9 +15,11 @@ from ..ledger import ClipRow, Job, Ledger, now_iso
 from ..publish.http import RecordingTransport, RequestsTransport, Transport
 from .base import IMAGE, VIDEO, Adapter, Media
 from .guard import (
-    DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, PostLog, PostRow, approved_networks,
-    caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now, posting_day, slots_for,
+    DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
+    approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now, posting_day,
+    slots_for,
 )
+from .winners import resolve
 from .media_host import GitHubPagesHost
 from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
@@ -58,6 +60,7 @@ def run_posts(
     env: Mapping[str, str] | None = None,
     sleep: Callable[[float], None] = time.sleep,
     adapters: Mapping[str, type[Adapter]] = ADAPTERS,
+    winner_handles: Mapping[str, dict] | None = None,
 ) -> list[Outcome]:
     env = dict(os.environ if env is None else env)
     approved = approved_networks(env)
@@ -182,6 +185,19 @@ def run_posts(
         if live and clip.oracle_source != "live":
             out.append(Outcome(job.id, net, "skipped_not_live_oracle", detail="fixture verdicts never go out live"))
             continue
+        if job.caption.strip() == WINNER:
+            res = resolve(clip.verdict, net, dict(winner_handles or {}))
+            if res.withheld:
+                if live:
+                    log.append(PostRow(job.id, net, WITHHELD, clip.clip_id, clip.verdict, detail=res.reason,
+                                       at=now.astimezone(timezone.utc).isoformat(timespec="seconds"),
+                                       category=job.category))
+                used_inputs.add(job.category)
+                out.append(Outcome(job.id, net, "withheld_winner", detail=f"{clip.verdict!r}: {res.reason}"))
+                continue
+            tag = res.handle if res.handle and not caption_problem(res.handle, job.category, net) else ""
+            note = res.reason if tag or not res.handle else f"{res.handle} is not a valid tag on {net}: no tag"
+            job = dataclasses.replace(job, caption=tag or "-", notes=f"{job.notes}; {note}")
 
         media = media_for(clip, kind)
         allowance[net] -= 1

@@ -82,12 +82,41 @@ run; a repeated X reuses its verdict).
   filter) would port in a small adapter.
 - Not built until Carlos decides X spend at unhold.
 
+## Winner lane (`publisher/winners.py`, built and tested)
+
+**The idea:** see `GTM_OUT_OF_THE_BOX.md` → Winner lane. Built pieces:
+- **Seeds:** `queue/winners/<network>.txt` (Instagram 13, TikTok 13, LinkedIn 10,
+  Bluesky 10). Curated bare inputs likely to crown an entity with a large official
+  account. They pass the input guard, are unique across all queues and pools, and
+  are drawn in file order.
+- **Handle resolver:** `queue/winners/handles.json` maps an entity (plus aliases) to a
+  handle per network.
+  - A handle is used **only with `verified: true`**, set by a human who saw the
+    badge (or the brand's own site linking to the account), with `checked` and `by`
+    recorded.
+  - The repo ships every handle as `verified: false`. `mill winners` lists what
+    needs checking.
+  - Unknown or unverified winners post with **no tag**. Never guessed.
+- **Withheld:** entries with `sensitive: true` (today: Elon Musk, politics), and any
+  verdict the safety filter flags. The post log records `withheld`, the input is
+  spent, and no slot is used.
+- **Per network:**
+  - Instagram and TikTok take a plain `@handle`.
+  - Bluesky tags only verified domain handles; anything else goes untagged.
+  - **LinkedIn tags are off:** a LinkedIn mention needs the organization's URN, not
+    `@text`, so LinkedIn winner posts go untagged until that is built (backlog).
+- **Cap:** `PUBLISHER_WINNER_CAP` (default 2, hard max 3) winner posts per posting
+  day across all networks in `PUBLISHER_WINNER_NETWORKS`. Winner rows come after the
+  explicit queue and trend rows, before the pools, in the normal slots.
+
 ## Config
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `PUBLISHER_TREND_NETWORKS` | none (off) | e.g. `tiktok,instagram,bluesky` |
 | `PUBLISHER_TREND_CAP` | 1 | Trend rows per network per posting day (max 3) |
+| `PUBLISHER_WINNER_NETWORKS` | none (off) | e.g. `instagram,tiktok,bluesky` |
+| `PUBLISHER_WINNER_CAP` | 2 | Winner posts per posting day across networks (max 3) |
 | `PUBLISHER_REPLY_NETWORKS` | none (off) | `bluesky` to allow live replies |
 | `PUBLISHER_REPLY_CAP` | 3 | Replies per posting day (max 3) |
 | `PUBLISHER_WATCH_BLUESKY` | none | Handles to watch, comma separated |

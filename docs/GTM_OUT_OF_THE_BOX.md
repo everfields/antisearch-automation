@@ -74,6 +74,42 @@ today.
   honest run we can only choose inputs (`restaurant in barcelona` and `hotel` head
   the Instagram pool), and the wall still opens with an unowned word.
 
+## Winner lane (Carlos, 2026-09-25; repo memory)
+
+**The idea.** Every input names one answer. When the answer is a real entity with an
+official account (a brand, a country's tourism board, a hotel, a company, a public
+figure in a neutral category), being named by the oracle is a free prestige award.
+We post the locked clip and the **only text is the winner's verified @handle**.
+- The repost is theirs to give; we never ask.
+- It's proven: Salesforce, the Plaza Hotel and Dyson reposted early iterations two
+  years ago. What was missing was a route, maintenance and a team.
+- Carlos's transcript is kept verbatim in
+  [`founder-notes/2026-09-25-winner-lane.md`](founder-notes/2026-09-25-winner-lane.md).
+
+**How it runs (built):**
+- About 46 curated seeds in `queue/winners/<network>.txt`, for example:
+  - Instagram: `country for having fun`, `sunset`, `luxury hotel`;
+  - TikTok: `squirrel`, `calisthenics influencer`, `sneaker brand`;
+  - LinkedIn: `us company`, `ceo`;
+  - Bluesky: `ai lab`, `football club`.
+- They're drawn in file order, never repeated, English and bare.
+- After the honest run, the verdict is looked up in `queue/winners/handles.json`. Only
+  handles a human verified are ever used; unknown or unverified winners post with no
+  tag.
+
+**Guardrails:**
+- Never alter or reroll a verdict to reach a bigger account.
+- Politics, tragedies, minors and private individuals are withheld (the verdict
+  stays frozen and nothing posts). Living public figures only in neutral categories.
+- The oracle's `no` posts nothing.
+- **≤ 2 winner posts a day across all networks** (`PUBLISHER_WINNER_CAP`).
+- The blind queue and the 1-in-4 unowned rhythm are unchanged; winners are a
+  separate lane.
+
+**One flag for Carlos:** his own example, `ceo` → Elon Musk, would be **withheld**
+under the politics guardrail (Musk is marked sensitive in the map). Lifting that is
+one line in `handles.json`, and it's his call.
+
 ## Decision: Bluesky is the one stand-in for held X
 
 **Bluesky is the single stand-in for the X vertical.** Threads, Mastodon, Reddit and

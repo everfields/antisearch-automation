@@ -118,6 +118,7 @@ def cmd_post(args, settings: Settings) -> int:
     from .publisher.run import run_posts
     from .publisher.trends import daily_candidates, trend_cap, trend_jobs, trend_networks
     from .publisher.verdicts import DryRunOracle, FrozenOracle
+    from .publisher.winners import load_handles, winner_cap, winner_jobs, winner_networks
 
     env = dict(os.environ)
     ledger = Ledger(settings.out_dir)
@@ -136,6 +137,10 @@ def cmd_post(args, settings: Settings) -> int:
 
         candidates = daily_candidates(log.path.parent, posting_day(now_et()), RequestsTransport())
         jobs += trend_jobs(candidates, nets, posting_day(now_et()), log, store.categories(), claimed, trend_cap(env))
+    winners_dir = Path(args.winners)
+    wnets = winner_networks(env)
+    if wnets:
+        jobs += winner_jobs(winners_dir, wnets, posting_day(now_et()), log, store.categories(), claimed, winner_cap(env))
     for net in pool_networks(pools_dir):
         jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY)
 
@@ -159,7 +164,7 @@ def cmd_post(args, settings: Settings) -> int:
         rows = run_posts(
             jobs, ledger, log, now=now, live=args.live, ignore_slots=args.ignore_slots,
             networks=_split(args.network), only=_split(args.only), kind=args.kind, retry_failed=args.retry_failed,
-            produce=produce, env=env, adapters=adapters,
+            produce=produce, env=env, adapters=adapters, winner_handles=load_handles(winners_dir / "handles.json"),
         )
     except (FontNotFound, RenderError, ValueError) as exc:
         print(f"post error: {exc}", file=sys.stderr)
@@ -212,6 +217,25 @@ def cmd_replies(args, settings: Settings) -> int:
     print(f"replies: {len(rows)} ({'live' if live else 'dry-run'}); today {replies.replied_today(now_et())}/"
           f"{env.get('PUBLISHER_REPLY_CAP') or 3}")
     return 1 if any(r.status == "failed" for r in rows) else 0
+
+
+def cmd_winners(args, settings: Settings) -> int:
+    from .publisher.pools import read_pool
+    from .publisher.winners import load_handles
+
+    d = Path(args.winners)
+    handles = load_handles(d / "handles.json")
+    for name, entry in sorted(handles.items()):
+        if entry.get("sensitive"):
+            print(f"  WITHHELD  {name}: {entry.get('why', '')}")
+            continue
+        for net, acct in entry.items():
+            if isinstance(acct, dict) and "handle" in acct:
+                state = "verified " + acct.get("checked", "") if acct.get("verified") else "CHECK BADGE"
+                print(f"  {state:<20} {name:<14} {net:<10} {acct['handle']}  {acct.get('note', '')}")
+    for seeds in sorted(d.glob("*.txt")):
+        print(f"  seeds {seeds.stem}: {len(read_pool(seeds))}")
+    return 0
 
 
 def cmd_due(args, settings: Settings) -> int:
@@ -477,7 +501,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--ignore-slots", action="store_true",
                     help="live: post now even if no slot is due (daily cap and one per network per run still apply)")
     sp.add_argument("--pools", default=DEFAULT_POOLS, help="pool dir: <network>.txt + unowned.txt")
+    sp.add_argument("--winners", default="queue/winners", help="winner lane dir: <network>.txt seeds + handles.json")
     sp.set_defaults(func=cmd_post)
+
+    sp = sub.add_parser("winners", help="winner lane: handle map status (which handles still need a badge check)")
+    sp.add_argument("--winners", default="queue/winners")
+    sp.set_defaults(func=cmd_winners)
 
     sp = sub.add_parser("networks", help="own publisher: routes, slots (ET + Madrid), credentials, pool runway")
     sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
