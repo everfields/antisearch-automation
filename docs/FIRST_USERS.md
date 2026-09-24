@@ -1,7 +1,8 @@
 # First 100 humans
 
 Owner: strategy brain (Opus 5.5), for Carlos + CoS, to converge with Soul and GTM.
-Written 2026-09-24. No code. Nothing here gets published without Carlos's yes.
+Written 2026-09-24; revised the same day with Soul's input. No code. Nothing here
+gets published without Carlos's yes.
 
 **The bet.** antisearch.ai needs no install, no login and no explanation: one input,
 one lowercase verdict. Its friction is a phone held out at arm's length, so the first
@@ -9,10 +10,16 @@ one lowercase verdict. Its friction is a phone held out at arm's length, so the 
 posting builds the wall; it won't hand the product to a stranger. Every idea below
 puts the blinking cursor in front of a person and then gets out of the way.
 
-**The one rule for Carlos in person: say almost nothing.**
-- The words he may use: "type anything", "antisearch.ai", "try".
-- Never "AI", never "best", never "I built this" (if asked who made it: "me").
-- Never explain a verdict.
+**The line (Soul's, adopted):**
+- **On-voice:** one person at a time, **at most 3 spoken words**
+  ("antisearch.ai. type anything."), no feedback asks, no filming.
+- **Campaign (don't):** crowds, scripts, props, flyers, explaining that it's AI,
+  share or feedback asks, filming strangers, incentives, group demos.
+- Also: never "best", never "I built this" (if asked who made it: "me"), never
+  explain a verdict.
+- The one place I differ: Carlos **glances** at two facts (did they type again? did
+  they ask the address?). Without that, the week measures nothing. He never
+  comments and never asks.
 
 ---
 
@@ -55,118 +62,146 @@ through the API (read-only). That's the only screenshot signal we can see online
 
 | Pre-kill | Now | Why |
 | --- | --- | --- |
-| Stunts | **Allowed if whisper-true** | Handing a stranger a phone *is* a stunt. It's allowed because it's one person, no audience, no pitch, and the product does all the talking. Still killed: anything staged for a camera, crowds, costumes, "watch this". |
-| Stickers / QR codes | **Still killed** | Printing is spend, QR says "download our app", and street stickers are litter. The only allowance is a handwritten card carrying just the address (raw idea 11), and it's weak. |
-| Founder-story posts | **Still killed** | In person the founder is unavoidably there. The rule is he doesn't narrate. "Who made this?" → "me." |
-| "We asked ai" framing | **Still killed** | The person asks, not us. |
-| Share cards | **Still killed** | Except the og card, which exists whether we like it or not; fix it (see above). |
-| Countdowns, hashtags, replying in threads | **Still killed** | Nothing Carlos pushed changes these. |
+| Stunts | **Allowed only if whisper-true** | Handing one stranger a phone is technically a stunt. It's allowed because it's one person, 3 words, no audience, and the product does all the talking. Still killed: anything staged, filmed, crowded or scripted |
+| Stickers / QR codes | **Still killed** | Printing is spend, QR says "download our app", and stickers are litter |
+| Handwritten card | **Revived, Soul's version only** | One card, handwritten `antisearch.ai`, **handed to one person**. No QR, no stack, no print run, never pinned on boards |
+| Founder-story posts | **Still killed** | In person the founder is unavoidably there. The rule is he doesn't narrate |
+| "We asked ai" framing | **Still killed** | The person asks, not us |
+| Share cards | **Still killed** | Except the og card, which exists whether we like it or not; fix it |
+| Countdowns, hashtags, replying in threads | **Still killed** | Nothing Carlos pushed changes these |
+| Meetup slide (was a runner-up) | **Moved to reserve** | Agree with Soul: a crowd plus a scripted moment is a campaign |
 
 ---
 
-## Raw ideas (14; 6 in person)
+## Raw ideas (18; 11 in person or ambient). (S) = Soul's
 
 "Who" is Carlos (C), Havas colleagues (H), or bots via API (B).
 
-| # | Idea | The move | In person | Who | Minimal signal |
-| --- | --- | --- | --- | --- | --- |
-| 1 | **Queue handoff** | Phone open on the cursor, held out to the person behind in a queue: "type anything" | yes | C | Tally |
-| 2 | **Table handoff** | Phone face-up in the middle of a lunch or dinner table, slid across: "type anything" | yes | C | Tally (inputs per table) |
-| 3 | **Office monolith** | A spare laptop in full screen on antisearch.ai, keyboard in front, at the Havas coffee point. No note | yes | C | Hourly count on that day + glances |
-| 4 | **Channel drop** | In one informal Havas Slack/Teams channel, a message that is only `antisearch.ai`. No reply, ever | no | C | Count in the following hour |
-| 5 | **Show HN, cold, once** | Already drafted in `GTM_OUT_OF_THE_BOX.md` | no | C | HN points, count spike |
-| 6 | **Meetup last slide** | At a Madrid AI or marketing meetup: one slide, the live site; ask the room for a word, type it, sit down | yes | C | Count in the 30 minutes after |
-| 7 | **Screen-share opener** | Carlos's browser opens on the antisearch.ai tab, so every screen share starts on the cursor for a few seconds | semi | C | None reliable (ambient) |
-| 8 | **WhatsApp Status clip** | A mill verdict clip as Carlos's WhatsApp Status, no text. It's ambient, not a message | no | C | Status viewers + next-day count |
-| 9 | **Colleague relay** | Five Havas colleagues who liked it leave it open in a tab on their own desks | yes-ish | H | Count trend on office days |
-| 10 | **Barber / hairdresser chair** | Beauty vertical, in real life: while waiting, hand the phone to the stylist | yes | C | Tally |
-| 11 | **Handwritten card** | Just `antisearch.ai`, handwritten, on a café or university board where allowed | yes | C | Weak: count drift |
-| 12 | **Bluesky wall** | The publisher's clips (already built) | no | B | Mentions search, count |
-| 13 | **AI-tool directories** | A one-line listing ("ai chooses the best. nothing else.") on free directories | no | C | Weak (no referrer data) |
-| 14 | **Mention oracle** | Answer Bluesky mentions once a day (reserve) | no | B | Replies; doesn't bring typing on the site |
+| # | Idea | The move | Where it sits on Soul's line | Minimal signal |
+| --- | --- | --- | --- | --- |
+| 1 | **Say the domain and leave** (S) | To one person in a queue: "antisearch.ai. type anything." They type it on their own phone. Carlos leaves | On-voice | Count drift only (no tally), but the site is now in *their* browser history, which is the only way a return is possible |
+| 2 | **Queue handoff** | Phone open on the cursor, held out to the person behind: "type anything" | On-voice | Tally |
+| 3 | **The answer instead of an opinion** (S) | When anyone asks Carlos "what's the best X?", he types their bare words (no "best") and turns the screen to them. Silent | On-voice | Tally |
+| 4 | **Idle screens** (S, merged with my office monolith) | antisearch.ai as the idle page on Carlos's laptop, the Havas meeting-room screen before calls, and a spare laptop at the coffee point. If asked: "type anything" | On-voice | Count during office hours; tally of who types |
+| 5 | **Channel drop** | In one informal Havas channel, a message that is only `antisearch.ai`; never reply | Soul: a crowd. Me: on-voice (see disagreements) | Count in the following hour |
+| 6 | **Show HN, cold, once** | As drafted in the GTM doc | Accepted earlier | HN points, count spike |
+| 7 | **Device names** (S) | Phone hotspot, Bluetooth and AirDrop named `antisearch.ai`. They show up in café wifi lists and meeting rooms | On-voice | None (ambient) |
+| 8 | **Status and signature** (S) | Slack/Teams status `antisearch.ai`; an email signature only if Havas policy allows | On-voice; policy-dependent | None (ambient) |
+| 9 | **Handwritten card** (S revival) | One handwritten card handed to one person | On-voice | Tally |
+| 10 | **Table handoff** | Phone face-up among friends, slid across: "type anything" | Soul: a group demo. Me: fine when it's natural | Tally (inputs per table) |
+| 11 | **Barber / hairdresser chair** | Hand the phone to the stylist while waiting | On-voice | Tally |
+| 12 | **WhatsApp Status clip** | A mill verdict clip as Carlos's WhatsApp Status, no text | Ambient | Status viewers + next-day count |
+| 13 | **Colleague relay** | Colleagues who liked it leave it open in a tab | Ambient | Count trend on office days |
+| 14 | **Meetup last slide** | One slide, the live site, a word from the room | Campaign (moved to reserve) | Count in the 30 minutes after |
+| 15 | **Screen-share opener** | Every screen share starts on the cursor for a few seconds | Ambient (covered by 4) | None |
+| 16 | **Bluesky wall** | The publisher's clips (already built) | — | Mentions search, count |
+| 17 | **AI-tool directories** | A one-line listing | Borderline campaign | Weak |
+| 18 | **Mention oracle** | Answer Bluesky mentions once a day (reserve) | Edge of "no chat" | Replies |
 
 Dropped on sight:
-- chalk on pavements (city rules; a stunt for a camera);
+- chalk on pavements;
 - pitching it to Havas clients (a verdict could crown a client's competitor in front
-  of the client: a real professional risk);
-- mass personal messages (Carlos says people ignore them).
+  of the client);
+- mass personal messages (Carlos says people ignore them);
+- filming anyone's reaction.
+
+### Where I disagree with Soul (one line each)
+
+- **"Nobody watches the result":** for the first 20 handoffs Carlos must glance at
+  two facts (a second input, the address asked), or the week proves nothing. He
+  never comments and never asks.
+- **Channel drop as a "crowd":** it's one message that is only the domain, with no
+  script and no follow-up. It's the digital version of Soul's handed card, and our
+  cleanest measurable test of a warm audience.
+- **Table handoff as a "group demo":** nobody presents. I agree it must never be
+  engineered, so it only happens when the phone is already out among friends. It's
+  demoted to runner-up.
+- **Email signature:** keep it to the internal Slack/Teams status. A signature
+  travels into client threads, and that is ambient pitching to clients, which we
+  both rule out.
+- **Hotspot name:** agree, with one guard. Keep the hotspot password-protected, so
+  the name is only a whisper and never an open network (a domain-named open hotspot
+  reads as phishing).
 
 ---
 
 ## Top 5, ranked
 
-Ranked by humans reached in 7 days per minute of Carlos's time, and by how clean the
-signal is.
+Ranked by humans reached in 7 days per minute of Carlos's time, whether a return is
+possible, and how clean the signal is.
 
-### 1. Queue handoff
+### 1. Queue: say the domain; hold out the phone only if needed (Soul's "say the domain and leave" + my handoff)
 
 - **Script:**
-  - Phone unlocked, antisearch.ai open, cursor blinking. Turn to the person behind
-    you and hold the phone out: **"type anything."**
-  - If asked what it is: **"antisearch.ai."** If asked what it does: **"try."**
-  - When they hand it back, take it, say "thanks", and turn around.
-- **Where:** Madrid café queues at the morning rush, a bakery, the Havas building
-  café or lift lobby. Anywhere people are stuck for 2–5 minutes and already holding
-  their phones.
-- **Effort:** 5 minutes a day, 2–4 people per queue, about 10 a day → about 50 in
-  the week.
-- **Success:** of the people who type, **≥ 40% type a second input without being
-  asked, and ≥ 20% ask the address or photograph the screen.**
-- **Kill:** after 20 handoffs, under 20% type again and nobody asks the address. The
-  magic doesn't carry in ten seconds; stop and rethink before scaling anything.
+  - To one person in a queue: **"antisearch.ai. type anything."**
+  - If they take out their own phone: say nothing more and turn back. This is the
+    better outcome: the site is now in their browser history, so they can come
+    back.
+  - If they don't: hold out your phone, already open on the cursor. Take it back
+    when it's handed back.
+  - If asked what it is: **"try."**
+- **Where:** Madrid café queues at the morning rush, bakeries, the Havas building
+  café. One person per queue.
+- **Effort:** 5 minutes a day, about 5–10 people a day → about 40 in the week.
+- **Tally, from a glance only:**
+  - own phone (y/n);
+  - on Carlos's phone: typed again unprompted (y/n);
+  - asked the address or photographed the screen (y/n).
+- **Success:** **≥ 30% type on their own phone**; of the handed-phone ones,
+  **≥ 40% type a second input unprompted.**
+- **Kill:** after 20 people, under 15% use their own phone and under 20% type again.
+  The product doesn't carry in ten seconds; stop and go back to the product.
 
-### 2. Table handoff
+### 2. The answer instead of an opinion (Soul's)
 
-- **Script:** at a lunch or dinner table (colleagues, friends), put the phone
-  face-up in the middle with the cursor blinking and slide it over: **"type
-  anything."** Then say nothing. Let the table argue about the verdicts.
-- **Where:** Havas lunches, after-work drinks, family dinners. Groups of 3–6.
-- **Effort:** 2 minutes per table; 3–4 tables in the week, about 15 people.
-- **Success:** **≥ 5 inputs per table** (the phone travels on its own) and **at least
-  one person per table asks the address.** An argument about a verdict is the
-  screenshot moment.
-- **Kill:** three tables in a row where the phone comes back after one input.
+- **Script:** someone asks Carlos "what's the best X?" (a restaurant, a laptop, a
+  gift). He types **X**, their bare words without "best", turns the screen to them,
+  and says nothing. If asked: **"antisearch.ai."**
+- **Where:** anywhere: Havas corridors, lunch, friends, family. It happens when it
+  happens.
+- **Effort:** 0 minutes; about 3–6 occurrences a week.
+- **Success:** **≥ 1 in 2 ask the address** or type a second input themselves. These
+  are the highest-intent humans in the whole plan: they came with a question.
+- **Kill:** it costs nothing, so it never stops. After 6 occurrences with nobody
+  asking the address, though, it's a charming habit, not a channel.
 
-### 3. Channel drop
+### 3. Idle screens (Soul's 4, merged with my office monolith)
 
-- **Script:** in one informal Havas channel (random / AI / general chatter; not a
-  client channel), post a message that is exactly **`antisearch.ai`**. Nothing
-  else. Don't reply to the thread; react to nothing.
-- **Where:** Havas Slack or Teams, a Tuesday–Thursday around 11:00 Madrid. Once.
+- **Script:**
+  - Set antisearch.ai, in full screen, as the idle page on Carlos's laptop and on
+    the Havas meeting-room screen before calls (and a spare laptop at the coffee
+    point, if policy allows).
+  - No note, no sign. If asked: **"type anything."**
+- **Where:** the Havas Madrid office for one working week; Carlos checks policy for
+  shared screens.
+- **Effort:** 10 minutes, once.
+- **Success:** **≥ 15 verdicts during office hours** on a screen day above the
+  baseline, and people mentioning it to Carlos unprompted.
+- **Kill:** fewer than 5 people type across two office days.
+
+### 4. Channel drop (mine; Soul disagrees, see above)
+
+- **Script:** in one informal Havas channel (not a client channel), a message that is
+  exactly **`antisearch.ai`**. Never reply; react to nothing.
+- **Where:** Havas Slack or Teams, Tuesday–Thursday around 11:00 Madrid. Once.
 - **Effort:** 1 minute. Prerequisite: the og fix, or the unfurl says
   `type. AI decides`.
-- **Success:** **≥ 20 verdicts in the hour after the post**, above the baseline, plus
-  someone asking about it outside the channel.
-- **Kill:** under 10 verdicts in that hour. Don't post in a second channel.
-
-### 4. Office monolith
-
-- **Script:** a spare laptop at the coffee point (or Carlos's own desk, if company
-  policy is unclear) with the browser in full screen on antisearch.ai, cursor
-  blinking, keyboard in front. **No note, no sign.** If anyone asks: **"type
-  anything."**
-- **Where:** the Havas Madrid office, one full working day. Carlos's call on whether
-  a personal project may sit in a shared space.
-- **Effort:** 10 minutes of setup; check it at lunch and at the end of the day.
-- **Success:** **≥ 15 verdicts during office hours** on that day above the baseline
-  (from the count), and people mentioning it to Carlos unprompted.
-- **Kill:** fewer than 5 people type in the whole day. Take it down; the office
-  already has its answer.
+- **Success:** **≥ 20 verdicts in the following hour** above the baseline.
+- **Kill:** under 10 verdicts in that hour. Never post in a second channel.
 
 ### 5. Show HN, cold, once (gated)
 
-- **Script:** exactly as drafted in `GTM_OUT_OF_THE_BOX.md`: title
-  `Show HN: antisearch – one verdict, nothing else`, the two-line first comment, then
-  no replies and no upvote asks.
-- **Where:** news.ycombinator.com, a weekday, 15:00–16:00 Madrid, from Carlos's
-  own account and device.
-- **Effort:** 5 minutes.
-- **Gates:** the og fix is live, and the per-verdict cost / global cap is confirmed.
+- **Script:** exactly as drafted in `GTM_OUT_OF_THE_BOX.md`: the title, the two-line
+  first comment, no replies, no upvote asks.
+- **Effort:** 5 minutes. **Gates:** the og fix is live, and the per-verdict cost /
+  global cap is confirmed.
 - **Success:** the front page, or **≥ 100 verdicts above the baseline** within 6 hours.
-- **Kill:** under 5 points after 2 hours. It was the one shot; never repost.
+- **Kill:** under 5 points after 2 hours; never repost.
 
-**Runner-up: meetup last slide (6).** It's strong: a room of 50+ gives a clean
-30-minute spike. It only makes the list if a Madrid meetup has a slot this week.
+**Always on, free, not ranked (they can't be measured):** device names (7) and the
+Slack/Teams status (8). Set them on day 1 and forget them. The handwritten card (9)
+is for the moment someone says "what was that called?" and has no phone at hand.
+**Runners-up:** table handoff (only when natural) and the barber chair.
 
 ---
 
@@ -174,22 +209,24 @@ signal is.
 
 | Day | Carlos | Signal to note |
 | --- | --- | --- |
-| 1 | Try one Spanish input himself. Note a baseline count. Queue handoff ×1 | Tally, count |
-| 2 | Queue ×1, table ×1 | Tally |
-| 3 | Channel drop at 11:00 (if og is fixed), queue ×1 | Count in the following hour |
-| 4 | Office monolith, all day | Count during office hours |
-| 5 | Queue ×1, table ×1; Show HN if both gates are cleared | HN points, count |
-| 6–7 | Queue or table as it comes naturally | Tally; the non-event-day count (the return proxy) |
+| 1 | Try one Spanish input himself. Note a baseline count. Set the device names, the Slack/Teams status and the idle screens. Queue ×1 | Tally, count |
+| 2 | Queue ×1 | Tally |
+| 3 | Channel drop at 11:00 (if og is fixed); queue ×1 | Count in the following hour |
+| 4 | Queue ×1 | Tally, office-hours count (idle screens) |
+| 5 | Queue ×1; Show HN if both gates are cleared | HN points, count |
+| 6–7 | Queue when natural | Tally; the non-event-day count (the return proxy) |
+| Any day | "The answer instead of an opinion" whenever someone asks | Tally |
 
 **Target:** about 100 humans typed (tally + counts above baseline). **The
-question it answers:** do people type a second time without being asked, and do they
-ask for the address? If yes, the product carries itself and social volume has
-something to amplify. If not, no amount of posting will fix it; go back to the
-product.
+question it answers:** do people type the domain on their own phone, and type a
+second time without being asked? If yes, the product carries itself and social
+volume has something to amplify. If not, no amount of posting will fix it; go back
+to the product.
 
 ## Questions for Carlos
 
-1. Is a personal project on a shared Havas screen and in a Havas channel OK
-   (ideas 3 and 4)? If not, keep them to his own desk and his own screen.
+1. Is a personal project OK on a shared Havas screen, in a Havas channel and in a
+   Slack/Teams status (ideas 4, 5, 8)? If not, keep them to his own laptop and
+   screen.
 2. Does the telemetry table have any per-client or IP hash? It decides whether
    returns can be measured at all, or only through the daily-volume proxy.
