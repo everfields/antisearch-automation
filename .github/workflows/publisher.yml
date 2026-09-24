@@ -1,0 +1,123 @@
+name: publisher
+
+# Own publisher: official APIs only, no browser, no Buffer, no Grok Bot box.
+# Off by default.
+#   Manual: Actions -> publisher -> Run workflow (dry-run unless `live` is ticked).
+#   Cron:   runs only when the repo variable PUBLISHER_CRON is `dry-run` or `live`.
+# Live posting also needs the network listed in the repo variable
+# PUBLISHER_LIVE_NETWORKS (recorded first-of-class yes) and its secrets
+# (docs/PUBLISHER_SETUP.md). The guard caps everything at 2 posts/day (Madrid).
+# The post log lives on the `publisher-state` branch, so runs never double-post.
+
+on:
+  workflow_dispatch:
+    inputs:
+      live:
+        description: Really post (still needs PUBLISHER_LIVE_NETWORKS + secrets)
+        type: boolean
+        default: false
+      queue:
+        description: Queue CSV (empty = repo variable PUBLISHER_QUEUE)
+        default: ""
+      network:
+        description: Only this network (empty = all own-publisher networks)
+        default: ""
+      kind:
+        description: video = the clip, image = the verdict frame
+        type: choice
+        options: [video, image]
+        default: video
+  schedule:
+    - cron: "7 8 * * *"   # 10:07 Madrid in summer time, 09:07 in winter
+    - cron: "7 17 * * *"  # 19:07 / 18:07
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publisher
+  cancel-in-progress: false
+
+jobs:
+  post:
+    if: github.event_name == 'workflow_dispatch' || vars.PUBLISHER_CRON == 'dry-run' || vars.PUBLISHER_CRON == 'live'
+    runs-on: ubuntu-24.04
+    env:
+      LIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.live) || (github.event_name == 'schedule' && vars.PUBLISHER_CRON == 'live') }}
+      QUEUE: ${{ inputs.queue || vars.PUBLISHER_QUEUE || 'queue/sample_queue.csv' }}
+      NETWORK: ${{ inputs.network }}
+      KIND: ${{ inputs.kind || vars.PUBLISHER_KIND || 'video' }}
+      PER_RUN: ${{ github.event_name == 'schedule' && '1' || '' }}
+      PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
+      PUBLISHER_DAILY_CAP: ${{ vars.PUBLISHER_DAILY_CAP }}
+      PUBLISHER_PUBLIC_BASE_URL: ${{ vars.PUBLISHER_PUBLIC_BASE_URL }}
+      BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+      BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+      THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+      LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+      LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
+      LINKEDIN_REFRESH_TOKEN: ${{ secrets.LINKEDIN_REFRESH_TOKEN }}
+      LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
+      LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
+      TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+      TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+      TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+      TIKTOK_MODE: ${{ vars.TIKTOK_MODE }}
+      INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+      INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+      REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+      MASTODON_BASE_URL: ${{ secrets.MASTODON_BASE_URL }}
+      MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter
+      - run: python -m pip install -e '.[dev]'
+
+      - name: Load the post log (publisher-state branch)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code --heads "$remote" publisher-state >/dev/null; then
+            git clone --quiet --depth 1 --branch publisher-state "$remote" state
+          else
+            git init --quiet -b publisher-state state
+            git -C state remote add origin "$remote"
+          fi
+
+      - name: Post
+        run: |
+          flags=()
+          [ "$LIVE" = "true" ] && flags+=(--live)
+          [ -n "$NETWORK" ] && flags+=(--network "$NETWORK")
+          [ -n "$PER_RUN" ] && flags+=(--max "$PER_RUN")
+          mill --out out post --queue "$QUEUE" --state state/posts.csv --kind "$KIND" "${flags[@]}"
+
+      - name: Save the post log
+        if: always() && env.LIVE == 'true'
+        run: |
+          cd state
+          [ -f posts.csv ] || exit 0
+          git add posts.csv
+          git -c user.name=antisearch-publisher -c user.email=actions@users.noreply.github.com \
+            commit --quiet -m "post log $(date -u +%FT%TZ)" || exit 0
+          git push --quiet origin publisher-state
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: publisher-${{ github.run_id }}
+          path: |
+            out/dry_run_posts/
+            out/clips/
+            out/logs/
+            state/posts.csv
+          if-no-files-found: ignore
+          retention-days: 14

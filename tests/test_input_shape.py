@@ -86,14 +86,25 @@ def test_docs_never_show_best_x_as_an_input(doc):
     assert bad == []
 
 
+GUARD_REJECT_LINE = ("src/antisearch_mill/publisher/guard.py", "RANKED = re.compile(")
+
+
 def test_source_never_templates_best_into_the_input():
     bad = [
         f"{p.relative_to(ROOT)}:{n}"
         for p in sorted((ROOT / "src").rglob("*.py"))
         for n, line in enumerate(p.read_text(encoding="utf-8").splitlines(), start=1)
         if re.search(r"\bbest\b", line, re.I)
+        and not (p.relative_to(ROOT).as_posix() == GUARD_REJECT_LINE[0] and line.startswith(GUARD_REJECT_LINE[1]))
     ]
     assert bad == []
+
+
+@pytest.mark.parametrize("caption", ["best dry shampoo", "The best pizza", "top 3 hotels", "greatest actor"])
+def test_publisher_guard_rejects_ranked_captions(caption):
+    from antisearch_mill.publisher.guard import caption_problem
+
+    assert caption_problem(caption, "dry shampoo")
 
 
 def test_post_body_is_the_bare_phrase():

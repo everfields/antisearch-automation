@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -86,6 +87,88 @@ def cmd_publish(args, settings: Settings) -> int:
     counts = Counter(r.status for r in rows)
     print(f"publish: {dict(counts)} -> {ledger.publish_csv}")
     return 1 if counts.get("failed") or counts.get("invalid_clip") else 0
+
+
+def cmd_post(args, settings: Settings) -> int:
+    from .publisher.guard import PostLog, daily_cap, local_today
+    from .publisher.run import run_posts
+
+    ledger = Ledger(settings.out_dir)
+    try:
+        jobs = read_queue(args.queue)
+    except QueueError as exc:
+        print(f"queue error: {exc}", file=sys.stderr)
+        return 2
+    env = dict(os.environ)
+    state = args.state or env.get("PUBLISHER_STATE") or str(settings.out_dir / "posts.csv")
+    log = PostLog(state, env.get("PUBLISHER_TZ") or "Europe/Madrid")
+    today = local_today(env)
+    oracle = _oracle(args, settings)
+
+    def produce(job):
+        (result,) = produce_all([job], oracle, ledger, font=settings.font_path, seconds=settings.clip_seconds, force=True)
+        if result.status == "failed":
+            raise RuntimeError(result.detail)
+        return ledger.clip_for_job(job.id)
+
+    print(f"post: mode={'LIVE' if args.live else 'dry-run'} queue={args.queue} state={state} "
+          f"day={today} used={log.used_on(today)}/{daily_cap(env)}")
+    try:
+        rows = run_posts(
+            jobs, ledger, log, today=today, live=args.live, networks=_split(args.network), only=_split(args.only),
+            kind=args.kind, retry_failed=args.retry_failed, max_posts=args.max, produce=produce, env=env,
+        )
+    except (FontNotFound, RenderError) as exc:
+        print(f"post error: {exc}", file=sys.stderr)
+        return 2
+    for r in rows:
+        print(f"  {r.network:<9} {r.status:<30} {r.job_id:<26} {r.url or r.artifact}")
+        if r.detail:
+            print(f"  {'':<9} {'':<30} {r.detail}")
+    counts = Counter(r.status for r in rows)
+    print(f"post: {dict(counts)}")
+    return 1 if counts.get("failed") or counts.get("dry_run_failed") else 0
+
+
+def cmd_networks(args, settings: Settings) -> int:
+    from .publisher import ADAPTERS
+    from .publisher.guard import approved_networks
+
+    approved = approved_networks(dict(os.environ))
+    for i, (name, cls) in enumerate(ADAPTERS.items(), start=1):
+        missing = cls.missing(os.environ)
+        creds = "present" if not missing else "missing " + ",".join(missing)
+        print(f"{i}. {name:<9} credentials {creds}; live-approved: {'yes' if name in approved else 'no'}")
+        print(f"   media: {', '.join(sorted(cls.kinds))}; env: {', '.join(cls.all_env())}")
+        if cls.blocked:
+            print(f"   BLOCKED: {cls.blocked}")
+        print(f"   cannot: {cls.cannot}")
+    print("-> docs/PUBLISHER_SETUP.md: exact steps per network")
+    return 0
+
+
+def cmd_oauth(args, settings: Settings) -> int:
+    from .publish.http import RequestsTransport
+    from .publisher import oauth
+    from .publisher.base import PublisherError
+
+    env = dict(os.environ)
+    try:
+        if args.action == "url":
+            print(oauth.authorize_url(args.provider, env, scope=args.scope or "", redirect_uri=args.redirect_uri or ""))
+            print("open it on the account owner's own device, approve, then paste the URL you land on into "
+                  f"`mill oauth {args.provider} exchange --code '<url>'`", file=sys.stderr)
+            return 0
+        if not args.code:
+            print("--code is required for exchange", file=sys.stderr)
+            return 2
+        tokens = oauth.exchange(args.provider, args.code, env, RequestsTransport(), redirect_uri=args.redirect_uri or "")
+    except PublisherError as exc:
+        print(f"oauth error: {exc}", file=sys.stderr)
+        return 1
+    print("store these as secrets now; they are not saved anywhere:", file=sys.stderr)
+    print(json.dumps(tokens, indent=2))
+    return 0
 
 
 def cmd_status(args, settings: Settings) -> int:
@@ -177,13 +260,12 @@ def cmd_doctor(args, settings: Settings) -> int:
             print(f"  FAIL oracle live: {exc}")
             ok = False
     print("  credentials (values never printed):")
-    for name in ALL_PLATFORMS:
-        creds = CREDENTIALS[name]
+    for name, creds in CREDENTIALS.items():
         present = creds.present_set()
         kind = "live-capable" if name in ("x", "linkedin") else "draft stub"
         state = "present" if present else "missing " + ",".join(creds.missing())
         print(f"    {name:<9} ({kind}): {state}")
-    print("  -> see SETUP.md for the full credential checklist")
+    print("  -> see SETUP.md for the full credential checklist; `mill networks` for the own publisher")
     return 0 if ok else 1
 
 
@@ -223,6 +305,29 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--platform", action="append", help=f"subset of {','.join(ALL_PLATFORMS)}")
     sp.add_argument("--clip", action="append", help="clip id(s), comma separated")
     sp.set_defaults(func=cmd_publish)
+
+    sp = sub.add_parser("post", help="own publisher: queue rows -> official APIs (dry-run unless --live)")
+    sp.add_argument("--queue", default=DEFAULT_QUEUE)
+    oracle_opts(sp)
+    sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
+    sp.add_argument("--live", action="store_true", help="really post (needs credentials + PUBLISHER_LIVE_NETWORKS)")
+    sp.add_argument("--network", action="append", help="only these networks, comma separated")
+    sp.add_argument("--only", action="append", help="job id(s), comma separated")
+    sp.add_argument("--kind", choices=("video", "image"), default="video",
+                    help="video = the clip; image = the verdict frame (raw screenshot)")
+    sp.add_argument("--retry-failed", action="store_true", help="retry rows whose last live attempt failed")
+    sp.add_argument("--max", type=int, help="attempt at most N posts this run (the daily cap still applies)")
+    sp.set_defaults(func=cmd_post)
+
+    sub.add_parser("networks", help="own publisher: adapters, credentials, blocked reasons").set_defaults(func=cmd_networks)
+
+    sp = sub.add_parser("oauth", help="one-time token helpers for TikTok / LinkedIn")
+    sp.add_argument("provider", choices=("tiktok", "linkedin"))
+    sp.add_argument("action", choices=("url", "exchange"))
+    sp.add_argument("--code", help="the code, or the whole URL the browser landed on")
+    sp.add_argument("--scope", help="override the default scope")
+    sp.add_argument("--redirect-uri", help="must match the app's registered redirect (default https://antisearch.ai/)")
+    sp.set_defaults(func=cmd_oauth)
 
     sub.add_parser("status", help="clips and their latest publish state").set_defaults(func=cmd_status)
     sub.add_parser("verify", help="re-probe every clip against the mill contract").set_defaults(func=cmd_verify)

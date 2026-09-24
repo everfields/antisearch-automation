@@ -19,12 +19,20 @@ requires_ffmpeg = pytest.mark.skipif(not HAS_FFMPEG, reason="ffmpeg/ffprobe not 
 @pytest.fixture(autouse=True)
 def _no_real_credentials(monkeypatch):
     """Tests never see the developer's real tokens."""
+    from antisearch_mill.publisher import ADAPTERS
+
     for creds in CREDENTIALS.values():
         for names in creds.sets:
             for n in names:
                 monkeypatch.delenv(n, raising=False)
         for n in creds.optional:
             monkeypatch.delenv(n, raising=False)
+    for cls in ADAPTERS.values():
+        for n in cls.all_env():
+            monkeypatch.delenv(n, raising=False)
+    for n in ("PUBLISHER_LIVE_NETWORKS", "PUBLISHER_DAILY_CAP", "PUBLISHER_STATE", "PUBLISHER_TZ",
+              "PUBLISHER_OAUTH_REDIRECT_URI"):
+        monkeypatch.delenv(n, raising=False)
 
 
 class LiveLikeFixtureOracle(FixtureOracle):

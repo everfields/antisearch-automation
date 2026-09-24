@@ -39,6 +39,8 @@ def publish_all(
         for platform in clip.platform_list:
             if platforms and platform not in platforms:
                 continue
+            if platform not in PUBLISHERS:
+                continue
             publisher = PUBLISHERS[platform]()
             ctx = PublishContext(ledger=ledger, mode=mode, transport=live_transport, sleep=sleep)
             row = publisher.publish(clip, ctx)
