@@ -1,0 +1,45 @@
+# Bluesky = stand-in for held X: companies / tech / SaaS. Append " | @?" to hold a row for a domain-handle tag.
+email client
+calendar app
+code editor
+programming language
+database
+cloud provider
+web browser
+search engine
+vpn
+laptop
+mechanical keyboard
+smartphone
+headphones
+project management tool
+crm
+design tool
+video call app
+messaging app
+to-do app
+terminal emulator
+linux distribution
+coding font
+git client
+javascript framework
+css framework
+text editor
+cloud storage
+backup service
+domain registrar
+analytics tool
+newsletter platform
+podcast app
+e-reader
+smartwatch
+tablet
+3d printer
+drone
+electric car
+ai assistant
+startup accelerator
+venture capital firm
+tech conference
+open source project
+operating system

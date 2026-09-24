@@ -66,12 +66,17 @@ def test_post_dry_run_end_to_end(tmp_path, capsys, monkeypatch):
     )
     out = tmp_path / "out"
     base = ["--env-file", str(tmp_path / "none"), "--out", str(out)]
-    args = ["post", "--queue", str(queue), "--oracle", "fixture", "--fixtures", str(ROOT / "fixtures" / "oracle_fixtures.json")]
+    no_pools = tmp_path / "no-pools"
+    no_pools.mkdir()
+    args = ["post", "--queue", str(queue), "--pools", str(no_pools), "--oracle", "fixture",
+            "--fixtures", str(ROOT / "fixtures" / "oracle_fixtures.json")]
     assert main(base + args) == 0
-    printed = capsys.readouterr().out
-    assert "skipped_daily_cap" in printed  # third own-publisher row is over the 2/day cap
+    capsys.readouterr()
     plans = sorted(p.relative_to(out).as_posix() for p in (out / "dry_run_posts").rglob("*.json"))
-    assert plans == ["dry_run_posts/bluesky/thing.json", "dry_run_posts/tiktok/dry-shampoo.json"]
+    assert plans == ["dry_run_posts/bluesky/thing.json", "dry_run_posts/linkedin/pizza.json",
+                     "dry_run_posts/tiktok/dry-shampoo.json"]
+    tiktok = json.loads((out / "dry_run_posts" / "tiktok" / "dry-shampoo.json").read_text())
+    assert tiktok["route"] == "buffer" and tiktok["media"]["public_url"].endswith("/clips/" + Path(tiktok["media"]["path"]).name)
     bsky = json.loads((out / "dry_run_posts" / "bluesky" / "thing.json").read_text())
     assert bsky["caption"] == "@antisearch.ai" and bsky["oracle_source"] == "fixture"
     assert Path(bsky["media"]["path"]).is_file()
@@ -80,6 +85,24 @@ def test_post_dry_run_end_to_end(tmp_path, capsys, monkeypatch):
     # live with a fixture oracle: approval + creds present, still refused
     for k, v in {"PUBLISHER_LIVE_NETWORKS": "bluesky", "BLUESKY_HANDLE": "h", "BLUESKY_APP_PASSWORD": "p"}.items():
         monkeypatch.setenv(k, v)
-    assert main(base + args + ["--live", "--network", "bluesky"]) == 0
+    assert main(base + args + ["--live", "--ignore-slots", "--network", "bluesky"]) == 0
     assert "skipped_not_live_oracle" in capsys.readouterr().out
     assert not (out / "posts.csv").exists()
+
+
+def test_due_is_the_cheap_precheck_for_the_hourly_cron(tmp_path, monkeypatch, capsys):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    import antisearch_mill.publisher.guard as guard
+
+    base = ["--env-file", str(tmp_path / "none"), "due", "--state", str(tmp_path / "posts.csv")]
+    monkeypatch.setattr(guard, "now_et", lambda: datetime(2026, 11, 2, 8, 30, tzinfo=ZoneInfo("America/New_York")))
+    assert main(base) == 3  # nothing approved
+    monkeypatch.setenv("PUBLISHER_LIVE_NETWORKS", "bluesky,tiktok")
+    assert main(base) == 3  # 08:30 ET: before the posting day starts
+    monkeypatch.setattr(guard, "now_et", lambda: datetime(2026, 11, 2, 9, 7, tzinfo=ZoneInfo("America/New_York")))
+    capsys.readouterr()
+    assert main(base) == 0
+    out = capsys.readouterr().out
+    assert "due: bluesky" in out and "tiktok" in out.splitlines()[1] and "0 due" in out.splitlines()[1]

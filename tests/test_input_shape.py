@@ -18,6 +18,7 @@ ASKING = re.compile(r"^(what|which|who|recommend|give me|find me)\b", re.I)
 DOC_OFFENDER = re.compile(r"""[`"'](the\s+)?(best|top|greatest)\s+[^\W\d_]""", re.I)
 
 QUEUES = sorted((ROOT / "queue").glob("*.csv"))
+POOLS = sorted((ROOT / "queue" / "pools").glob("*.txt"))
 FIXTURES = sorted((ROOT / "fixtures").glob("*.json"))
 DOCS = [ROOT / "README.md", ROOT / "SETUP.md"]
 
@@ -62,6 +63,20 @@ def test_queue_files_exist_and_sample_starts_with_thing():
 def test_every_queue_row_is_a_bare_phrase(queue):
     bad = {j.id: (j.category, offences(j.category)) for j in read_queue(queue) if offences(j.category)}
     assert bad == {}
+
+
+@pytest.mark.parametrize("pool", POOLS, ids=lambda p: p.name)
+def test_every_pool_input_is_a_bare_phrase(pool):
+    from antisearch_mill.publisher.pools import read_pool
+
+    inputs = read_pool(pool)
+    assert inputs
+    bad = {c: offences(c) for c, _ in inputs if offences(c)}
+    assert bad == {}
+
+
+def test_pools_exist_for_the_four_trial_networks():
+    assert {p.stem for p in POOLS} >= {"unowned", "bluesky", "linkedin", "instagram", "tiktok"}
 
 
 @pytest.mark.parametrize("fixture", FIXTURES, ids=lambda p: p.name)

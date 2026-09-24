@@ -1,0 +1,62 @@
+# Unowned words: bare inputs no brand owns. Shared by every network; each is asked once, ever.
+# One per line. Curated by CoS + Soul. Never prefix "best".
+love
+advice
+dog
+squirrels
+time
+a color
+a number
+a smell
+a sound
+a feeling
+a season
+a month
+an hour
+a name
+a gift
+a secret
+a promise
+a habit
+a memory
+a question
+an answer
+a dream
+a moment
+a shape
+a letter
+a song
+a book
+a film
+a view
+a walk
+a meal
+breakfast
+sleep
+rain
+snow
+sea
+fire
+water
+a tree
+a flower
+an animal
+a bird
+a stone
+a door
+a window
+a chair
+a city
+a country
+a planet
+a star
+a cloud
+morning
+night
+sunday
+friendship
+luck
+patience
+courage
+childhood
+home

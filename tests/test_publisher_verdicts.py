@@ -56,7 +56,8 @@ def test_mill_post_dry_run_never_calls_the_real_oracle(tmp_path, monkeypatch, ca
     q2 = tmp_path / "b.csv"
     q2.write_text("id,category,platforms,caption\nt-dry-shampoo,dry shampoo,tiktok,\n", encoding="utf-8")
     base = ["--env-file", str(tmp_path / "none"), "--out", str(tmp_path / "out")]
-    assert main(base + ["post", "--queue", f"{q1},{q2}"]) == 0
+    (tmp_path / "pools").mkdir()
+    assert main(base + ["post", "--queue", f"{q1},{q2}", "--pools", str(tmp_path / "pools")]) == 0
     out = capsys.readouterr().out
     assert "oracle=dry-run" in out and "{'dry_run_ok': 2}" in out
     assert not (tmp_path / "out" / "verdicts.csv").exists()

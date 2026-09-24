@@ -22,6 +22,7 @@ class MetaContainerAdapter(Adapter):
     status_field = ""
     publish_edge = ""
     create_edge = ""
+    needs_public_url = True
 
     def _media_params(self, media: Media, url: str) -> dict[str, str]:
         raise NotImplementedError
@@ -31,7 +32,7 @@ class MetaContainerAdapter(Adapter):
 
     def _post(self, media: Media, caption: str) -> PostResult:
         base = self.var("PUBLISHER_PUBLIC_BASE_URL")
-        if not base:
+        if not base and not media.public_url:
             raise PublisherError(f"{self.name}: PUBLISHER_PUBLIC_BASE_URL is required (Meta pulls media from a public URL)")
         uid, token = self.var(self.user_var), self.var(self.token_var)
         params = {**self._media_params(media, public_url(base, media)), "access_token": token}

@@ -35,6 +35,12 @@ class VerdictStore:
                                       "attempts": int(row["attempts"] or 0)})
         return None
 
+    def categories(self) -> set[str]:
+        if not self.path.is_file():
+            return set()
+        with self.path.open(newline="", encoding="utf-8") as fh:
+            return {row["category"] for row in csv.DictReader(fh)}
+
     def put(self, verdict: Verdict) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         new = not self.path.is_file()

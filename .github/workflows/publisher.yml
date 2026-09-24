@@ -1,14 +1,15 @@
 name: publisher
 
-# Own publisher: official APIs only, no browser, no Buffer, no Grok Bot box.
-# Off by default.
+# Own publisher: Bluesky direct; Instagram, LinkedIn Page and TikTok through Buffer's
+# API. No browser, no Grok Bot box. Off by default.
 #   Manual: Actions -> publisher -> Run workflow (dry-run unless `live` is ticked).
-#   Cron:   runs only when the repo variable PUBLISHER_CRON is `dry-run` or `live`.
-# Live posting also needs the network listed in the repo variable
-# PUBLISHER_LIVE_NETWORKS (recorded first-of-class yes) and its secrets
-# (docs/PUBLISHER_SETUP.md). The guard caps everything at 2 posts/day (Madrid),
-# 1 per network. The post log and the frozen verdicts (one honest oracle run per
-# input) live on the `publisher-state` branch, so runs never double-post or re-ask.
+#   Cron:   hourly; runs only when the repo variable PUBLISHER_CRON is `dry-run` or `live`.
+# Slots are America/New_York wall-clock times (docs/PUBLISHER_SETUP.md); the cron
+# only wakes the job, and `mill due` decides from the tz database whether a slot
+# has come, so summer/winter time needs no edits here. Live posting also needs
+# the network in PUBLISHER_LIVE_NETWORKS (the recorded first-of-class yes) and its
+# secrets. The post log and the frozen verdicts (one honest oracle run per input)
+# live on the `publisher-state` branch, so runs never double-post or re-ask.
 
 on:
   workflow_dispatch:
@@ -17,15 +18,16 @@ on:
         description: Really post (still needs PUBLISHER_LIVE_NETWORKS + secrets)
         type: boolean
         default: false
-      queue:
-        description: Queue CSV(s), space separated, priority order (empty = repo variable PUBLISHER_QUEUE)
-        default: ""
+      ignore_slots:
+        description: Live only - post now even if no slot is due (daily cap still applies)
+        type: boolean
+        default: false
       network:
-        description: Only this network (empty = all own-publisher networks)
+        description: Only this network (empty = all)
         default: ""
   schedule:
-    - cron: "7 8 * * *"   # 10:07 Madrid in summer time, 09:07 in winter
-    - cron: "7 17 * * *"  # 19:07 / 18:07
+    # :07 past every hour from 13:00 to 05:59 UTC = 09:00-00:59 ET in both EDT and EST.
+    - cron: "7 0-5,13-23 * * *"
 
 permissions:
   contents: write
@@ -40,31 +42,36 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       LIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.live) || (github.event_name == 'schedule' && vars.PUBLISHER_CRON == 'live') }}
-      QUEUE: ${{ inputs.queue || vars.PUBLISHER_QUEUE || 'queue/bluesky_trial.csv queue/tiktok_trial.csv' }}
+      IGNORE_SLOTS: ${{ github.event_name == 'workflow_dispatch' && inputs.ignore_slots }}
+      QUEUE: ${{ vars.PUBLISHER_QUEUE || 'queue/bluesky_trial.csv queue/tiktok_trial.csv' }}
       NETWORK: ${{ inputs.network }}
-      PER_RUN: ${{ github.event_name == 'schedule' && '1' || '' }}
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
-      PUBLISHER_DAILY_CAP: ${{ vars.PUBLISHER_DAILY_CAP }}
+      PUBLISHER_SLOTS_BLUESKY: ${{ vars.PUBLISHER_SLOTS_BLUESKY }}
+      PUBLISHER_SLOTS_LINKEDIN: ${{ vars.PUBLISHER_SLOTS_LINKEDIN }}
+      PUBLISHER_SLOTS_INSTAGRAM: ${{ vars.PUBLISHER_SLOTS_INSTAGRAM }}
+      PUBLISHER_SLOTS_TIKTOK: ${{ vars.PUBLISHER_SLOTS_TIKTOK }}
+      PUBLISHER_ROUTE_INSTAGRAM: ${{ vars.PUBLISHER_ROUTE_INSTAGRAM }}
+      PUBLISHER_ROUTE_LINKEDIN: ${{ vars.PUBLISHER_ROUTE_LINKEDIN }}
+      PUBLISHER_ROUTE_TIKTOK: ${{ vars.PUBLISHER_ROUTE_TIKTOK }}
+      PUBLISHER_MEDIA_REPO: ${{ vars.PUBLISHER_MEDIA_REPO }}
       PUBLISHER_PUBLIC_BASE_URL: ${{ vars.PUBLISHER_PUBLIC_BASE_URL }}
+      PUBLISHER_MEDIA_TOKEN: ${{ secrets.PUBLISHER_MEDIA_TOKEN }}
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+      BUFFER_CHANNEL_INSTAGRAM: ${{ vars.BUFFER_CHANNEL_INSTAGRAM }}
+      BUFFER_CHANNEL_LINKEDIN: ${{ vars.BUFFER_CHANNEL_LINKEDIN }}
+      BUFFER_CHANNEL_TIKTOK: ${{ vars.BUFFER_CHANNEL_TIKTOK }}
       BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
       BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
-      THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
-      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
-      LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
-      LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
-      LINKEDIN_REFRESH_TOKEN: ${{ secrets.LINKEDIN_REFRESH_TOKEN }}
-      LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
-      LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
       TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
       TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
       TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
       TIKTOK_MODE: ${{ vars.TIKTOK_MODE }}
+      THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+      LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+      LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
       INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
       INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
-      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-      REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
-      REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
       MASTODON_BASE_URL: ${{ secrets.MASTODON_BASE_URL }}
       MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
     steps:
@@ -72,8 +79,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter
-      - run: python -m pip install -e '.[dev]'
+          cache: pip
+      - run: python -m pip install -e .
 
       - name: Load the post log (publisher-state branch)
         env:
@@ -87,17 +94,27 @@ jobs:
             git -C state remote add origin "$remote"
           fi
 
+      - name: Anything due? (scheduled runs stop here when not)
+        id: due
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ] || [ "$LIVE" != "true" ]; then echo "go=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if mill due --state state/posts.csv; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "go=false" >> "$GITHUB_OUTPUT"; fi
+
+      - if: steps.due.outputs.go == 'true'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter
+
       - name: Post (only a live run asks the real oracle; its verdict is frozen in state/verdicts.csv)
+        if: steps.due.outputs.go == 'true'
         run: |
           flags=()
           for q in ${QUEUE//,/ }; do flags+=(--queue "$q"); done
           [ "$LIVE" = "true" ] && flags+=(--live)
+          [ "$IGNORE_SLOTS" = "true" ] && flags+=(--ignore-slots)
           [ -n "$NETWORK" ] && flags+=(--network "$NETWORK")
-          [ -n "$PER_RUN" ] && flags+=(--max "$PER_RUN")
           mill --out out post --state state/posts.csv "${flags[@]}"
 
       - name: Save the post log
-        if: always() && env.LIVE == 'true'
+        if: always() && env.LIVE == 'true' && steps.due.outputs.go == 'true'
         run: |
           cd state
           compgen -G '*.csv' >/dev/null || exit 0
@@ -108,13 +125,12 @@ jobs:
           git push --quiet origin publisher-state
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.due.outputs.go == 'true'
         with:
           name: publisher-${{ github.run_id }}
           path: |
             out/dry_run_posts/
-            out/clips/
             out/logs/
             state/*.csv
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 7

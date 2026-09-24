@@ -40,6 +40,7 @@ class Media:
     duration_s: float = 0.0
     poster: Path | None = None
     label: str = ""  # the bare input the verdict answers; used where a network demands a title
+    public_url: str = ""  # set by the media host for networks that fetch media from a URL
 
     @property
     def size(self) -> int:
@@ -50,9 +51,9 @@ class Media:
 
     @classmethod
     def video(cls, path: str | Path, width: int, height: int, duration_s: float,
-              poster: str | Path | None = None, label: str = "") -> "Media":
+              poster: str | Path | None = None, label: str = "", public_url: str = "") -> "Media":
         return cls(Path(path), VIDEO, "video/mp4", width, height, duration_s,
-                   Path(poster) if poster else None, label)
+                   Path(poster) if poster else None, label, public_url)
 
     @classmethod
     def image(cls, path: str | Path, width: int, height: int, label: str = "") -> "Media":
@@ -76,6 +77,8 @@ class Adapter(ABC):
     kinds: frozenset[str] = frozenset({VIDEO, IMAGE})
     blocked: str = ""  # why live posting can't happen today even though the code is done
     cannot: str = ""  # what the free / unaudited API cannot do, stated plainly
+    needs_public_url: bool = False  # the network fetches media from a URL (media host required)
+    route: str = "direct"
 
     def __init__(
         self,
@@ -154,4 +157,4 @@ def form_request(method: str, url: str, fields: Mapping[str, str], headers: Mapp
 
 
 def public_url(base: str, media: Media) -> str:
-    return f"{base.rstrip('/')}/{quote(media.path.name)}"
+    return media.public_url or f"{base.rstrip('/')}/{quote(media.path.name)}"
