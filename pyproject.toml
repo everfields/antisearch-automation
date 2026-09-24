@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antisearch-mill"
+version = "0.1.0"
+description = "antisearch.ai social automation mill: synthetic-oracle clips + publish adapters"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "requests>=2.31",
+  "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+mill = "antisearch_mill.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+  "ffmpeg: needs ffmpeg/ffprobe on PATH",
+  "network: hits the live antisearch.ai oracle (opt-in via MILL_TEST_NETWORK=1)",
+]
