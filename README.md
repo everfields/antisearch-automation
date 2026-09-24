@@ -46,8 +46,11 @@ add before `--live`. Nothing blocks without them.
 Official APIs only, one adapter per network behind `post(media, caption) -> url`:
 Bluesky, Threads, LinkedIn, TikTok, Instagram, Reddit, Mastodon
 (`src/antisearch_mill/publisher/`). Dry-run unless `--live`.
-- **Guard:** ≤2 posts/day total (Madrid), one clip → one network, caption = empty /
-  bare input / @handle, live only for networks in `PUBLISHER_LIVE_NETWORKS`.
+- **Guard:** ≤2 posts/day total and ≤1 per network (Madrid), one clip → one network,
+  caption = empty / bare input / @handle (Bluesky: empty or a verified domain
+  handle), live only for networks in `PUBLISHER_LIVE_NETWORKS`.
+- **One honest run:** only `--live` asks the real oracle, once per input; the verdict
+  is frozen in `verdicts.csv` next to the post log. Dry-runs never call it.
 - **Post log:** a `pending` row is written before every API call, so nothing
   double-posts.
 - **Scheduling:** `.github/workflows/publisher.yml` (manual + cron, off by default)
@@ -55,8 +58,8 @@ Bluesky, Threads, LinkedIn, TikTok, Instagram, Reddit, Mastodon
 
 ```bash
 mill networks                        # what's configured, what's blocked, what each API can't do
-mill post --queue q.csv              # dry-run plans -> out/dry_run_posts/<network>/<job>.json
-mill post --queue q.csv --live --state state/posts.csv
+mill post --queue queue/bluesky_trial.csv --queue queue/tiktok_trial.csv   # dry-run plans, no oracle call
+mill post --queue queue/bluesky_trial.csv --live --state state/posts.csv
 ```
 
 Setup, exact env vars and the honest limits per network:
