@@ -41,6 +41,41 @@ make doctor         # tools, font, live oracle ping, which credentials are missi
 Credentials: see **[SETUP.md](SETUP.md)**, a single checklist of everything to
 add before `--live`. Nothing blocks without them.
 
+## Own publisher (`mill post`)
+
+One adapter per network behind `post(media, caption) -> url`
+(`src/antisearch_mill/publisher/`). Dry-run unless `--live`.
+- **Routes:** native (each network's official API) everywhere by default: Bluesky,
+  Instagram Reels, LinkedIn Page, TikTok. `PUBLISHER_BRIDGE=buffer` is a removable
+  bridge through Buffer free while a native gate is pending. Threads, Reddit and
+  Mastodon are built too.
+- **Cadence:** per-network slots in America/New_York on fixed :07 minutes, ≥90 min
+  apart. The day starts 09:00 ET; ≤5 per network per day, one per run.
+  `PUBLISHER_CADENCE=carlos|soul` switches presets.
+- **Fill:** queue rows first, then `queue/pools/`; unowned words open each wall and
+  come back one in four.
+- **Guard:** one clip → one network; an input never repeats; inputs English and never
+  serial; caption = empty / bare input / @handle
+  (Bluesky: empty or a verified domain handle); live only for networks in
+  `PUBLISHER_LIVE_NETWORKS`.
+- **One honest run:** only `--live` asks the real oracle, once per input; the verdict
+  is frozen in `verdicts.csv` next to the post log. Dry-runs never call it.
+- **Post log:** a `pending` row is written before every API call, so nothing
+  double-posts.
+- **Scheduling:** `.github/workflows/publisher.yml` (manual + cron, off by default)
+  runs it without the Grok Bot box.
+
+```bash
+mill networks                        # routes, slots (ET + Madrid), credentials, pool runway
+mill due                             # exit 0 if a live network has a slot open now (cron pre-check)
+mill post --queue queue/bluesky_trial.csv --queue queue/tiktok_trial.csv   # dry-run plans, no oracle call
+mill post --queue queue/bluesky_trial.csv --live --state state/posts.csv
+```
+
+Setup, exact env vars and the honest limits per network:
+**[docs/PUBLISHER_SETUP.md](docs/PUBLISHER_SETUP.md)**. `mill publish` (below) is
+the older X/LinkedIn path and stays as it was.
+
 ## CLI
 
 `mill` (or `PYTHONPATH=src python3 -m antisearch_mill`):

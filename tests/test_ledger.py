@@ -3,7 +3,7 @@ import json
 import pytest
 
 from antisearch_mill.ledger import (
-    ALL_PLATFORMS, ClipRow, Ledger, PublishRow, QueueError, read_queue,
+    ALL_PLATFORMS, DEFAULT_PLATFORMS, ClipRow, Ledger, PublishRow, QueueError, read_queue,
 )
 from conftest import ROOT
 
@@ -28,7 +28,7 @@ def test_defaults_and_normalization(tmp_path):
     assert len(jobs) == 1
     assert jobs[0].id == "a-1"
     assert jobs[0].category == "chef knife"
-    assert jobs[0].platforms == ALL_PLATFORMS
+    assert jobs[0].platforms == DEFAULT_PLATFORMS
 
 
 @pytest.mark.parametrize(

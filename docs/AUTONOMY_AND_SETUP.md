@@ -1,5 +1,11 @@
 # Autonomy walls + one-shot setup (AntiSearch social ops)
 
+> **Superseded in part, 2026-09-24 evening (Carlos):** no Buffer or other SaaS
+> middlemen, and no posting from the Grok Bot box. Posting now goes through our own
+> publisher on official APIs: [PUBLISHER_SETUP.md](PUBLISHER_SETUP.md). Instagram is
+> burned for now. The identity, walls, email and persistence sections below still
+> apply.
+
 Owner: strategy brain (Opus 5.5), for CoS (Grok Bot) and Carlos. Written 2026-09-24,
 amended the same day with the founder locks below.
 Scope: how the Grok Bot squad opens and runs the AntiSearch social accounts for the

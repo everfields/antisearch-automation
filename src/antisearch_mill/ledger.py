@@ -19,8 +19,9 @@ from pathlib import Path
 from . import CAPTURE_TAG
 from .oracle import normalize_category
 
-ALL_PLATFORMS = ("x", "linkedin", "tiktok", "instagram")
-DEFAULT_PLATFORMS = ALL_PLATFORMS
+LEGACY_PLATFORMS = ("x", "linkedin", "tiktok", "instagram")
+ALL_PLATFORMS = LEGACY_PLATFORMS + ("bluesky", "threads", "reddit", "mastodon")
+DEFAULT_PLATFORMS = LEGACY_PLATFORMS
 _ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
 
 

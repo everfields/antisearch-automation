@@ -7,11 +7,10 @@ and/or as GitHub Actions secrets (for `.github/workflows/mill.yml`), and/or as
 Cursor Cloud Agent secrets. `mill doctor` shows what is present/missing
 without printing values.
 
-For the ~20-day organic trial none of the platform API values below are needed:
-Instagram + LinkedIn post through Buffer (free), TikTok is uploaded directly from
-the box, X is held, and accounts are set up in one sitting.
-See [docs/AUTONOMY_AND_SETUP.md](docs/AUTONOMY_AND_SETUP.md) before asking anyone
-for X / LinkedIn / TikTok / Instagram keys.
+Since 2026-09-24 (evening), posting goes through our own publisher (`mill post`,
+official APIs, no Buffer, no box browser). Its tokens and steps live in
+[docs/PUBLISHER_SETUP.md](docs/PUBLISHER_SETUP.md). The X / LinkedIn values below
+serve the older `mill publish` path. X stays held.
 
 ## Bulk checklist
 

@@ -1,0 +1,43 @@
+# Instagram = places: restaurants, travel, hotels, entertainment.
+restaurant in barcelona
+hotel
+restaurant in paris
+restaurant in tokyo
+restaurant in new york
+restaurant in madrid
+restaurant in lisbon
+restaurant in mexico city
+hotel in tokyo
+hotel in paris
+hotel in new york
+hotel in bali
+beach in europe
+island
+city for a weekend
+museum in paris
+museum in new york
+bar in london
+cocktail bar in new york
+rooftop in barcelona
+pizza in naples
+coffee in rome
+bakery in paris
+ramen in tokyo
+tapas in madrid
+sushi in tokyo
+road trip
+national park
+ski resort
+train journey
+concert venue
+music festival
+theme park
+jazz club in new york
+bookshop in london
+market in barcelona
+viewpoint in lisbon
+sunset in santorini
+hike in europe
+brunch in new york
+wine region
+street food city

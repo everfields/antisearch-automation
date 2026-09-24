@@ -18,6 +18,7 @@ ASKING = re.compile(r"^(what|which|who|recommend|give me|find me)\b", re.I)
 DOC_OFFENDER = re.compile(r"""[`"'](the\s+)?(best|top|greatest)\s+[^\W\d_]""", re.I)
 
 QUEUES = sorted((ROOT / "queue").glob("*.csv"))
+POOLS = sorted((ROOT / "queue" / "pools").glob("*.txt"))
 FIXTURES = sorted((ROOT / "fixtures").glob("*.json"))
 DOCS = [ROOT / "README.md", ROOT / "SETUP.md"]
 
@@ -64,6 +65,37 @@ def test_every_queue_row_is_a_bare_phrase(queue):
     assert bad == {}
 
 
+@pytest.mark.parametrize("pool", POOLS, ids=lambda p: p.name)
+def test_every_pool_input_is_a_bare_phrase(pool):
+    from antisearch_mill.publisher.pools import read_pool
+
+    inputs = read_pool(pool)
+    assert inputs
+    bad = {c: offences(c) for c, _ in inputs if offences(c)}
+    assert bad == {}
+
+
+def test_every_queued_or_pooled_input_passes_the_publisher_guard():
+    from antisearch_mill.publisher.guard import input_problem
+    from antisearch_mill.publisher.pools import read_pool
+
+    inputs = [j.category for q in QUEUES for j in read_queue(q)] + [c for p in POOLS for c, _ in read_pool(p)]
+    bad = {c: input_problem(c, {}) for c in inputs if input_problem(c, {})}
+    assert bad == {}
+
+
+def test_publisher_inputs_are_unique_across_queues_and_pools():
+    from antisearch_mill.publisher.pools import read_pool
+
+    publisher_queues = [q for q in QUEUES if q.name != "sample_queue.csv"]
+    inputs = [j.category for q in publisher_queues for j in read_queue(q)] + [c for p in POOLS for c, _ in read_pool(p)]
+    assert sorted(c for c in set(inputs) if inputs.count(c) > 1) == []
+
+
+def test_pools_exist_for_the_four_trial_networks():
+    assert {p.stem for p in POOLS} >= {"unowned", "bluesky", "linkedin", "instagram", "tiktok"}
+
+
 @pytest.mark.parametrize("fixture", FIXTURES, ids=lambda p: p.name)
 def test_every_fixture_input_is_a_bare_phrase(fixture):
     keys = json.loads(fixture.read_text(encoding="utf-8"))
@@ -86,14 +118,25 @@ def test_docs_never_show_best_x_as_an_input(doc):
     assert bad == []
 
 
+GUARD_REJECT_LINE = ("src/antisearch_mill/publisher/guard.py", "RANKED = re.compile(")
+
+
 def test_source_never_templates_best_into_the_input():
     bad = [
         f"{p.relative_to(ROOT)}:{n}"
         for p in sorted((ROOT / "src").rglob("*.py"))
         for n, line in enumerate(p.read_text(encoding="utf-8").splitlines(), start=1)
         if re.search(r"\bbest\b", line, re.I)
+        and not (p.relative_to(ROOT).as_posix() == GUARD_REJECT_LINE[0] and line.startswith(GUARD_REJECT_LINE[1]))
     ]
     assert bad == []
+
+
+@pytest.mark.parametrize("caption", ["best dry shampoo", "The best pizza", "top 3 hotels", "greatest actor"])
+def test_publisher_guard_rejects_ranked_captions(caption):
+    from antisearch_mill.publisher.guard import caption_problem
+
+    assert caption_problem(caption, "dry shampoo")
 
 
 def test_post_body_is_the_bare_phrase():

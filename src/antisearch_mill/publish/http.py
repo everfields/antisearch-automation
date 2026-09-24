@@ -15,6 +15,13 @@ from typing import Any, Callable, Protocol
 import requests
 
 REDACT_HEADERS = {"authorization", "cookie"}
+REDACT_FIELDS = {"access_token", "client_secret", "password", "refresh_token", "code", "code_verifier"}
+
+
+def _redact(mapping: Any) -> Any:
+    if not isinstance(mapping, dict):
+        return mapping
+    return {k: ("<redacted>" if str(k).lower() in REDACT_FIELDS else v) for k, v in mapping.items()}
 
 
 @dataclass
@@ -96,13 +103,13 @@ def _summarize(req: Request) -> dict:
         "headers": {k: ("<redacted>" if k.lower() in REDACT_HEADERS else v) for k, v in req.headers.items()},
     }
     if req.params:
-        out["params"] = req.params
+        out["params"] = _redact(req.params)
     if req.json is not None:
-        out["json"] = req.json
+        out["json"] = _redact(req.json)
     if req.data is not None:
         out["body_bytes"] = len(req.data)
     if req.form:
-        out["form"] = req.form
+        out["form"] = _redact(req.form)
     if req.files:
         out["files"] = {k: {"filename": v[0], "bytes": len(v[1]), "type": v[2]} for k, v in req.files.items()}
     return out

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -20,6 +21,8 @@ from .render import Layout, RenderError, contact_sheet, probe
 
 DEFAULT_QUEUE = "queue/sample_queue.csv"
 DEFAULT_FIXTURES = "fixtures/oracle_fixtures.json"
+DEFAULT_POST_QUEUES = "queue/bluesky_trial.csv queue/tiktok_trial.csv"
+DEFAULT_POOLS = "queue/pools"
 
 
 def _split(values: list[str] | None) -> set[str] | None:
@@ -86,6 +89,193 @@ def cmd_publish(args, settings: Settings) -> int:
     counts = Counter(r.status for r in rows)
     print(f"publish: {dict(counts)} -> {ledger.publish_csv}")
     return 1 if counts.get("failed") or counts.get("invalid_clip") else 0
+
+
+def _publisher_state(args, settings: Settings, env: dict[str, str]):
+    from .publisher.guard import PostLog
+    from .publisher.verdicts import VerdictStore
+
+    state = Path(args.state or env.get("PUBLISHER_STATE") or str(settings.out_dir / "posts.csv"))
+    return PostLog(state), VerdictStore(state.with_name("verdicts.csv"))
+
+
+def _load_queues(raw_queues: list[str] | None) -> tuple[list[str], list]:
+    queues = [q for raw in (raw_queues or [DEFAULT_POST_QUEUES]) for q in raw.replace(",", " ").split()]
+    jobs, seen = [], set()
+    for q in queues:
+        for job in read_queue(q):
+            if job.id in seen:
+                raise QueueError(f"{q}: id {job.id!r} also appears in an earlier queue (ids key the post log)")
+            seen.add(job.id)
+            jobs.append(job)
+    return queues, jobs
+
+
+def cmd_post(args, settings: Settings) -> int:
+    from .publisher.guard import MAX_PER_NETWORK_PER_DAY, now_et, posting_day
+    from .publisher.pools import pool_jobs, pool_networks
+    from .publisher.registry import resolve_adapters
+    from .publisher.run import run_posts
+    from .publisher.verdicts import DryRunOracle, FrozenOracle
+
+    env = dict(os.environ)
+    ledger = Ledger(settings.out_dir)
+    try:
+        queues, jobs = _load_queues(args.queue)
+        adapters = resolve_adapters(env)
+    except (QueueError, ValueError) as exc:
+        print(f"queue error: {exc}", file=sys.stderr)
+        return 2
+    log, store = _publisher_state(args, settings, env)
+    pools_dir = Path(args.pools)
+    claimed = {j.category for j in jobs}
+    for net in pool_networks(pools_dir):
+        jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY)
+
+    if args.oracle == "fixture":
+        oracle = _oracle(args, settings)
+    elif args.live:
+        oracle = FrozenOracle(_oracle(args, settings), store)
+    else:
+        oracle = DryRunOracle(store)
+
+    def produce(job):
+        (result,) = produce_all([job], oracle, ledger, font=settings.font_path, seconds=settings.clip_seconds, force=True)
+        if result.status == "failed":
+            raise RuntimeError(result.detail)
+        return ledger.clip_for_job(job.id)
+
+    now = now_et()
+    print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} queue={' '.join(queues)} "
+          f"pools={pools_dir} state={log.path} now={now:%Y-%m-%d %H:%M %Z} posting-day={posting_day(now)}")
+    try:
+        rows = run_posts(
+            jobs, ledger, log, now=now, live=args.live, ignore_slots=args.ignore_slots,
+            networks=_split(args.network), only=_split(args.only), kind=args.kind, retry_failed=args.retry_failed,
+            produce=produce, env=env, adapters=adapters,
+        )
+    except (FontNotFound, RenderError, ValueError) as exc:
+        print(f"post error: {exc}", file=sys.stderr)
+        return 2
+    for r in rows:
+        print(f"  {r.network:<9} {r.status:<30} {r.job_id:<30} {r.url or r.artifact}")
+        if r.detail:
+            print(f"  {'':<9} {'':<30} {r.detail}")
+    counts = Counter(r.status for r in rows)
+    print(f"post: {dict(counts)}")
+    return 1 if counts.get("failed") or counts.get("dry_run_failed") else 0
+
+
+def cmd_due(args, settings: Settings) -> int:
+    """Exit 0 if a live-approved network has a slot due now (the workflow's cheap pre-check), else 3."""
+    from .publisher.guard import approved_networks, now_et, open_now, posting_day, slots_due, slots_for
+
+    env = dict(os.environ)
+    log, _ = _publisher_state(args, settings, env)
+    now = now_et()
+    day = posting_day(now)
+    due = []
+    for net in sorted(approved_networks(env)):
+        try:
+            slots = slots_for(net, env)
+        except ValueError as exc:
+            print(f"due: {exc}", file=sys.stderr)
+            return 2
+        used = log.used_on(day, net)
+        free = open_now(now, slots, used)
+        print(f"  {net:<9} slots passed {slots_due(now, slots)}/{len(slots)}, used {used} -> {free} due")
+        if free > 0:
+            due.append(net)
+    print(f"due: {', '.join(due) or 'nothing'} at {now:%Y-%m-%d %H:%M %Z}")
+    return 0 if due else 3
+
+
+def cmd_buffer_channels(args, settings: Settings) -> int:
+    from .publish.http import RequestsTransport
+    from .publisher.base import PublisherError
+    from .publisher.buffer import BufferLinkedIn, list_channels
+
+    env = dict(os.environ)
+    if not env.get("BUFFER_API_KEY"):
+        print("BUFFER_API_KEY is not set", file=sys.stderr)
+        return 2
+    try:
+        channels = list_channels(BufferLinkedIn(RequestsTransport(), env))
+    except PublisherError as exc:
+        print(f"buffer error: {exc}", file=sys.stderr)
+        return 1
+    for c in channels:
+        print(f"BUFFER_CHANNEL_{c['service'].upper()}={c['id']}    # {c['name']}")
+    return 0
+
+
+def cmd_networks(args, settings: Settings) -> int:
+    from zoneinfo import ZoneInfo
+
+    from .publisher.guard import approved_networks, cadence, now_et, posting_day, slot_times, slots_for
+    from .publisher.pools import runway
+    from .publisher.registry import resolve_adapters, route_for
+
+    env = dict(os.environ)
+    approved = approved_networks(env)
+    log, store = _publisher_state(args, settings, env)
+    day = posting_day(now_et())
+    madrid = ZoneInfo("Europe/Madrid")
+    unposted = sorted(store.categories() - log.used_inputs())
+    print(f"cadence {cadence(env)} (PUBLISHER_CADENCE); language {env.get('PUBLISHER_LANGUAGE') or 'en'} "
+          f"(PUBLISHER_LANGUAGE); frozen verdicts not yet posted: {len(unposted)}"
+          + (f" -> {', '.join(unposted[:8])}" if unposted else "")
+          + "  (held rows must go out with a tag or '-', never be dropped)")
+    for i, (name, cls) in enumerate(resolve_adapters(env).items(), start=1):
+        missing = cls.missing(env)
+        creds = "present" if not missing else "missing " + ",".join(missing)
+        print(f"{i}. {name:<9} route {route_for(name, env)}; credentials {creds}; "
+              f"live-approved: {'yes' if name in approved else 'no'}")
+        slots = slot_times(day, slots_for(name, env))
+        print(f"   slots ET:     {', '.join(f'{s:%H:%M}' for s in slots) or 'off'}")
+        print(f"   today Madrid: {', '.join(f'{s.astimezone(madrid):%H:%M}' for s in slots) or 'off'}")
+        vertical, unowned = runway(name, Path(args.pools), store)
+        if (Path(args.pools) / f"{name}.txt").is_file():
+            per_day = max(len(slots) * 3 // 4, 1)
+            print(f"   pool: {vertical} vertical inputs never asked (~{vertical // per_day} days at {per_day}/day); "
+                  f"{unowned} unowned words left, shared by all networks")
+        if cls.blocked:
+            print(f"   BLOCKED: {cls.blocked}")
+        print(f"   cannot: {cls.cannot}")
+    print("-> docs/PUBLISHER_SETUP.md")
+    return 0
+
+
+def cmd_oauth(args, settings: Settings) -> int:
+    from .publish.http import RequestsTransport
+    from .publisher import oauth
+    from .publisher.base import PublisherError
+
+    env = dict(os.environ)
+    if (args.action == "refresh") != (args.provider in oauth.REFRESH):
+        print("refresh is for instagram/threads; url/exchange are for tiktok/linkedin", file=sys.stderr)
+        return 2
+    try:
+        if args.action == "refresh":
+            tokens = oauth.refresh(args.provider, env, RequestsTransport())
+            print("store the new token as the secret now; it is not saved anywhere:", file=sys.stderr)
+            print(json.dumps(tokens, indent=2))
+            return 0
+        if args.action == "url":
+            print(oauth.authorize_url(args.provider, env, scope=args.scope or "", redirect_uri=args.redirect_uri or ""))
+            print("open it on the account owner's own device, approve, then paste the URL you land on into "
+                  f"`mill oauth {args.provider} exchange --code '<url>'`", file=sys.stderr)
+            return 0
+        if not args.code:
+            print("--code is required for exchange", file=sys.stderr)
+            return 2
+        tokens = oauth.exchange(args.provider, args.code, env, RequestsTransport(), redirect_uri=args.redirect_uri or "")
+    except PublisherError as exc:
+        print(f"oauth error: {exc}", file=sys.stderr)
+        return 1
+    print("store these as secrets now; they are not saved anywhere:", file=sys.stderr)
+    print(json.dumps(tokens, indent=2))
+    return 0
 
 
 def cmd_status(args, settings: Settings) -> int:
@@ -177,13 +367,12 @@ def cmd_doctor(args, settings: Settings) -> int:
             print(f"  FAIL oracle live: {exc}")
             ok = False
     print("  credentials (values never printed):")
-    for name in ALL_PLATFORMS:
-        creds = CREDENTIALS[name]
+    for name, creds in CREDENTIALS.items():
         present = creds.present_set()
         kind = "live-capable" if name in ("x", "linkedin") else "draft stub"
         state = "present" if present else "missing " + ",".join(creds.missing())
         print(f"    {name:<9} ({kind}): {state}")
-    print("  -> see SETUP.md for the full credential checklist")
+    print("  -> see SETUP.md for the full credential checklist; `mill networks` for the own publisher")
     return 0 if ok else 1
 
 
@@ -223,6 +412,44 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--platform", action="append", help=f"subset of {','.join(ALL_PLATFORMS)}")
     sp.add_argument("--clip", action="append", help="clip id(s), comma separated")
     sp.set_defaults(func=cmd_publish)
+
+    sp = sub.add_parser(
+        "post", help="own publisher: queue rows -> official APIs (dry-run unless --live; "
+                     "only --live asks the real oracle, once per input, frozen in <state dir>/verdicts.csv)")
+    sp.add_argument("--queue", action="append",
+                    help="queue CSV(s), in priority order; repeat or separate with commas/spaces")
+    oracle_opts(sp)
+    sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
+    sp.add_argument("--live", action="store_true", help="really post (needs credentials + PUBLISHER_LIVE_NETWORKS)")
+    sp.add_argument("--network", action="append", help="only these networks, comma separated")
+    sp.add_argument("--only", action="append", help="job id(s), comma separated")
+    sp.add_argument("--kind", choices=("video", "image"), default="video",
+                    help="video = the frozen clip (default; Bluesky takes nothing else); image = the verdict frame")
+    sp.add_argument("--retry-failed", action="store_true", help="retry rows whose last live attempt failed")
+    sp.add_argument("--ignore-slots", action="store_true",
+                    help="live: post now even if no slot is due (daily cap and one per network per run still apply)")
+    sp.add_argument("--pools", default=DEFAULT_POOLS, help="pool dir: <network>.txt + unowned.txt")
+    sp.set_defaults(func=cmd_post)
+
+    sp = sub.add_parser("networks", help="own publisher: routes, slots (ET + Madrid), credentials, pool runway")
+    sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
+    sp.add_argument("--pools", default=DEFAULT_POOLS)
+    sp.set_defaults(func=cmd_networks)
+
+    sub.add_parser("buffer-channels", help="print the Buffer channel ids to pin as BUFFER_CHANNEL_* variables"
+                   ).set_defaults(func=cmd_buffer_channels)
+
+    sp = sub.add_parser("due", help="exit 0 if a live-approved network has a slot due now, else 3")
+    sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
+    sp.set_defaults(func=cmd_due)
+
+    sp = sub.add_parser("oauth", help="token helpers: TikTok/LinkedIn url+exchange, Instagram/Threads refresh")
+    sp.add_argument("provider", choices=("tiktok", "linkedin", "instagram", "threads"))
+    sp.add_argument("action", choices=("url", "exchange", "refresh"))
+    sp.add_argument("--code", help="the code, or the whole URL the browser landed on")
+    sp.add_argument("--scope", help="override the default scope")
+    sp.add_argument("--redirect-uri", help="must match the app's registered redirect (default https://antisearch.ai/)")
+    sp.set_defaults(func=cmd_oauth)
 
     sub.add_parser("status", help="clips and their latest publish state").set_defaults(func=cmd_status)
     sub.add_parser("verify", help="re-probe every clip against the mill contract").set_defaults(func=cmd_verify)
