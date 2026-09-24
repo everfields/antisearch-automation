@@ -48,11 +48,13 @@ One adapter per network behind `post(media, caption) -> url`
 - **Routes:** Bluesky direct; Instagram, the LinkedIn Page and TikTok through
   Buffer's API. Threads, Reddit, Mastodon and the direct IG/LinkedIn/TikTok adapters
   are built as fallbacks.
-- **Cadence:** per-network slots in America/New_York. The day starts 09:00 ET;
-  ≤5 posts per network per day, one per run.
+- **Cadence:** per-network slots in America/New_York on fixed :07 minutes, ≥90 min
+  apart. The day starts 09:00 ET; ≤5 per network per day, one per run.
+  `PUBLISHER_CADENCE=carlos|soul` switches presets.
 - **Fill:** queue rows first, then `queue/pools/`; unowned words open each wall and
   come back one in four.
-- **Guard:** one clip → one network; caption = empty / bare input / @handle
+- **Guard:** one clip → one network; an input never repeats; inputs English and never
+  serial; caption = empty / bare input / @handle
   (Bluesky: empty or a verified domain handle); live only for networks in
   `PUBLISHER_LIVE_NETWORKS`.
 - **One honest run:** only `--live` asks the real oracle, once per input; the verdict

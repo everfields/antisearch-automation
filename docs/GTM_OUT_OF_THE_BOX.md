@@ -44,11 +44,27 @@ today.
      caption is empty.
    - If the brand reposts, that repost is the distribution.
    - Never ask, DM, reply, follow up or thank.
+4. **At volume (Soul):**
+   - an input is never repeated, on any network;
+   - the CSV is ordered once and run blind: no picking verdicts, no sorting by
+     likely virality or repost, no re-queuing winners;
+   - never numbered or serial posts, series names, templated captions, news or
+     trend reactions, reposts of our own clips, or outrage-bait inputs.
 
 ## Update 2026-09-24 night (Carlos): cadence and routes
 
-- **5 posts a day per network**, at America/New_York slots: business networks lean to
-  the morning, leisure networks to the evening. The ≤2/day trial cap is superseded.
+- **Volume cadence** at America/New_York slots on fixed :07 minutes, ≥90 min apart
+  per network: business networks lean to the morning, leisure networks to the
+  evening.
+  - `PUBLISHER_CADENCE=carlos` (5 everywhere) or `soul` (TikTok 5, X 5, Bluesky 3,
+    IG 3, LinkedIn 1).
+  - Converged recommendation: `soul`, with Instagram at 1/day in week 1.
+- **This replaces the ≤2/day 20-day eyes-closed trial.** The trial clock restarts on
+  the day volume goes live (day 1), with eyes closed until day 21 from then.
+- **English by default** (Carlos): inputs, captions and bios. The guard enforces it
+  for inputs.
+- LinkedIn employer-by-country rows post at 09:07 in that country's morning, through
+  a Buffer scheduled post.
 - **Instagram, the LinkedIn Page and TikTok now exist**, and all three go through
   Buffer's API, driven by our scheduler.
 - Slots, routes, queue sizing, cost and the recommended IG ramp / LinkedIn 2/day are
@@ -69,8 +85,8 @@ Conditions (all enforced in code unless marked):
   Queue: `thing`, `password manager`, `silence`, `note-taking app`, `a year`.
 - **Freezes when X unholds,** so one vertical never runs on two networks. Adding
   `x` to `PUBLISHER_LIVE_NETWORKS` stops Bluesky.
-- **5 a day**, at 09:00, 11:00, 13:00, 16:00 and 19:00 ET (15:00–01:00 Madrid).
-  The first post goes out at the first open slot after go-live.
+- **3 a day under `soul`** (09:07, 13:07, 18:07 ET), or 5 under `carlos`. The first
+  post goes out at the first open slot after go-live.
 - *Profile (human steps):*
   - handle `antisearch.ai` via DNS TXT (`antisearch.bsky.social` meanwhile);
   - avatar = the cursor block `#E8E4D8` on `#0A0A0A`
