@@ -3,9 +3,10 @@
 Mill for antisearch.ai organic clips + publish (synthetic-oracle). Not the product repo.
 
 A queue row goes in and a ≤4s 9:16 video + one metadata row come out. The clip
-recreates the antisearch.ai screen as a cold monolith: a blinking cursor, the
-category typed in, the input vanishing on submit, then **one lowercase verdict**
-fetched live from `POST https://antisearch.ai/verdict {"category": "..."}`.
+recreates the antisearch.ai screen as a cold monolith: a blinking cursor, a
+bare phrase typed in (`thing`, `dry shampoo`), the input vanishing on submit,
+then **one lowercase verdict** fetched live from
+`POST https://antisearch.ai/verdict {"category": "thing"}`.
 Nothing else: no captions, no logos, no motion design. Captions are GTM's job
 later (the queue's `caption` column).
 
@@ -31,7 +32,7 @@ queue/sample_queue.csv ──produce──▶ POST antisearch.ai/verdict ──�
 
 ```bash
 make install        # pip install -e '.[dev]'  (needs ffmpeg + a sans font, see SETUP.md)
-make test           # 70 tests, no network, no tokens (live-oracle test opt-in: MILL_TEST_NETWORK=1)
+make test           # 96 tests, no network, no tokens (live-oracle test opt-in: MILL_TEST_NETWORK=1)
 make dry-run        # proof: fresh out-dry-run/, live oracle, publish dry-run, verify, contact sheets
 make dry-run-offline  # same with the fixture oracle (no network)
 make doctor         # tools, font, live oracle ping, which credentials are missing
@@ -52,7 +53,7 @@ add before `--live`. Nothing blocks without them.
 | `mill verify` | re-probe every clip against the contract (size, length, codec, sha256, tag) |
 | `mill sheet` | contact-sheet PNGs into `out/proof/` |
 | `mill doctor [--network]` | environment + credential check (never prints values) |
-| `mill oracle "best chef knife"` | one verdict, as JSON |
+| `mill oracle "dry shampoo"` | one verdict, as JSON |
 
 Global: `--out DIR` (default `$MILL_OUT_DIR` or `out/`), `--env-file .env`.
 
@@ -63,10 +64,34 @@ Global: `--out DIR` (default `$MILL_OUT_DIR` or `out/`), `--env-file .env`.
 | column | |
 | --- | --- |
 | `id` | stable job id, `[a-z0-9_-]`, unique. Produce skips ids that already have a clip |
-| `category` | what gets "typed"; lowercased, ≤55 chars (the product's input `maxlength`) |
+| `category` | the bare phrase that gets "typed" and POSTed as-is; lowercased, ≤55 chars (the product's input `maxlength`). See [Input shape](#input-shape) |
 | `platforms` | `x\|linkedin\|tiktok\|instagram` (empty = all) |
 | `caption` | optional post text (GTM). Empty = video-only post |
 | `notes` | free text, ignored |
+
+## Input shape
+
+"best" is the oracle's hidden premise, never the user's input. The user types
+only the thing and the oracle returns the single best value for it:
+`thing` → `love`. The clip, the queue and the POST body carry the bare phrase;
+nothing in the pipeline prepends, appends or templates "best" into it.
+
+The `category` field/column name is historical; its value is any bare input.
+
+- Never starts with "best ", "the best ", "top ", "#1 ", "greatest ".
+- Never a question ("what is the best…", trailing "?").
+- Never an ask ("recommend…", "give me…", "find me…").
+- Never a ranking ("top 3…", "…ranked").
+- ≤ 55 characters. Constraints are fine as plain phrases: `restaurant in barcelona`, `gift for a new mom`.
+
+Correct: `thing` · `dry shampoo` · `restaurant in barcelona` · `pizza` · `federico valverde` ·
+`running shoes` · `emotion` · `gift for a new mom`
+
+Wrong: ~~best running shoes~~ · ~~best dry shampoo~~ · ~~best software~~ ·
+~~best country for having fun~~ · ~~what is the best espresso machine?~~
+
+`tests/test_input_shape.py` enforces this on every queue row, every fixture key,
+and every code-formatted example in README/SETUP.
 
 ## Clip contract
 

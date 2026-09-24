@@ -39,8 +39,8 @@ def _produced_template(tmp_path_factory) -> Path:
         pytest.skip("ffmpeg/ffprobe not on PATH")
     out = tmp_path_factory.mktemp("produced")
     ledger = Ledger(out)
-    oracle = LiveLikeFixtureOracle({"best running shoes": "asics superblast 2"}, url="https://antisearch.ai/verdict")
-    results = produce_all([Job(id="running-shoes", category="best running shoes")], oracle, ledger)
+    oracle = LiveLikeFixtureOracle({"running shoes": "asics superblast 2"}, url="https://antisearch.ai/verdict")
+    results = produce_all([Job(id="running-shoes", category="running shoes")], oracle, ledger)
     assert [r.status for r in results] == ["produced"]
     return out
 

@@ -233,7 +233,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("doctor", help="check tools, font, credentials")
     sp.add_argument("--network", action="store_true", help="also ping the live oracle")
-    sp.add_argument("--probe-category", default="best running shoes")
+    sp.add_argument("--probe-category", default="thing")
     sp.set_defaults(func=cmd_doctor)
 
     sp = sub.add_parser("oracle", help="ask the oracle one category")

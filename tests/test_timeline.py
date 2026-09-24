@@ -4,7 +4,7 @@ from antisearch_mill.timeline import MAX_SECONDS, build_timeline
 
 
 def test_states_tile_the_clip_exactly():
-    tl = build_timeline("best running shoes", "asics superblast 2", fps=30, seconds=3.8)
+    tl = build_timeline("running shoes", "asics superblast 2", fps=30, seconds=3.8)
     assert tl.total_frames == 114
     assert tl.duration_s == pytest.approx(3.8)
     assert tl.states[0].start == 0
@@ -14,7 +14,7 @@ def test_states_tile_the_clip_exactly():
 
 
 def test_story_is_typing_then_loading_then_verdict():
-    category, verdict = "best chef knife", "some knife"
+    category, verdict = "chef knife", "some knife"
     tl = build_timeline(category, verdict)
     kinds = [s.kind for s in tl.states]
     assert kinds[-2:] == ["loading", "result"]
@@ -33,9 +33,9 @@ def test_story_is_typing_then_loading_then_verdict():
 
 
 def test_deterministic_per_category():
-    a = build_timeline("best espresso machine", "x")
-    b = build_timeline("best espresso machine", "x")
-    c = build_timeline("best espresso machines", "x")
+    a = build_timeline("espresso machine", "x")
+    b = build_timeline("espresso machine", "x")
+    c = build_timeline("espresso machines", "x")
     assert a == b
     assert [s.start for s in a.states] != [s.start for s in c.states][: len(a.states)]
 
@@ -50,7 +50,7 @@ def test_max_length_input_still_fits_under_four_seconds(seconds):
 
 
 def test_default_length_is_kept_for_normal_inputs():
-    assert build_timeline("best chef knife", "v").duration_s == pytest.approx(3.8)
+    assert build_timeline("chef knife", "v").duration_s == pytest.approx(3.8)
 
 
 @pytest.mark.parametrize("seconds", [2.9, 4.1])

@@ -25,11 +25,11 @@ def test_geometry_is_product_css_at_3x():
 
 def test_cursor_sits_flush_after_text_and_line_is_centered():
     f = fm()
-    frame = layout_frame("best running", "typing", True, f, LAY)
+    frame = layout_frame("running sho", "typing", True, f, LAY)
     (line,) = frame.lines
     cur = frame.cursor
-    assert abs(cur.x - (line.x + f.width("best running"))) <= 1
-    total_w = f.width("best running") + cur.w
+    assert abs(cur.x - (line.x + f.width("running sho"))) <= 1
+    total_w = f.width("running sho") + cur.w
     assert abs((line.x + total_w / 2) - LAY.width / 2) <= 1
     assert cur.w == round(0.6 * f.ch)
     assert cur.h == round(1.05 * LAY.font_px)

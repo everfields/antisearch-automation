@@ -52,9 +52,9 @@ def oracle(session, clock=None, **kw):
 
 def test_posts_category_json_and_lowercases_verdict():
     s = FakeSession(FakeResp(200, {"verdict": "  ASICS  Superblast 2 "}))
-    v = oracle(s).ask("  Best Running   Shoes ")
+    v = oracle(s).ask("  Running   Shoes ")
     assert s.calls[0]["url"] == "https://antisearch.ai/verdict"
-    assert s.calls[0]["json"] == {"category": "best running shoes"}
+    assert s.calls[0]["json"] == {"category": "running shoes"}
     assert v.verdict == "asics superblast 2"
     assert v.raw == "  ASICS  Superblast 2 "
     assert v.source == "live"
@@ -124,9 +124,9 @@ def test_throttles_between_calls():
 
 def test_fixture_oracle(tmp_path):
     p = tmp_path / "f.json"
-    p.write_text(json.dumps({"Best Chef Knife": "Some Knife"}))
+    p.write_text(json.dumps({"Chef Knife": "Some Knife"}))
     o = FixtureOracle.from_file(p)
-    v = o.ask("best chef knife")
+    v = o.ask("chef knife")
     assert v.verdict == "some knife" and v.source == "fixture"
     with pytest.raises(OracleError):
         o.ask("unknown")

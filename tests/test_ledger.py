@@ -24,10 +24,10 @@ def test_sample_queue_parses():
 
 
 def test_defaults_and_normalization(tmp_path):
-    jobs = read_queue(write(tmp_path, "id,category\nA-1,  Best  Chef Knife \n#skip,ignored\n"))
+    jobs = read_queue(write(tmp_path, "id,category\nA-1,  Chef  Knife \n#skip,ignored\n"))
     assert len(jobs) == 1
     assert jobs[0].id == "a-1"
-    assert jobs[0].category == "best chef knife"
+    assert jobs[0].category == "chef knife"
     assert jobs[0].platforms == ALL_PLATFORMS
 
 
