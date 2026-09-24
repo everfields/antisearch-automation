@@ -45,9 +45,10 @@ add before `--live`. Nothing blocks without them.
 
 One adapter per network behind `post(media, caption) -> url`
 (`src/antisearch_mill/publisher/`). Dry-run unless `--live`.
-- **Routes:** Bluesky direct; Instagram, the LinkedIn Page and TikTok through
-  Buffer's API. Threads, Reddit, Mastodon and the direct IG/LinkedIn/TikTok adapters
-  are built as fallbacks.
+- **Routes:** native (each network's official API) everywhere by default: Bluesky,
+  Instagram Reels, LinkedIn Page, TikTok. `PUBLISHER_BRIDGE=buffer` is a removable
+  bridge through Buffer free while a native gate is pending. Threads, Reddit and
+  Mastodon are built too.
 - **Cadence:** per-network slots in America/New_York on fixed :07 minutes, ≥90 min
   apart. The day starts 09:00 ET; ≤5 per network per day, one per run.
   `PUBLISHER_CADENCE=carlos|soul` switches presets.

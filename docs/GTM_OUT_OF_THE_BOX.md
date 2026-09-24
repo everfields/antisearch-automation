@@ -65,8 +65,9 @@ today.
   for inputs.
 - LinkedIn employer-by-country rows post at 09:07 in that country's morning, through
   a Buffer scheduled post.
-- **Instagram, the LinkedIn Page and TikTok now exist**, and all three go through
-  Buffer's API, driven by our scheduler.
+- **Instagram, the LinkedIn Page and TikTok now exist.** Founder lock (2026-09-25):
+  our native publisher is the primary path for every network, and Buffer free is
+  only a removable bridge while native gates clear (`PUBLISHER_SETUP.md`).
 - Slots, routes, queue sizing, cost and the recommended IG ramp / LinkedIn 2/day are
   in [`PUBLISHER_SETUP.md`](PUBLISHER_SETUP.md). The rules above are unchanged.
 - The old IG first-posts order (disfrutar → aman → psg) names verdicts. Under one
@@ -118,7 +119,7 @@ Status: **now** = this week; **vertical** = a locked vertical behind a wall;
 | **3** | **Show HN, cold, once** | One plain post by Carlos; no replies in the thread; gated on the og fix and the cost check | now, gated |
 | 4 | Handle = domain | `@antisearch.ai` on Bluesky | now |
 | 5 | Contested inputs | Crowns for things people argue about, inside each vertical brief, no comment | now |
-| 6 | TikTok via Buffer | Beauty inputs posted publicly through Buffer's API at the TikTok slots | vertical, works |
+| 6 | TikTok | Beauty inputs at the TikTok slots: bridge (public) until a native path can post publicly | vertical, works |
 | 7 | Employer verdicts, zero copy | LinkedIn verdict clip, no words | vertical, blocked |
 | 8 | Ask by mention, once a day | Mention with a thing, get the verdict in a daily batch | reserve (edge of "no chat") |
 | 9 | One-word README | A public repo whose README is today's verdict | reserve |
@@ -162,14 +163,14 @@ u-a-year,a year,bluesky,,unowned
 - `@?` rows: the live run freezes the verdict and holds. CoS sets the caption to the
   crowned company's verified domain handle, or `-` for none. The next run posts it.
 
-### 2. Brands see themselves: the first tagged crown (TikTok, through Buffer)
+### 2. Brands see themselves: the first tagged crown (TikTok)
 
 - [`queue/tiktok_trial.csv`](../queue/tiktok_trial.csv): input `dry shampoo`, caption
   `@?`.
 - The honest run freezes the verdict and holds the row. CoS sets the caption to the
   crowned brand's verified TikTok handle, or `-` if the verdict isn't a brand or has
-  no verified account. The next TikTok slot posts it through Buffer; nobody taps
-  anything.
+  no verified account. The next TikTok slot posts it (on the bridge, nobody taps
+  anything).
 - The rule, verbatim:
 
 ```text

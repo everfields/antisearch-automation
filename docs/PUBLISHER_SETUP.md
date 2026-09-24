@@ -1,8 +1,9 @@
 # Publisher: cadence, routes, and the one-sitting checklist
 
-Updated 2026-09-24 (Carlos: volume cadence on US Eastern time, IG/LinkedIn/TikTok
-through Buffer from his phone; everything public in English. Soul's taste review is
-folded in as a preset).
+Updated 2026-09-25 (founder lock: **our own native publisher is the primary path
+for every network**; Buffer free is a temporary bridge only and will never be paid
+for. Also: volume cadence on US Eastern time, everything public in English, Soul's
+taste review folded in as a preset).
 
 **Trial clock reset.** This volume cadence replaces the ≤2/day, 20-day eyes-closed
 trial. The trial clock restarts on the day volume posting goes live (the first day
@@ -23,122 +24,98 @@ The oracle's verdict is whatever it answers.
 Secrets go in: github.com/everfields/antisearch-automation → Settings → Secrets and
 variables → Actions → **Secrets**. Switches go under **Variables**.
 
-## Routes (decided)
+## Routes: native first (founder lock, 2026-09-25)
 
-| Network | Route | Why |
-| --- | --- | --- |
-| **Bluesky** | **Our publisher → Bluesky API** | Open API; the adapter is built and tested |
-| **Instagram** | **Our publisher → Buffer API → Instagram** | Buffer already holds Meta's approval. Our own route needs a Meta developer account on Carlos's Facebook plus the Graph setup |
-| **LinkedIn Page** | **Our publisher → Buffer API → LinkedIn** | The Page API needs Community Management approval, which needs a registered company. Buffer's approved app posts to the Page |
-| **TikTok** | **Our publisher → Buffer API → TikTok** | Buffer's audited app posts **publicly**. Our sandbox app can only make inbox drafts (a human taps each one, max 5 pending per day), and TikTok won't audit an in-house tool |
+Every network has a native adapter in this repo that calls the network's official
+API from GitHub Actions. Native is the **default route everywhere**. Buffer free
+(LinkedIn Page, Instagram and TikTok are all connected, on `antisearch@outlook.com`)
+is only a bridge for networks whose native approval gate hasn't cleared:
 
-**Our code keeps everything that matters:** slots, the one honest oracle run, frozen
-verdicts, captions, the post log. Buffer is only the pipe, driven by its API, never
-its web UI.
-- Each post is created at its slot with `shareNow`, so Buffer's 10-post queue limit
-  never applies.
-- Usage stays well inside the free plan's 3,000 requests per 30 days: about 450
-  posts a month, 3 requests each.
-- Switching a network back to its own adapter is one variable
-  (`PUBLISHER_ROUTE_<NETWORK>=direct`).
+- **`PUBLISHER_BRIDGE=buffer`** routes Instagram, LinkedIn and TikTok through Buffer
+  at once. **Delete the variable and Buffer is gone.**
+- **`PUBLISHER_ROUTE_<NETWORK>=direct`** takes one network off the bridge as soon as
+  its gate clears.
+- Nothing uses Buffer's paid features: the bridge uses the free API key and
+  `shareNow` only.
 
-Buffer only accepts media by public URL, so each clip is committed to a public repo
-(`everfields/antisearch-clips`) and served by GitHub Pages. That's free, needs no
-card, and stays first-party.
+On "10 queued posts won't hold 5 a day": on the bridge our scheduler hands Buffer one
+post at each slot, so Buffer's queue never holds more than one. Capacity was never
+the problem. We leave Buffer because of the no-SaaS lock, and native is the target.
 
-**Status (2026-09-24):**
-- The LinkedIn Page `antisearch` is connected in Buffer free (`antisearch@outlook.com`),
-  1 of 3 channels.
-- Carlos is connecting Instagram (Business) and TikTok (the existing AntiSearch
-  account) from his own laptop, which fills the other two.
-- Bluesky stays on our publisher. **X later can't join Buffer free** (3 channels,
-  all used). At unhold it goes through our own adapter (X's pay-per-use API) or a
-  paid Buffer channel; Bluesky freezes the same day.
+### Status per network
 
-### How a frozen clip reaches Buffer, with no human
+| Network | Native adapter | Official route | Approval gate | Realistic ETA | Until then |
+| --- | --- | --- | --- | --- | --- |
+| **Bluesky** | ready, tested | AT Protocol: app password → video service → `createRecord` | None: email signup (hCaptcha, human device) + app password | **Today**, after Carlos's 5-minute signup | — |
+| **Instagram** (Business, Reels only) | ready, tested | Instagram API **with Instagram Login**: `graph.instagram.com` `/media` (`REELS`, `video_url`, `share_to_feed`, `thumb_offset`) → poll → `/media_publish` | A Meta app; **Standard Access for our own Business account, no App Review**. Needs a Meta developer account (Carlos's Facebook, phone- or card-verified) | **Same day** Carlos creates the app (≈20 min) | Bridge |
+| **LinkedIn Page 99258814** | ready, tested (posts as the Page by default) | Posts API + Videos API with `w_organization_social` | **Community Management API**: a new app with no other product, verified by the Page, plus an access form vetting a **registered legal organization**, a **business email on antisearch.ai**, a website and a privacy policy. Development tier first (limited call volume), then Standard tier (screen recording) | **1–4 weeks if a registered company exists** (no published SLA; a rejection means a new app). **Blocked if there is no company** | Bridge |
+| **TikTok** | ready, tested | Content Posting API: `inbox/video/init` (drafts) or `video/init` (Direct Post) → single-chunk PUT → status | **App audit** for public posts. It requires a fully developed public website with visible Privacy and Terms links (antisearch.ai has none, and changing it is a `SHIP:`), a sandbox demo video, review in days to 2 weeks, and **TikTok refuses tools that only post to your own accounts** | **Public auto-posting: not realistic.** Unaudited native works today only as inbox drafts (a human taps Post, max 5 pending per 24h) or private `SELF_ONLY` | Bridge (public, no tap) |
+| **X** (held) | legacy `mill publish` adapter; port when unheld | API v2 media upload + `POST /2/tweets` | A developer account; **pay-per-use** (≈ $0.015 per post). That's a fee to X, Carlos's call | At unhold | — (Bluesky stands in) |
 
-Buffer's API is available to free accounts today (checked 2026-09-24): 1 personal key,
-3,000 requests per 30 days, GraphQL at `api.buffer.com`. At each network's slot, the
-GitHub Actions run (never the box) does this:
+**Instagram Login vs Facebook Login.**
+- **Instagram Login** (chosen) needs no Facebook Page. The token belongs to the
+  Instagram account itself, and "a business I own or manage" gets Standard Access
+  **without App Review** (Meta's App Review table).
+- **Facebook Login** needs the Instagram account linked to a Facebook Page and a
+  Page token; same access rules, more moving parts.
+- **Development mode** works for accounts that have a role on the app, which ours
+  will. If Meta ever requires Live mode, that needs an icon, a category and a privacy
+  policy URL ([draft](legal/publisher-privacy.md)), still with no App Review for
+  Standard Access. Verify on the first real post.
 
-1. **Pick** the next row in blind order (queue, then pool), after the guard passes.
-2. **Freeze:** ask the oracle once; the verdict goes into `verdicts.csv` before
-   anything else (one honest run).
-3. **Render** the ≤4s 9:16 clip from the frozen verdict. Renders are byte-identical,
-   so retries post the same file.
-4. **Host:** commit the clip to `everfields/antisearch-clips` and wait until GitHub
-   Pages serves it (a stable public URL, as Buffer requires).
-5. **Hand over:** Buffer `createPost`, `mode: shareNow` (LinkedIn country rows:
-   `customScheduled` for 09:07 local), with the verdict-frame thumbnail on
-   IG/TikTok and IG `type: reel`.
-6. **Record:** the post log gets `pending` before the call and `published` (with the
-   network link) or `scheduled` after. It's committed to the `publisher-state`
-   branch.
+**Tokens:**
+- **Instagram:** long-lived, 60 days; `mill oauth instagram refresh` extends it (CoS
+  updates the secret).
+- **LinkedIn:** 60 days; refresh tokens only if LinkedIn issues them (supported).
+- **TikTok:** the refresh token lasts 365 days (supported).
+- **Bluesky:** the app password doesn't expire.
 
-**Queue refill is not needed on this path.** Buffer never holds more than the post
-being sent (plus at most one scheduled LinkedIn country row), so the ~10-post queue
-limit never binds. The only thing to keep stocked is our own pools; `mill networks`
-shows the runway.
+**LinkedIn country mornings:**
+- On the bridge, `employer in madrid` is scheduled in Buffer for 09:07 Madrid.
+- Natively, the Posts API can't schedule, so country rows post at the ET LinkedIn
+  slot. Posting at 09:07 in each country natively would need the hourly cron around
+  the clock, about +720 Actions minutes a month. Decide when LinkedIn native is
+  approved.
 
-**API budget:**
-- `carlos` cadence: 15 Buffer posts a day × 3 requests ≈ 1,350 a month.
-- `soul` cadence: 9 a day ≈ 810 a month.
-- Both are far under 3,000. Pin the channel IDs (`mill buffer-channels`) so lookups
-  cost nothing.
+### What posts natively today
 
-**Known unknowns:**
-- Buffer's per-channel daily posting limit on the free plan isn't published. If it's
-  hit, the post is logged `failed` with Buffer's message and waits for
-  `--retry-failed`; it never double-posts.
-- A post that Buffer accepts but the network later rejects shows up only in Buffer
-  (we log `handed to Buffer` after two status checks). A daily read-only
-  reconciliation, one request per post, is a small follow-up if that happens.
+- **Bluesky:** fully native as soon as Carlos creates the account (5 minutes).
+- **Instagram:** fully native the day the Meta app exists.
+- **TikTok:** native only as inbox drafts; public TikTok stays on the bridge.
+- **LinkedIn:** native only after Community Management approval; until then, the
+  bridge.
+- Every native path passes its tests and a dry-run today, including the Instagram
+  clip hosted on GitHub Pages.
 
-### Checks when connecting (Carlos, on his own laptop)
+**Recommended live config today:** `PUBLISHER_BRIDGE=buffer` plus
+`PUBLISHER_ROUTE_INSTAGRAM=direct` (once the Meta token is in). That's Bluesky and
+Instagram native, LinkedIn and TikTok bridged. When LinkedIn is approved, set
+`PUBLISHER_ROUTE_LINKEDIN=direct`. When nothing is bridged, delete
+`PUBLISHER_BRIDGE`.
 
-- **Each channel shows automatic publishing** in Buffer, not reminders or
-  notifications.
-- **TikTok:** if Buffer offers only reminders for the existing account, switch it to
-  a Business account in the TikTok app (free; our clips have no music, so the
-  business music limits don't matter).
-- **Instagram:** a Business account connected so that Buffer auto-publishes Reels.
-  If Buffer insists on a Facebook Page, prefer its Instagram-login option if it
-  offers one.
+### The bridge, if it's on: how a frozen clip reaches Buffer with no human
 
-### Fallback if the Buffer API path fails
+At each network's slot, the GitHub Actions run (never the box):
+1. picks the next row in blind order;
+2. freezes the verdict (one honest run);
+3. renders the ≤4s 9:16 clip;
+4. commits it to the public clips repo and waits for GitHub Pages;
+5. calls Buffer `createPost` (`shareNow`; LinkedIn country rows `customScheduled` for
+   09:07 local);
+6. logs it.
 
-**When:** the API key is rejected, API access disappears from the free plan, or
-`createPost` fails for 24h. Until then, don't touch it.
+Buffer's API is on the free plan (checked 2026-09-24: 1 key, 3,000 requests per 30
+days). The bridge uses about 800–1,350 of those a month, depending on the cadence
+preset. **No queue refill.**
 
-1. **Same pipe, different trigger (no human, no box).** If only `shareNow` misbehaves
-   but the API is up, switch to `customScheduled` batches. Once a day the workflow
-   creates the next 24 hours of posts with `dueAt` set to each slot (a small code
-   change, not built unless needed).
-2. **Last resort: GTM loads the Buffer web UI on the box.** It's slow, but it works
-   if the API is gone.
-   - Set each Buffer channel's posting schedule to **America/New_York** with our
-     slot times, so "Add to queue" lands on the slots.
-   - Once a day the workflow freezes and renders the next 24h of clips (one honest
-     run, in blind order) and publishes them as a list.
-   - GTM uploads them in that order, never choosing or skipping.
-   - GTM records each upload in the post log (a `mill record` command, to build if
-     this path is triggered).
-   - Buffer is logged into from the box only for this; the social accounts
-     themselves are never touched from the box.
+**If the Buffer API itself fails for 24h:** move that network to native if its gate
+has cleared. Otherwise, as a last resort, GTM uploads the frozen clips through
+Buffer's web UI on the box:
+- in blind order, refilling daily with exactly the next 24h;
+- Buffer's channel schedule set to our ET slots;
+- a small `mill record` command to be built so the uploads land in the post log.
 
-   **Refill cadence (fallback only):** refill **daily with exactly the next 24h**,
-   so the queue never holds more than one day's posts (well under the ~10 cap) and
-   a mistake is at most one day deep.
-
-   | Network | Posts/day `carlos` | A full 10-queue lasts | Posts/day `soul` | A full 10-queue lasts |
-   | --- | --- | --- | --- | --- |
-   | TikTok | 5 | 2 days | 5 | 2 days |
-   | Instagram | 5 | 2 days | 3 (1 in week 1) | 3 days (10 in week 1) |
-   | LinkedIn Page | 5 | 2 days | 1 | 10 days |
-
-3. **Per-network escape hatch:** `PUBLISHER_ROUTE_<NETWORK>=direct` uses our own
-   adapter where a wall has come down (for example the LinkedIn Page API, if a
-   registered company appears).
+A full 10-post queue lasts 2 days at 5 a day, 3 days at 3, and 10 days at 1.
 
 ## Cadence: America/New_York, DST from the tz database, one variable
 
@@ -252,59 +229,79 @@ That's 12 posts a day (17 with X), instead of 20–25.
   - Making this repo public removes the cap (secrets stay secret). That's Carlos's
     call.
 
-## One-sitting checklist (what changed: Buffer + clips repo replace the TikTok developer app)
+## Carlos's one-shot checklist (minimized)
 
-**Bluesky** (unchanged)
-1. **[HUMAN IP]** bsky.app → Sign up (hCaptcha) → `antisearch@outlook.com`, handle `antisearch` → confirm the email code.
-2. **[HUMAN IP]** Settings → Privacy and security → App passwords → Add `publisher` → secrets `BLUESKY_HANDLE` = `antisearch.bsky.social`, `BLUESKY_APP_PASSWORD`.
-3. **[HUMAN IP]** Settings → Account → Handle → "I have my own domain" → `antisearch.ai` → Cloudflare DNS: `TXT` `_atproto` = the `did=…` value → Verify → set `BLUESKY_HANDLE` = `antisearch.ai`.
-4. **[HUMAN IP]** Profile:
-   - avatar [`docs/assets/bluesky-avatar.png`](assets/bluesky-avatar.png);
-   - name `antisearch.ai`;
-   - bio `ai chooses the best. nothing else.`
+**[HUMAN IP]** = his own laptop or phone. About an hour in total; A–C unlock
+everything that can post natively.
 
-**Buffer** (Instagram, LinkedIn Page, TikTok)
+**A. Bluesky (5 min)**
+1. **[HUMAN IP]** bsky.app → Sign up (hCaptcha) → `antisearch@outlook.com`, handle
+   `antisearch` → confirm the email code.
+2. **[HUMAN IP]** Settings → Privacy and security → App passwords → Add `publisher`
+   → secrets `BLUESKY_HANDLE`, `BLUESKY_APP_PASSWORD`.
+   Later, optional: the `antisearch.ai` handle via a Cloudflare TXT record (steps in
+   Bluesky → Settings → Account → Handle).
 
-5. **[HUMAN IP]** Buffer (signed in as `antisearch@outlook.com`) → connect:
-   - the **LinkedIn Page**: **done** (2026-09-24);
-   - **Instagram**, as a Business account;
-   - **TikTok**, the existing AntiSearch account.
-
-   Instagram and TikTok are in progress from Carlos's laptop. Check that each
-   channel shows automatic publishing (see "Checks when connecting").
-6. **[HUMAN IP]** publish.buffer.com/settings/api → create the API key (the org owner
-   only) → secret `BUFFER_API_KEY`.
-7. CoS: `mill buffer-channels` → set the variables `BUFFER_CHANNEL_INSTAGRAM`,
-   `BUFFER_CHANNEL_LINKEDIN`, `BUFFER_CHANNEL_TIKTOK`.
-
-**Clip hosting**
-
-8. **[HUMAN IP]** GitHub:
-   - create the **public** repo `everfields/antisearch-clips` (with a README);
-   - Settings → Pages → Deploy from branch `main`, folder `/`;
+**B. Clip host (5 min)** — needed by Instagram native and by the bridge
+3. **[HUMAN IP]** GitHub:
+   - create the **public** repo `everfields/antisearch-clips` with a README;
+   - Settings → Pages → Deploy from branch `main` `/`;
    - create a fine-grained token with *Contents: read and write* on that repo only
      → secret `PUBLISHER_MEDIA_TOKEN`.
-9. Variables: `PUBLISHER_MEDIA_REPO` = `everfields/antisearch-clips`,
-   `PUBLISHER_PUBLIC_BASE_URL` = `https://everfields.github.io/antisearch-clips`.
+
+   CoS sets `PUBLISHER_MEDIA_REPO` and `PUBLISHER_PUBLIC_BASE_URL`, and publishes the
+   privacy page there.
+
+**C. Instagram native (≈20 min)**
+4. **[HUMAN IP]** developers.facebook.com (his Facebook; Meta may ask to confirm a
+   phone or card once):
+   - My Apps → Create app → use case **"Manage messaging and content on Instagram"**
+     (Instagram API with Instagram login);
+   - API setup → **Add account** → log in as the AntiSearch Business account →
+     **Generate token**.
+5. Send CoS the **token** and the **Instagram user ID** shown next to it → secrets
+   `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID`. No App Review.
+
+**D. Bridge key (2 min)** — keeps LinkedIn and TikTok posting until their gates clear
+6. **[HUMAN IP]** publish.buffer.com/settings/api → create the key → secret
+   `BUFFER_API_KEY`. CoS runs `mill buffer-channels` and pins the channel IDs.
+
+**E. LinkedIn native (15 min + LinkedIn's review) — only if a registered company exists**
+7. **[HUMAN IP]** linkedin.com/developers/apps/new:
+   - a **new** app `AntiSearch Page Publisher`, Page `antisearch` (99258814);
+   - Settings → Verify, then approve it as the Page's super admin;
+   - Products → **Community Management API** only → the access form:
+     - the company's legal name and registered address;
+     - website `https://antisearch.ai`;
+     - privacy policy URL (the clips-site page);
+     - business email `social@antisearch.ai` (Cloudflare Email Routing → the
+       Outlook inbox, so the verification email arrives).
+   - Auth: redirect `https://antisearch.ai/`.
+8. After approval: CoS sends the `mill oauth linkedin url` link → Carlos approves as
+   Page admin → CoS stores `LINKEDIN_ACCESS_TOKEN` (and the refresh token if issued).
+
+**F. TikTok native drafts (15 min) — only if Carlos wants native drafts that need a tap; otherwise skip and keep the bridge**
+9. **[HUMAN IP]** developers.tiktok.com:
+   - an app with Login Kit (redirect `https://antisearch.ai/`) + Content Posting API
+     (`video.upload`), Sandbox, target user = the AntiSearch TikTok;
+   - CoS runs `mill oauth tiktok url` → Carlos approves on the phone →
+     `TIKTOK_REFRESH_TOKEN`.
 
 **Go live**
+10. Carlos's yes → Variables:
+    - `PUBLISHER_LIVE_NETWORKS=bluesky,instagram,linkedin,tiktok`;
+    - `PUBLISHER_CADENCE` (`soul` recommended);
+    - `PUBLISHER_BRIDGE=buffer` + `PUBLISHER_ROUTE_INSTAGRAM=direct`;
+    - `PUBLISHER_CRON=live`.
 
-10. CoS: Actions → publisher → Run workflow (dry-run; never calls the oracle), then
-    `mill networks` for slots and runway.
-11. Carlos's yes → Variables:
-    - `PUBLISHER_LIVE_NETWORKS` = `bluesky,instagram,linkedin,tiktok`;
-    - `PUBLISHER_CADENCE` = `carlos` or `soul`, plus any slot overrides;
-    - `PUBLISHER_CRON` = `live`.
-
-The next open slot posts, and that day is **day 1 of the trial clock**. Recurring: CoS sets tags on held rows and keeps the pools
-stocked. Nobody taps anything.
+    That day is day 1 of the trial clock.
 
 ## Env vars
 
 | Name | Kind | Notes |
 | --- | --- | --- |
 | `BLUESKY_HANDLE`, `BLUESKY_APP_PASSWORD` | secret | App password, no expiry |
-| `BUFFER_API_KEY` | secret | Free plan: 1 key, 3,000 requests / 30 days |
+| `BUFFER_API_KEY` | secret | Bridge only. Free plan: 1 key, 3,000 requests / 30 days |
 | `BUFFER_CHANNEL_INSTAGRAM` / `_LINKEDIN` / `_TIKTOK` | variable | From `mill buffer-channels`; saves 2 requests per post |
 | `PUBLISHER_MEDIA_TOKEN` | secret | Fine-grained, contents write on the clips repo only |
 | `PUBLISHER_MEDIA_REPO`, `PUBLISHER_PUBLIC_BASE_URL` | variable | Clips repo + its Pages URL |
@@ -313,14 +310,17 @@ stocked. Nobody taps anything.
 | `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere) or `soul` (TikTok 5, X 5, Bluesky 3, IG 3, LinkedIn 1) |
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
 | `PUBLISHER_LANGUAGE` | variable, optional | `en` (default, Carlos's lock); anything else lifts the English check |
-| `PUBLISHER_ROUTE_<NETWORK>` | variable, optional | `buffer` (default for instagram, linkedin, tiktok) or `direct` |
+| `PUBLISHER_BRIDGE` | variable, optional | `buffer` = Instagram, LinkedIn and TikTok via Buffer free. Unset = Buffer gone, all native |
+| `PUBLISHER_ROUTE_<NETWORK>` | variable, optional | `direct` (native, the default) or `buffer`; overrides the bridge for one network |
+| `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID` | secret | From the Meta app's Instagram login token generator; refresh within 60 days |
+| `LINKEDIN_ACCESS_TOKEN` (+ `LINKEDIN_REFRESH_TOKEN`, `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`) | secret | After Community Management approval |
+| `LINKEDIN_ORGANIZATION_ID` | variable, optional | Default `99258814` (the antisearch Page) |
+| `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, `TIKTOK_REFRESH_TOKEN` | secret | Native drafts only (section F) |
 | `PUBLISHER_QUEUE` | variable, optional | Default `queue/bluesky_trial.csv queue/tiktok_trial.csv` |
 
 ## Other adapters (built, tested, not routed)
 
-`mill networks` prints each one's status:
-- **Direct Instagram, LinkedIn and TikTok:** fallbacks behind
-  `PUBLISHER_ROUTE_<NETWORK>=direct`, with the walls listed there.
-- **Threads:** a Meta developer account on Carlos's Facebook.
+`mill networks` prints each one's status and gate:
+- **Threads:** the same Meta developer account as Instagram (its own use case).
 - **Reddit:** the API is closed to new apps.
 - **Mastodon:** small reach.
