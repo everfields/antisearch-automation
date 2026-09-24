@@ -10,7 +10,7 @@ from __future__ import annotations
 import secrets
 from urllib.parse import parse_qs, unquote, urlencode, urlsplit
 
-from ..publish.http import Transport
+from ..publish.http import Request, Transport
 from .base import PublisherError, form_request
 
 DEFAULT_REDIRECT = "https://antisearch.ai/"
@@ -80,4 +80,20 @@ def exchange(provider: str, pasted: str, env: dict[str, str], transport: Transpo
     body = resp.json() if resp.body else {}
     if not resp.ok or "access_token" not in body:
         raise PublisherError(f"{provider} token exchange failed ({resp.status}): {body}")
+    return body
+
+
+REFRESH = {
+    "instagram": ("https://graph.instagram.com/refresh_access_token", "ig_refresh_token", "INSTAGRAM_ACCESS_TOKEN"),
+    "threads": ("https://graph.threads.net/refresh_access_token", "th_refresh_token", "THREADS_ACCESS_TOKEN"),
+}
+
+
+def refresh(provider: str, env: dict[str, str], transport: Transport) -> dict:
+    """Extend a long-lived Meta token by 60 days (it must be at least 24h old and not yet expired)."""
+    url, grant, var = REFRESH[provider]
+    resp = transport.send(Request("GET", url, params={"grant_type": grant, "access_token": _need(env, var)}))
+    body = resp.json() if resp.body else {}
+    if not resp.ok or "access_token" not in body:
+        raise PublisherError(f"{provider} token refresh failed ({resp.status}): {body}")
     return body

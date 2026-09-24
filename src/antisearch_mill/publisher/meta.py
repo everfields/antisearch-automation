@@ -76,7 +76,8 @@ class ThreadsAdapter(MetaContainerAdapter):
     user_var, token_var = "THREADS_USER_ID", "THREADS_ACCESS_TOKEN"
     status_field = "status"
     create_edge, publish_edge = "threads", "threads_publish"
-    env_sets = (("THREADS_USER_ID", "THREADS_ACCESS_TOKEN", "PUBLISHER_PUBLIC_BASE_URL"),)
+    env_sets = (("THREADS_USER_ID", "THREADS_ACCESS_TOKEN",
+                 "PUBLISHER_MEDIA_REPO", "PUBLISHER_MEDIA_TOKEN", "PUBLISHER_PUBLIC_BASE_URL"),)
     blocked = ("needs a Meta developer app (registered from Carlos's Facebook, phone- or card-verified) "
                "and a public host for the media files")
     cannot = ("No direct upload: Meta must fetch the file from a public URL. Long-lived tokens expire after 60 days. "
@@ -96,21 +97,22 @@ class InstagramAdapter(MetaContainerAdapter):
     user_var, token_var = "INSTAGRAM_BUSINESS_ACCOUNT_ID", "INSTAGRAM_ACCESS_TOKEN"
     status_field = "status_code"
     create_edge, publish_edge = "media", "media_publish"
-    env_sets = (("INSTAGRAM_BUSINESS_ACCOUNT_ID", "INSTAGRAM_ACCESS_TOKEN", "PUBLISHER_PUBLIC_BASE_URL"),)
+    kinds = frozenset({VIDEO})
+    env_sets = (("INSTAGRAM_BUSINESS_ACCOUNT_ID", "INSTAGRAM_ACCESS_TOKEN",
+                 "PUBLISHER_MEDIA_REPO", "PUBLISHER_MEDIA_TOKEN", "PUBLISHER_PUBLIC_BASE_URL"),)
     optional_env = ("INSTAGRAM_GRAPH_VERSION",)
-    blocked = ("the new AntiSearch Instagram is suspended pending selfie verification (2026-09-24); "
-               "also needs a Meta app and a public host for the media files")
-    cannot = ("Professional (Business/Creator) account only. No direct upload: Meta must fetch the file from a public URL. "
-              "Long-lived tokens expire after 60 days. 100 API posts per 24h.")
+    blocked = ("gate: a Meta app with 'Instagram API with Instagram login' (Standard Access, no App Review for our "
+               "own Business account) and a long-lived token; Carlos creates it once")
+    cannot = ("Reels only (Business/Creator account). No direct upload: Meta fetches the clip from a public URL. "
+              "Long-lived tokens last 60 days (`mill oauth instagram refresh`). 100 API posts per 24h.")
 
     @property
     def api(self) -> str:  # type: ignore[override]
         return f"https://graph.instagram.com/{self.var('INSTAGRAM_GRAPH_VERSION', 'v24.0')}"
 
     def _media_params(self, media: Media, url: str) -> dict[str, str]:
-        if media.kind == VIDEO:
-            return {"media_type": "REELS", "video_url": url}
-        return {"image_url": url}
+        return {"media_type": "REELS", "video_url": url, "share_to_feed": "true",
+                "thumb_offset": str(max(0, int((media.duration_s - 0.3) * 1000)))}
 
     def _caption_param(self) -> str:
         return "caption"

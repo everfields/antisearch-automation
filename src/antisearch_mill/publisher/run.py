@@ -117,7 +117,7 @@ def run_posts(
             out.append(Outcome(job.id, net, "rejected_input", detail=problem))
             continue
 
-        if net in waiting:
+        if net in waiting and not from_pool:
             once(job, net, "skipped_waiting_for_tag", f"{waiting[net]} comes first on {net} and is waiting for its tag")
             continue
         held = frozen_by(net, approved)

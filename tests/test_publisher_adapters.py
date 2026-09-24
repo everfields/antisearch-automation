@@ -1,5 +1,6 @@
 """Each own-publisher adapter against a mocked HTTP API (no network, no tokens)."""
 
+import dataclasses
 import json
 from urllib.parse import parse_qs, urlsplit
 
@@ -164,9 +165,12 @@ def test_threads_container_polls_then_publishes(video):
 
 def test_instagram_reels_and_error_state(video):
     env = {**META, "INSTAGRAM_BUSINESS_ACCOUNT_ID": "17841", "INSTAGRAM_ACCESS_TOKEN": "ig"}
-    _, t, _ = run(InstagramAdapter, env, video, "@antisearch")
+    hosted = dataclasses.replace(video, public_url="https://everfields.github.io/antisearch-clips/clips/thing-abc123.mp4")
+    _, t, _ = run(InstagramAdapter, env, hosted, "@antisearch")
+    create = t.requests[0].params
     assert t.requests[0].url == "https://graph.instagram.com/v24.0/17841/media"
-    assert t.requests[0].params["media_type"] == "REELS" and t.requests[0].params["caption"] == "@antisearch"
+    assert create["media_type"] == "REELS" and create["caption"] == "@antisearch"
+    assert create["video_url"] == hosted.public_url and create["share_to_feed"] == "true" and create["thumb_offset"] == "3500"
 
     def failing(req):
         if req.method == "GET" and req.params.get("fields", "").startswith("status_code"):
@@ -180,6 +184,19 @@ def test_instagram_reels_and_error_state(video):
 def test_meta_needs_a_public_base_url(video):
     with pytest.raises(PublisherError, match="PUBLISHER_PUBLIC_BASE_URL"):
         run(ThreadsAdapter, {"THREADS_USER_ID": "1", "THREADS_ACCESS_TOKEN": "t"}, video)
+
+
+def test_instagram_is_reels_only(image):
+    with pytest.raises(PublisherError, match="cannot post image"):
+        run(InstagramAdapter, {**META, "INSTAGRAM_BUSINESS_ACCOUNT_ID": "1", "INSTAGRAM_ACCESS_TOKEN": "t"}, image)
+
+
+def test_linkedin_posts_as_the_antisearch_page_by_default(video):
+    _, t, _ = run(LinkedInAdapter, {"LINKEDIN_ACCESS_TOKEN": "li"}, video)
+    assert t.requests[0].json["initializeUploadRequest"]["owner"] == "urn:li:organization:99258814"
+    assert t.requests[-1].json["author"] == "urn:li:organization:99258814"
+    _, t, _ = run(LinkedInAdapter, {"LINKEDIN_ACCESS_TOKEN": "li", "LINKEDIN_ORGANIZATION_ID": "42"}, video)
+    assert t.requests[-1].json["author"] == "urn:li:organization:42"
 
 
 def test_linkedin_image_post(image):

@@ -28,6 +28,9 @@ class TikTokAdapter(Adapter):
         ("TIKTOK_ACCESS_TOKEN",),
     )
     optional_env = ("TIKTOK_MODE", "TIKTOK_PRIVACY_LEVEL")
+    blocked = ("gate: public posting needs TikTok's app audit, which requires a full public website with privacy and "
+               "terms pages and is refused for tools that post only to your own accounts. Unaudited: inbox drafts "
+               "(a human taps Post) or SELF_ONLY")
     cannot = ("Public Direct Post needs TikTok's app audit, and TikTok rejects apps that only post to your own accounts. "
               "Unaudited: direct = SELF_ONLY on a private account; inbox = draft that a human must tap Post on in the app "
               "(max 5 pending drafts per 24h). Access tokens last 24h; refresh tokens 365 days and may rotate.")

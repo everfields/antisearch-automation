@@ -252,7 +252,15 @@ def cmd_oauth(args, settings: Settings) -> int:
     from .publisher.base import PublisherError
 
     env = dict(os.environ)
+    if (args.action == "refresh") != (args.provider in oauth.REFRESH):
+        print("refresh is for instagram/threads; url/exchange are for tiktok/linkedin", file=sys.stderr)
+        return 2
     try:
+        if args.action == "refresh":
+            tokens = oauth.refresh(args.provider, env, RequestsTransport())
+            print("store the new token as the secret now; it is not saved anywhere:", file=sys.stderr)
+            print(json.dumps(tokens, indent=2))
+            return 0
         if args.action == "url":
             print(oauth.authorize_url(args.provider, env, scope=args.scope or "", redirect_uri=args.redirect_uri or ""))
             print("open it on the account owner's own device, approve, then paste the URL you land on into "
@@ -435,9 +443,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
     sp.set_defaults(func=cmd_due)
 
-    sp = sub.add_parser("oauth", help="one-time token helpers for TikTok / LinkedIn")
-    sp.add_argument("provider", choices=("tiktok", "linkedin"))
-    sp.add_argument("action", choices=("url", "exchange"))
+    sp = sub.add_parser("oauth", help="token helpers: TikTok/LinkedIn url+exchange, Instagram/Threads refresh")
+    sp.add_argument("provider", choices=("tiktok", "linkedin", "instagram", "threads"))
+    sp.add_argument("action", choices=("url", "exchange", "refresh"))
     sp.add_argument("--code", help="the code, or the whole URL the browser landed on")
     sp.add_argument("--scope", help="override the default scope")
     sp.add_argument("--redirect-uri", help="must match the app's registered redirect (default https://antisearch.ai/)")

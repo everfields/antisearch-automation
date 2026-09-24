@@ -289,6 +289,10 @@ def test_hold_for_tag_blocks_queue_rows_but_not_pool_rows(ledger, log):
     assert "1password" in out[0].detail and b.calls == []
     pooled = [job("password-manager", caption="@?", notes="pool:vertical"), job("silence", notes="pool:unowned")]
     assert [o.status for o in go(pooled, ledger, log, {"bluesky": b})] == ["held_for_tag", "published"]
+    clip(ledger, "rain")
+    mixed = [job("password-manager", caption="@?"), job("rain", notes="pool:unowned")]
+    out = go(mixed, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 25, 21, 0, tzinfo=ET))
+    assert [o.status for o in out] == ["held_for_tag", "published"]  # a held queue row never stalls the pool
 
 
 def test_live_needs_approval_and_credentials(ledger, log):

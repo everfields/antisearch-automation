@@ -17,6 +17,7 @@ from .base import VIDEO, Adapter, Media, PostResult, PublisherError, form_reques
 API = "https://api.linkedin.com/rest"
 TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken"
 DEFAULT_VERSION = "202609"
+PAGE_ID = "99258814"  # the antisearch Company Page
 MAX_STATUS_POLLS = 40
 STATUS_POLL_S = 3.0
 
@@ -159,15 +160,18 @@ def dry_run_response(req: Request) -> HttpResponse:
 class LinkedInAdapter(Adapter):
     name = "linkedin"
     env_sets = (
-        ("LINKEDIN_ACCESS_TOKEN", "LINKEDIN_AUTHOR_URN"),
-        ("LINKEDIN_REFRESH_TOKEN", "LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET", "LINKEDIN_AUTHOR_URN"),
+        ("LINKEDIN_ACCESS_TOKEN",),
+        ("LINKEDIN_REFRESH_TOKEN", "LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET"),
     )
-    optional_env = ("LINKEDIN_VERSION",)
-    blocked = ("Company Page posting needs Community Management API approval (registered legal organization, "
-               "business email on antisearch.ai, privacy policy). Works today only as Carlos's own profile "
-               "via Share on LinkedIn (urn:li:person)")
+    optional_env = ("LINKEDIN_AUTHOR_URN", "LINKEDIN_ORGANIZATION_ID", "LINKEDIN_VERSION")
+    blocked = ("gate: Community Management API on a dedicated app verified by the antisearch Page (99258814); "
+               "LinkedIn vets a registered legal organization, a business email on the domain and a privacy policy")
     cannot = ("Access tokens last 60 days; programmatic refresh tokens are only issued to some approved apps. "
               "Page posting and member posting are separate scopes and separate tokens.")
+
+    def author(self) -> str:
+        """The Page by default: urn:li:organization:<LINKEDIN_ORGANIZATION_ID, default the antisearch Page>."""
+        return self.var("LINKEDIN_AUTHOR_URN") or f"urn:li:organization:{self.var('LINKEDIN_ORGANIZATION_ID', PAGE_ID)}"
 
     def _token(self) -> str:
         refresh = self.var("LINKEDIN_REFRESH_TOKEN")
@@ -183,7 +187,7 @@ class LinkedInAdapter(Adapter):
     def _post(self, media: Media, caption: str) -> PostResult:
         token = self._token()
         version = self.var("LINKEDIN_VERSION", DEFAULT_VERSION)
-        owner = self.var("LINKEDIN_AUTHOR_URN")
+        owner = self.author()
         if media.kind == VIDEO:
             urn = upload_video(self.send, self.sleep, token, version, owner, media.read())
         else:

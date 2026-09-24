@@ -1,7 +1,8 @@
 name: publisher
 
-# Own publisher: Bluesky direct; Instagram, LinkedIn Page and TikTok through Buffer's
-# API. No browser, no Grok Bot box. Off by default.
+# Own publisher: native official APIs for every network (Bluesky, Instagram Reels,
+# LinkedIn Page, TikTok). Buffer free is an optional bridge (PUBLISHER_BRIDGE=buffer)
+# for networks whose native gate hasn't cleared. No browser, no Grok Bot box. Off by default.
 #   Manual: Actions -> publisher -> Run workflow (dry-run unless `live` is ticked).
 #   Cron:   hourly; runs only when the repo variable PUBLISHER_CRON is `dry-run` or `live`.
 # Slots are America/New_York wall-clock times (docs/PUBLISHER_SETUP.md); the cron
@@ -52,6 +53,7 @@ jobs:
       PUBLISHER_SLOTS_LINKEDIN: ${{ vars.PUBLISHER_SLOTS_LINKEDIN }}
       PUBLISHER_SLOTS_INSTAGRAM: ${{ vars.PUBLISHER_SLOTS_INSTAGRAM }}
       PUBLISHER_SLOTS_TIKTOK: ${{ vars.PUBLISHER_SLOTS_TIKTOK }}
+      PUBLISHER_BRIDGE: ${{ vars.PUBLISHER_BRIDGE }}
       PUBLISHER_ROUTE_INSTAGRAM: ${{ vars.PUBLISHER_ROUTE_INSTAGRAM }}
       PUBLISHER_ROUTE_LINKEDIN: ${{ vars.PUBLISHER_ROUTE_LINKEDIN }}
       PUBLISHER_ROUTE_TIKTOK: ${{ vars.PUBLISHER_ROUTE_TIKTOK }}
@@ -71,9 +73,13 @@ jobs:
       THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
       THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
       LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
-      LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
+      LINKEDIN_REFRESH_TOKEN: ${{ secrets.LINKEDIN_REFRESH_TOKEN }}
+      LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
+      LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
+      LINKEDIN_ORGANIZATION_ID: ${{ vars.LINKEDIN_ORGANIZATION_ID }}
       INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
       INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+      INSTAGRAM_GRAPH_VERSION: ${{ vars.INSTAGRAM_GRAPH_VERSION }}
       MASTODON_BASE_URL: ${{ secrets.MASTODON_BASE_URL }}
       MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
     steps:

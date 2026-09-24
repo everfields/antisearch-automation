@@ -142,13 +142,24 @@ def test_host_reuses_an_existing_file_and_fails_if_pages_never_serves(clip):
         host.publish(clip)
 
 
-def test_routes_default_to_buffer_for_ig_linkedin_tiktok():
-    adapters = resolve_adapters({})
-    assert adapters["instagram"] is BufferInstagram and adapters["tiktok"] is BufferTikTok
-    assert adapters["bluesky"].route == "direct"
-    assert route_for("linkedin", {"PUBLISHER_ROUTE_LINKEDIN": "direct"}) == "direct"
+def test_native_is_the_default_and_buffer_is_one_switch():
+    from antisearch_mill.publisher.linkedin import LinkedInAdapter
+    from antisearch_mill.publisher.meta import InstagramAdapter
+    from antisearch_mill.publisher.tiktok import TikTokAdapter
+
+    native = resolve_adapters({})
+    assert native["instagram"] is InstagramAdapter and native["linkedin"] is LinkedInAdapter
+    assert native["tiktok"] is TikTokAdapter and all(a.route == "direct" for a in native.values())
+    bridged = resolve_adapters({"PUBLISHER_BRIDGE": "buffer"})
+    assert bridged["instagram"] is BufferInstagram and bridged["tiktok"] is BufferTikTok
+    assert bridged["bluesky"].route == "direct"
+    mixed = resolve_adapters({"PUBLISHER_BRIDGE": "buffer", "PUBLISHER_ROUTE_INSTAGRAM": "direct"})
+    assert mixed["instagram"] is InstagramAdapter and mixed["linkedin"] is BufferLinkedIn
+    assert route_for("linkedin", {"PUBLISHER_ROUTE_LINKEDIN": "buffer"}) == "buffer"
     with pytest.raises(ValueError):
         route_for("bluesky", {"PUBLISHER_ROUTE_BLUESKY": "buffer"})
+    with pytest.raises(ValueError):
+        route_for("tiktok", {"PUBLISHER_BRIDGE": "hootsuite"})
 
 
 def test_scheduled_post_uses_custom_time_and_skips_status_polls(clip):
@@ -178,3 +189,4 @@ def test_places_map_country_rows_to_their_timezone():
     assert local_morning_after(datetime(2026, 9, 25, 9, 9, tzinfo=ny), ny) is None  # it's that morning: share now
     assert local_morning_after(datetime(2026, 9, 25, 9, 9, tzinfo=ny), ZoneInfo("Asia/Tokyo")) == \
         datetime(2026, 9, 26, 9, 7, tzinfo=ZoneInfo("Asia/Tokyo"))
+

@@ -76,7 +76,18 @@ def test_post_dry_run_end_to_end(tmp_path, capsys, monkeypatch):
     assert plans == ["dry_run_posts/bluesky/thing.json", "dry_run_posts/linkedin/pizza.json",
                      "dry_run_posts/tiktok/dry-shampoo.json"]
     tiktok = json.loads((out / "dry_run_posts" / "tiktok" / "dry-shampoo.json").read_text())
-    assert tiktok["route"] == "buffer" and tiktok["media"]["public_url"].endswith("/clips/" + Path(tiktok["media"]["path"]).name)
+    assert tiktok["route"] == "direct" and tiktok["simulated_result"]["state"] == "drafted"
+    linkedin = json.loads((out / "dry_run_posts" / "linkedin" / "pizza.json").read_text())
+    assert linkedin["route"] == "direct"
+    assert linkedin["requests"][-1]["json"]["author"] == "urn:li:organization:99258814"
+
+    capsys.readouterr()
+    for k, v in {"PUBLISHER_BRIDGE": "buffer"}.items():
+        monkeypatch.setenv(k, v)
+    assert main(base + args + ["--network", "tiktok"]) == 0
+    bridged = json.loads((out / "dry_run_posts" / "tiktok" / "dry-shampoo.json").read_text())
+    assert bridged["route"] == "buffer" and bridged["media"]["public_url"].endswith(".mp4")
+    monkeypatch.delenv("PUBLISHER_BRIDGE")
     bsky = json.loads((out / "dry_run_posts" / "bluesky" / "thing.json").read_text())
     assert bsky["caption"] == "@antisearch.ai" and bsky["oracle_source"] == "fixture"
     assert Path(bsky["media"]["path"]).is_file()
@@ -106,3 +117,21 @@ def test_due_is_the_cheap_precheck_for_the_hourly_cron(tmp_path, monkeypatch, ca
     assert main(base) == 0
     out = capsys.readouterr().out
     assert "due: bluesky" in out and "tiktok" in out.splitlines()[1] and "0 due" in out.splitlines()[1]
+
+
+def test_instagram_token_refresh():
+    t = RecordingTransport(lambda req: HttpResponse.of_json(200, {"access_token": "new", "token_type": "bearer",
+                                                                   "expires_in": 5183944}))
+    body = oauth.refresh("instagram", {"INSTAGRAM_ACCESS_TOKEN": "old"}, t)
+    assert body["access_token"] == "new"
+    req = t.requests[0]
+    assert req.url == "https://graph.instagram.com/refresh_access_token"
+    assert req.params == {"grant_type": "ig_refresh_token", "access_token": "old"}
+    bad = RecordingTransport(lambda req: HttpResponse.of_json(400, {"error": {"message": "expired"}}))
+    with pytest.raises(PublisherError, match="refresh failed"):
+        oauth.refresh("instagram", {"INSTAGRAM_ACCESS_TOKEN": "old"}, bad)
+
+
+def test_oauth_actions_match_providers(tmp_path, capsys):
+    assert main(["--env-file", str(tmp_path / "x"), "oauth", "tiktok", "refresh"]) == 2
+    assert main(["--env-file", str(tmp_path / "x"), "oauth", "instagram", "url"]) == 2
