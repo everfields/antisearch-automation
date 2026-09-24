@@ -8,7 +8,8 @@ Cursor Cloud Agent secrets. `mill doctor` shows what is present/missing
 without printing values.
 
 For the ~20-day organic trial none of the platform API values below are needed:
-posting goes through Buffer (free) and accounts are opened in one setup sitting.
+Instagram + LinkedIn post through Buffer (free), TikTok is uploaded directly from
+the box, X is held, and accounts are set up in one sitting.
 See [docs/AUTONOMY_AND_SETUP.md](docs/AUTONOMY_AND_SETUP.md) before asking anyone
 for X / LinkedIn / TikTok / Instagram keys.
 
