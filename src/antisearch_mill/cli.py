@@ -239,19 +239,31 @@ def cmd_winners(args, settings: Settings) -> int:
 
 def cmd_due(args, settings: Settings) -> int:
     """Exit 0 if a live-approved network has a slot due now (the workflow's cheap pre-check), else 3."""
+    from .publisher.antiban import (
+        X_NETWORK, AntibanState, daily_slot_count, ramp_days, ramp_enabled, ramp_start,
+    )
     from .publisher.guard import approved_networks, now_et, open_now, posting_day, slots_due, slots_for
 
     env = dict(os.environ)
     log, _ = _publisher_state(args, settings, env)
     now = now_et()
     day = posting_day(now)
+    state = AntibanState(log.path.parent / "antiban.json")
+    state.apply_reach(log.path.parent / "metrics.csv", now, log.path.parent / "flags")
     due = []
     for net in sorted(approved_networks(env)):
+        if net == X_NETWORK:
+            print("  x         off (no auto-posting)")
+            continue
         try:
-            slots = slots_for(net, env)
+            full = slots_for(net, env)
         except ValueError as exc:
             print(f"due: {exc}", file=sys.stderr)
             return 2
+        slots = full[:daily_slot_count(
+            len(full), days_since_first=state.days_since_first(net, day), ramp=ramp_enabled(env),
+            ramp_days=ramp_days(env), start=ramp_start(env), braked=state.braked(net, now),
+        )]
         used = log.used_on(day, net)
         free = open_now(now, slots, used)
         print(f"  {net:<9} slots passed {slots_due(now, slots)}/{len(slots)}, used {used} -> {free} due")

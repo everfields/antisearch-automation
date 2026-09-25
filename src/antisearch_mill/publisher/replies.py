@@ -65,6 +65,7 @@ class ReplyRow:
     source: str = ""
     detail: str = ""
     at: str = field(default_factory=now_iso)
+    network: str = "bluesky"
 
 
 class ReplyLog:
@@ -88,16 +89,18 @@ class ReplyLog:
             fh.flush()
             os.fsync(fh.fileno())
 
-    def replied_today(self, now: datetime) -> int:
+    def replied_today(self, now: datetime, network: str | None = None) -> int:
         day = posting_day(now)
         return sum(1 for r in self.rows()
-                   if r["status"] == "replied" and posting_day(datetime.fromisoformat(r["at"])) == day)
+                   if r["status"] == "replied" and posting_day(datetime.fromisoformat(r["at"])) == day
+                   and (network is None or (r.get("network") or "bluesky") == network))
 
     def seen(self, uri: str) -> bool:
         return any(r["post_uri"] == uri for r in self.rows())
 
-    def author_recent(self, author: str, now: datetime) -> bool:
+    def author_recent(self, author: str, now: datetime, network: str | None = None) -> bool:
         return any(r["author"] == author and r["status"] == "replied"
+                   and (network is None or (r.get("network") or "bluesky") == network)
                    and now - datetime.fromisoformat(r["at"]) < AUTHOR_COOLDOWN for r in self.rows())
 
 
@@ -182,7 +185,7 @@ class BlueskyReplier:
 def run_replies(replier: BlueskyReplier, oracle: Oracle, log: ReplyLog, *, now: datetime, env: Mapping[str, str],
                 live: bool, alerts_path: Path) -> list[ReplyRow]:
     """One pass: watched accounts first, then search. Returns what was (or would be) done."""
-    cap = replies_cap(env) - log.replied_today(now)
+    cap = replies_cap(env) - log.replied_today(now, "bluesky")
     own = (env.get("BLUESKY_HANDLE") or "").lower()
     results: list[ReplyRow] = []
     candidates: list[Candidate] = []
@@ -205,7 +208,7 @@ def run_replies(replier: BlueskyReplier, oracle: Oracle, log: ReplyLog, *, now: 
             break
         x = extract_input(c.text)
         if (not x or c.uri in done or log.seen(c.uri) or c.root is not None or c.author.lower() == own
-                or now - c.created > MAX_AGE or log.author_recent(c.author, now)):
+                or now - c.created > MAX_AGE or log.author_recent(c.author, now, "bluesky")):
             continue
         done.add(c.uri)
         try:

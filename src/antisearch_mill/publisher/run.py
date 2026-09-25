@@ -14,10 +14,15 @@ from typing import Callable, Mapping
 from ..ledger import ClipRow, Job, Ledger, now_iso
 from ..publish.http import RecordingTransport, RequestsTransport, Transport
 from .base import IMAGE, VIDEO, Adapter, Media
+from .antiban import (
+    X_NETWORK, AntibanState, cooldown_days, daily_slot_count, is_limit_error, jitter_enabled, jitter_minutes,
+    ramp_days, ramp_enabled, ramp_start, upload_wait_seconds,
+)
+from .fresh import looks_like_mp4, remux_fresh
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now, posting_day,
-    slots_for,
+    slot_times, slots_for,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
@@ -65,6 +70,9 @@ def run_posts(
     env = dict(os.environ if env is None else env)
     approved = approved_networks(env)
     day = posting_day(now)
+    state = AntibanState(log.path.parent / "antiban.json")
+    flags = log.path.parent / "flags"
+    state.apply_reach(log.path.parent / "metrics.csv", now, flags)
     enforce_slots = live and not ignore_slots
     allowance: dict[str, int] = {}
     waiting: dict[str, str] = {}
@@ -78,9 +86,21 @@ def run_posts(
             reported.add((net, status))
             out.append(Outcome(job.id, net, status, detail=detail))
 
+    def slots_now(net: str) -> list:
+        full = slots_for(net, env)
+        n = daily_slot_count(
+            len(full),
+            days_since_first=state.days_since_first(net, day),
+            ramp=ramp_enabled(env),
+            ramp_days=ramp_days(env),
+            start=ramp_start(env),
+            braked=state.braked(net, now),
+        )
+        return full[:n]
+
     def left(net: str) -> int:
         if net not in allowance:
-            slots = slots_for(net, env)
+            slots = slots_now(net)
             used = log.used_on(day, net)
             free = open_now(now, slots, used) if enforce_slots else len(slots) - used
             allowance[net] = min(free, PER_RUN_PER_NETWORK)
@@ -88,6 +108,10 @@ def run_posts(
 
     for job in jobs:
         if only and job.id not in only:
+            continue
+        if len(job.platforms) == 1 and job.platforms[0] == X_NETWORK:
+            if not networks or X_NETWORK in networks:
+                out.append(Outcome(job.id, X_NETWORK, "skipped_x_off", detail="X stays off for auto-posting"))
             continue
         own = [p for p in job.platforms if p in adapters]
         if not own or (networks and not set(own) & networks):
@@ -111,6 +135,10 @@ def run_posts(
         if prior and prior["status"] == FAILED and not retry_failed:
             out.append(Outcome(job.id, net, "skipped_failed_before", detail=prior["detail"]))
             continue
+        if log.input_within(job.category, now, cooldown_days(env)):
+            out.append(Outcome(job.id, net, "skipped_input_used",
+                               detail=f"{job.category!r} went out within {cooldown_days(env)} days"))
+            continue
         if job.category in used_inputs:
             out.append(Outcome(job.id, net, "skipped_input_used",
                                detail=f"{job.category!r} already went out; an input is never repeated"))
@@ -127,7 +155,10 @@ def run_posts(
         if held:
             once(job, net, "skipped_frozen_stand_in", f"{net} stands in for {held}; {held} is live again, so {net} is frozen")
             continue
-        slots = slots_for(net, env)
+        slots = slots_now(net)
+        if state.braked(net, now) and not slots:
+            once(job, net, "skipped_braked", f"cadence halved until {state.brake_until.get(net, '')}")
+            continue
         if left(net) <= 0:
             used = log.used_on(day, net)
             if used >= len(slots):
@@ -199,7 +230,22 @@ def run_posts(
             note = res.reason if tag or not res.handle else f"{res.handle} is not a valid tag on {net}: no tag"
             job = dataclasses.replace(job, caption=tag or "-", notes=f"{job.notes}; {note}")
 
+        shown = effective_caption(job.caption)
+        if state.seen_caption(net, shown, log):
+            out.append(Outcome(job.id, net, "skipped_duplicate_caption", detail="that caption already went out on this network"))
+            continue
+        if state.seen_clip(net, clip.clip_id, log):
+            out.append(Outcome(job.id, net, "skipped_duplicate_clip", detail=f"clip {clip.clip_id} already went out on {net}"))
+            continue
+
         media = media_for(clip, kind)
+        wait_s = 0.0
+        if jitter_enabled(env) and enforce_slots:
+            passed = [s for s in slot_times(day, slots) if s <= now]
+            used_slots = log.used_on(day, net)
+            if used_slots < len(passed):
+                nominal = passed[used_slots]
+                wait_s = upload_wait_seconds(nominal, jitter_minutes(net, nominal), now)
         allowance[net] -= 1
         used_inputs.add(job.category)
         due_at = None
@@ -207,9 +253,9 @@ def run_posts(
         if zone is not None:
             due_at = local_morning_after(now, zone)
         if live:
-            out.append(_post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at))
+            out.append(_post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at, state, flags, wait_s))
         else:
-            out.append(_post_dry(cls, job, clip, media, ledger, env, missing, due_at))
+            out.append(_post_dry(cls, job, clip, media, ledger, env, missing, due_at, wait_s))
     return out
 
 
@@ -220,31 +266,53 @@ def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep) -> GitHu
 
 
 def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, transport, sleep,
-               now: datetime, due_at: datetime | None = None) -> Outcome:
+               now: datetime, due_at: datetime | None, state: AntibanState, flags: Path, wait_s: float) -> Outcome:
     net = cls.name
     at = now.astimezone(timezone.utc).isoformat(timespec="seconds")
-    log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category))
+    shown = effective_caption(job.caption)
+    log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
+    if wait_s > 0:
+        sleep(wait_s)
     try:
         host = _host(cls, env, transport, sleep)
         if host:
             media = dataclasses.replace(media, public_url=host.publish(media))
-        result = adapter.post(media, effective_caption(job.caption))
+        media = _fresh_container(media, now, clip.clip_id)
+        result = adapter.post(media, shown)
     except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
-                           category=job.category))
+                           category=job.category, caption=shown))
+        if is_limit_error(detail):
+            state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
-                       job.category))
+                       job.category, shown))
+    if result.state in DONE:
+        state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
+    if is_limit_error(detail):
+        state.trip(net, now, detail[:500], flags)
     return Outcome(job.id, net, result.state, result.url, detail)
 
 
+def _fresh_container(media: Media, now: datetime, clip_id: str) -> Media:
+    if media.kind != VIDEO or not looks_like_mp4(media.path):
+        return media
+    token = f"{clip_id}-{now.astimezone(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}"
+    dst = media.path.with_name(f"{media.path.stem}-upload.mp4")
+    try:
+        remux_fresh(media.path, dst, now, token)
+    except (OSError, RuntimeError):
+        return media
+    return dataclasses.replace(media, path=dst)
+
+
 def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, missing: list[str],
-              due_at: datetime | None = None) -> Outcome:
+              due_at: datetime | None = None, wait_s: float = 0.0) -> Outcome:
     net = cls.name
     dry_env = {**cls.placeholder_env(), **{k: v for k, v in env.items() if v}}
     adapter = cls(None, dry_env, sleep=lambda _s: None, idempotency_key=f"antisearch-{job.id}")
@@ -274,6 +342,7 @@ def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, m
         "bare_input": job.category,
         "caption": effective_caption(job.caption),
         "scheduled_for": due_at.isoformat() if due_at else None,
+        "upload_wait_s": round(wait_s, 3),
         "clip_id": clip.clip_id,
         "verdict": clip.verdict,
         "oracle_source": clip.oracle_source,
