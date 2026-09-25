@@ -4,58 +4,67 @@ The one place for what's pending. CoS keeps it current; each PR updates the rows
 touches.
 - **Owner:** C = Carlos by hand, CoS = CoS alone, Dev = a Cloud Agent PR.
 - **Status:** todo, blocked, parked, live.
+- **Priority:** `today` (must be closed today), `now`, `next`, `later`. Anything marked `today` is in the section below and is not repeated.
 
 Updated 2026-09-25.
 
+## Today
+
+| Item | Priority | Owner | Status | Notes |
+| --- | --- | --- | --- | --- |
+| LinkedIn decision | today | Opus | decided | Keep Page 99258814. One post/day after Spanish work hours: `PUBLISHER_SLOTS_LINKEDIN=15:07` (21:07 Madrid, 20:07 in the DST-gap week). Leave LinkedIn out of `PUBLISHER_LIVE_NETWORKS` until that variable is set. No place-rows (`employer in madrid` and the like) until local-morning scheduling is off. Write-up: `docs/proposals/2026-09-25-linkedin-decision.md` |
+
 ## Tonight and now
 
-| Item | Owner | Status | Notes |
-| --- | --- | --- | --- |
-| First 4 clips to Buffer | GTM | todo | Same four frozen verdicts, re-rendered with a 2.0s pause (typed input and a blinking caret only; no spinner, dots, or "thinking" text) under `publisher-state` `manual/2026-09-25/` (oracle not re-asked). Upload through Buffer's free API from Actions, not the web UI. `@k18hair` only after `verified: true`. Mark a row `failed` in `posts.csv` if it never went out |
-| `PUBLISHER_CRON=live` per network | CoS | todo | After each network's credentials exist: `PUBLISHER_LIVE_NETWORKS` + `PUBLISHER_CADENCE=soul` |
-| Surprise-input test (6 rows) | CoS | todo | `queue/surprise_trial.csv`; keep/kill rules in `SURPRISING_INPUTS.md` |
-| Winner lane on | CoS | todo | `PUBLISHER_WINNER_NETWORKS=instagram,tiktok,bluesky`, cap 2/day. Verify badges first (next row) |
-| Verify winner handles | CoS / GTM | todo | `mill winners` lists them. Open each account, confirm the badge or the brand site link, set `verified: true` + `checked` + `by` in `queue/winners/handles.json` (PR). Add entries for new winners as they appear, never ahead of the verdict |
-| Early-iteration repost screenshots | C | todo | Salesforce, Plaza Hotel, Dyson reposts from two years ago → `docs/founder-notes/` as proof and as handle candidates |
+| Item | Priority | Owner | Status | Notes |
+| --- | --- | --- | --- | --- |
+| First 4 clips to Buffer | now | GTM | todo | Same four frozen verdicts, re-rendered with a 2.0s pause (typed input and a blinking caret only; no spinner, dots, or "thinking" text) under `publisher-state` `manual/2026-09-25/` (oracle not re-asked). Upload through Buffer's free API from Actions, not the web UI. `@k18hair` only after `verified: true`. Mark a row `failed` in `posts.csv` if it never went out |
+| `PUBLISHER_CRON=live` per network | now | CoS | todo | After each network's credentials exist: `PUBLISHER_LIVE_NETWORKS` + `PUBLISHER_CADENCE=soul`. LinkedIn stays out until the decision above is configured |
+| Surprise-input test (6 rows) | now | CoS | todo | `queue/surprise_trial.csv`; keep/kill rules in `SURPRISING_INPUTS.md` |
+| Winner lane on | now | CoS | todo | `PUBLISHER_WINNER_NETWORKS=instagram,tiktok,bluesky`, cap 2/day. Verify badges first (next row) |
+| Verify winner handles | now | CoS / GTM | todo | `mill winners` lists them. Open each account, confirm the badge or the brand site link, set `verified: true` + `checked` + `by` in `queue/winners/handles.json` (PR). Add entries for new winners as they appear, never ahead of the verdict |
+| Early-iteration repost screenshots | next | C | todo | Salesforce, Plaza Hotel, Dyson reposts from two years ago → `docs/founder-notes/` as proof and as handle candidates |
 
 ## Setup (by hand, minimized)
 
-| Item | Owner | Status | Notes |
-| --- | --- | --- | --- |
-| Meta app for Instagram native | C | todo (tomorrow) | Instagram Login, Standard Access, no App Review; token + IG user ID → secrets |
-| Bluesky account + Actions secrets | C → CoS | todo | Sign up on a human device (hCaptcha); `BLUESKY_HANDLE`, `BLUESKY_APP_PASSWORD` |
-| DNS TXT records on antisearch.ai | C | todo | `_atproto` (Bluesky handle); Google Search Console and Bing Webmaster verification TXT. Cloudflare, additive |
-| Public clips repo + Pages + token | C | todo | Needed by Instagram native and the Buffer bridge |
-| Buffer API key | C | todo | Bridge for LinkedIn and TikTok until their native gates clear |
-| LinkedIn Community Management | C | blocked | Needs a registered company (open question), a business email on the domain and a privacy policy (draft in `docs/legal/`) |
+| Item | Priority | Owner | Status | Notes |
+| --- | --- | --- | --- | --- |
+| Meta app for Instagram native | next | C | todo (tomorrow) | Instagram Login, Standard Access, no App Review; token + IG user ID → secrets |
+| Bluesky account + Actions secrets | now | C → CoS | todo | Sign up on a human device (hCaptcha); `BLUESKY_HANDLE`, `BLUESKY_APP_PASSWORD` |
+| DNS TXT records on antisearch.ai | next | C | todo | `_atproto` (Bluesky handle); Google Search Console and Bing Webmaster verification TXT. Cloudflare, additive |
+| Public clips repo + Pages + token | now | C | todo | Needed by Instagram native and the Buffer bridge |
+| Buffer API key | now | C | todo | Bridge for LinkedIn and TikTok until their native gates clear |
+| LinkedIn Community Management | later | C | blocked | Needs a registered company (open question), a business email on the domain and a privacy policy (draft in `docs/legal/`) |
 
 ## Decisions and gates
 
-| Item | Owner | Status | Notes |
-| --- | --- | --- | --- |
-| TikTok stays on the Buffer bridge | — | decided | Native = inbox drafts only (a human taps Post); the public audit is out of reach for an own-account tool |
-| X: no posting | C | decided | The API is paid (pay-per-use). Bluesky stands in; X design exists |
-| `ceo` → Elon Musk | — | decided | Politics is allowed (founder 2026-09-25). The verdict publishes. It tags `@elonmusk` on TikTok or Instagram only after a human sets `verified: true` in `handles.json`. No LinkedIn Page or Bluesky handle is confirmed |
-| og image fix | C (`SHIP:`) | todo | `<title>`/`og:title`/`twitter:title` → `antisearch.ai`; image = a lone cursor block; `?v=3`. Gates Show HN |
-| Per-verdict cost / global cap on `/verdict` | C | open | Gates Show HN and full volume |
-| `?q=` deep link | C (`SHIP:`) | parked | antisearch.ai/?q=thing prefills the input; parked until after the trial |
+| Item | Priority | Owner | Status | Notes |
+| --- | --- | --- | --- | --- |
+| TikTok stays on the Buffer bridge | later | — | decided | Native = inbox drafts only (a human taps Post); the public audit is out of reach for an own-account tool |
+| X: no posting | later | C | decided | The API is paid (pay-per-use). Bluesky stands in; X design exists |
+| `ceo` → Elon Musk | later | — | decided | Politics is allowed (founder 2026-09-25). The verdict publishes. It tags `@elonmusk` on TikTok or Instagram only after a human sets `verified: true` in `handles.json`. No LinkedIn Page or Bluesky handle is confirmed |
+| og image fix | next | C (`SHIP:`) | todo | `<title>`/`og:title`/`twitter:title` → `antisearch.ai`; image = a lone cursor block; `?v=3`. Gates Show HN |
+| Per-verdict cost / global cap on `/verdict` | next | C | open | Gates Show HN and full volume |
+| `?q=` deep link | later | C (`SHIP:`) | parked | antisearch.ai/?q=thing prefills the input; parked until after the trial |
 
 ## Dev
 
-| Item | Owner | Status | Notes |
-| --- | --- | --- | --- |
-| Trend lane | Dev | live in code | `publisher/trends.py`; switch on with `PUBLISHER_TREND_NETWORKS` |
-| Reply watcher + "what's the … X?" answers (Bluesky) | Dev | live in code | `publisher/replies.py`; switch on with `PUBLISHER_REPLY_NETWORKS=bluesky` after the account exists |
-| Winner lane | Dev | live in code | `publisher/winners.py`: seeds, verified-only @mention per network, withhold only for minors and private individuals, cross-network cap. Politics is not withheld |
-| Reverse oracle: `mill reverse search` + target builder | Dev | todo (exploration) | Design in `GTM_OUT_OF_THE_BOX.md` → Reverse oracle: sandbox log outside `verdicts.csv`, ≤10 calls per target, naturalness score, Wikidata brand/person/exclusion check, handles as candidates only |
-| LinkedIn winner tags | Dev | parked | Needs organization mentions in the Posts API (`@[Name](urn:li:organization:id)`) and a verified name→URN map; until then LinkedIn winners go untagged |
-| X watcher / replies | Dev | parked | Design in `TREND_AND_REPLY_LANES.md`; needs X spend |
-| `mill record` for manual uploads | — | dropped | Buffer uploads go through the free API key in Actions. No web UI |
-| Buffer post reconciliation | Dev | todo if needed | One read per post, to catch network-side rejections on the bridge |
-| Native LinkedIn country mornings | Dev | parked | Needs cron around the clock (+720 Actions min/month); decide after LinkedIn approval |
-| Pulse telemetry | C | blocked | `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` in Cursor Cloud Agent secrets |
+| Item | Priority | Owner | Status | Notes |
+| --- | --- | --- | --- | --- |
+| Trend lane | later | Dev | live in code | `publisher/trends.py`; switch on with `PUBLISHER_TREND_NETWORKS` |
+| Reply watcher + "what's the … X?" answers (Bluesky) | later | Dev | live in code | `publisher/replies.py`; switch on with `PUBLISHER_REPLY_NETWORKS=bluesky` after the account exists |
+| Winner lane | later | Dev | live in code | `publisher/winners.py`: seeds, verified-only @mention per network, withhold only for minors and private individuals, cross-network cap. Politics is not withheld |
+| Reverse oracle: `mill reverse search` + target builder | later | Dev | todo (exploration) | Design in `GTM_OUT_OF_THE_BOX.md` → Reverse oracle: sandbox log outside `verdicts.csv`, ≤10 calls per target, naturalness score, Wikidata brand/person/exclusion check, handles as candidates only |
+| LinkedIn winner tags | later | Dev | parked | Needs organization mentions in the Posts API (`@[Name](urn:li:organization:id)`) and a verified name→URN map; until then LinkedIn winners go untagged |
+| X watcher / replies | later | Dev | parked | Design in `TREND_AND_REPLY_LANES.md`; needs X spend |
+| `mill record` for manual uploads | later | — | dropped | Buffer uploads go through the free API key in Actions. No web UI |
+| Buffer post reconciliation | next | Dev | todo if needed | One read per post, to catch network-side rejections on the bridge |
+| Native LinkedIn country mornings | later | Dev | parked | Needs cron around the clock (+720 Actions min/month). Do not build this on top of 09:07 local: a Madrid morning is inside Havas hours. See the LinkedIn decision |
+| Pulse telemetry | later | C | blocked | `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` in Cursor Cloud Agent secrets |
 
 ## Reverse oracle: first 10-target dry run (exploration)
+
+Priority: `later`.
 
 **Goal:** learn whether natural inputs reliably name high-reach, reply-friendly
 accounts, before anything is published.
