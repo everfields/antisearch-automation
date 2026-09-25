@@ -7,60 +7,70 @@ and needs a founder yes. Do not merge this until Carlos reviews it.
 The test is the one already in `docs/GTM_OUT_OF_THE_BOX.md`: the distribution
 behaves like the product. One input, one lowercase verdict, no list, no pitch.
 "best" stays the hidden premise and is never typed or posted
-(`README.md` → Input shape).
+(`README.md` → Input shape). Politics stays allowed. This note adds no
+politics filter.
 
 ---
 
-## A. LinkedIn text posts, one line per category
+## A. LinkedIn text posts, one pair per post
 
-**Evaluation.** LinkedIn will take the post. The brand will not.
-
-A list of `best company in france: X` lines is the thing the constitution
-refuses: "best" in the line, more than one verdict, a directory. Company vs
-company-to-work-for is a real distinction (the firm vs the place employees
-would pick). Putting both in one post makes a comparison, which is a list of
-two. LinkedIn's feed likes that shape. That fit is the reason to skip it.
-The Page already has a slot for employer verdicts, and the move on the books
-is a clip with no words (`GTM` rank 7), not a text list.
-
-One live call per line and no reroll is the right *asking* rule. It does not
-make a list a legal post.
-
-**Recommendation.** Do not post lists. Do not post the word "best". If a text
-experiment is wanted later, it replaces the clip for that one slot, it is one
-input, and it needs an explicit yes because the caption ritual today is empty
-or an `@handle`:
+**Format lock.** Soul, 2026-09-25, approved by CoS. One post is one pair of
+live calls, not a list. Lowercase. No header, no link, no hashtag, no emoji,
+no colon. The input is one line and the verdict is the next. A blank line
+sits between the two members of the pair. Shape only, `x` and `y` are not
+verdicts:
 
 ```text
 company in france
-<one lowercase verdict>
+x
+
+company to work for in france
+y
 ```
 
-Nothing else. The two France inputs would be two posts on two days, never side
-by side. Asking any line below spends that input forever, so none were asked.
+**Evaluation.** A pair is the company, then the place to work: two honest
+runs, no reroll, and it stops at two. A third line would be the list this
+lock refuses. "best" stays untyped. It is still not the clip, which is one
+verdict and no words (`GTM` rank 7). The Page's caption today is empty or an
+`@handle`, so this text replaces that ritual only with an explicit yes.
+Nothing below was asked. Asking a line spends that input forever.
 
-### Example sets (not run; verdicts left blank)
+**Recommendation.** If A is posted, this shape only. One pair per post. Do
+not post it until Carlos reviews this note.
+
+### Example sets (not run; verdict lines blank)
 
 Set 1, country:
 
-| input | verdict |
-| --- | --- |
-| `company in france` | |
-| `company to work for in france` | |
+```text
+company in france
+<blank>
+
+company to work for in france
+<blank>
+```
 
 Set 2, city:
 
-| input | verdict |
-| --- | --- |
-| `company in paris` | |
-| `company to work for in paris` | |
+```text
+company in paris
+<blank>
+
+company to work for in paris
+<blank>
+```
 
 Set 3, industry:
 
-| input | verdict |
-| --- | --- |
-| `airline` | |
-| `airline to work for` | |
+```text
+airline
+<blank>
+
+airline to work for
+<blank>
+```
+
+`<blank>` is an empty line. It is not a verdict.
 
 ---
 
@@ -190,7 +200,7 @@ distribution; they are not re-ranked here.
 
 Below the line, in order of how fast they should be forgotten:
 
-- **LinkedIn lists (A).** Feed-shaped, brand-wrong. The Page already has a clip slot.
+- **LinkedIn pairs (A).** The locked shape is one pair, not a list. Two verdicts in a company-page text post are still less reach per hour than Show HN, and they are not the clip. Not posted.
 - **Directories, newsletters, display/CTV.** A tour, a pitch, or a stunt. No free reach that behaves like the product.
 - **X API.** Not free. A URL post is $0.20. Out while spend is zero.
 - **Programmatic SEO (B).** The compatible page should not rank. The version that ranked is forbidden. Cost per URL is an unknown model bill, and a manual action lands on the domain. Worst reach per unit of effort and per unit of risk.
