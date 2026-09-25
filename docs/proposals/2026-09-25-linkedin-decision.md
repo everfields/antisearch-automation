@@ -1,10 +1,12 @@
 # LinkedIn decision
 
-Opus, 2026-09-25. Soul and GTM have not replied. Their notes go in the section at the bottom. This call does not wait on them. Carlos can override it.
+Opus, 2026-09-25, after Soul and GTM. Carlos can override it.
 
 The Page is `99258814`, the old company page renamed to antisearch, administered from Carlos's personal profile. He works full time at Havas Spain. Many of his connections are coworkers. He works on antisearch in the evening in Spain, not during the Havas day. LinkedIn is not in `PUBLISHER_LIVE_NETWORKS`. Nothing has been auto-posted.
 
-Madrid is ET+6, except the DST-gap weeks (2026-10-25 → 11-01, and the March pair), when it is ET+5. The current Soul slot `09:07` ET is 15:07 Madrid. That is inside the Spanish workday. On the `carlos` preset the LinkedIn slots are 15:07, 17:07, 19:07, 21:07 and 23:07 Madrid, so the first three sit in or on the edge of that day.
+X is idle. There is no paid API, so nothing posts there. The whisper currently lives on TikTok and Instagram, and on Bluesky once that account exists.
+
+Madrid is ET+6, except the DST-gap weeks (2026-10-25 → 11-01, and the March pair), when it is ET+5. The current Soul slot `09:07` ET is 15:07 Madrid, inside the Spanish workday. On the `carlos` preset the LinkedIn slots are 15:07, 17:07, 19:07, 21:07 and 23:07 Madrid.
 
 ## Options
 
@@ -12,38 +14,39 @@ Madrid is ET+6, except the DST-gap weeks (2026-10-25 → 11-01, and the March pa
 2. **Detach the Page from his personal profile** by adding another admin and leaving his profile.
 3. **Open a new Page** that is not the renamed company page.
 4. **Pause LinkedIn.** `PUBLISHER_SLOTS_LINKEDIN=off`. Leave it out of the live set.
-5. **Text pairs only, posted by hand.** One pair per post, lowercase, no header. Not built. Not this channel's current clip.
-
-## Risks
-
-- A post at 15:07 Madrid, from a Page he admins on the profile his coworkers already have, reads as side work at his desk. That is the risk he named. It is about the clock, not the clip.
-- Another admin, or a new Page, does not fix the clock. A new Page also drops `99258814`, which the publisher already uses. Both are extra human setup. He may not have a second admin.
-- Pausing drops the one network, with Instagram, that did not ban the earlier accounts. The ban history was X, and maybe TikTok.
-- Hand-posting text pairs from his own session is more visible to those connections than one Page post late in the evening.
-- The evening slot does not cover place rows. On the Buffer bridge, `employer in madrid` is scheduled for 09:07 Madrid no matter what `PUBLISHER_SLOTS_LINKEDIN` says. 09:07 New York is 15:07 Madrid. Any city whose local 09:07 falls between 09:00 and 19:00 Madrid has the same problem.
-
-## Decision
-
-Keep Page `99258814`. One automated clip a day, after the Spanish workday. Do not open a new Page. Do not pause the channel. Do not switch LinkedIn to manual text pairs.
-
-Set this before LinkedIn is added to `PUBLISHER_LIVE_NETWORKS`:
-
-```
-PUBLISHER_SLOTS_LINKEDIN=15:07
-```
-
-`15:07` ET is 21:07 Madrid (20:07 Madrid in a DST-gap week). Both are after 19:00. The cron already wakes at that UTC hour. One slot is one post a day on either cadence preset. `13:07` ET is 19:07 Madrid most of the year and 18:07 Madrid in the gap week, so it is not the slot.
-
-Until that variable is set, LinkedIn stays out of `PUBLISHER_LIVE_NETWORKS`.
-
-Do not enqueue LinkedIn place rows (`employer in madrid`, and the rest of `publisher/places.py`) while the bridge still schedules them for 09:07 local. The slot above does not move those.
-
-Adding another admin can happen later. It is not required for this.
+5. **Text pairs only, posted from the Page.** One pair per post, lowercase, no header, no video. Not built.
 
 ## Soul
 
-_(blank. Carlos adds this when Soul replies.)_
+Pause LinkedIn. The audience there is coworkers, and the Page has a past from the earlier pivot. If it is kept: only after 19:00 Madrid, plus weekends, 1 a day at most, text pairs only with no video, never Spain, media, advertising, Havas, or Havas clients as inputs, and posted from the Page only. A new clean Page is better. Park that for now.
 
 ## GTM
 
-_(blank. Carlos adds this when GTM replies.)_
+Keep it at 19:07 Madrid (`13:07` ET), plus weekends, 1 a day at most. A new Page does not fix the worry: it would still be administered from his profile, and it would have zero followers. Text-only does not help, because coworkers see the timestamp, not the format. LinkedIn is the weakest reach channel, so pausing costs almost nothing. Pause is the fallback.
+
+## Decision
+
+Pause LinkedIn.
+
+```
+PUBLISHER_SLOTS_LINKEDIN=off
+```
+
+Leave `linkedin` out of `PUBLISHER_LIVE_NETWORKS`. The `soul` preset still has a 09:07 ET LinkedIn slot. Without `off`, adding LinkedIn to the live set would post at 15:07 Madrid.
+
+Soul's reason is the one that decides it. The people who will see the Page are coworkers, and the Page is a renamed company page from the last pivot. An evening timestamp does not change either fact. GTM's keep is the timestamp fix, and GTM also says the reach cost of pausing is almost nothing. That cost is smaller still while X is idle and the whisper is already on TikTok, Instagram, and soon Bluesky.
+
+`13:07` ET is not an acceptable keep. It is 19:07 Madrid most of the year and 18:07 Madrid in a DST-gap week, which is inside the Havas day. A daily slot also cannot mean "evenings on weekdays and daytime on weekends." The publisher has no day-of-week slots. Pausing posts on no day, weekend included.
+
+Do not open a new Page. Soul wants one later and says park it. GTM is right that a new Page, still administered from his profile, does not answer the worry, and it would start with no followers. Parked.
+
+Do not build LinkedIn text pairs for this. GTM is right that coworkers read the clock. Soul's text-only rule would matter only if the Page were turned back on.
+
+If Carlos turns LinkedIn back on later, all of these hold, or it stays off:
+
+- `PUBLISHER_SLOTS_LINKEDIN=15:07` (21:07 Madrid, 20:07 in a DST-gap week). Not `13:07`. Not `09:07`.
+- One slot, so one post a day. That daily evening slot is also the weekend post.
+- From the Page only. No personal-profile posts.
+- No video on LinkedIn. Text pairs only, once that path exists. Until it exists, LinkedIn stays off.
+- No input about Spain, media, advertising, Havas, or a Havas client.
+- No place rows. The bridge still schedules those for 09:07 local, and 09:07 Madrid is the middle of the Havas day.

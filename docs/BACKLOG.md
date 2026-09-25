@@ -12,14 +12,14 @@ Updated 2026-09-25.
 
 | Item | Priority | Owner | Status | Notes |
 | --- | --- | --- | --- | --- |
-| LinkedIn decision | today | Opus | decided | Keep Page 99258814. One post/day after Spanish work hours: `PUBLISHER_SLOTS_LINKEDIN=15:07` (21:07 Madrid, 20:07 in the DST-gap week). Leave LinkedIn out of `PUBLISHER_LIVE_NETWORKS` until that variable is set. No place-rows (`employer in madrid` and the like) until local-morning scheduling is off. Write-up: `docs/proposals/2026-09-25-linkedin-decision.md` |
+| LinkedIn decision | today | Opus | decided | Pause. `PUBLISHER_SLOTS_LINKEDIN=off`. Leave LinkedIn out of `PUBLISHER_LIVE_NETWORKS`. A new Page stays parked. Write-up: `docs/proposals/2026-09-25-linkedin-decision.md` |
 
 ## Tonight and now
 
 | Item | Priority | Owner | Status | Notes |
 | --- | --- | --- | --- | --- |
 | First 4 clips to Buffer | now | GTM | todo | Same four frozen verdicts, re-rendered with a 2.0s pause (typed input and a blinking caret only; no spinner, dots, or "thinking" text) under `publisher-state` `manual/2026-09-25/` (oracle not re-asked). Upload through Buffer's free API from Actions, not the web UI. `@k18hair` only after `verified: true`. Mark a row `failed` in `posts.csv` if it never went out |
-| `PUBLISHER_CRON=live` per network | now | CoS | todo | After each network's credentials exist: `PUBLISHER_LIVE_NETWORKS` + `PUBLISHER_CADENCE=soul`. LinkedIn stays out until the decision above is configured |
+| `PUBLISHER_CRON=live` per network | now | CoS | todo | After each network's credentials exist: `PUBLISHER_LIVE_NETWORKS` + `PUBLISHER_CADENCE=soul`. LinkedIn stays out (`PUBLISHER_SLOTS_LINKEDIN=off`) |
 | Surprise-input test (6 rows) | now | CoS | todo | `queue/surprise_trial.csv`; keep/kill rules in `SURPRISING_INPUTS.md` |
 | Winner lane on | now | CoS | todo | `PUBLISHER_WINNER_NETWORKS=instagram,tiktok,bluesky`, cap 2/day. Verify badges first (next row) |
 | Verify winner handles | now | CoS / GTM | todo | `mill winners` lists them. Open each account, confirm the badge or the brand site link, set `verified: true` + `checked` + `by` in `queue/winners/handles.json` (PR). Add entries for new winners as they appear, never ahead of the verdict |
