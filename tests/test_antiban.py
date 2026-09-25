@@ -160,6 +160,47 @@ def test_x_is_not_auto_posted(ledger, log):
     assert out[0].status == "skipped_x_off"
 
 
+def test_x_buffer_dry_run_plans_one_video_url(ledger, log):
+    import json
+    from pathlib import Path
+
+    from antisearch_mill.publisher.buffer import BufferX
+
+    clip(ledger, "thing")
+    env = {
+        "BUFFER_API_KEY": "k", "BUFFER_CHANNEL_X": "ch-x", "PUBLISHER_RAMP": "off",
+        "PUBLISHER_MEDIA_REPO": "everfields/antisearch-clips", "PUBLISHER_MEDIA_TOKEN": "t",
+        "PUBLISHER_PUBLIC_BASE_URL": "https://everfields.github.io/antisearch-clips",
+    }
+    (o,) = go([job("thing", ("x",))], ledger, log, {"x": BufferX}, env=env, live=False, now=NOW)
+    assert o.status == "dry_run_ok"
+    plan = json.loads(Path(o.artifact).read_text())
+    assert plan["route"] == "buffer" and plan["network"] == "x" and plan["error"] is None
+    post = next(r for r in plan["requests"] if "CreatePost" in (r.get("json") or {}).get("query", ""))
+    payload = post["json"]["variables"]["input"]
+    assert payload["assets"] == [{"video": {"url": plan["media"]["public_url"]}}]
+    assert len(payload["assets"]) == 1 and "thumbnailOffset" not in json.dumps(payload["assets"])
+
+
+def test_x_live_needs_the_live_list_and_refuses_links_mentions_and_near_copies(ledger, log):
+    from antisearch_mill.publisher.winners import winner_networks
+
+    clip(ledger, "thing")
+    clip(ledger, "dry-shampoo")
+    clip(ledger, "dry-shampoos")
+    x = fake_adapter("x")
+    x.route = "buffer"
+    assert go([job("thing", ("x",))], ledger, log, {"x": x}, env=LIVE_ENV, now=NOW)[0].status == "skipped_not_approved"
+    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "x"}
+    assert "link" in go([job("thing", ("x",), caption="https://antisearch.ai")], ledger, log, {"x": x}, env=env, now=NOW)[0].detail
+    assert "mention" in go([job("thing", ("x",), caption="@antisearch_ai")], ledger, log, {"x": x}, env=env, now=NOW)[0].detail
+    assert go([job("dry-shampoo", ("x",), caption="dry shampoo")], ledger, log, {"x": x}, env=env, now=NOW)[0].status == "published"
+    later = NOW + timedelta(minutes=91)
+    again = go([job("dry-shampoos", ("x",), caption="dry shampoos")], ledger, log, {"x": x}, env=env, now=later)
+    assert again[0].status == "skipped_duplicate_caption"
+    assert winner_networks({"PUBLISHER_WINNER_NETWORKS": "instagram,x"}) == ["instagram"]
+
+
 def test_reply_cap_stays_three_a_day_and_seven_days_per_account():
     assert MAX_REPLIES_PER_DAY == 3
     assert AUTHOR_COOLDOWN == timedelta(days=7)

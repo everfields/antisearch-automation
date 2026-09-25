@@ -2,8 +2,9 @@
 
 Native (our own adapter, the network's official API) is the default everywhere.
 Buffer free is a temporary bridge, used only where a native gate hasn't cleared:
-`PUBLISHER_BRIDGE=buffer` routes Instagram, LinkedIn and TikTok through Buffer at once,
+`PUBLISHER_BRIDGE=buffer` routes Instagram, LinkedIn, TikTok and X through Buffer at once,
 unset removes Buffer entirely, and `PUBLISHER_ROUTE_<NETWORK>` overrides one network.
+X has no direct route: the paid API stays off, and `x` posts only when its route is buffer.
 """
 
 from __future__ import annotations
@@ -38,4 +39,7 @@ def route_for(network: str, env: Mapping[str, str]) -> str:
 
 
 def resolve_adapters(env: Mapping[str, str]) -> dict[str, type[Adapter]]:
-    return {n: (BUFFER_ROUTES[n] if route_for(n, env) == "buffer" else cls) for n, cls in ADAPTERS.items()}
+    resolved = {n: (BUFFER_ROUTES[n] if route_for(n, env) == "buffer" else cls) for n, cls in ADAPTERS.items()}
+    if route_for("x", env) == "buffer":
+        resolved["x"] = BUFFER_ROUTES["x"]
+    return resolved

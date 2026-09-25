@@ -65,7 +65,7 @@ HHMM = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 SERIAL = re.compile(r"(^|\s)(day|part|episode|ep|no\.?|vol\.?|#)\s*\d+|\b\d+\s*/\s*\d+\b", re.I)
 ENGLISH_CHARS = re.compile(r"^[a-z0-9 .,'&+\-/]+$")
 
-STAND_IN_FOR = {"bluesky": "x"}
+STAND_IN_FOR: dict[str, str] = {}  # Bluesky is its own channel. X via Buffer does not freeze it.
 HOLD_FOR_TAG = "@?"  # queue caption: freeze the verdict, post nothing until a human sets the tag
 WINNER = "@winner"  # queue caption: tag the verdict's verified handle from the winner map, or nothing
 NO_CAPTION = "-"  # queue caption: explicitly none (e.g. after a hold, when no verified handle exists)
@@ -86,6 +86,14 @@ def caption_problem(caption: str, bare_input: str, network: str = "") -> str | N
         return "at most one mention"
     if RANKED.search(c):
         return "caption starts with a ranking word"
+    if network == "x":
+        if "@" in c:
+            return "X captions cannot mention an account"
+        if re.search(r"https?://|\bwww\.", c, re.I):
+            return "X captions cannot contain a link"
+        if c == bare_input.strip():
+            return None
+        return "X caption must be empty or the bare input"
     if network == "bluesky":
         if HANDLE.match(c) and "." in c and not c.lower().endswith(".bsky.social"):
             return None

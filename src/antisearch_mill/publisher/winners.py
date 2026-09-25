@@ -81,7 +81,9 @@ def winner_cap(env: Mapping[str, str]) -> int:
 
 
 def winner_networks(env: Mapping[str, str]) -> list[str]:
-    return [n.strip().lower() for n in re.split(r"[,\s|]+", env.get("PUBLISHER_WINNER_NETWORKS") or "") if n.strip()]
+    # A winner tag is an @mention. X takes none.
+    return [n.strip().lower() for n in re.split(r"[,\s|]+", env.get("PUBLISHER_WINNER_NETWORKS") or "")
+            if n.strip() and n.strip().lower() != "x"]
 
 
 def winner_jobs(seeds_dir: Path, networks: list[str], day: date, log: PostLog, frozen: set[str],
@@ -96,6 +98,8 @@ def winner_jobs(seeds_dir: Path, networks: list[str], day: date, log: PostLog, f
     for net in networks:
         if left <= 0:
             break
+        if net == "x":
+            continue
         for category, _ in read_pool(seeds_dir / f"{net}.txt"):
             if category in taken:
                 continue

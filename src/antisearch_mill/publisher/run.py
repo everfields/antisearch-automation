@@ -110,9 +110,12 @@ def run_posts(
         if only and job.id not in only:
             continue
         if len(job.platforms) == 1 and job.platforms[0] == X_NETWORK:
-            if not networks or X_NETWORK in networks:
-                out.append(Outcome(job.id, X_NETWORK, "skipped_x_off", detail="X stays off for auto-posting"))
-            continue
+            xcls = adapters.get(X_NETWORK)
+            if xcls is None or xcls.route != "buffer":
+                if not networks or X_NETWORK in networks:
+                    out.append(Outcome(job.id, X_NETWORK, "skipped_x_off",
+                                       detail="X posts only through Buffer; the paid API stays off"))
+                continue
         own = [p for p in job.platforms if p in adapters]
         if not own or (networks and not set(own) & networks):
             continue
@@ -231,7 +234,10 @@ def run_posts(
             job = dataclasses.replace(job, caption=tag or "-", notes=f"{job.notes}; {note}")
 
         shown = effective_caption(job.caption)
-        if state.seen_caption(net, shown, log):
+        if net == X_NETWORK and (job.notes.startswith("trend:") or job.notes.startswith("winner")):
+            out.append(Outcome(job.id, net, "skipped_x_no_trend", detail="X takes no trend-lane posts and no automated mentions"))
+            continue
+        if state.seen_caption(net, shown, log) or (net == X_NETWORK and state.near_caption(net, shown, log)):
             out.append(Outcome(job.id, net, "skipped_duplicate_caption", detail="that caption already went out on this network"))
             continue
         if state.seen_clip(net, clip.clip_id, log):

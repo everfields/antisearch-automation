@@ -107,6 +107,7 @@ def test_one_trend_per_network_per_day_never_repeated(tmp_path):
 def test_trend_config():
     assert trend_cap({}) == 1 and trend_cap({"PUBLISHER_TREND_CAP": "9"}) == 3 and trend_cap({"PUBLISHER_TREND_CAP": "0"}) == 0
     assert trend_networks({"PUBLISHER_TREND_NETWORKS": "tiktok, instagram"}) == ["tiktok", "instagram"]
+    assert trend_networks({"PUBLISHER_TREND_NETWORKS": "tiktok,x"}) == ["tiktok"]
     assert trend_networks({}) == []
 
 

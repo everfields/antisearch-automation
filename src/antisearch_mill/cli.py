@@ -243,6 +243,7 @@ def cmd_due(args, settings: Settings) -> int:
         X_NETWORK, AntibanState, daily_slot_count, ramp_days, ramp_enabled, ramp_start,
     )
     from .publisher.guard import approved_networks, now_et, open_now, posting_day, slots_due, slots_for
+    from .publisher.registry import route_for
 
     env = dict(os.environ)
     log, _ = _publisher_state(args, settings, env)
@@ -252,8 +253,8 @@ def cmd_due(args, settings: Settings) -> int:
     state.apply_reach(log.path.parent / "metrics.csv", now, log.path.parent / "flags")
     due = []
     for net in sorted(approved_networks(env)):
-        if net == X_NETWORK:
-            print("  x         off (no auto-posting)")
+        if net == X_NETWORK and route_for(net, env) != "buffer":
+            print("  x         off (Buffer only; the paid API stays off)")
             continue
         try:
             full = slots_for(net, env)
@@ -288,7 +289,8 @@ def cmd_buffer_channels(args, settings: Settings) -> int:
         print(f"buffer error: {exc}", file=sys.stderr)
         return 1
     for c in channels:
-        print(f"BUFFER_CHANNEL_{c['service'].upper()}={c['id']}    # {c['name']}")
+        pin = "X" if c["service"] == "twitter" else c["service"].upper()
+        print(f"BUFFER_CHANNEL_{pin}={c['id']}    # {c['name']}")
     return 0
 
 

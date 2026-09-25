@@ -257,11 +257,11 @@ def test_one_clip_one_network(ledger, log):
     assert o.status == "skipped_one_clip_one_network" and b.calls == []
 
 
-def test_bluesky_freezes_once_x_is_live_again(ledger, log):
+def test_bluesky_stays_live_when_x_is_also_live(ledger, log):
     clip(ledger, "thing")
     b = fake_adapter()
     (o,) = go([job("thing")], ledger, log, {"bluesky": b}, env={**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "bluesky,x"})
-    assert o.status == "skipped_frozen_stand_in" and b.calls == []
+    assert o.status == "published" and b.calls
 
 
 @pytest.mark.parametrize("caption,ok", [("", True), ("thing", True), ("@antisearch", True), ("-", True),
