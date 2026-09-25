@@ -169,7 +169,9 @@ def trend_cap(env: Mapping[str, str]) -> int:
 
 
 def trend_networks(env: Mapping[str, str]) -> list[str]:
-    return [n.strip().lower() for n in re.split(r"[,\s|]+", env.get("PUBLISHER_TREND_NETWORKS") or "") if n.strip()]
+    # X takes no trend-lane posts. Listing it in the variable does not create rows.
+    return [n.strip().lower() for n in re.split(r"[,\s|]+", env.get("PUBLISHER_TREND_NETWORKS") or "")
+            if n.strip() and n.strip().lower() != "x"]
 
 
 def trend_jobs(candidates: list[Candidate], networks: list[str], day: date, log: PostLog, frozen: set[str],
@@ -187,6 +189,8 @@ def trend_jobs(candidates: list[Candidate], networks: list[str], day: date, log:
     pool = [c for c in candidates if c.input not in taken]
     jobs: list[Job] = []
     for net in networks:
+        if net == "x":
+            continue
         for _ in range(max(0, cap - used_today.get(net, 0))):
             if not pool:
                 return jobs

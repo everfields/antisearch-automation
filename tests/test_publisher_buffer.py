@@ -8,7 +8,7 @@ import pytest
 
 from antisearch_mill.publish.http import HttpResponse, RecordingTransport
 from antisearch_mill.publisher import Media, PublisherError
-from antisearch_mill.publisher.buffer import BufferInstagram, BufferLinkedIn, BufferTikTok
+from antisearch_mill.publisher.buffer import BufferInstagram, BufferLinkedIn, BufferTikTok, BufferX
 from antisearch_mill.publisher.media_host import GitHubPagesHost
 from antisearch_mill.publisher.registry import resolve_adapters, route_for
 
@@ -152,7 +152,7 @@ def test_native_is_the_default_and_buffer_is_one_switch():
     assert native["tiktok"] is TikTokAdapter and all(a.route == "direct" for a in native.values())
     bridged = resolve_adapters({"PUBLISHER_BRIDGE": "buffer"})
     assert bridged["instagram"] is BufferInstagram and bridged["tiktok"] is BufferTikTok
-    assert bridged["bluesky"].route == "direct"
+    assert bridged["x"] is BufferX and bridged["bluesky"].route == "direct"
     mixed = resolve_adapters({"PUBLISHER_BRIDGE": "buffer", "PUBLISHER_ROUTE_INSTAGRAM": "direct"})
     assert mixed["instagram"] is InstagramAdapter and mixed["linkedin"] is BufferLinkedIn
     assert route_for("linkedin", {"PUBLISHER_ROUTE_LINKEDIN": "buffer"}) == "buffer"
@@ -160,6 +160,31 @@ def test_native_is_the_default_and_buffer_is_one_switch():
         route_for("bluesky", {"PUBLISHER_ROUTE_BLUESKY": "buffer"})
     with pytest.raises(ValueError):
         route_for("tiktok", {"PUBLISHER_BRIDGE": "hootsuite"})
+
+
+def test_x_sends_one_video_url_and_no_thumbnail(clip):
+    _, t, res = run(BufferX, {**KEY, "BUFFER_CHANNEL_X": "ch-x"}, clip, "thing")
+    payload = gql(t.requests[0])[1]["input"]
+    assert payload["channelId"] == "ch-x"
+    assert payload["assets"] == [{"video": {"url": clip.public_url}}]
+    assert "thumbnailOffset" not in json.dumps(payload)
+    assert "metadata" not in payload
+    assert res.url == "https://twitter.dry.run/p/dry"
+
+
+def test_x_discovers_the_twitter_channel(clip):
+    _, t, _ = run(BufferX, KEY, clip)
+    payload = gql(t.requests[2])[1]["input"]
+    assert payload["channelId"] == "ch-twitter"
+
+
+def test_x_rejects_a_clip_outside_half_a_second_to_140(clip):
+    short = Media.video(clip.path, 1080, 1920, 0.4, public_url=clip.public_url)
+    with pytest.raises(PublisherError, match="0.5s and 140s"):
+        run(BufferX, {**KEY, "BUFFER_CHANNEL_X": "c"}, short)
+    long = Media.video(clip.path, 1080, 1920, 141, public_url=clip.public_url)
+    with pytest.raises(PublisherError, match="0.5s and 140s"):
+        run(BufferX, {**KEY, "BUFFER_CHANNEL_X": "c"}, long)
 
 
 def test_scheduled_post_uses_custom_time_and_skips_status_polls(clip):

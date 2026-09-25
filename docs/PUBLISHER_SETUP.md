@@ -36,7 +36,7 @@ API from GitHub Actions. Native is the **default route everywhere**. Buffer free
 (LinkedIn Page, Instagram and TikTok are all connected, on `antisearch@outlook.com`)
 is only a bridge for networks whose native approval gate hasn't cleared:
 
-- **`PUBLISHER_BRIDGE=buffer`** routes Instagram, LinkedIn and TikTok through Buffer
+- **`PUBLISHER_BRIDGE=buffer`** routes Instagram, LinkedIn, TikTok and X through Buffer
   at once. **Delete the variable and Buffer is gone.**
 - **`PUBLISHER_ROUTE_<NETWORK>=direct`** takes one network off the bridge as soon as
   its gate clears.
@@ -55,7 +55,7 @@ the problem. We leave Buffer because of the no-SaaS lock, and native is the targ
 | **Instagram** (Business, Reels only) | ready, tested | Instagram API **with Instagram Login**: `graph.instagram.com` `/media` (`REELS`, `video_url`, `share_to_feed`, `thumb_offset`) → poll → `/media_publish` | A Meta app; **Standard Access for our own Business account, no App Review**. Needs a Meta developer account (Carlos's Facebook, phone- or card-verified) | **Same day** Carlos creates the app (≈20 min) | Bridge |
 | **LinkedIn Page 99258814** | ready, tested (posts as the Page by default) | Posts API + Videos API with `w_organization_social` | **Community Management API**: a new app with no other product, verified by the Page, plus an access form vetting a **registered legal organization**, a **business email on antisearch.ai**, a website and a privacy policy. Development tier first (limited call volume), then Standard tier (screen recording) | **1–4 weeks if a registered company exists** (no published SLA; a rejection means a new app). **Blocked if there is no company** | Bridge |
 | **TikTok** | ready, tested | Content Posting API: `inbox/video/init` (drafts) or `video/init` (Direct Post) → single-chunk PUT → status | **App audit** for public posts. It requires a fully developed public website with visible Privacy and Terms links (antisearch.ai has none, and changing it is a `SHIP:`), a sandbox demo video, review in days to 2 weeks, and **TikTok refuses tools that only post to your own accounts** | **Public auto-posting: not realistic.** Unaudited native works today only as inbox drafts (a human taps Post, max 5 pending per 24h) or private `SELF_ONLY` | Bridge (public, no tap) |
-| **X** (held) | legacy `mill publish` adapter; port when unheld | API v2 media upload + `POST /2/tweets` | A developer account; **pay-per-use** (≈ $0.015 per post). That's a fee to X, Carlos's call | At unhold | — (Bluesky stands in) |
+| **X** `@antisearch_ai` | Buffer only. The paid API stays off | Buffer `createPost`, one MP4 by public URL, no `thumbnailOffset` | `PUBLISHER_BRIDGE=buffer` and `x` in `PUBLISHER_LIVE_NETWORKS`. Disconnect LinkedIn in Buffer first (free plan: 3 channels) | When the X channel is connected | Bridge |
 
 **Instagram Login vs Facebook Login.**
 - **Instagram Login** (chosen) needs no Facebook Page. The token belongs to the
@@ -120,7 +120,7 @@ already passes `secrets.BUFFER_API_KEY` into `mill post`. `BufferRoute` in
 
 1. Secret `BUFFER_API_KEY` from publish.buffer.com → Settings → API (free plan: 1 key, 3,000 requests / 30 days).
 2. Variable `PUBLISHER_BRIDGE=buffer` (and, per network, `PUBLISHER_ROUTE_<NETWORK>=buffer` only if that one network should stay on the bridge while others go native).
-3. Optional variables `BUFFER_CHANNEL_INSTAGRAM`, `BUFFER_CHANNEL_LINKEDIN`, `BUFFER_CHANNEL_TIKTOK` from `mill buffer-channels`, so a post does not spend two extra requests looking the channel up.
+3. Optional variables `BUFFER_CHANNEL_INSTAGRAM`, `BUFFER_CHANNEL_LINKEDIN`, `BUFFER_CHANNEL_TIKTOK`, `BUFFER_CHANNEL_X` from `mill buffer-channels` (Buffer's service id for X is `twitter`; the variable is still `BUFFER_CHANNEL_X`), so a post does not spend two extra requests looking the channel up.
 
 Nobody drives Buffer's web UI. If the API fails, that post is `failed` in the post log and the next run can retry it. There is no manual-upload fallback.
 
@@ -313,10 +313,10 @@ everything that can post natively.
 | --- | --- | --- |
 | `BLUESKY_HANDLE`, `BLUESKY_APP_PASSWORD` | secret | App password, no expiry |
 | `BUFFER_API_KEY` | secret | Bridge only. Free plan: 1 key, 3,000 requests / 30 days |
-| `BUFFER_CHANNEL_INSTAGRAM` / `_LINKEDIN` / `_TIKTOK` | variable | From `mill buffer-channels`; saves 2 requests per post |
+| `BUFFER_CHANNEL_INSTAGRAM` / `_LINKEDIN` / `_TIKTOK` / `_X` | variable | From `mill buffer-channels`; saves 2 requests per post. X's Buffer service id is `twitter` |
 | `PUBLISHER_MEDIA_TOKEN` | secret | Fine-grained, contents write on the clips repo only |
 | `PUBLISHER_MEDIA_REPO`, `PUBLISHER_PUBLIC_BASE_URL` | variable | Clips repo + its Pages URL |
-| `PUBLISHER_LIVE_NETWORKS` | variable | The recorded first-of-class yes. Adding `x` freezes Bluesky |
+| `PUBLISHER_LIVE_NETWORKS` | variable | The recorded first-of-class yes. `x` posts only when this lists it and the route is Buffer |
 | `PUBLISHER_CRON` | variable | unset = off; `dry-run`; `live` |
 | `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere) or `soul` (TikTok 5, X 5, Bluesky 3, IG 3, LinkedIn 1) |
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
@@ -324,7 +324,7 @@ everything that can post natively.
 | `PUBLISHER_WINNER_NETWORKS`, `PUBLISHER_WINNER_CAP` | variable, optional | Winner lane: networks + posts per day across networks (default 2, max 3); handles in `queue/winners/handles.json` |
 | `PUBLISHER_REPLY_NETWORKS`, `PUBLISHER_REPLY_CAP`, `PUBLISHER_WATCH_BLUESKY` | variable, optional | Reply lane (Bluesky): `bluesky` to go live, ≤3 a day, handles to watch |
 | `PUBLISHER_LANGUAGE` | variable, optional | `en` (default, Carlos's lock); anything else lifts the English check |
-| `PUBLISHER_BRIDGE` | variable, optional | `buffer` = Instagram, LinkedIn and TikTok via Buffer free. Unset = Buffer gone, all native |
+| `PUBLISHER_BRIDGE` | variable, optional | `buffer` = Instagram, LinkedIn, TikTok and X via Buffer free. Unset = Buffer gone; X then stays off |
 | `PUBLISHER_ROUTE_<NETWORK>` | variable, optional | `direct` (native, the default) or `buffer`; overrides the bridge for one network |
 | `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID` | secret | From the Meta app's Instagram login token generator; refresh within 60 days |
 | `LINKEDIN_ACCESS_TOKEN` (+ `LINKEDIN_REFRESH_TOKEN`, `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`) | secret | After Community Management approval |

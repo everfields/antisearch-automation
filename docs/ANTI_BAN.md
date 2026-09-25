@@ -77,7 +77,12 @@ gratuitously repetitive messages are not allowed.
    pixel noise). At upload, a real mp4 is remuxed with `-c copy`: new
    `creation_time`, new `comment=upload=...`, same frames, different file
    hash. A test fixture that is not an mp4 is posted as-is.
-8. **X.** A queue row for `x` is `skipped_x_off`. It is not auto-posted.
-   Putting `x` in `PUBLISHER_LIVE_NETWORKS` still freezes Bluesky, because
-   Bluesky is only the stand-in, and it still does not post to X. Leave `x`
-   out of that list until there is a separate decision to unhold it.
+8. **X.** Posts only through Buffer (`PUBLISHER_BRIDGE=buffer` or
+   `PUBLISHER_ROUTE_X=buffer`), and only when `x` is in `PUBLISHER_LIVE_NETWORKS`.
+   The paid API stays off: without the bridge a row is `skipped_x_off`.
+   One MP4, public URL, no `thumbnailOffset`. Jitter applies, same as the other
+   networks. No link in the caption, no `@mention`, no automated reply, no
+   trend-lane row, no winner tag. A non-empty caption that matches or nearly
+   matches an earlier X caption is not posted. Empty captions may repeat.
+   Unverified X on Buffer allows 50 posts per 24h; the cadence stays far under that.
+   Bluesky does not freeze when X is live.

@@ -13,6 +13,7 @@ import os
 import random
 import re
 from datetime import date, datetime, timedelta, timezone
+from difflib import SequenceMatcher
 from pathlib import Path
 
 from .guard import PostLog
@@ -119,6 +120,21 @@ def upload_wait_seconds(slot: datetime, offset: int, now: datetime, *, span: int
     return min(delta, span * 60.0)
 
 
+def _norm_text(text: str) -> str:
+    text = re.sub(r"https?://\S+|\bwww\.\S+", " ", (text or "").lower())
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", text).split())
+
+
+def near_duplicate(a: str, b: str, *, ratio: float = 0.82) -> bool:
+    """True when two captions are the same text, or close enough that X would treat them as the same post."""
+    na, nb = _norm_text(a), _norm_text(b)
+    if not na or not nb:
+        return False
+    if na == nb or (len(na) >= 12 and len(nb) >= 12 and (na in nb or nb in na)):
+        return True
+    return SequenceMatcher(None, na, nb).ratio() >= ratio
+
+
 def is_limit_error(detail: str) -> bool:
     return bool(_LIMIT.search(detail or ""))
 
@@ -219,6 +235,18 @@ class AntibanState:
             r.get("network") == network and r.get("caption") == caption and r.get("status") not in ("failed", "withheld")
             for r in log.rows()
         )
+
+    def near_caption(self, network: str, caption: str, log: PostLog | None = None) -> bool:
+        """X only uses this. Empty captions are not text, so they are never near-duplicates."""
+        if not caption:
+            return False
+        prior = list(self.captions.get(network, []))
+        if log is not None:
+            prior.extend(
+                r.get("caption", "") for r in log.rows()
+                if r.get("network") == network and r.get("status") not in ("failed", "withheld")
+            )
+        return any(near_duplicate(caption, old) for old in prior)
 
     def seen_clip(self, network: str, clip_id: str, log: PostLog | None = None) -> bool:
         if not clip_id:

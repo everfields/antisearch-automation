@@ -1,9 +1,10 @@
-"""Instagram, LinkedIn Page and TikTok through Buffer's GraphQL API (free plan).
+"""Instagram, LinkedIn Page, TikTok and X through Buffer's GraphQL API (free plan).
 
 Our scheduler still owns everything that matters: slots, frozen verdicts, captions,
 the post log. Buffer is only the authorized pipe into networks whose own APIs are
 closed to us: the LinkedIn Page API needs a registered company, Instagram needs a
-Meta app, and TikTok won't audit an in-house tool. Each post is created at its slot with
+Meta app, TikTok won't audit an in-house tool, and the X API is pay-per-use.
+X posts only through this bridge. Each post is created at its slot with
 `mode: shareNow`, so Buffer's 10-post queue limit never comes into play. Media
 must be at a public URL (the media host provides it).
 """
@@ -113,7 +114,7 @@ class BufferRoute(Adapter):
             return HttpResponse.of_json(200, {"data": {"account": {"organizations": [{"id": "org-dry"}]}}})
         if "Channels" in query:
             return HttpResponse.of_json(200, {"data": {"channels": [
-                {"id": f"ch-{s}", "name": s, "service": s} for s in ("instagram", "linkedin", "tiktok")]}})
+                {"id": f"ch-{s}", "name": s, "service": s} for s in ("instagram", "linkedin", "tiktok", "twitter")]}})
         return HttpResponse.of_json(400, {"errors": [{"message": "dry-run responder: unexpected query"}]})
 
 
@@ -157,9 +158,30 @@ class BufferTikTok(BufferRoute):
         return _thumbnail_on_verdict(media)
 
 
+class BufferX(BufferRoute):
+    """One MP4 by public URL. X rejects thumbnailOffset, so the asset is the URL alone."""
+
+    name = "x"
+    service = "twitter"  # Buffer's service enum; the env pin is BUFFER_CHANNEL_X
+    env_sets = (("BUFFER_API_KEY", "PUBLISHER_MEDIA_REPO", "PUBLISHER_MEDIA_TOKEN", "PUBLISHER_PUBLIC_BASE_URL"),)
+    optional_env = ("BUFFER_CHANNEL_X", "BUFFER_ORG_ID")
+    cannot = ("Unverified X via Buffer: 1 MP4, 0.5–140s, 50 posts per 24h. No thumbnailOffset. "
+              "Free plan is 3 channels; disconnect LinkedIn in Buffer before connecting @antisearch_ai.")
+
+    def _video(self, media: Media) -> dict:
+        return {"url": media.public_url}
+
+    def _post(self, media: Media, caption: str) -> PostResult:
+        if not (0.5 <= media.duration_s <= 140):
+            raise PublisherError(f"buffer: X wants an MP4 between 0.5s and 140s, got {media.duration_s:g}s")
+        return super()._post(media, caption)
+
+
 def list_channels(adapter: BufferRoute) -> list[dict]:
     org = adapter.var("BUFFER_ORG_ID") or adapter._gql(ORGS)["account"]["organizations"][0]["id"]
     return adapter._gql(CHANNELS, {"org": org})["channels"]
 
 
-BUFFER_ROUTES: dict[str, type[BufferRoute]] = {c.name: c for c in (BufferInstagram, BufferLinkedIn, BufferTikTok)}
+BUFFER_ROUTES: dict[str, type[BufferRoute]] = {
+    c.name: c for c in (BufferInstagram, BufferLinkedIn, BufferTikTok, BufferX)
+}

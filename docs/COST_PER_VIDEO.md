@@ -118,7 +118,7 @@ Already the free API, not the website. The switch:
 
 1. Secret `BUFFER_API_KEY` (publish.buffer.com → Settings → API).
 2. Variable `PUBLISHER_BRIDGE=buffer`.
-3. Optional `BUFFER_CHANNEL_INSTAGRAM`, `BUFFER_CHANNEL_LINKEDIN`, `BUFFER_CHANNEL_TIKTOK`.
+3. Optional `BUFFER_CHANNEL_INSTAGRAM`, `BUFFER_CHANNEL_LINKEDIN`, `BUFFER_CHANNEL_TIKTOK`, `BUFFER_CHANNEL_X`.
 
 `.github/workflows/publisher.yml` passes the secret into `mill post`.
 `publisher/buffer.py` posts to `https://api.buffer.com` (`createPost`,

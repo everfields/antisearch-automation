@@ -34,7 +34,7 @@ Updated 2026-09-25.
 | Item | Owner | Status | Notes |
 | --- | --- | --- | --- |
 | TikTok stays on the Buffer bridge | — | decided | Native = inbox drafts only (a human taps Post); the public audit is out of reach for an own-account tool |
-| X: no posting | C | decided | The API is paid (pay-per-use). Bluesky stands in; X design exists |
+| X via Buffer | C | decided | Paid API stays off. `PUBLISHER_BRIDGE=buffer` and `x` in `PUBLISHER_LIVE_NETWORKS`. Disconnect LinkedIn in Buffer, connect `@antisearch_ai`. No links, mentions, replies, or trend posts on X |
 | `ceo` → Elon Musk | — | decided | Politics is allowed (founder 2026-09-25). The verdict publishes. It tags `@elonmusk` on TikTok or Instagram only after a human sets `verified: true` in `handles.json`. No LinkedIn Page or Bluesky handle is confirmed |
 | og image fix | C (`SHIP:`) | todo | `<title>`/`og:title`/`twitter:title` → `antisearch.ai`; image = a lone cursor block; `?v=3`. Gates Show HN |
 | Per-verdict cost / global cap on `/verdict` | C | open | Gates Show HN and full volume |
