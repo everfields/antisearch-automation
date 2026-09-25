@@ -98,7 +98,7 @@ Instagram native, LinkedIn and TikTok bridged. When LinkedIn is approved, set
 At each network's slot, the GitHub Actions run (never the box):
 1. picks the next row in blind order;
 2. freezes the verdict (one honest run);
-3. renders the 9:16 clip (about 5–8s, thinking pause included);
+3. renders the 9:16 clip (about 5–8s, pause included: typed input and a blinking caret only);
 4. commits it to the public clips repo and waits for GitHub Pages;
 5. calls Buffer `createPost` (`shareNow`; LinkedIn country rows `customScheduled` for
    09:07 local);

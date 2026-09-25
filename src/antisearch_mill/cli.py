@@ -475,7 +475,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--force", action="store_true", help="re-produce jobs that already have a clip")
     sp.add_argument("--limit", type=int, help="produce at most N new clips")
     sp.add_argument("--only", action="append", help="job id(s), comma separated")
-    sp.add_argument("--pause", type=float, help="thinking pause in seconds (default: the oracle call's latency, clamped 1.2-3.5)")
+    sp.add_argument("--pause", type=float, help="pause in seconds: typed input and a blinking caret only (default: the oracle call's latency, clamped 1.2-3.5)")
     sp.set_defaults(func=cmd_produce)
 
     sp = sub.add_parser("publish", help="publish produced clips (dry-run unless --live)")

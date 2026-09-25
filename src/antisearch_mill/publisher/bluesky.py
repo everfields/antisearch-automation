@@ -1,7 +1,7 @@
 """Bluesky (AT Protocol): app password session -> video service -> app.bsky.feed.post.
 
 Bluesky is the stand-in for the held X vertical and posts only the mill's frozen
-9:16 verdict clip (about 5–8s, the thinking pause included): no images, no
+9:16 verdict clip (about 5–8s, the pause included): no images, no
 text-only posts, no replies. Video goes through
 Bluesky's video service (service token scoped to uploadBlob on our PDS ->
 video.bsky.app uploadVideo -> getJobStatus until a BlobRef), so the post never

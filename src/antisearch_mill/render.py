@@ -233,6 +233,8 @@ def build_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: 
     # Blink phase restarts at every keystroke and when the pause begins (native caret
     # behaviour). The product's free-running CSS blink is 1.05s, 51% on. During the
     # pause the completed input stays, so a blink-off frame is never an empty screen.
+    # Soul lock: that pause draws the input and this caret only. No spinner, dots,
+    # or "thinking" text, even if the live site adds them.
     # Integer frame arithmetic: a rounded float anchor can make t-anchor slightly
     # negative, and ffmpeg's floor-based mod() then wraps it into the off phase.
     period_f = BLINK_PERIOD_S * timeline.fps

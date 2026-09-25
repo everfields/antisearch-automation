@@ -27,8 +27,10 @@ def test_story_is_typing_then_a_still_pause_then_verdict():
     assert typed == [category[:i] for i in range(len(category) + 1)]
 
     loading, result = tl.states[-2], tl.states[-1]
-    # The completed input stays. The caret is the only waiting mark. Nothing else is added.
+    # Soul lock: typed input and a caret. No spinner, dots, or "thinking" text.
     assert loading.text == category and loading.cursor
+    assert "thinking" not in loading.text
+    assert "..." not in loading.text and "…" not in loading.text
     assert (loading.end - loading.start) / tl.fps == pytest.approx(tl.pause_s)
     assert MIN_PAUSE_S <= tl.pause_s <= MAX_PAUSE_S
     assert result.text == verdict and not result.cursor

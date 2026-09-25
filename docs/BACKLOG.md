@@ -11,7 +11,7 @@ Updated 2026-09-25.
 
 | Item | Owner | Status | Notes |
 | --- | --- | --- | --- |
-| First 4 clips to Buffer | GTM | todo | Same four frozen verdicts, re-rendered with a 2.0s thinking pause under `publisher-state` `manual/2026-09-25/` (oracle not re-asked). Upload through Buffer's free API from Actions, not the web UI. `@k18hair` only after `verified: true`. Mark a row `failed` in `posts.csv` if it never went out |
+| First 4 clips to Buffer | GTM | todo | Same four frozen verdicts, re-rendered with a 2.0s pause (typed input and a blinking caret only; no spinner, dots, or "thinking" text) under `publisher-state` `manual/2026-09-25/` (oracle not re-asked). Upload through Buffer's free API from Actions, not the web UI. `@k18hair` only after `verified: true`. Mark a row `failed` in `posts.csv` if it never went out |
 | `PUBLISHER_CRON=live` per network | CoS | todo | After each network's credentials exist: `PUBLISHER_LIVE_NETWORKS` + `PUBLISHER_CADENCE=soul` |
 | Surprise-input test (6 rows) | CoS | todo | `queue/surprise_trial.csv`; keep/kill rules in `SURPRISING_INPUTS.md` |
 | Winner lane on | CoS | todo | `PUBLISHER_WINNER_NETWORKS=instagram,tiktok,bluesky`, cap 2/day. Verify badges first (next row) |

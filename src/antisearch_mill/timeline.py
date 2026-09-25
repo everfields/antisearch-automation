@@ -3,13 +3,12 @@
 Frame-indexed and deterministic: the typing jitter is seeded from the
 category, so the same (category, verdict, pause) always renders the same clip.
 
-The pause is the product's wait. The live site (antisearch.ai, fetched
-2026-09-25) adds nothing while the oracle thinks: no spinner, no status word.
-On submit it sets state to "loading", hides `.mirror`, and leaves `#cursor`
-blinking (`animation: blink 1.05s steps(1)`). Founder order the same day: the
-pause is a still hold of the typed input plus that caret, with nothing added.
-Hiding the input for the whole wait is the beat nobody could read, so the
-completed input stays on screen and the caret is the only waiting mark.
+Soul lock, 2026-09-25, approved by CoS: the thinking pause is blank time
+with the typed input and a blinking caret only. No spinner, no dots, no
+"thinking" text. This does not follow antisearch.ai. If the site adds any of
+those, the clip still does not. The site fetched that day hides `.mirror` on
+submit and leaves `#cursor` blinking; the clip keeps the completed input up,
+because a blank caret for the whole wait does not read as a question.
 """
 
 from __future__ import annotations
@@ -133,7 +132,7 @@ def build_timeline(
         until = appear[k] if k < len(appear) else submit
         states.append(State(appear[k - 1], until, "typing", category[:k], True))
     verdict_at = submit + pause
-    # Still: the completed input, caret blinking. Nothing else.
+    # Pause lock: the completed input and the caret. No spinner, dots, or status word.
     states.append(State(submit, verdict_at, "loading", category, True))
     states.append(State(verdict_at, total, "result", verdict, False))
 

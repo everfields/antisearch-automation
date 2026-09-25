@@ -143,13 +143,14 @@ and every code-formatted example in README/SETUP.
   dim `antisearch.ai` footer
 - the blink phase restarts on every keystroke and when the pause begins
 - timeline: 0.3s idle cursor → jittered typing (≤1.5s, seeded by category, so deterministic) →
-  0.22s hold of the completed input → a still pause (the same input and the blinking caret;
-  no spinner, no status word) → verdict holds to the end (≥1s). Short clips are padded on the
-  verdict hold so the total is at least 5s. The pause length is the oracle call's wall-clock
-  latency, clamped to 1.2–3.5s. If that latency was not recorded, the pause is 2.0s
-- the live site hides the typed line on submit and leaves only the caret. These clips keep
-  the typed input up during the pause, because a blank caret for a few seconds does not read
-  as a question being answered. Nothing the site doesn't have is added
+  0.22s hold of the completed input → a still pause (the typed input and a blinking caret only;
+  no spinner, no dots, no "thinking" text, even if antisearch.ai shows one) → verdict holds to
+  the end (≥1s). Short clips are padded on the verdict hold so the total is at least 5s. The
+  pause length is the oracle call's wall-clock latency, clamped to 1.2–3.5s. If that latency
+  was not recorded, the pause is 2.0s
+- the pause does not copy the site's loading chrome. The site fetched 2026-09-25 hides the
+  typed line on submit. The clip keeps the input anyway. A later spinner, dots, or status
+  word on the site is not drawn
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long
 - the verdict frame is the cover
 - renders are byte-identical for the same (category, verdict, pause)
