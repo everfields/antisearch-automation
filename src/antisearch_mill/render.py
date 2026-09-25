@@ -230,9 +230,9 @@ def build_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: 
     for idx, (p, ranges) in enumerate(text_ranges.items()):
         filters.append(drawtext(p, lay.font_px, FG, _ranges_expr(_merge(ranges)), idx))
 
-    # Blink phase restarts at every keystroke and at submit (native caret behaviour).
-    # The product's free-running CSS blink would otherwise land a 0.5s blackout on the
-    # lone-cursor submit beat of a <=4s clip, depending only on typing speed.
+    # Blink phase restarts at every keystroke and when the pause begins (native caret
+    # behaviour). The product's free-running CSS blink is 1.05s, 51% on. During the
+    # pause the completed input stays, so a blink-off frame is never an empty screen.
     # Integer frame arithmetic: a rounded float anchor can make t-anchor slightly
     # negative, and ffmpeg's floor-based mod() then wraps it into the off phase.
     period_f = BLINK_PERIOD_S * timeline.fps
@@ -367,6 +367,47 @@ def contact_sheet(clip: Path, out_png: Path, *, every_s: float = 0.4, cols: int 
         "-vf", f"fps=1/{every_s},scale=270:-2,tile={cols}x{rows}:padding=6:color=0x333333",
         "-frames:v", "1", "-update", "1", str(out_png),
     ])
+
+
+def render_gif(src: Path, dst: Path, *, width: int = 600, max_bytes: int = 3 * 1024 * 1024) -> int:
+    """Looping GIF of a rendered clip. Width is `width` px; height keeps the source aspect.
+
+    Palette is generated from the frames, which are only #0A0A0A and #E8E4D8.
+    fps drops until the file is at most 3 MB.
+    """
+    require_tools()
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    last_size = 0
+    for fps in (12, 10, 8, 6, 4):
+        _run([
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(src),
+            "-vf", (
+                f"fps={fps},scale={width}:-2:flags=lanczos,"
+                "split[s0][s1];[s0]palettegen=max_colors=16:stats_mode=diff[p];"
+                "[s1][p]paletteuse=dither=none"
+            ),
+            "-loop", "0", str(dst),
+        ])
+        last_size = dst.stat().st_size
+        if last_size <= max_bytes:
+            return last_size
+    raise RenderError(f"gif {dst} is {last_size} bytes, over the {max_bytes} byte cap")
+
+
+def render_loop_mp4(src: Path, dst: Path, *, width: int = 600) -> ClipInfo:
+    """Silent looping-source mp4 at `width` px wide, same aspect as `src`. Players loop the file."""
+    require_tools()
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    _run([
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(src),
+        "-vf", f"scale={width}:-2:flags=lanczos,format=yuv420p",
+        "-an",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-profile:v", "high",
+        "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+        "-metadata", "comment=loop=1;capture=synthetic-oracle",
+        str(dst),
+    ])
+    return probe(dst)
 
 
 def derive_variant(src: Path, dst: Path, width: int, height: int) -> ClipInfo:

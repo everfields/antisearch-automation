@@ -2,7 +2,8 @@
 
 Candidates come only from Wikipedia's most-read articles, because each one carries
 a description we can classify: a film, a show, a place, a product, a food or an event
-is kept; a person, a death, a crime, politics or a disaster is dropped. Google
+is kept; a person, a death, a crime or a disaster is dropped. Politics is not
+filtered (founder, 2026-09-25). Google
 Trends (daily RSS) and Bluesky trending topics only boost the rank of a Wikipedia
 candidate they also mention; they never supply an input themselves (their top items
 are mostly news). The day's ordered list is fetched once and frozen in the state
@@ -35,17 +36,18 @@ HT = "{https://trends.google.com/trending/rss}"
 MAX_TREND_CAP = 3
 TREND_PREFIX = "tr-"
 
-UNSAFE = re.compile(
+# Trend lane only. Politics is not in this pattern (founder, 2026-09-25). Confirmation
+# is still open on whether disaster/tragedy, and the crime words grouped with them,
+# should stay. Winner and reply lanes do not use this filter.
+DISASTER = re.compile(
     r"\b(death|deaths|dead|dies|died|killed|killing|kill|murder\w*|serial killer|shooting|shot|stabbing|war|wars|"
-    r"invasion|attack\w*|terror\w*|bomb\w*|genocide|massacre|hostage|election\w*|president\w*|senator|congress\w*|"
-    r"parliament|politic\w*|minister|government|campaign|protest\w*|riot\w*|earthquake|hurricane|typhoon|flood\w*|"
+    r"invasion|attack\w*|terror\w*|bomb\w*|genocide|massacre|hostage|earthquake|hurricane|typhoon|flood\w*|"
     r"wildfire|tornado|storm|crash\w*|accident|disaster|suicide|overdose|abuse\w*|assault\w*|rape|trial|court|lawsuit|"
-    r"arrest\w*|convicted|prison|scandal|disease|outbreak|pandemic|virus|cancer|funeral|obituary|acquitted|execution|"
-    r"deportation\w*|immigration|refugee\w*|israel|gaza|ukraine|russia|palestin\w*|trump|biden|netanyahu)\b",
+    r"arrest\w*|convicted|prison|scandal|disease|outbreak|pandemic|virus|cancer|funeral|obituary|acquitted|execution)\b",
     re.I,
 )
 PERSON = re.compile(
-    r"\b(born \d{4}|\(\d{4}\s*[–-]\s*\d{4}\)|actor|actress|singer|songwriter|rapper|musician|model|politician|player|"
+    r"\b(born \d{4}|\(\d{4}\s*[–-]\s*\d{4}\)|actor|actress|singer|songwriter|rapper|musician|model|player|"
     r"footballer|athlete|businessman|businesswoman|entrepreneur|journalist|youtuber|streamer|influencer|comedian|"
     r"writer|author|director|producer|chef|king|queen|prince|princess|woman|man|person|band|duo|group|reporter|"
     r"correspondent|anchor|presenter|host|personality|executive|ceo|founder|coach|manager|scientist|lawyer|judge|"
@@ -113,8 +115,8 @@ def to_input(title: str) -> str:
 def classify(article: dict) -> str | None:
     """None if the article can become an input; otherwise the reason it can't."""
     text = " ".join((article["title"], article["description"], article["extract"]))
-    if UNSAFE.search(text):
-        return "unsafe topic"
+    if DISASTER.search(text):
+        return "disaster or tragedy"
     if not article["description"]:
         return "no description to classify"
     if re.match(r"^(list of|lists of|[\w .]+ at the )", article["title"], re.I):

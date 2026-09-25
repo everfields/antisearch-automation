@@ -39,7 +39,7 @@ def test_clip_contract_and_monolith_pixels(tmp_path):
     clip = tmp_path / "c.mp4"
     info = render_clip(tl, clip, font_path=resolve_font(), metadata={"comment": "capture=synthetic-oracle"})
     assert (info.width, info.height) == (1080, 1920)
-    assert info.duration_s == pytest.approx(3.8, abs=0.05)
+    assert 5.0 <= info.duration_s <= 8.0
     assert (info.vcodec, info.pix_fmt, info.acodec) == ("h264", "yuv420p", "aac")
     assert info.fps == 30
 
@@ -50,7 +50,7 @@ def test_clip_contract_and_monolith_pixels(tmp_path):
     assert "capture=synthetic-oracle" in tags
 
     lay = Layout()
-    verdict_frame = frame_rgb(clip, 3.5)
+    verdict_frame = frame_rgb(clip, tl.verdict_frame / tl.fps + 0.15)
     bg = px(verdict_frame, 20, 20)
     assert all(abs(c - 10) <= 4 for c in bg), bg
     cy = int(lay.center_y)
@@ -64,7 +64,7 @@ def test_clip_contract_and_monolith_pixels(tmp_path):
     "restaurant in barcelona", "noise cancelling headphones", "x" * 55,
 ])
 def test_cursor_never_blinks_out_mid_story(tmp_path, category):
-    """Typing and the lone-cursor submit beat must show something in every frame."""
+    """Typing, the still pause (input stays), and the verdict each show the text."""
     tl = build_timeline(category, "a verdict")
     clip = tmp_path / "c.mp4"
     render_clip(tl, clip, font_path=resolve_font())
@@ -88,7 +88,7 @@ def test_cursor_never_blinks_out_mid_story(tmp_path, category):
 def test_hostile_characters_render(tmp_path, category, verdict):
     tl = build_timeline(category, verdict)
     info = render_clip(tl, tmp_path / "h.mp4", font_path=resolve_font())
-    assert info.duration_s == pytest.approx(3.8, abs=0.05)
+    assert 5.0 <= info.duration_s <= 8.0
 
 
 def test_render_is_deterministic(tmp_path):

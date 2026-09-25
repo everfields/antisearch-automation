@@ -62,15 +62,17 @@ def test_only_safe_things_survive_and_trending_boosts_rank():
     assert [c.input for c in kept] == ["big brother", "resident evil", "potoo"]
     assert kept[0].source == "wikipedia+trending" and kept[2].source == "wikipedia+trending"
     reasons = {d["title"]: d["skipped"] for d in decisions}
-    assert reasons["Lizzie Borden"] == "unsafe topic" and reasons["Deaths in 2026"] == "unsafe topic"
+    assert reasons["Lizzie Borden"] == "disaster or tragedy" and reasons["Deaths in 2026"] == "disaster or tragedy"
     assert reasons["Cindy Crawford"] == "a person" and reasons["Ed Henry"] == "a person"
     assert reasons["India at the 2026 Asian Games"] == "a list or delegation, not a thing"
 
 
-def test_classify_drops_politics_disasters_and_crime_even_in_the_extract():
+def test_classify_drops_disasters_in_the_extract_and_keeps_politics():
     art = {"title": "Storm Chaser", "description": "2026 film", "extract": "A hurricane destroys a town."}
-    assert classify(art) == "unsafe topic"
+    assert classify(art) == "disaster or tragedy"
     assert classify({"title": "Ramen", "description": "Japanese noodle dish", "extract": ""}) is None
+    # Politics is allowed. A film about a campaign is not a disaster.
+    assert classify({"title": "The Campaign", "description": "2026 film", "extract": "A satire of an election."}) is None
 
 
 def test_the_day_list_is_frozen_once(tmp_path):

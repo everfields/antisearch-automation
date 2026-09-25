@@ -20,8 +20,10 @@ one bare English input, one lowercase verdict, nothing else.
 - **TikTok Creative Center:** not scraped (its terms don't allow it); design only.
 
 **The filter** (on the live data of 2026-09-25 it dropped 37 of 44 articles):
-- **unsafe:** deaths, crime, war, politics, disasters, disease, courts, named
-  politicians. Checked in the title, the description *and* the extract.
+- **disaster / tragedy (trend lane only):** deaths, crime, war, disasters, disease,
+  courts. Checked in the title, the description *and* the extract. **Politics is
+  not filtered** (founder, 2026-09-25). This disaster filter is flagged for
+  founder confirmation; it does not apply to the winner lane or the reply lane.
 - **people:** anyone described by an occupation or a birth year; people are never
   objects.
 - **lists and delegations** ("List of…", "X at the Y").
@@ -66,7 +68,7 @@ run; a repeated X reuses its verdict).
 - one reply per author per 7 days;
 - only posts under 2h old, only top-level posts, never our own, never a post we've
   already handled;
-- never unsafe topics (the same filter as the trend lane);
+- politics is allowed, and the trend lane's disaster filter does not apply;
 - the oracle's `no` → no reply.
 
 **Running it:**
@@ -97,9 +99,10 @@ run; a repeated X reuses its verdict).
   - The repo ships every handle as `verified: false`. `mill winners` lists what
     needs checking.
   - Unknown or unverified winners post with **no tag**. Never guessed.
-- **Withheld:** entries with `sensitive: true` (today: Elon Musk, politics), and any
-  verdict the safety filter flags. The post log records `withheld`, the input is
-  spent, and no slot is used.
+- **Withheld:** entries with `sensitive: true`, which is only for a minor or a
+  private individual. Politics is not a withhold: `ceo` → Elon Musk publishes, and
+  the caption is the verified `@handle` for that network (never a `#hashtag`).
+  The post log records `withheld`, the input is spent, and no slot is used.
 - **Per network:**
   - Instagram and TikTok take a plain `@handle`.
   - Bluesky tags only verified domain handles; anything else goes untagged.

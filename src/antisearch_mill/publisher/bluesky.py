@@ -1,7 +1,8 @@
 """Bluesky (AT Protocol): app password session -> video service -> app.bsky.feed.post.
 
 Bluesky is the stand-in for the held X vertical and posts only the mill's frozen
-≤4s 9:16 verdict clip: no images, no text-only posts, no replies. Video goes through
+9:16 verdict clip (about 5–8s, the thinking pause included): no images, no
+text-only posts, no replies. Video goes through
 Bluesky's video service (service token scoped to uploadBlob on our PDS ->
 video.bsky.app uploadVideo -> getJobStatus until a BlobRef), so the post never
 appears with a missing video. Every @handle in the caption must resolve to a DID
@@ -18,7 +19,7 @@ from .base import VIDEO, Adapter, Media, PostResult, PublisherError
 
 VIDEO_SERVICE = "https://video.bsky.app"
 JOB_POLLS = 90
-MAX_SECONDS = 4.0
+MAX_SECONDS = 8.0  # founder 2026-09-25: the <=4s clip cap is lifted; the wait is part of the clip
 HANDLE_IN_TEXT = re.compile(r"(?<![\w.])@([A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9])")
 
 
@@ -50,7 +51,7 @@ class BlueskyAdapter(Adapter):
 
     def _post(self, media: Media, caption: str) -> PostResult:
         if media.duration_s > MAX_SECONDS or media.width * 16 != media.height * 9:
-            raise PublisherError(f"bluesky: only the <=4s 9:16 verdict clip goes out "
+            raise PublisherError(f"bluesky: only the <={MAX_SECONDS:.0f}s 9:16 verdict clip goes out "
                                  f"(got {media.duration_s}s {media.width}x{media.height})")
         service = self.var("BLUESKY_SERVICE", "https://bsky.social").rstrip("/")
         session = self.send(Request(

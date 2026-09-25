@@ -98,7 +98,7 @@ Instagram native, LinkedIn and TikTok bridged. When LinkedIn is approved, set
 At each network's slot, the GitHub Actions run (never the box):
 1. picks the next row in blind order;
 2. freezes the verdict (one honest run);
-3. renders the ≤4s 9:16 clip;
+3. renders the 9:16 clip (about 5–8s, thinking pause included);
 4. commits it to the public clips repo and waits for GitHub Pages;
 5. calls Buffer `createPost` (`shareNow`; LinkedIn country rows `customScheduled` for
    09:07 local);
@@ -108,12 +108,16 @@ Buffer's API is on the free plan (checked 2026-09-24: 1 key, 3,000 requests per 
 days). The bridge uses about 800–1,350 of those a month, depending on the cadence
 preset. **No queue refill.**
 
-**If the Buffer API itself fails for 24h:** move that network to native if its gate
-has cleared. Otherwise, as a last resort, GTM uploads the frozen clips through
-Buffer's web UI on the box:
-- in blind order, refilling daily with exactly the next 24h;
-- Buffer's channel schedule set to our ET slots;
-- a small `mill record` command to be built so the uploads land in the post log.
+**Buffer is the free API key in GitHub Actions, not the web UI.** The workflow
+already passes `secrets.BUFFER_API_KEY` into `mill post`. `BufferRoute` in
+`publisher/buffer.py` calls `https://api.buffer.com` GraphQL `createPost` with
+`mode: shareNow` (LinkedIn country rows: `customScheduled`). The switch, exactly:
+
+1. Secret `BUFFER_API_KEY` from publish.buffer.com → Settings → API (free plan: 1 key, 3,000 requests / 30 days).
+2. Variable `PUBLISHER_BRIDGE=buffer` (and, per network, `PUBLISHER_ROUTE_<NETWORK>=buffer` only if that one network should stay on the bridge while others go native).
+3. Optional variables `BUFFER_CHANNEL_INSTAGRAM`, `BUFFER_CHANNEL_LINKEDIN`, `BUFFER_CHANNEL_TIKTOK` from `mill buffer-channels`, so a post does not spend two extra requests looking the channel up.
+
+Nobody drives Buffer's web UI. If the API fails, that post is `failed` in the post log and the next run can retry it. There is no manual-upload fallback.
 
 A full 10-post queue lasts 2 days at 5 a day, 3 days at 3, and 10 days at 1.
 
@@ -213,8 +217,10 @@ That's 12 posts a day (17 with X), instead of 20–25.
 - **Tags:** the explicit company rows and the TikTok row carry `@?`. The honest run
   freezes the verdict and holds the row, CoS sets the verified @handle (or `-`),
   and the next slot posts it. Pool rows are untagged unless a line ends in `| @?`.
-- **Cost, unknown, must be confirmed before going live:** 360–600 `/verdict` calls a
-  month, with an unknown LLM cost per verdict and no known global cap.
+- **Cost:** the marginal cost of one clip, and of a month at the soul cadence, is
+  in [`COST_PER_VIDEO.md`](COST_PER_VIDEO.md). The per-video path is the oracle
+  call, ffmpeg, and the official API or Buffer's free API, all inside GitHub
+  Actions. No LLM agent, no browser.
   Pulse should also exclude the mill's user agent `antisearch-mill/0.1` from
   product telemetry.
 - **Production:** rendering is not the limit (5 clips render in 3.5 s). **GitHub

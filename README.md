@@ -2,10 +2,11 @@
 
 Mill for antisearch.ai organic clips + publish (synthetic-oracle). Not the product repo.
 
-A queue row goes in and a ≤4s 9:16 video + one metadata row come out. The clip
-recreates the antisearch.ai screen as a cold monolith: a blinking cursor, a
-bare phrase typed in (`thing`, `dry shampoo`), the input vanishing on submit,
-then **one lowercase verdict** fetched live from
+A queue row goes in and a 9:16 video of about 5–8s + one metadata row come out.
+The clip recreates the antisearch.ai screen as a cold monolith: a blinking
+cursor, a bare phrase typed in (`thing`, `dry shampoo`), a still pause while
+the oracle thinks (the typed input and the caret, nothing added), then **one
+lowercase verdict** fetched live from
 `POST https://antisearch.ai/verdict {"category": "thing"}`.
 Nothing else: no captions, no logos, no motion design. Captions are GTM's job
 later (the queue's `caption` column).
@@ -32,7 +33,7 @@ queue/sample_queue.csv ──produce──▶ POST antisearch.ai/verdict ──�
 
 ```bash
 make install        # pip install -e '.[dev]'  (needs ffmpeg + a sans font, see SETUP.md)
-make test           # 96 tests, no network, no tokens (live-oracle test opt-in: MILL_TEST_NETWORK=1)
+make test           # unit + ffmpeg tests, no network, no tokens (live-oracle test opt-in: MILL_TEST_NETWORK=1)
 make dry-run        # proof: fresh out-dry-run/, live oracle, publish dry-run, verify, contact sheets
 make dry-run-offline  # same with the fixture oracle (no network)
 make doctor         # tools, font, live oracle ping, which credentials are missing
@@ -136,18 +137,23 @@ and every code-formatted example in README/SETUP.
 ## Clip contract
 
 - 1080×1920 (9:16), 30 fps, H.264 High yuv420p + silent AAC stereo track, `+faststart`
-- 3.8s default, hard window 3.0–4.0s (LinkedIn and Reels reject clips under 3s; the constitution caps at 4s)
+- about 5–8s. The old ≤4s cap is lifted (founder, 2026-09-25). LinkedIn and Reels still reject clips under 3s; the visible wait is why these run longer
 - the product CSS evaluated on a 360×640 CSS-px phone at 3×: `#0A0A0A` background, `#E8E4D8` text,
   18px→54px sans (Inter), centered at 38% height, `0.6ch × 1.05em` block cursor blinking at 1.05s,
   dim `antisearch.ai` footer
-- the blink phase restarts on every keystroke and on submit (native caret behaviour), so the
-  cursor never blinks out during typing or the lone-cursor submit beat of a ≤4s clip
+- the blink phase restarts on every keystroke and when the pause begins
 - timeline: 0.3s idle cursor → jittered typing (≤1.5s, seeded by category, so deterministic) →
-  0.22s hold → submit (input vanishes, lone cursor 0.45s) → verdict holds to the end (≥1s);
-  inputs too long to type at one keystroke per frame stretch the clip toward the 4.0s cap
+  0.22s hold of the completed input → a still pause (the same input and the blinking caret;
+  no spinner, no status word) → verdict holds to the end (≥1s). Short clips are padded on the
+  verdict hold so the total is at least 5s. The pause length is the oracle call's wall-clock
+  latency, clamped to 1.2–3.5s. If that latency was not recorded, the pause is 2.0s
+- the live site hides the typed line on submit and leaves only the caret. These clips keep
+  the typed input up during the pause, because a blank caret for a few seconds does not read
+  as a question being answered. Nothing the site doesn't have is added
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long
+- the verdict frame is the cover
+- renders are byte-identical for the same (category, verdict, pause)
 - mp4 metadata: `title=<verdict>`, `comment=capture=synthetic-oracle;oracle=<live|fixture>;category=<...>`
-- renders are byte-identical for the same (category, verdict)
 
 X gets a 720×1280 derivative at publish time (X's documented portrait max is
 1200×1900); LinkedIn, TikTok and Instagram get the 1080×1920 master.
@@ -159,7 +165,7 @@ oracle_latency_ms, oracle_fetched_at, produced_at, clip_path, poster_path,
 duration_s, width, height, fps, size_bytes, sha256, font, render_style,
 mill_version, platforms, caption`
 
-`clip_id = <job_id>-<sha8(category, verdict, oracle_source, render_style)>`.
+`clip_id = <job_id>-<sha8(category, verdict, oracle_source, render_style, pause)>`.
 The oracle is not deterministic (the same category can return a different pick
 on a later call), so the row freezes the verdict that was actually shown.
 
@@ -190,7 +196,7 @@ Publish statuses: `dry_run_ok`, `published`, `draft_logged`,
 ```
 src/antisearch_mill/
   oracle.py      live + fixture verdict oracles
-  timeline.py    pure frame timeline (typing → loading → verdict)
+  timeline.py    pure frame timeline (typing → pause → verdict)
   render.py      product-CSS layout → ffmpeg drawtext/drawbox graph, probe, poster, sheets
   fonts.py       font resolution + HarfBuzz-shaped metrics (Pillow/raqm)
   produce.py     queue → verdict → clip → metadata row

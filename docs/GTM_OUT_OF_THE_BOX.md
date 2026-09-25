@@ -99,9 +99,11 @@ We post the locked clip and the **only text is the winner's verified @handle**.
 
 **Guardrails:**
 - Never alter or reroll a verdict to reach a bigger account.
-- Politics, tragedies, minors and private individuals are withheld (the verdict
-  stays frozen and nothing posts). Living public figures only in neutral categories.
+- Minors and private individuals are withheld (the verdict stays frozen and nothing
+  posts). Politics is allowed, including a public figure such as Elon Musk.
 - The oracle's `no` posts nothing.
+- No competitor filter and no personal-conflict filter. A verdict that names a
+  client's competitor still posts.
 - **≤ 2 winner posts a day across all networks** (`PUBLISHER_WINNER_CAP`).
 - The blind queue and the 1-in-4 unowned rhythm are unchanged; winners are a
   separate lane.
@@ -109,9 +111,9 @@ We post the locked clip and the **only text is the winner's verified @handle**.
 **Sibling: the reverse oracle** (below) picks the winner first. Winner seeds stay
 the blind, main version.
 
-**One flag for Carlos:** his own example, `ceo` → Elon Musk, would be **withheld**
-under the politics guardrail (Musk is marked sensitive in the map). Lifting that is
-one line in `handles.json`, and it's his call.
+**`ceo` → Elon Musk publishes.** Politics is not a withhold (founder, 2026-09-25).
+The caption is `@elonmusk` on TikTok or Instagram only after a human verifies that
+account. Nothing is tagged with a `#hashtag`.
 
 ## Reverse oracle (Carlos, 2026-09-25 00:52; exploration, not the main line)
 
@@ -144,8 +146,9 @@ trends and winner seeds stay exactly as they are.
   - ≤ 55 characters, ≤ 6 words, English, bare, never "best";
   - no target name, no year or birth date, no contrived qualifiers ("… from puerto
     rico born 1994").
-- **Never a target who is** a private individual, a minor, a politician (or
-  politically active), or tied to a tragedy.
+- **Never a target who is** a private individual or a minor. Politicians are
+  allowed. A tragedy is not a reason to skip a reverse-oracle target (the
+  disaster filter lives only in the trend lane, and is flagged for confirmation).
 
 **Design:**
 1. **Target list builder (free signals only).**
@@ -161,8 +164,8 @@ trends and winner seeds stay exactly as they are.
    - **Brand vs person, and the exclusions, come from Wikidata** (free):
      - `P31 = human` → person;
      - date of death → skip;
-     - birth date under 18 years ago → skip;
-     - occupation politician or any political office held → skip.
+     - birth date under 18 years ago → skip.
+     Occupation and political office are not exclusions.
    - **Official handles:** Wikidata lists them (Instagram `P2003`, TikTok `P7085`,
      X `P2002`). Duolingo has six Instagram handles, for example, so these are
      candidates only. A human verifies the main account before `handles.json` gets
@@ -204,7 +207,7 @@ trends and winner seeds stay exactly as they are.
 YouTube stay in reserve.
 
 Conditions (all enforced in code unless marked):
-- **Posts the same frozen ≤4s 9:16 verdict video the mill renders.** No text-only
+- **Posts the same frozen 9:16 verdict video the mill renders** (about 5–8s, pause included). No text-only
   posts, no screenshots, no threads, no replies, follows, reposts or likes.
 - **Inherits X's brief:** companies / tech, plus unowned words.
   Queue: `thing`, `password manager`, `silence`, `note-taking app`, `a year`.
@@ -362,7 +365,7 @@ titles and on the image.
 - **Landed in PR #5:**
   - one honest run: verdicts are frozen on the `publisher-state` branch, and
     dry-runs never call the oracle;
-  - Bluesky video-only with the ≤4s 9:16 check;
+  - Bluesky video-only with the 9:16 check (about 5–8s);
   - domain-handle tags resolved to real mentions (a dead tag fails the post);
   - the `@?` hold-for-tag flow;
   - 1 post per network per day;

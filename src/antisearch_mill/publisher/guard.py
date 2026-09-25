@@ -72,7 +72,7 @@ NO_CAPTION = "-"  # queue caption: explicitly none (e.g. after a hold, when no v
 
 PENDING = "pending"
 FAILED = "failed"
-WITHHELD = "withheld"  # the verdict was frozen but deliberately not posted (a sensitive winner)
+WITHHELD = "withheld"  # frozen, not posted: a minor or a private individual (sensitive)
 DONE = ("published", "drafted", "scheduled", WITHHELD)
 
 

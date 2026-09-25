@@ -50,13 +50,12 @@ def cmd_produce(args, settings: Settings) -> int:
         print(f"queue error: {exc}", file=sys.stderr)
         return 2
     oracle = _oracle(args, settings)
-    seconds = args.seconds or settings.clip_seconds
     print(f"produce: {len(jobs)} job(s) from {args.queue}, oracle={oracle.source} "
-          f"({getattr(oracle, 'url', '')}), capture={CAPTURE_TAG}, {seconds}s")
+          f"({getattr(oracle, 'url', '')}), capture={CAPTURE_TAG}, pause={args.pause or 'oracle latency'}")
     try:
         results = produce_all(
             jobs, oracle, ledger,
-            font=settings.font_path, seconds=seconds, force=args.force,
+            font=settings.font_path, pause_s=args.pause, force=args.force,
             limit=args.limit, only=_split(args.only),
         )
     except (FontNotFound, RenderError) as exc:
@@ -152,7 +151,7 @@ def cmd_post(args, settings: Settings) -> int:
         oracle = DryRunOracle(store)
 
     def produce(job):
-        (result,) = produce_all([job], oracle, ledger, font=settings.font_path, seconds=settings.clip_seconds, force=True)
+        (result,) = produce_all([job], oracle, ledger, font=settings.font_path, force=True)
         if result.status == "failed":
             raise RuntimeError(result.detail)
         return ledger.clip_for_job(job.id)
@@ -476,7 +475,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--force", action="store_true", help="re-produce jobs that already have a clip")
     sp.add_argument("--limit", type=int, help="produce at most N new clips")
     sp.add_argument("--only", action="append", help="job id(s), comma separated")
-    sp.add_argument("--seconds", type=float, help="clip length, 3.0-4.0 (default 3.8)")
+    sp.add_argument("--pause", type=float, help="thinking pause in seconds (default: the oracle call's latency, clamped 1.2-3.5)")
     sp.set_defaults(func=cmd_produce)
 
     sp = sub.add_parser("publish", help="publish produced clips (dry-run unless --live)")

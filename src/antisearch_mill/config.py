@@ -97,7 +97,6 @@ class Settings:
     font_path: str = ""
     oracle_min_interval_s: float = 1.5
     oracle_rate_limit_wait_s: float = 60.0
-    clip_seconds: float = 3.8
     linkedin_version: str = "202609"
     extra: dict[str, str] = field(default_factory=dict)
 
@@ -109,7 +108,6 @@ class Settings:
             font_path=_env("MILL_FONT"),
             oracle_min_interval_s=_env_float("MILL_ORACLE_MIN_INTERVAL_S", 1.5),
             oracle_rate_limit_wait_s=_env_float("MILL_ORACLE_RATE_LIMIT_WAIT_S", 60.0),
-            clip_seconds=_env_float("MILL_CLIP_SECONDS", 3.8),
             linkedin_version=_env("LINKEDIN_VERSION", "202609"),
         )
 

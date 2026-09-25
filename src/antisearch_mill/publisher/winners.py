@@ -6,12 +6,15 @@ locked clip, and the only text is the winner's verified @handle.
 
 - Seeds: `queue/winners/<network>.txt`, curated bare inputs, drawn in file order.
 - Handles: `queue/winners/handles.json`, a curated map
-  `{entity: {aliases, sensitive, <network>: {handle, verified, checked, by}}}`.
-  A handle is used only when a human checked the badge (`verified: true`). An
-  unknown or unverified winner posts with no tag; nothing is ever guessed.
-- A sensitive winner (politics, tragedy, minors, private individuals, or anything
-  the safety filter flags) is **withheld**: the verdict stays frozen and nothing is
-  posted. Never a reroll to reach a bigger account; the oracle's `no` posts nothing.
+  `{entity: {aliases, sensitive, tiktok, instagram, linkedin, bluesky}}`.
+  Each network value is `{handle, verified, checked, by}`. The caption is an
+  `@mention` of that handle, never a `#hashtag`. A handle is used only when a
+  human checked the badge (`verified: true`). An unknown or unverified winner
+  posts with no tag; nothing is ever guessed.
+- `sensitive: true` withholds a minor or a private individual: the verdict stays
+  frozen and nothing is posted. Politics is allowed (a `ceo` verdict of Elon Musk
+  publishes, and tags once the handle is verified). Tragedies are not filtered
+  here. Never a reroll to reach a bigger account; the oracle's `no` posts nothing.
 - Cap: at most `PUBLISHER_WINNER_CAP` winner posts per posting day across all
   networks (default 2, hard max 3).
 """
@@ -29,7 +32,6 @@ from ..ledger import Job
 from ..oracle import normalize_category
 from .guard import PostLog, posting_day
 from .pools import read_pool
-from .trends import UNSAFE
 
 WINNER_PREFIX = "w-"
 WINNER_CAPTION = "@winner"  # queue caption sentinel: resolve the verdict to a verified handle after the honest run
@@ -60,8 +62,6 @@ def _key(verdict: str, handles: dict[str, dict]) -> str | None:
 
 
 def resolve(verdict: str, network: str, handles: dict[str, dict]) -> Resolution:
-    if UNSAFE.search(verdict):
-        return Resolution("", True, "the verdict touches an unsafe topic")
     name = _key(verdict, handles)
     if name is None:
         return Resolution("", False, "winner not in the handle map: no tag")

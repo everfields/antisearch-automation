@@ -105,7 +105,7 @@ def test_bluesky_video_needs_confirmed_email(video):
 def test_bluesky_takes_only_the_frozen_clip(image, tmp_path):
     with pytest.raises(PublisherError, match="cannot post image"):
         run(BlueskyAdapter, BSKY, image)
-    long = Media.video(tmp_path / "x.mp4", 1080, 1920, 4.5)
+    long = Media.video(tmp_path / "x.mp4", 1080, 1920, 8.5)
     (tmp_path / "x.mp4").write_bytes(b"v")
     with pytest.raises(PublisherError, match="9:16"):
         run(BlueskyAdapter, BSKY, long)

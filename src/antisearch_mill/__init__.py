@@ -3,4 +3,4 @@
 __version__ = "0.1.0"
 
 CAPTURE_TAG = "synthetic-oracle"
-RENDER_STYLE = "monolith-v1"
+RENDER_STYLE = "monolith-v2"
