@@ -92,24 +92,105 @@ example list.
 | Risk | What it actually is |
 | --- | --- |
 | Scaled content abuse | The compatible page has no added value. A manual action hits the host. |
-| Crawl budget | One new site with 1k–500k URLs spends Google's attention on the thinnest URL it owns. |
+| Crawl budget | At 1k–500k thin URLs the quality ratio is the problem, not Google running out of crawl. See SEO plan v0. |
 | Brand dilution | `antisearch.ai` is one input box. `/best/<category>` turns it into a ranking site, which the manifesto names as what this is not. |
 | Oracle cost × N | The model vendor is unknown from this repo (`everfields/the_best` 404). PR [#7](https://github.com/everfields/antisearch-automation/pull/7) `docs/COST_PER_VIDEO.md` (2026-09-25): the HTTP call is $0; the vendor line is unknown; measured latency about 1.6–3.0s, and 2458 ms for `thing`. 1,000 pages = 1,000 × unknown. 500,000 = 500,000 × unknown. The old <500 EUR figure is a different prompt on a different API. It is not a forecast. |
 | Hosting | Checked 2026-09-25: `GET https://antisearch.ai` is one HTML document, 10,062 bytes, `last-modified` 2026-09-20, `server: uvicorn`. DNS `20.72.112.112`, AS8075 Microsoft, Boydton VA. There is no page tree. Static files are the cheap part. Serving them from this app is a change to `the_best`. |
 
-**Path.** Not `/best/` on the apex. A penalty or a directory URL would be the
-product. A subdomain isolates the crawl and still is a directory. The path
-does not make the page constitution-compatible.
+**Path.** Not `/best/` on the apex. Host choice, and the fact that a subdomain
+does not fence off a penalty, are in SEO plan v0. The path does not make the
+page constitution-compatible.
 
-**Recommendation.** Do not build it. A pilot exists only after `SHIP:` and a
-founder yes, and then only as: a subdomain, **1,000 pages**, one live call
-each, no reroll, one lowercase verdict, no second block of text. 500k is the
-abandoned project, not a pilot.
+**Recommendation.** Do not build it. The pilot shape and the go / not now /
+never call are in SEO plan v0. 500k is the abandoned project, not a pilot.
 
 **Success metric.** Not "pages indexed". That was the old win and it is the
 abuse pattern. Success is no manual action in Search Console, plus clicks
 that end with a person typing on `antisearch.ai`. Kill on a manual action, or
 if indexation is the only result.
+
+---
+
+## SEO plan v0
+
+The old Amazon-category tree indexed fast (100k+ pages) and Google then
+deindexed it. The founder's guess: identical HTML, and the same title / meta
+pattern with the category swapped in. He still likes the scale. This is the
+tweezers pass. No pages and no oracle calls. A build is `SHIP:` plus a yes.
+We cannot buy a domain.
+
+### 1. Likely causes of that deindexation
+
+Fast indexing is not approval. Google crawls new URLs, then drops spam.
+Most of that is automatic. A manual action is the extra case, and it is
+visible in Search Console
+([manual actions](https://support.google.com/webmasters/answer/9044175)).
+
+The title-pattern guess is a real mechanism. It is not the whole cause.
+Rewriting titles and leaving the tree would still be the same violation.
+
+| Cause | What it was on that project | Source |
+| --- | --- | --- |
+| Scaled content abuse | Many pages generated to rank. One template, a model filling the slot, little value beyond the swap. | [Spam policies](https://developers.google.com/search/docs/essentials/spam-policies#scaled-content), updated 2026-08-28. [Gen-AI guidance](https://developers.google.com/search/docs/fundamentals/using-gen-ai-content), updated 2025-12-10: generating many pages without added value can be that policy, and it names titles and meta descriptions as part of the content. It points at rater guidelines 4.6.5 and 4.6.6 (low effort, low originality, no added value). |
+| Doorway pages | Substantially similar pages, one per query, closer to a result list than to a site. Identical HTML with a swapped category is that. | [Doorway abuse](https://developers.google.com/search/docs/essentials/spam-policies#doorways) |
+| Thin duplicate template | Cookie-cutter pages. The old ones also had affiliate links, which is the thin-affiliation pattern. The thin-content manual action names doorways and pages with little or no added value even as a separate item. | [Thin affiliation](https://developers.google.com/search/docs/essentials/spam-policies#thin-affiliate-pages). [Manual actions](https://support.google.com/webmasters/answer/9044175), thin content with little or no added value. |
+| Crawl-to-quality ratio | 100k thin URLs and no other inventory. Google tries to crawl URLs it knows about. Duplicates and unimportant URLs waste that crawl. Demand also depends on page quality. | [Crawl budget](https://developers.google.com/search/docs/crawling-indexing/large-site-managing-crawl-budget), updated 2026-07-22. That doc's "you have a crawl-budget problem" bar is about 1M pages, or 10k that change daily. The deindex was quality, not running out of crawl. |
+
+### 2. Blast radius
+
+No second domain is available. This plan does not assume one can be bought.
+
+| Host | Isolation |
+| --- | --- |
+| Apex, `/best/<category>` | None. Same site as the app. A partial action can name a directory. "Affects all pages" takes the app with it. |
+| Subdomain | A separate Search Console property, so the tree can be watched apart from the homepage. Not a penalty fence. Google's caution, written for moving problematic content: a subdomain or subdirectory can be read as circumventing the spam policy and can widen the action against the site ([manual actions](https://support.google.com/webmasters/answer/9044175)). A subdomain **can** hurt `antisearch.ai`. It only lowers the chance that a partial pattern is the homepage. It does not stop a site-wide action or a quality demotion of the brand. |
+| Separate domain | The only real cut. Closed, because we cannot buy one. Do not put the tree on someone else's established domain. That exports the problem onto their reputation. |
+
+### 3. Worth indexing, still constitution-compatible
+
+One lowercase verdict. No top-3, no citations, no Q&A, no affiliate, no chat.
+"best" stays out of the title, the meta description, and the URL.
+
+The page is the product frame with one frozen answer. The only unique strings
+are the input and the verdict. A title of `best {category}` is the pattern
+from the deindexed tree, not added value.
+
+The constitution and "worth indexing" conflict. The old pages had substance
+because of the top-3 and the three Q&As, and those are forbidden. A paragraph
+added so Google has something to index is a different product. If the page
+needs that paragraph, it is not this one.
+
+A URL is worth an index slot only if a stranger would rather land on it than
+open the homepage and type. That is a handful of inputs, not a category tree.
+
+### 4. Staged pilot
+
+Not started until this note is accepted and there is a `SHIP:` yes. One live
+call per page, no reroll. The model bill is still unknown per call
+([PR #7](https://github.com/everfields/antisearch-automation/pull/7)), so
+100 pages = 100 × unknown. Do not spend the calls before the host and the
+noindex gate are accepted.
+
+0. No URLs. This section.
+1. **100 pages, `noindex`, no sitemap, not linked from the apex.** Read a sample. One shared template with a slot is a stop. Do not lift `noindex` to see if Google likes it.
+2. **Lift `noindex` on those 100 only** if the sample is the product frame and the founder still wants the test. Own Search Console property. Then watch, and add nothing:
+   - Manual actions stays clear on that property and on the apex.
+   - Page indexing is not a pile of "Crawled – currently not indexed" or "Discovered – currently not indexed."
+   - Apex impressions do not drop.
+   - "URL is on Google" is not a success. That is how the old tree started.
+3. **1,000** only if those 100 stay indexed, get impressions for the input rather than the brand, and the apex is flat. Same gates. Then stop. 100k is not a later stage.
+
+Kill on any manual action on either property, a dip on the apex, most URLs crawled and not indexed or indexed and then dropped, or the only number that moved being "pages indexed."
+
+### 5. Recommendation
+
+**Not now.**
+
+Never rebuild the category tree, the shared template, or the index-first
+100k. **Go** would mean publishing pages this plan cannot make worth indexing
+without breaking the constitution. The tweezers version is the 100-page
+`noindex` sample, and even that waits for a yes. Until then, nothing is
+generated.
 
 ---
 
@@ -203,4 +284,4 @@ Below the line, in order of how fast they should be forgotten:
 - **LinkedIn pairs (A).** The locked shape is one pair, not a list. Two verdicts in a company-page text post are still less reach per hour than Show HN, and they are not the clip. Not posted.
 - **Directories, newsletters, display/CTV.** A tour, a pitch, or a stunt. No free reach that behaves like the product.
 - **X API.** Not free. A URL post is $0.20. Out while spend is zero.
-- **Programmatic SEO (B).** The compatible page should not rank. The version that ranked is forbidden. Cost per URL is an unknown model bill, and a manual action lands on the domain. Worst reach per unit of effort and per unit of risk.
+- **Programmatic SEO (B, SEO plan v0).** Not now. The tree that indexed was deindexed, and a constitution-compatible page cannot grow the substance that was removed. A subdomain does not fence the brand off from that.
