@@ -12,7 +12,7 @@ from .fonts import resolve_font
 from .ledger import ClipRow, Job, Ledger, now_iso
 from .oracle import Oracle, OracleError, Verdict
 from .render import ClipInfo, Layout, RenderError, extract_poster, render_clip
-from .timeline import MAX_SECONDS, MIN_SECONDS, build_timeline
+from .timeline import MAX_SECONDS, MIN_SECONDS, build_timeline, pause_from_latency_ms
 
 
 @dataclass
@@ -23,9 +23,9 @@ class ProduceResult:
     detail: str = ""
 
 
-def clip_id_for(job_id: str, verdict: Verdict) -> str:
+def clip_id_for(job_id: str, verdict: Verdict, pause_s: float) -> str:
     digest = hashlib.sha256(
-        f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{RENDER_STYLE}".encode()
+        f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{RENDER_STYLE}\0{pause_s:.3f}".encode()
     ).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
@@ -59,8 +59,9 @@ def produce_one(
     ledger: Ledger,
     *,
     font_path: str,
-    seconds: float,
     layout: Layout,
+    pause_s: float | None = None,
+    latency_recorded: bool = True,
 ) -> ProduceResult:
     try:
         verdict = oracle.ask(job.category)
@@ -78,12 +79,13 @@ def produce_one(
         attempts=verdict.attempts,
     )
 
-    clip_id = clip_id_for(job.id, verdict)
+    pause = pause_from_latency_ms(verdict.latency_ms, recorded=latency_recorded) if pause_s is None else pause_s
+    clip_id = clip_id_for(job.id, verdict, pause)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
     poster_path = ledger.clips_dir / f"{clip_id}.png"
     sidecar_path = ledger.clips_dir / f"{clip_id}.json"
     try:
-        timeline = build_timeline(verdict.category, verdict.verdict, fps=layout.fps, seconds=seconds)
+        timeline = build_timeline(verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause)
         info = render_clip(
             timeline,
             clip_path,
@@ -138,6 +140,7 @@ def produce_one(
                     "frames": timeline.total_frames,
                     "submit_frame": timeline.submit_frame,
                     "verdict_frame": timeline.verdict_frame,
+                    "pause_s": timeline.pause_s,
                 },
             },
             indent=2,
@@ -166,7 +169,8 @@ def produce_all(
     ledger: Ledger,
     *,
     font: str = "",
-    seconds: float = 3.8,
+    pause_s: float | None = None,
+    latency_recorded: bool = True,
     layout: Layout | None = None,
     force: bool = False,
     limit: int | None = None,
@@ -185,7 +189,10 @@ def produce_all(
         if existing and not force and Path(existing.clip_path).is_file():
             results.append(ProduceResult(job.id, "skipped", existing.clip_id, "already produced"))
             continue
-        result = produce_one(job, oracle, ledger, font_path=font_path, seconds=seconds, layout=lay)
+        result = produce_one(
+            job, oracle, ledger, font_path=font_path, layout=lay,
+            pause_s=pause_s, latency_recorded=latency_recorded,
+        )
         results.append(result)
         if result.status == "produced":
             produced += 1

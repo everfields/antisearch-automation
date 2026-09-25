@@ -1,4 +1,4 @@
-"""Winner lane: the only text is a human-verified @handle, never guessed; sensitive winners are withheld."""
+"""Winner lane: the only text is a human-verified @handle, never guessed; minors and private individuals are withheld."""
 
 import json
 from datetime import date, datetime
@@ -20,7 +20,13 @@ HANDLES = {
     "spain": {"aliases": ["españa"], "instagram": {"handle": "@spain", "verified": True, "checked": "2026-09-25"},
               "tiktok": {"handle": "@spain", "verified": False}},
     "apple": {"instagram": {"handle": "apple", "verified": True}, "bluesky": {"handle": "@apple", "verified": True}},
-    "elon musk": {"sensitive": True, "why": "politics"},
+    "elon musk": {
+        "instagram": {"handle": "@elonmusk", "verified": True, "checked": "2026-09-25"},
+        "tiktok": {"handle": "@elonmusk", "verified": True, "checked": "2026-09-25"},
+        "linkedin": {"handle": "", "verified": False},
+        "bluesky": {"handle": "", "verified": False},
+    },
+    "some private person": {"sensitive": True, "why": "private individual"},
 }
 
 
@@ -30,8 +36,10 @@ HANDLES = {
     ("spain", "tiktok", "", False),            # candidate exists but not verified: no tag
     ("brazil", "instagram", "", False),        # not in the map: no tag, never guessed
     ("apple", "instagram", "@apple", False),   # handle normalized with @
-    ("elon musk", "linkedin", "", True),       # sensitive: withheld
-    ("the election", "instagram", "", True),   # unsafe topic: withheld
+    ("elon musk", "instagram", "@elonmusk", False),  # politics is allowed; verified handle tags
+    ("elon musk", "linkedin", "", False),      # no LinkedIn Page handle: publishes untagged
+    ("the election", "instagram", "", False),  # politics is not a withhold
+    ("some private person", "instagram", "", True),
 ])
 def test_resolve(verdict, network, handle, withheld):
     r = resolve(verdict, network, HANDLES)
@@ -40,7 +48,9 @@ def test_resolve(verdict, network, handle, withheld):
 
 def test_repo_map_ships_nothing_verified_until_a_human_checks():
     handles = load_handles(ROOT / "queue" / "winners" / "handles.json")
-    assert handles["elon musk"]["sensitive"] is True
+    assert "sensitive" not in handles["elon musk"]
+    for net in ("tiktok", "instagram", "linkedin", "bluesky"):
+        assert net in handles["elon musk"]
     for name, entry in handles.items():
         for net, acct in entry.items():
             if isinstance(acct, dict) and "handle" in acct:
@@ -88,15 +98,23 @@ def test_the_only_text_is_the_verified_handle(tmp_path):
     assert ig.calls[0][2] == "@spain" and tt.calls[0][2] == ""  # tiktok handle not verified: no tag
 
 
-def test_sensitive_winner_is_withheld_and_its_input_is_spent(tmp_path):
+def test_a_verified_public_figure_publishes_and_tags(tmp_path):
     ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "posts.csv")
     ig = fake_adapter("instagram")
     clip(ledger, "w-ceo", verdict="elon musk")
     (o,) = go([wjob("w-ceo", "ceo", "instagram")], ledger, log, {"instagram": ig})
+    assert o.status == "published" and ig.calls[0][2] == "@elonmusk"
+
+
+def test_a_private_individual_is_withheld_and_its_input_is_spent(tmp_path):
+    ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "posts.csv")
+    ig = fake_adapter("instagram")
+    clip(ledger, "w-neighbour", verdict="some private person")
+    (o,) = go([wjob("w-neighbour", "neighbour", "instagram")], ledger, log, {"instagram": ig})
     assert o.status == "withheld_winner" and ig.calls == []
-    assert [r["status"] for r in log.rows()] == ["withheld"] and log.used_inputs() == {"ceo"}
+    assert [r["status"] for r in log.rows()] == ["withheld"] and log.used_inputs() == {"neighbour"}
     assert log.used_on(date(2026, 9, 25), "instagram") == 0  # a withheld winner doesn't use a slot
-    (again,) = go([wjob("w-ceo", "ceo", "instagram")], ledger, log, {"instagram": ig})
+    (again,) = go([wjob("w-neighbour", "neighbour", "instagram")], ledger, log, {"instagram": ig})
     assert again.status == "skipped_already_posted"
 
 

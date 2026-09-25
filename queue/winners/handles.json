@@ -1,38 +1,62 @@
 {
-  "_readme": "Winner -> official handle per network. A handle is used ONLY when verified is true: a human (CoS/GTM) opened the account, saw the platform's verified badge or the brand's own site linking to it, and set verified=true, checked=YYYY-MM-DD, by=<who>. Unknown or unverified winners post with no tag. sensitive=true withholds the post entirely (politics, tragedy, minors, private individuals). Never add an entry to chase a bigger account; the verdict comes first.",
+  "_readme": "Winner -> official @mention per network (tiktok, instagram, linkedin Page, bluesky). Never a #hashtag. A handle is used ONLY when verified is true: a human opened the account, saw the platform's verified badge or the brand's own site linking to it, and set verified=true, checked=YYYY-MM-DD, by=<who>. Unknown or unverified winners post with no tag. sensitive=true withholds the post only for a minor or a private individual. Politics is allowed. Never add an entry to chase a bigger account; the verdict comes first.",
   "spain": {
     "aliases": ["españa", "espana", "kingdom of spain"],
+    "tiktok": {"handle": "@spain", "verified": false, "note": "Turespaña; confirm it's the official account"},
     "instagram": {"handle": "@spain", "verified": false, "note": "Turespaña (Spain's official tourism board); confirm badge"},
-    "tiktok": {"handle": "@spain", "verified": false, "note": "Turespaña; confirm it's the official account"}
+    "linkedin": {"handle": "", "verified": false, "note": "LinkedIn Page; no handle confirmed"},
+    "bluesky": {"handle": "", "verified": false, "note": "verified domain handle only; none confirmed"}
   },
   "brazil": {
     "aliases": ["brasil"],
-    "instagram": {"handle": "@visitbrasil", "verified": false, "note": "Embratur official tourism account; confirm badge"}
+    "tiktok": {"handle": "", "verified": false, "note": "no handle confirmed"},
+    "instagram": {"handle": "@visitbrasil", "verified": false, "note": "Embratur official tourism account; confirm badge"},
+    "linkedin": {"handle": "", "verified": false, "note": "LinkedIn Page; no handle confirmed"},
+    "bluesky": {"handle": "", "verified": false, "note": "verified domain handle only; none confirmed"}
   },
   "apple": {
     "aliases": ["apple inc", "apple inc."],
-    "instagram": {"handle": "@apple", "verified": false, "note": "confirm badge"}
+    "tiktok": {"handle": "", "verified": false, "note": "no handle confirmed"},
+    "instagram": {"handle": "@apple", "verified": false, "note": "confirm badge"},
+    "linkedin": {"handle": "", "verified": false, "note": "LinkedIn Page; no handle confirmed"},
+    "bluesky": {"handle": "", "verified": false, "note": "verified domain handle only; none confirmed"}
   },
   "nvidia": {
-    "instagram": {"handle": "@nvidia", "verified": false, "note": "confirm badge"}
+    "tiktok": {"handle": "", "verified": false, "note": "no handle confirmed"},
+    "instagram": {"handle": "@nvidia", "verified": false, "note": "confirm badge"},
+    "linkedin": {"handle": "", "verified": false, "note": "LinkedIn Page; no handle confirmed"},
+    "bluesky": {"handle": "", "verified": false, "note": "verified domain handle only; none confirmed"}
   },
   "salesforce": {
-    "instagram": {"handle": "@salesforce", "verified": false, "note": "reposted early iterations; confirm badge"}
+    "tiktok": {"handle": "", "verified": false, "note": "no handle confirmed"},
+    "instagram": {"handle": "@salesforce", "verified": false, "note": "reposted early iterations; confirm badge"},
+    "linkedin": {"handle": "", "verified": false, "note": "LinkedIn Page; no handle confirmed"},
+    "bluesky": {"handle": "", "verified": false, "note": "verified domain handle only; none confirmed"}
   },
   "dyson": {
+    "tiktok": {"handle": "@dyson", "verified": false, "note": "confirm badge"},
     "instagram": {"handle": "@dyson", "verified": false, "note": "reposted early iterations; confirm badge"},
-    "tiktok": {"handle": "@dyson", "verified": false, "note": "confirm badge"}
+    "linkedin": {"handle": "", "verified": false, "note": "LinkedIn Page; no handle confirmed"},
+    "bluesky": {"handle": "", "verified": false, "note": "verified domain handle only; none confirmed"}
   },
   "the plaza": {
     "aliases": ["the plaza hotel", "plaza hotel", "the plaza new york"],
-    "instagram": {"handle": "@theplazahotel", "verified": false, "note": "reposted early iterations; confirm badge"}
+    "tiktok": {"handle": "", "verified": false, "note": "no handle confirmed"},
+    "instagram": {"handle": "@theplazahotel", "verified": false, "note": "reposted early iterations; confirm badge"},
+    "linkedin": {"handle": "", "verified": false, "note": "LinkedIn Page; no handle confirmed"},
+    "bluesky": {"handle": "", "verified": false, "note": "verified domain handle only; none confirmed"}
   },
   "k18": {
     "aliases": ["k18 airwash dry shampoo", "k18 hair", "k18 airwash"],
-    "tiktok": {"handle": "@k18hair", "verified": false, "note": "official (bio links k18hair.com); badge unconfirmed as of 2026-09-24"}
+    "tiktok": {"handle": "@k18hair", "verified": false, "note": "official (bio links k18hair.com); badge unconfirmed as of 2026-09-24"},
+    "instagram": {"handle": "", "verified": false, "note": "no handle confirmed"},
+    "linkedin": {"handle": "", "verified": false, "note": "LinkedIn Page; no handle confirmed"},
+    "bluesky": {"handle": "", "verified": false, "note": "verified domain handle only; none confirmed"}
   },
   "elon musk": {
-    "sensitive": true,
-    "why": "politically active public figure (politics guardrail); Carlos can lift this explicitly"
+    "tiktok": {"handle": "@elonmusk", "verified": false, "note": "A verified @elonmusk was reported on TikTok in April 2026 (NYT); Musk and TikTok did not confirm it. Tag only after a human sets verified=true."},
+    "instagram": {"handle": "@elonmusk", "verified": false, "note": "A verified private @elonmusk was reported on Instagram in April 2026 (NYT); not confirmed by Musk or Meta. Tag only after a human sets verified=true."},
+    "linkedin": {"handle": "", "verified": false, "note": "no confirmed LinkedIn Page; do not guess. A Page mention needs an organization URN."},
+    "bluesky": {"handle": "", "verified": false, "note": "no confirmed verified domain handle; do not guess"}
   }
 }

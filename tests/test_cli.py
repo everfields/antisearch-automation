@@ -29,7 +29,7 @@ def test_offline_end_to_end_dry_run(tmp_path, capsys):
         assert c["capture"] == "synthetic-oracle"
         assert c["oracle_source"] == "fixture"
         assert os.path.isfile(c["clip_path"]) and os.path.isfile(c["poster_path"])
-        assert float(c["duration_s"]) <= 4.0
+        assert 5.0 <= float(c["duration_s"]) <= 8.0
         assert (c["width"], c["height"]) == ("1080", "1920")
 
     with open(os.path.join(out, "publish.csv"), newline="") as fh:

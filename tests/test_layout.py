@@ -36,6 +36,15 @@ def test_cursor_sits_flush_after_text_and_line_is_centered():
     assert cur.y < line.baseline < cur.y + cur.h
 
 
+def test_pause_frame_draws_the_input_and_a_caret_only():
+    frame = layout_frame("company in france", "loading", True, fm(), LAY)
+    assert "".join(line.text for line in frame.lines) == "company in france"
+    assert frame.cursor is not None
+    drawn = " ".join(line.text for line in frame.lines)
+    assert "thinking" not in drawn
+    assert "..." not in drawn and "…" not in drawn
+
+
 def test_empty_input_is_a_lone_centered_cursor():
     frame = layout_frame("", "loading", True, fm(), LAY)
     assert frame.lines == ()

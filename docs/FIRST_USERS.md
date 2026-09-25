@@ -100,8 +100,8 @@ through the API (read-only). That's the only screenshot signal we can see online
 
 Dropped on sight:
 - chalk on pavements;
-- pitching it to Havas clients (a verdict could crown a client's competitor in front
-  of the client);
+- pitching it to Havas clients (a pitch in front of a client is a pitch). A verdict
+  that names a competitor is not filtered; there is no personal-conflict rule;
 - mass personal messages (Carlos says people ignore them);
 - filming anyone's reaction.
 

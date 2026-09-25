@@ -14,7 +14,7 @@ things only Carlos can give.
 
 Locks kept (not reopened here): product constitution (whisper, bare input in, one
 lowercase verdict out); the input is the bare phrase, never with "best" in front
-(README → Input shape); video ritual (≤4s typing→verdict, caption = @handle only,
+(README → Input shape); video ritual (about 5–8s typing→pause→verdict, caption = @handle only,
 bio "ai chooses the best. nothing else."); one clip → one network; vertical map
 (TikTok = beauty/hair/skin, IG = places, LinkedIn = employers / Company Page,
 X = companies/SaaS, **held**); ≤2 posts/day total; eyes closed until day 21; first

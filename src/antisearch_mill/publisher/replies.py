@@ -10,7 +10,8 @@ Every reply is the lowercase verdict for the bare X, and nothing else: no link, 
 clip, no pitch, no follow-up. Verdicts come from the frozen store (a repeated X
 reuses its verdict; never a reroll). Hard caps: at most MAX_REPLIES_PER_DAY a day,
 one per author per week, only fresh top-level posts, never a thread we're already
-in, never unsafe topics. Dry-run unless live.
+in. Politics is not filtered, and the trend lane's disaster filter does not apply
+here. Dry-run unless live.
 """
 
 from __future__ import annotations
@@ -29,7 +30,6 @@ from ..ledger import now_iso
 from ..oracle import Oracle, normalize_category
 from ..publish.http import HttpError, HttpResponse, Request, Transport
 from .guard import input_problem, posting_day
-from .trends import UNSAFE
 
 PUBLIC = "https://public.api.bsky.app"
 MAX_REPLIES_PER_DAY = 3
@@ -49,7 +49,7 @@ def extract_input(text: str) -> str | None:
     x = TRAILING.sub("", m.group("x").strip())
     x = re.sub(r"^(?:a|an|the)\s+", "", x, flags=re.I)
     value = normalize_category(x)
-    if not value or len(value) > 55 or input_problem(value, {}) or UNSAFE.search(value):
+    if not value or len(value) > 55 or input_problem(value, {}):
         return None
     return value
 
@@ -205,7 +205,7 @@ def run_replies(replier: BlueskyReplier, oracle: Oracle, log: ReplyLog, *, now: 
             break
         x = extract_input(c.text)
         if (not x or c.uri in done or log.seen(c.uri) or c.root is not None or c.author.lower() == own
-                or now - c.created > MAX_AGE or UNSAFE.search(c.text) or log.author_recent(c.author, now)):
+                or now - c.created > MAX_AGE or log.author_recent(c.author, now)):
             continue
         done.add(c.uri)
         try:

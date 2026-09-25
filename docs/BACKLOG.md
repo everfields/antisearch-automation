@@ -11,7 +11,7 @@ Updated 2026-09-25.
 
 | Item | Owner | Status | Notes |
 | --- | --- | --- | --- |
-| First 4 clips to Buffer | GTM | todo | TikTok 22:07 + 00:07 ET, IG 22:07 ET, LinkedIn 09:07 ET. Files and JSON on branch `publisher-state`, `manual/2026-09-24/`. `@k18hair` only if TikTok shows it verified or official. Mark a row `failed` in `posts.csv` if it never went out |
+| First 4 clips to Buffer | GTM | todo | Same four frozen verdicts, re-rendered with a 2.0s pause (typed input and a blinking caret only; no spinner, dots, or "thinking" text) under `publisher-state` `manual/2026-09-25/` (oracle not re-asked). Upload through Buffer's free API from Actions, not the web UI. `@k18hair` only after `verified: true`. Mark a row `failed` in `posts.csv` if it never went out |
 | `PUBLISHER_CRON=live` per network | CoS | todo | After each network's credentials exist: `PUBLISHER_LIVE_NETWORKS` + `PUBLISHER_CADENCE=soul` |
 | Surprise-input test (6 rows) | CoS | todo | `queue/surprise_trial.csv`; keep/kill rules in `SURPRISING_INPUTS.md` |
 | Winner lane on | CoS | todo | `PUBLISHER_WINNER_NETWORKS=instagram,tiktok,bluesky`, cap 2/day. Verify badges first (next row) |
@@ -35,7 +35,7 @@ Updated 2026-09-25.
 | --- | --- | --- | --- |
 | TikTok stays on the Buffer bridge | — | decided | Native = inbox drafts only (a human taps Post); the public audit is out of reach for an own-account tool |
 | X: no posting | C | decided | The API is paid (pay-per-use). Bluesky stands in; X design exists |
-| `ceo` → Elon Musk | C | open | Marked sensitive (politics guardrail), so a Musk verdict is withheld. One line in `handles.json` lifts it, if Carlos wants |
+| `ceo` → Elon Musk | — | decided | Politics is allowed (founder 2026-09-25). The verdict publishes. It tags `@elonmusk` on TikTok or Instagram only after a human sets `verified: true` in `handles.json`. No LinkedIn Page or Bluesky handle is confirmed |
 | og image fix | C (`SHIP:`) | todo | `<title>`/`og:title`/`twitter:title` → `antisearch.ai`; image = a lone cursor block; `?v=3`. Gates Show HN |
 | Per-verdict cost / global cap on `/verdict` | C | open | Gates Show HN and full volume |
 | `?q=` deep link | C (`SHIP:`) | parked | antisearch.ai/?q=thing prefills the input; parked until after the trial |
@@ -46,11 +46,11 @@ Updated 2026-09-25.
 | --- | --- | --- | --- |
 | Trend lane | Dev | live in code | `publisher/trends.py`; switch on with `PUBLISHER_TREND_NETWORKS` |
 | Reply watcher + "what's the … X?" answers (Bluesky) | Dev | live in code | `publisher/replies.py`; switch on with `PUBLISHER_REPLY_NETWORKS=bluesky` after the account exists |
-| Winner lane | Dev | live in code | `publisher/winners.py`: seeds, verified-only handle resolver, withheld sensitive winners, cross-network cap |
+| Winner lane | Dev | live in code | `publisher/winners.py`: seeds, verified-only @mention per network, withhold only for minors and private individuals, cross-network cap. Politics is not withheld |
 | Reverse oracle: `mill reverse search` + target builder | Dev | todo (exploration) | Design in `GTM_OUT_OF_THE_BOX.md` → Reverse oracle: sandbox log outside `verdicts.csv`, ≤10 calls per target, naturalness score, Wikidata brand/person/exclusion check, handles as candidates only |
 | LinkedIn winner tags | Dev | parked | Needs organization mentions in the Posts API (`@[Name](urn:li:organization:id)`) and a verified name→URN map; until then LinkedIn winners go untagged |
 | X watcher / replies | Dev | parked | Design in `TREND_AND_REPLY_LANES.md`; needs X spend |
-| `mill record` for manual uploads | Dev | todo if needed | Only if the Buffer-web-UI fallback becomes routine |
+| `mill record` for manual uploads | — | dropped | Buffer uploads go through the free API key in Actions. No web UI |
 | Buffer post reconciliation | Dev | todo if needed | One read per post, to catch network-side rejections on the bridge |
 | Native LinkedIn country mornings | Dev | parked | Needs cron around the clock (+720 Actions min/month); decide after LinkedIn approval |
 | Pulse telemetry | C | blocked | `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` in Cursor Cloud Agent secrets |
@@ -93,4 +93,6 @@ accounts, before anything is published.
 - **Kill:** fewer than 3 natural hits, or hits only with contrived inputs. Drop the
   lane; winner seeds remain the main prestige route.
 - **Exclusions:** every target passes the Wikidata check first (alive, adult, not a
-  politician, no tragedy). Handles are verified by a human before any tag.
+  minor, not a private individual). Politicians are allowed. Handles are verified
+  by a human before any tag. The trend lane's disaster/tragedy filter does not
+  apply here.
