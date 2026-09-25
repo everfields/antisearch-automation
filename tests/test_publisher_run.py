@@ -64,7 +64,11 @@ def log(tmp_path):
     return PostLog(tmp_path / "state" / "posts.csv")
 
 
-LIVE_ENV = {"FAKE_TOKEN": "t", "PUBLISHER_LIVE_NETWORKS": "bluesky,mastodon,tiktok"}
+LIVE_ENV = {
+    "FAKE_TOKEN": "t",
+    "PUBLISHER_LIVE_NETWORKS": "bluesky,mastodon,tiktok",
+    "PUBLISHER_RAMP": "off",  # the cap tests cover the target cadence; ramp has its own tests
+}
 
 
 def job(job_id, platforms=("bluesky",), caption="", notes=""):
@@ -298,8 +302,10 @@ def test_hold_for_tag_blocks_queue_rows_but_not_pool_rows(ledger, log):
 def test_live_needs_approval_and_credentials(ledger, log):
     clip(ledger, "thing")
     b = fake_adapter()
-    assert go([job("thing")], ledger, log, {"bluesky": b}, env={"FAKE_TOKEN": "t"})[0].status == "skipped_not_approved"
-    (o,) = go([job("thing")], ledger, log, {"bluesky": b}, env={"PUBLISHER_LIVE_NETWORKS": "bluesky"})
+    bare = {"FAKE_TOKEN": "t", "PUBLISHER_RAMP": "off"}
+    assert go([job("thing")], ledger, log, {"bluesky": b}, env=bare)[0].status == "skipped_not_approved"
+    (o,) = go([job("thing")], ledger, log, {"bluesky": b},
+              env={"PUBLISHER_LIVE_NETWORKS": "bluesky", "PUBLISHER_RAMP": "off"})
     assert o.status == "skipped_missing_credentials" and "FAKE_TOKEN" in o.detail
     assert b.calls == [] and log.rows() == []
 
@@ -326,7 +332,8 @@ def test_live_rerenders_a_clip_that_did_not_come_from_the_real_oracle(ledger, lo
 
 def test_rows_for_other_paths_are_ignored(ledger, log):
     clip(ledger, "thing")
-    assert go([job("thing", ("x",))], ledger, log, {"bluesky": fake_adapter()}) == []
+    (o,) = go([job("thing", ("x",))], ledger, log, {"bluesky": fake_adapter()})
+    assert o.status == "skipped_x_off"
 
 
 def test_dry_run_ignores_slots_writes_a_plan_and_never_touches_the_log(ledger, log):

@@ -156,3 +156,11 @@ from here:
 The unknown line is one model call per clip, paid by antisearch.ai, with a
 measured latency of about 1.6–3.0s on the four frozen runs and 2.458s for
 `thing`. It is not an agent, and this pipeline must not grow one.
+
+A live post whose jittered minute is still ahead waits up to 9 minutes inside
+the same Actions job (`docs/ANTI_BAN.md`). That wait is billed. A negative
+offset does not wait. At the founder's 10 posts/day the extra is a few
+minutes each on the posts that land after :07, on top of the minute table
+above, and it stays inside the 2,000 free minutes unless most offsets are
+near the +9 cap and the idle wakes are already at the upper estimate. Set
+`PUBLISHER_JITTER=off` to drop the wait.

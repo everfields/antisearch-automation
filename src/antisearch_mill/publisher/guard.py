@@ -80,6 +80,10 @@ def caption_problem(caption: str, bare_input: str, network: str = "") -> str | N
     c = caption.strip()
     if not c or c in (HOLD_FOR_TAG, NO_CAPTION, WINNER):
         return None
+    if "#" in c:
+        return "hashtags are not allowed"
+    if c.count("@") > 1:
+        return "at most one mention"
     if RANKED.search(c):
         return "caption starts with a ranking word"
     if network == "bluesky":
@@ -207,6 +211,7 @@ class PostRow:
     detail: str = ""
     at: str = field(default_factory=now_iso)
     category: str = ""
+    caption: str = ""
 
 
 COLUMNS = [f.name for f in fields(PostRow)]
@@ -224,11 +229,20 @@ class PostLog:
         with self.path.open(newline="", encoding="utf-8") as fh:
             return list(csv.DictReader(fh))
 
+    def _fields(self) -> list[str]:
+        """New logs grow a caption column. An older file keeps its header so the append stays valid."""
+        if not self.path.is_file():
+            return COLUMNS
+        with self.path.open(newline="", encoding="utf-8") as fh:
+            header = next(csv.reader(fh), [])
+        return header if header and "job_id" in header else COLUMNS
+
     def append(self, row: PostRow) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        fields = self._fields()
         new = not self.path.is_file()
         with self.path.open("a", newline="", encoding="utf-8") as fh:
-            writer = csv.DictWriter(fh, fieldnames=COLUMNS)
+            writer = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
             if new:
                 writer.writeheader()
             writer.writerow(asdict(row))
@@ -261,6 +275,24 @@ class PostLog:
         times = [datetime.fromisoformat(r["at"]) for r in self.rows()
                  if r["network"] == network and r["status"] == PENDING and final.get(r["job_id"]) != FAILED]
         return max(times) if times else None
+
+    def input_within(self, category: str, now: datetime, days: int) -> bool:
+        """True if this input went out (or may have) within the last `days` days."""
+        if not category or days <= 0:
+            return False
+        cutoff = now - timedelta(days=days)
+        for row in self.latest_by_job().values():
+            if row.get("category") != category or row.get("status") in (FAILED, WITHHELD):
+                continue
+            try:
+                at = datetime.fromisoformat(row["at"])
+            except (KeyError, ValueError):
+                continue
+            if at.tzinfo is None:
+                at = at.replace(tzinfo=now.tzinfo)
+            if at >= cutoff:
+                return True
+        return False
 
     def used_inputs(self) -> set[str]:
         """Inputs that went (or may have gone) out anywhere: an input is never repeated, ever."""
