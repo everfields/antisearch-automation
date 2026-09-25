@@ -1,0 +1,148 @@
+{
+  "clips": [
+    {
+      "id": "t-dry-shampoo",
+      "network": "tiktok",
+      "input": "dry shampoo",
+      "verdict": "k18 airwash dry shampoo",
+      "handle": "@k18hair",
+      "handle_rule": "tag @k18hair only after a human sets verified=true (badge or k18hair.com link). Never a #hashtag. Otherwise caption empty",
+      "account": "AntiSearch TikTok",
+      "slot": "2026-09-24 22:07 America/New_York (2026-09-25 04:07 Madrid)",
+      "oracle_latency_ms_recorded": 2766,
+      "oracle_fetched_at": "2026-09-24T22:40:23+00:00",
+      "clip_id": "tiktok-t-dry-shampoo",
+      "caption": "",
+      "pause_s": 2.0,
+      "pause_note": "Founder order 2026-09-25: treat this clip's pause latency as unrecorded and use 2.0s. verdicts.csv on publisher-state does contain oracle latency_ms from the 2026-09-24 honest run (see oracle_latency_ms_recorded). That number was not used for the pause, and the oracle was not re-asked.",
+      "cover": "tiktok-t-dry-shampoo-cover.png",
+      "cover_frame": "verdict hold (duration - 0.25s)",
+      "duration_s": 5.0,
+      "size": "1080x1920",
+      "sha256": "7c58ef9bcc521e3a286b33465bd735a684d70b277a5bc50d9c7c1d59af5e4de2",
+      "oracle": "live, one honest run, frozen 2026-09-24T22:40:23+00:00; not re-asked",
+      "route": "Buffer free API from GitHub Actions (PUBLISHER_BRIDGE=buffer, secret BUFFER_API_KEY). Not the web UI.",
+      "render_style": "monolith-v2"
+    },
+    {
+      "id": "p-time",
+      "network": "tiktok",
+      "input": "time",
+      "verdict": "now",
+      "handle": "",
+      "handle_rule": "no tag: unowned word; caption empty",
+      "account": "AntiSearch TikTok",
+      "slot": "2026-09-25 00:07 America/New_York (06:07 Madrid)",
+      "oracle_latency_ms_recorded": 1716,
+      "oracle_fetched_at": "2026-09-24T22:40:26+00:00",
+      "clip_id": "tiktok-p-time",
+      "caption": "",
+      "pause_s": 2.0,
+      "pause_note": "Founder order 2026-09-25: treat this clip's pause latency as unrecorded and use 2.0s. verdicts.csv on publisher-state does contain oracle latency_ms from the 2026-09-24 honest run (see oracle_latency_ms_recorded). That number was not used for the pause, and the oracle was not re-asked.",
+      "cover": "tiktok-p-time-cover.png",
+      "cover_frame": "verdict hold (duration - 0.25s)",
+      "duration_s": 5.0,
+      "size": "1080x1920",
+      "sha256": "b8e0709f3601f7173ff88b9eebca240ecf5107d3e51ecdb15a77a7c3d118bc50",
+      "oracle": "live, one honest run, frozen 2026-09-24T22:40:26+00:00; not re-asked",
+      "route": "Buffer free API from GitHub Actions (PUBLISHER_BRIDGE=buffer, secret BUFFER_API_KEY). Not the web UI.",
+      "render_style": "monolith-v2"
+    },
+    {
+      "id": "p-love",
+      "network": "instagram",
+      "input": "love",
+      "verdict": "unconditional love",
+      "handle": "",
+      "handle_rule": "no tag: unowned word; caption empty",
+      "account": "AntiSearch IG Business",
+      "slot": "2026-09-24 22:07 America/New_York (2026-09-25 04:07 Madrid)",
+      "oracle_latency_ms_recorded": 3013,
+      "oracle_fetched_at": "2026-09-24T22:40:30+00:00",
+      "clip_id": "instagram-p-love",
+      "caption": "",
+      "pause_s": 2.0,
+      "pause_note": "Founder order 2026-09-25: treat this clip's pause latency as unrecorded and use 2.0s. verdicts.csv on publisher-state does contain oracle latency_ms from the 2026-09-24 honest run (see oracle_latency_ms_recorded). That number was not used for the pause, and the oracle was not re-asked.",
+      "cover": "instagram-p-love-cover.png",
+      "cover_frame": "verdict hold (duration - 0.25s)",
+      "duration_s": 5.0,
+      "size": "1080x1920",
+      "sha256": "11657932bdb7c680e57d1bac59806e55372dd9ce80c2030d26458a28fd59d1b4",
+      "oracle": "live, one honest run, frozen 2026-09-24T22:40:30+00:00; not re-asked",
+      "route": "Buffer free API from GitHub Actions (PUBLISHER_BRIDGE=buffer, secret BUFFER_API_KEY). Not the web UI.",
+      "render_style": "monolith-v2"
+    },
+    {
+      "id": "p-dog",
+      "network": "linkedin",
+      "input": "dog",
+      "verdict": "golden retriever",
+      "handle": "",
+      "handle_rule": "no tag: unowned word; caption empty",
+      "account": "antisearch Page 99258814",
+      "slot": "2026-09-25 09:07 America/New_York (15:07 Madrid)",
+      "oracle_latency_ms_recorded": 1569,
+      "oracle_fetched_at": "2026-09-24T22:40:33+00:00",
+      "clip_id": "linkedin-p-dog",
+      "caption": "",
+      "pause_s": 2.0,
+      "pause_note": "Founder order 2026-09-25: treat this clip's pause latency as unrecorded and use 2.0s. verdicts.csv on publisher-state does contain oracle latency_ms from the 2026-09-24 honest run (see oracle_latency_ms_recorded). That number was not used for the pause, and the oracle was not re-asked.",
+      "cover": "linkedin-p-dog-cover.png",
+      "cover_frame": "verdict hold (duration - 0.25s)",
+      "duration_s": 5.0,
+      "size": "1080x1920",
+      "sha256": "802142418389f99b8d4120c9666ce3426515174f85230b8685e70c5d16d81736",
+      "oracle": "live, one honest run, frozen 2026-09-24T22:40:33+00:00; not re-asked",
+      "route": "Buffer free API from GitHub Actions (PUBLISHER_BRIDGE=buffer, secret BUFFER_API_KEY). Not the web UI.",
+      "render_style": "monolith-v2"
+    },
+    {
+      "id": "intro-thing",
+      "verdict": "love",
+      "pause_s": 2.466666666666667,
+      "latency_ms": 2458
+    }
+  ],
+  "render_times": [
+    {
+      "stem": "tiktok-t-dry-shampoo",
+      "ffmpeg_s": 0.928,
+      "duration_s": 5.0,
+      "pause_s": 2.0,
+      "bytes": 64056
+    },
+    {
+      "stem": "tiktok-p-time",
+      "ffmpeg_s": 0.731,
+      "duration_s": 5.0,
+      "pause_s": 2.0,
+      "bytes": 38739
+    },
+    {
+      "stem": "instagram-p-love",
+      "ffmpeg_s": 0.753,
+      "duration_s": 5.0,
+      "pause_s": 2.0,
+      "bytes": 52316
+    },
+    {
+      "stem": "linkedin-p-dog",
+      "ffmpeg_s": 0.794,
+      "duration_s": 5.0,
+      "pause_s": 2.0,
+      "bytes": 50969
+    },
+    {
+      "stem": "intro-thing-9x16",
+      "ffmpeg_s": 0.745,
+      "duration_s": 5.0,
+      "pause_s": 2.466666666666667,
+      "bytes": 40315
+    }
+  ],
+  "intro_extra_s": {
+    "square": 0.477,
+    "gif": 0.484,
+    "loop": 0.54
+  }
+}
