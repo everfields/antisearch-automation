@@ -157,9 +157,14 @@ and every code-formatted example in README/SETUP.
   height, the caret blinks alone for the real oracle latency, the verdict holds ≥1.5s.
   Target ≤4s, hard cap 5s; a long latency is not cut. Unset or `word` is the default above
   and is what already-scheduled posts keep using
+- `PUBLISHER_CLIP_AUDIO=off` (default) keeps the silent AAC track. `pulse` muxes a
+  procedural felt-piano bed into Instagram and TikTok only: one low note on each
+  caret blink during the real pause, one resolving chord at the verdict.
+  `PUBLISHER_CLIP_AUDIO_VARIANT` is `a` (major 9), `b` (suspended), or `c` (chord
+  only). X, LinkedIn, and Bluesky stay silent either way
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long
 - the verdict frame is the cover
-- renders are byte-identical for the same (category, verdict, pause, style)
+- renders are byte-identical for the same (category, verdict, pause, style, pulse)
 - mp4 metadata: `title=<verdict>`, `comment=capture=synthetic-oracle;oracle=<live|fixture>;category=<...>`
 
 X gets a 720×1280 derivative at publish time (X's documented portrait max is
