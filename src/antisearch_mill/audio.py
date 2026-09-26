@@ -18,12 +18,24 @@ Variants (`PUBLISHER_CLIP_AUDIO_VARIANT`, default `c`):
   a  blinks, then an open fifth with octave one register below (no third)
   b  blinks, then that same note one octave lower
   c  blinks, then silence at the verdict
+
+Founder, 2026-09-26, `PUBLISHER_CLIP_AUDIO=heartbeat` replaces the piano:
+  typing   one synthesized mechanical key click per typed character, on the
+           frame the letter appears, and a heavier Enter. Noise transient plus
+           a short resonant body, varied per key, seeded from the input.
+  wait     a low lub-dub on every caret blink, on the frame the caret turns on.
+  bed      `PUBLISHER_CLIP_AUDIO_BED=on` adds a very low, very quiet drone
+           under the wait only. Off by default.
+  verdict  silence (variant c, locked). Nothing sounds from the verdict frame on.
+Same input, same audio: every random draw is seeded from the typed text.
 """
 
 from __future__ import annotations
 
+import hashlib
 import math
 import os
+import random
 import struct
 import subprocess
 import wave
@@ -31,8 +43,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-from .render import BLINK_ON_FRACTION, BLINK_PERIOD_S
-from .timeline import Timeline
+from .timeline import BLINK_ON_FRACTION, BLINK_PERIOD_S, Timeline
 
 SR = 44100
 # Quieter than a normal feed. The peak sits near -24 dBFS; integrated is lower.
@@ -43,9 +54,15 @@ LOOP_SILENCE_S = 0.18
 
 AUDIO_OFF = "off"
 AUDIO_PULSE = "pulse"
-AUDIO_MODES = (AUDIO_OFF, AUDIO_PULSE)
+AUDIO_HEARTBEAT = "heartbeat"
+AUDIO_MODES = (AUDIO_OFF, AUDIO_PULSE, AUDIO_HEARTBEAT)
 AUDIO_VARIANTS = ("a", "b", "c")
 PULSE_NETWORKS = frozenset({"instagram", "tiktok"})
+
+# Heartbeat mix: sample peak -3 dBFS, true peak held under -1 dBTP before AAC.
+HEARTBEAT_PEAK_DB = -3.0
+TRUE_PEAK_CEILING_DB = -1.0
+LUB_DUB_S = 0.29  # S1 to S2 at about 57 bpm (one beat per 1.05s blink)
 
 # Equal temperament, A4 = 440. One pitch for every blink: C3, low-mid.
 BLINK_HZ = 130.8127826502993
@@ -60,14 +77,34 @@ class Loudness:
 
 
 def clip_audio(env: Mapping[str, str] | None = None) -> str:
-    """`PUBLISHER_CLIP_AUDIO`: `off` (default) or `pulse`. Blank means `off`."""
+    """`PUBLISHER_CLIP_AUDIO`: `off` (default), `pulse`, or `heartbeat`. Blank means `off`."""
     source = os.environ if env is None else env
     raw = (source.get("PUBLISHER_CLIP_AUDIO") or "").strip().lower()
     if not raw:
         return AUDIO_OFF
     if raw not in AUDIO_MODES:
-        raise ValueError(f"PUBLISHER_CLIP_AUDIO={raw!r}; use off or pulse")
+        raise ValueError(f"PUBLISHER_CLIP_AUDIO={raw!r}; use off, pulse, or heartbeat")
     return raw
+
+
+def clip_audio_bed(env: Mapping[str, str] | None = None) -> bool:
+    """`PUBLISHER_CLIP_AUDIO_BED`: `off` (default) or `on`. Only the heartbeat uses it."""
+    source = os.environ if env is None else env
+    raw = (source.get("PUBLISHER_CLIP_AUDIO_BED") or "").strip().lower()
+    if raw in ("", "off"):
+        return False
+    if raw == "on":
+        return True
+    raise ValueError(f"PUBLISHER_CLIP_AUDIO_BED={raw!r}; use on or off")
+
+
+def audio_tag(mode: str, variant: str, bed: bool) -> str:
+    """What is actually muxed, for the clip id and metadata. Empty when silent."""
+    if mode == AUDIO_PULSE:
+        return f"pulse:{variant}"
+    if mode == AUDIO_HEARTBEAT:
+        return "heartbeat+bed" if bed else "heartbeat"
+    return ""
 
 
 def clip_audio_variant(env: Mapping[str, str] | None = None) -> str:
@@ -82,8 +119,8 @@ def clip_audio_variant(env: Mapping[str, str] | None = None) -> str:
 
 
 def pulse_for_platforms(platforms: tuple[str, ...] | list[str], mode: str) -> bool:
-    """Pulse only when every destination is Instagram or TikTok. Anywhere else stays silent."""
-    if mode != AUDIO_PULSE:
+    """Audio only when every destination is Instagram or TikTok. Anywhere else stays silent."""
+    if mode not in (AUDIO_PULSE, AUDIO_HEARTBEAT):
         return False
     plats = tuple(platforms)
     return bool(plats) and set(plats) <= PULSE_NETWORKS
@@ -375,6 +412,214 @@ def write_pulse_wav(timeline: Timeline, variant: str, dest: Path, *, work: Path 
     left, right = synthesize(timeline, variant)
     folder = work or dest.parent
     left, right, loud = fit_loudness(left, right, folder)
+    if dest != folder / "level.wav":
+        _write_wav(dest, left, right)
+    return loud
+
+
+def _rng(*parts: object) -> random.Random:
+    key = "\0".join(str(p) for p in parts).encode("utf-8")
+    return random.Random(int.from_bytes(hashlib.sha256(key).digest()[:8], "big"))
+
+
+def _burst(n: int, rng: random.Random, tau_s: float, highpass_hz: float) -> list[float]:
+    """Decaying white noise, one-pole highpassed: the plastic tick of a switch."""
+    a = math.exp(-2.0 * math.pi * highpass_hz / SR)
+    tau = tau_s * SR
+    out = [0.0] * n
+    prev_x = prev_y = 0.0
+    for i in range(n):
+        x = rng.uniform(-1.0, 1.0) * math.exp(-i / tau)
+        y = a * (prev_y + x - prev_x)
+        out[i] = y
+        prev_x, prev_y = x, y
+    return out
+
+
+def _ring(n: int, freq: float, tau_s: float, attack_s: float, phase: float = 0.0) -> list[float]:
+    """Short resonant body: a damped sine with a raised-cosine onset."""
+    w = 2.0 * math.pi * freq / SR
+    tau = tau_s * SR
+    att = max(1, int(attack_s * SR))
+    out = [0.0] * n
+    for i in range(n):
+        env = math.exp(-i / tau)
+        if i < att:
+            env *= 0.5 - 0.5 * math.cos(math.pi * i / att)
+        out[i] = env * math.sin(w * i + phase)
+    return out
+
+
+def _mix_into(left: list[float], right: list[float], start: int, sig: list[float], amp: float, pan: float = 0.0) -> None:
+    gl, gr = amp * (1.0 - pan), amp * (1.0 + pan)
+    end = min(len(left), start + len(sig))
+    for i in range(max(0, start), end):
+        s = sig[i - start]
+        left[i] += gl * s
+        right[i] += gr * s
+
+
+def key_click(rng: random.Random, *, enter: bool = False) -> list[float]:
+    """One mechanical key: tick, ping, case thock, and a bottom-out a few ms later."""
+    n = int((0.11 if enter else 0.06) * SR)
+    sig = [0.0] * n
+    tick = _burst(int(0.006 * SR), rng, rng.uniform(0.0005, 0.0009), rng.uniform(1800, 2600))
+    ping_hz = rng.uniform(1500, 1800) if enter else rng.uniform(2300, 3300)
+    ping = _ring(int(0.02 * SR), ping_hz, rng.uniform(0.0025, 0.0040), 0.0002, rng.uniform(0, math.pi))
+    thock_hz = rng.uniform(125, 150) if enter else rng.uniform(190, 270)
+    thock = _ring(n, thock_hz, 0.016 if enter else rng.uniform(0.008, 0.011), 0.0008)
+    bottom = int(rng.uniform(0.012, 0.016) * SR) if enter else int(rng.uniform(0.007, 0.011) * SR)
+    parts = [
+        (0, tick, 0.9),
+        (0, ping, 0.35),
+        (0, thock, 0.55 if enter else 0.42),
+        (bottom, _burst(int(0.005 * SR), rng, 0.0006, 1400), 0.5),
+        (bottom, _ring(n - bottom, thock_hz * 0.92, 0.012 if enter else 0.007, 0.0006), 0.5 if enter else 0.32),
+    ]
+    if enter:
+        # A long key rides on a stabilizer wire: one small late rattle.
+        rattle = bottom + int(0.009 * SR)
+        parts.append((rattle, _burst(int(0.004 * SR), rng, 0.0008, 3000), 0.18))
+    for offset, part, gain in parts:
+        for i, s in enumerate(part):
+            if offset + i < n:
+                sig[offset + i] += gain * s
+    return sig
+
+
+def _thump(dur_s: float, f_start: float, f_end: float, tau_s: float, drop_s: float, drive: float) -> list[float]:
+    """A heart sound: a low sine falling in pitch, soft-saturated so a phone speaker hears its harmonics."""
+    n = int(dur_s * SR)
+    out = [0.0] * n
+    phase = 0.0
+    att = int(0.006 * SR)
+    norm = math.tanh(drive)
+    for i in range(n):
+        t = i / SR
+        f = f_end + (f_start - f_end) * math.exp(-t / drop_s)
+        phase += 2.0 * math.pi * f / SR
+        env = math.exp(-t / tau_s)
+        if i < att:
+            env *= math.sin(0.5 * math.pi * i / att)
+        out[i] = env * math.tanh(drive * math.sin(phase)) / norm
+    # Close the tail cleanly at the end of the buffer.
+    fade = int(0.02 * SR)
+    for i in range(fade):
+        out[n - fade + i] *= 0.5 + 0.5 * math.cos(math.pi * (i + 1) / fade)
+    return out
+
+
+def _lowpassed_noise(n: int, rng: random.Random, cutoff_hz: float) -> list[float]:
+    a = math.exp(-2.0 * math.pi * cutoff_hz / SR)
+    out = [0.0] * n
+    y = 0.0
+    for i in range(n):
+        y = (1.0 - a) * rng.uniform(-1.0, 1.0) + a * y
+        out[i] = y
+    return out
+
+
+def heartbeat_frames(timeline: Timeline) -> list[int]:
+    """One beat per caret blink in the wait, on the frame the caret turns on."""
+    return pause_caret_frames(timeline)
+
+
+def synthesize_heartbeat(timeline: Timeline, *, bed: bool = False) -> tuple[list[float], list[float]]:
+    """Stereo float samples: key clicks, Enter, a lub-dub per blink, optional drone, silent verdict."""
+    fps = timeline.fps
+    n = int(math.ceil(timeline.total_frames / fps * SR))
+    left = [0.0] * n
+    right = [0.0] * n
+    typed = timeline.typed
+
+    def at(frame: int) -> int:
+        return int(round(frame / fps * SR))
+
+    for i, frame in enumerate(timeline.keystroke_frames()):
+        ch = typed[i] if i < len(typed) else ""
+        rng = _rng("key", typed, i, ch)
+        click = key_click(rng)
+        _mix_into(left, right, at(frame), click, rng.uniform(0.30, 0.38), rng.uniform(-0.12, 0.12))
+    enter_rng = _rng("enter", typed)
+    _mix_into(left, right, at(timeline.submit_frame), key_click(enter_rng, enter=True), 0.48, 0.04)
+
+    lub = _thump(0.30, 82.0, 47.0, 0.075, 0.035, 2.2)
+    dub = _thump(0.24, 98.0, 60.0, 0.050, 0.025, 1.9)
+    hit_rng = _rng("heart", typed)
+    impact = _lowpassed_noise(int(0.04 * SR), hit_rng, 160.0)
+    for i in range(len(impact)):
+        impact[i] *= math.exp(-i / (0.012 * SR)) * 6.0
+    for frame in heartbeat_frames(timeline):
+        start = at(frame)
+        _mix_into(left, right, start, lub, 1.0)
+        _mix_into(left, right, start, impact, 0.25)
+        _mix_into(left, right, start + int(LUB_DUB_S * SR), dub, 0.72)
+
+    verdict = at(timeline.verdict_frame)
+    if bed:
+        _add_drone(left, right, at(timeline.submit_frame), verdict, _rng("bed", typed))
+    # Verdict is silence: a short fade into it, then exact zeros to the end.
+    fade = int(0.03 * SR)
+    for i in range(fade):
+        k = verdict - fade + i
+        if 0 <= k < n:
+            g = 0.5 + 0.5 * math.cos(math.pi * (i + 1) / fade)
+            left[k] *= g
+            right[k] *= g
+    for i in range(max(0, verdict), n):
+        left[i] = 0.0
+        right[i] = 0.0
+    return left, right
+
+
+def _add_drone(left: list[float], right: list[float], start: int, end: int, rng: random.Random) -> None:
+    """A1 with a faint fifth and octave, a slow breath, a breath of low air. About -30 dB under the beat."""
+    length = end - start
+    if length <= 0:
+        return
+    fade_in = min(length // 3, int(0.6 * SR))
+    fade_out = min(length // 3, int(0.45 * SR))
+    tail_gap = int(0.12 * SR)  # the drone is gone a beat before the verdict frame
+    body = max(1, length - tail_gap)
+    air = _lowpassed_noise(body, rng, 220.0)
+    partials = ((55.0, 1.0, 0.0), (55.0 * 1.5, 0.22, 1.3), (110.0, 0.12, 2.1))
+    amp = 0.030
+    for i in range(body):
+        t = i / SR
+        env = 1.0
+        if i < fade_in:
+            env = 0.5 - 0.5 * math.cos(math.pi * i / fade_in)
+        elif i > body - fade_out:
+            env = 0.5 + 0.5 * math.cos(math.pi * (i - (body - fade_out)) / fade_out)
+        breath = 1.0 + 0.18 * math.sin(2.0 * math.pi * 0.23 * t)
+        tone = sum(g * math.sin(2.0 * math.pi * f * t + ph) for f, g, ph in partials)
+        s = amp * env * breath * (tone + 1.4 * air[i])
+        k = start + i
+        left[k] += s
+        right[k] += s * 0.97
+
+
+def fit_heartbeat_level(left: list[float], right: list[float], work: Path) -> tuple[list[float], list[float], Loudness]:
+    """Static gain: sample peak at -3 dBFS, then down again if the true peak passes -1 dBTP."""
+    peak_db = _peak_db(left, right)
+    gain_db = 0.0 if peak_db <= -120.0 else HEARTBEAT_PEAK_DB - peak_db
+    left, right = _scale(left, right, 10 ** (gain_db / 20.0))
+    scratch = work / "level.wav"
+    _write_wav(scratch, left, right)
+    final = measure_loudness(scratch)
+    if final.peak_db > TRUE_PEAK_CEILING_DB:
+        extra = TRUE_PEAK_CEILING_DB - 0.3 - final.peak_db
+        left, right = _scale(left, right, 10 ** (extra / 20.0))
+        _write_wav(scratch, left, right)
+        final = measure_loudness(scratch)
+    return left, right, final
+
+
+def write_heartbeat_wav(timeline: Timeline, dest: Path, *, bed: bool = False, work: Path | None = None) -> Loudness:
+    """Write the 44.1 kHz stereo heartbeat mix, already gain-staged."""
+    left, right = synthesize_heartbeat(timeline, bed=bed)
+    folder = work or dest.parent
+    left, right, loud = fit_heartbeat_level(left, right, folder)
     if dest != folder / "level.wav":
         _write_wav(dest, left, right)
     return loud
