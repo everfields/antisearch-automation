@@ -28,6 +28,13 @@ Founder, 2026-09-26, `PUBLISHER_CLIP_AUDIO=heartbeat` replaces the piano:
            under the wait only. Off by default.
   verdict  silence (variant c, locked). Nothing sounds from the verdict frame on.
 Same input, same audio: every random draw is seeded from the typed text.
+
+Founder, 2026-09-26, second pass, `PUBLISHER_CLIP_AUDIO=keys`: the only sound
+is typing and Enter. A normal laptop keyboard (low-profile chiclet keys): a soft,
+short, muted thock, little click, low level, subtle per-key variation. Enter is
+a little weightier and still soft. Exact silence from the end of the Enter
+slide through the wait and the verdict. No heartbeat, no drone, no piano.
+`PUBLISHER_CLIP_KEYS_SOUND` picks the voicing: `soft` (default) or `muted`.
 """
 
 from __future__ import annotations
@@ -55,7 +62,13 @@ LOOP_SILENCE_S = 0.18
 AUDIO_OFF = "off"
 AUDIO_PULSE = "pulse"
 AUDIO_HEARTBEAT = "heartbeat"
-AUDIO_MODES = (AUDIO_OFF, AUDIO_PULSE, AUDIO_HEARTBEAT)
+AUDIO_KEYS = "keys"
+AUDIO_MODES = (AUDIO_OFF, AUDIO_PULSE, AUDIO_HEARTBEAT, AUDIO_KEYS)
+KEY_SOUNDS = ("soft", "muted")
+# Per-key sample peak, like a laptop heard from arm's length. Enter sits a little above.
+KEY_PEAK_DB = -22.5
+KEY_PEAK_SPREAD_DB = 0.8
+ENTER_PEAK_DB = -20.8
 AUDIO_VARIANTS = ("a", "b", "c")
 PULSE_NETWORKS = frozenset({"instagram", "tiktok"})
 
@@ -77,13 +90,13 @@ class Loudness:
 
 
 def clip_audio(env: Mapping[str, str] | None = None) -> str:
-    """`PUBLISHER_CLIP_AUDIO`: `off` (default), `pulse`, or `heartbeat`. Blank means `off`."""
+    """`PUBLISHER_CLIP_AUDIO`: `off` (default), `pulse`, `heartbeat`, or `keys`. Blank means `off`."""
     source = os.environ if env is None else env
     raw = (source.get("PUBLISHER_CLIP_AUDIO") or "").strip().lower()
     if not raw:
         return AUDIO_OFF
     if raw not in AUDIO_MODES:
-        raise ValueError(f"PUBLISHER_CLIP_AUDIO={raw!r}; use off, pulse, or heartbeat")
+        raise ValueError(f"PUBLISHER_CLIP_AUDIO={raw!r}; use off, pulse, heartbeat, or keys")
     return raw
 
 
@@ -98,8 +111,21 @@ def clip_audio_bed(env: Mapping[str, str] | None = None) -> bool:
     raise ValueError(f"PUBLISHER_CLIP_AUDIO_BED={raw!r}; use on or off")
 
 
-def audio_tag(mode: str, variant: str, bed: bool) -> str:
+def clip_keys_sound(env: Mapping[str, str] | None = None) -> str:
+    """`PUBLISHER_CLIP_KEYS_SOUND`: `soft` (default) or `muted`. Only `keys` uses it."""
+    source = os.environ if env is None else env
+    raw = (source.get("PUBLISHER_CLIP_KEYS_SOUND") or "").strip().lower()
+    if not raw:
+        return "soft"
+    if raw not in KEY_SOUNDS:
+        raise ValueError(f"PUBLISHER_CLIP_KEYS_SOUND={raw!r}; use soft or muted")
+    return raw
+
+
+def audio_tag(mode: str, variant: str, bed: bool, keys: str = "soft") -> str:
     """What is actually muxed, for the clip id and metadata. Empty when silent."""
+    if mode == AUDIO_KEYS:
+        return f"keys:{keys}"
     if mode == AUDIO_PULSE:
         return f"pulse:{variant}"
     if mode == AUDIO_HEARTBEAT:
@@ -120,7 +146,7 @@ def clip_audio_variant(env: Mapping[str, str] | None = None) -> str:
 
 def pulse_for_platforms(platforms: tuple[str, ...] | list[str], mode: str) -> bool:
     """Audio only when every destination is Instagram or TikTok. Anywhere else stays silent."""
-    if mode not in (AUDIO_PULSE, AUDIO_HEARTBEAT):
+    if mode not in (AUDIO_PULSE, AUDIO_HEARTBEAT, AUDIO_KEYS):
         return False
     plats = tuple(platforms)
     return bool(plats) and set(plats) <= PULSE_NETWORKS
@@ -623,3 +649,127 @@ def write_heartbeat_wav(timeline: Timeline, dest: Path, *, bed: bool = False, wo
     if dest != folder / "level.wav":
         _write_wav(dest, left, right)
     return loud
+
+
+@dataclass(frozen=True)
+class KeyVoice:
+    noise_tau_s: float
+    body_hz: tuple[float, float]
+    body_tau_s: tuple[float, float]
+    thud_hz: tuple[float, float]
+    thud_tau_s: float
+    bottom_s: tuple[float, float]
+    bottom_gain: float
+    lowpass_hz: float
+    body_gain: float
+    thud_gain: float
+
+
+KEY_VOICES = {
+    # A clean laptop tock: a little plastic body, most of it the soft landing.
+    "soft": KeyVoice(
+        0.0007, (900.0, 1300.0), (0.0026, 0.0034), (150.0, 190.0), 0.0050, (0.004, 0.006), 0.30, 4800.0,
+        body_gain=0.95, thud_gain=0.5,
+    ),
+    # Duller and closer: lower body, darker top, like typing on a quieter deck.
+    "muted": KeyVoice(
+        0.0009, (480.0, 640.0), (0.0035, 0.0045), (120.0, 150.0), 0.0060, (0.005, 0.007), 0.22, 3000.0,
+        body_gain=0.85, thud_gain=0.75,
+    ),
+}
+
+
+def _lowpass(sig: list[float], cutoff_hz: float, passes: int = 2) -> list[float]:
+    """RBJ Butterworth biquad, run `passes` times (4th order by default)."""
+    w0 = 2.0 * math.pi * cutoff_hz / SR
+    alpha = math.sin(w0) / (2.0 * 0.7071067811865476)
+    cw = math.cos(w0)
+    a0 = 1.0 + alpha
+    b0 = (1.0 - cw) / 2.0 / a0
+    b1 = (1.0 - cw) / a0
+    b2 = b0
+    a1 = -2.0 * cw / a0
+    a2 = (1.0 - alpha) / a0
+    out = sig
+    for _ in range(passes):
+        x1 = x2 = y1 = y2 = 0.0
+        nxt = [0.0] * len(out)
+        for i, x in enumerate(out):
+            y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
+            nxt[i] = y
+            x2, x1 = x1, x
+            y2, y1 = y1, y
+        out = nxt
+    return out
+
+
+def soft_key(rng: random.Random, voice: KeyVoice, *, enter: bool = False) -> list[float]:
+    """One chiclet key, normalized to a peak of 1.0. Mostly thock, a trace of tick."""
+    n = int((0.07 if enter else 0.045) * SR)
+    sig = [0.0] * n
+    weight = 0.82 if enter else 1.0
+    body_hz = rng.uniform(*voice.body_hz) * weight
+    thud_hz = rng.uniform(*voice.thud_hz) * weight
+    body_tau = rng.uniform(*voice.body_tau_s) * (1.3 if enter else 1.0)
+    thud_tau = voice.thud_tau_s * (1.35 if enter else 1.0)
+    bottom = int(rng.uniform(*voice.bottom_s) * SR)
+    parts = [
+        (0, _burst(int(0.004 * SR), rng, voice.noise_tau_s, 300.0), 0.7),
+        (0, _ring(n, body_hz, body_tau, 0.0006, rng.uniform(0, math.pi)), voice.body_gain),
+        (0, _ring(n, thud_hz, thud_tau, 0.0012), voice.thud_gain),
+        (bottom, _burst(int(0.004 * SR), rng, voice.noise_tau_s, 300.0), voice.bottom_gain),
+    ]
+    if enter:
+        # The long key lands twice, faintly: the stabilizer settles.
+        parts.append((bottom + int(0.008 * SR), _ring(n, thud_hz * 0.9, thud_tau, 0.001), 0.25))
+    for offset, part, gain in parts:
+        for i, s in enumerate(part):
+            if offset + i < n:
+                sig[offset + i] += gain * s
+    sig = _lowpass(sig, voice.lowpass_hz)
+    fade = int(0.006 * SR)
+    for i in range(fade):
+        sig[n - fade + i] *= 0.5 + 0.5 * math.cos(math.pi * (i + 1) / fade)
+    peak = _peak(sig)
+    return [s / peak for s in sig] if peak > 0 else sig
+
+
+def _peak(sig: list[float]) -> float:
+    return max((abs(s) for s in sig), default=0.0)
+
+
+def synthesize_keys(timeline: Timeline, sound: str = "soft") -> tuple[list[float], list[float]]:
+    """Typing and Enter only. Exact zeros from the first wait frame to the end."""
+    if sound not in KEY_VOICES:
+        raise ValueError(f"unknown key sound {sound!r}; use soft or muted")
+    voice = KEY_VOICES[sound]
+    fps = timeline.fps
+    n = int(math.ceil(timeline.total_frames / fps * SR))
+    left = [0.0] * n
+    right = [0.0] * n
+    typed = timeline.typed
+
+    def at(frame: int) -> int:
+        return int(round(frame / fps * SR))
+
+    for i, frame in enumerate(timeline.keystroke_frames()):
+        ch = typed[i] if i < len(typed) else ""
+        rng = _rng("soft-key", sound, typed, i, ch)
+        level = KEY_PEAK_DB + rng.uniform(-KEY_PEAK_SPREAD_DB, KEY_PEAK_SPREAD_DB)
+        _mix_into(left, right, at(frame), soft_key(rng, voice), 10 ** (level / 20.0), rng.uniform(-0.06, 0.06))
+    enter_rng = _rng("soft-enter", sound, typed)
+    _mix_into(
+        left, right, at(timeline.submit_frame), soft_key(enter_rng, voice, enter=True),
+        10 ** (ENTER_PEAK_DB / 20.0), 0.02,
+    )
+    loading = next(s for s in timeline.states if s.kind == "loading")
+    for i in range(min(n, at(loading.start)), n):
+        left[i] = 0.0
+        right[i] = 0.0
+    return left, right
+
+
+def write_keys_wav(timeline: Timeline, dest: Path, sound: str = "soft") -> None:
+    """44.1 kHz stereo, at the absolute key levels above. No normalization: each key is already set."""
+    left, right = synthesize_keys(timeline, sound)
+    _write_wav(dest, left, right)

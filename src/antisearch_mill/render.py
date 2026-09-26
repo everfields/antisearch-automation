@@ -616,8 +616,10 @@ def render_clip(
     heartbeat: bool = False,
     bed: bool = False,
     phone: PhoneSpec | None = None,
+    keys: str | None = None,
 ) -> ClipInfo:
     """`pulse` is a pulse variant; `heartbeat` (with an optional `bed`) replaces it.
+    `keys` is a key voicing: typing and Enter only, silence after.
 
     `phone` draws the screen inside the phone mockup. The output stays the
     layout's full 9:16 frame either way.
@@ -644,7 +646,13 @@ def render_clip(
             frame_png = work / "phone.png"
             draw_phone(frame_png, phone, geometry(phone, lay.width, lay.height))
             extra += [*still, str(frame_png)]
-        if heartbeat:
+        if keys:
+            from .audio import write_keys_wav
+            wav = work / "keys.wav"
+            write_keys_wav(timeline, wav, keys)
+            audio_in = ["-i", str(wav)]
+            audio_codec = ["-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2"]
+        elif heartbeat:
             from .audio import write_heartbeat_wav
             wav = work / "heartbeat.wav"
             write_heartbeat_wav(timeline, wav, bed=bed, work=work)

@@ -168,15 +168,24 @@ and every code-formatted example in README/SETUP.
   - `PUBLISHER_CLIP_FRAME=phone` plays the `app` screen inside a generic phone drawn in code
     (thin bezels, rounded corners, a centered punch-hole camera, side buttons; no logo, no
     notch, no status bar, no captions). `PUBLISHER_CLIP_PHONE_SCALE` is the phone height over
-    the video height (default `0.80`, allowed 0.60–0.95). `PUBLISHER_CLIP_PHONE_BG` is `black`
-    (default) or `gradient` (a very dark grey radial falloff). `none` is the default
+    the video height (default `0.80`, allowed 0.60–0.95). `PUBLISHER_CLIP_PHONE_BG` is a calm
+    surface lighter than the phone, so it reads at a glance: `stone` (mid warm grey, default),
+    `bone` (off-white), or `sage` (muted grey-green). `black` and `gradient` (very dark grey)
+    are kept but the phone disappears on them. The phone is a near-black slab with a graphite
+    rim and a black bezel; the app screen is unchanged. `none` is the default
   - `PUBLISHER_CLIP_AUDIO=heartbeat` (Instagram and TikTok only): a synthesized mechanical key
     click on the frame each letter appears, a heavier Enter, then a low lub-dub on every caret
     blink of the wait. The verdict is silence (variant `c`, locked). Seeded from the input, so
     the same input gives the same audio. Sample peak -3 dBFS, true peak under -1 dBTP.
     `PUBLISHER_CLIP_AUDIO_BED=on` adds a very quiet low drone (about 20 LU under the beat)
     under the wait only; `off` is the default
-  - with the phone frame or the heartbeat, the wait is fixed: `WAIT_BLINKS = 3` caret blinks
+  - `PUBLISHER_CLIP_AUDIO=keys` (Instagram and TikTok only; founder, second pass): the only
+    sound is typing and Enter. A soft laptop chiclet key per letter, on the frame it appears,
+    about -22.5 dBFS peak per key (±0.8 dB), Enter about -20.8 dBFS, low-passed so there is
+    almost nothing above 6 kHz. Exact silence from the first wait frame through the verdict.
+    `PUBLISHER_CLIP_KEYS_SOUND` is `soft` (default, a little plastic presence around 1 kHz) or
+    `muted` (a duller thock). `heartbeat` and `pulse` are kept for back-compat
+  - with the phone frame, the keys, or the heartbeat, the wait is fixed: `WAIT_BLINKS = 3` caret blinks
     of 1.05s, 3.15s nominal, 95 frames (3.167s) at 30 fps, in every clip. It overrides the
     oracle latency. Only the typing and the verdict can vary with length. Segment frames are
     in the clip's sidecar JSON (`timeline.segments_frames`)

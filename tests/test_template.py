@@ -119,7 +119,7 @@ def test_flag_values_and_rejections():
     assert phone_scale({"PUBLISHER_CLIP_PHONE_SCALE": "0.75"}) == 0.75
     assert phone_scale({"PUBLISHER_CLIP_PHONE_SCALE": "80"}) == 0.80
     assert phone_scale({"PUBLISHER_CLIP_PHONE_SCALE": "78%"}) == 0.78
-    assert phone_background({}) == "black"
+    assert phone_background({}) == "stone"
     assert phone_background({"PUBLISHER_CLIP_PHONE_BG": "gradient"}) == "gradient"
     assert phone_spec({"PUBLISHER_CLIP_FRAME": "phone", "PUBLISHER_CLIP_PHONE_SCALE": "0.75"}) == PhoneSpec(0.75)
     for name, value in [
@@ -301,7 +301,7 @@ def _bright(buf, x0, x1, y0, y1):
 @requires_ffmpeg
 def test_phone_heartbeat_clip(tmp_path):
     tl = _fixed("thing", "love")
-    spec = PhoneSpec(0.80)
+    spec = PhoneSpec(0.80, "black")
     g = geometry(spec)
     clip = tmp_path / "phone.mp4"
     info = render_clip(tl, clip, font_path=resolve_font(), phone=spec, heartbeat=True)
@@ -365,7 +365,7 @@ def test_produce_ignores_latency_with_the_template(tmp_path, monkeypatch):
         sidecars[job] = json.loads((ledger.clips_dir / f"{r.clip_id}.json").read_text())["timeline"]
     for tl in sidecars.values():
         assert tl["wait"] == "fixed" and tl["wait_blinks"] == 3
-        assert tl["audio"] == "heartbeat" and tl["frame"] == "phone:0.80:black"
+        assert tl["audio"] == "heartbeat" and tl["frame"] == "phone:0.80:stone"
     assert sidecars["thing"]["segments_frames"]["wait"] == sidecars["situationship"]["segments_frames"]["wait"] == 95
 
 

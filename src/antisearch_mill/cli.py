@@ -16,7 +16,7 @@ from .config import CREDENTIALS, Settings, load_dotenv
 from .fonts import FontNotFound, resolve_font
 from .ledger import ALL_PLATFORMS, Ledger, QueueError, read_queue
 from .oracle import FixtureOracle, LiveOracle, OracleError
-from .audio import AUDIO_HEARTBEAT, clip_audio, clip_audio_bed, clip_audio_variant
+from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound
 from .phone import FRAME_NONE, FRAME_PHONE, phone_spec
 from .produce import produce_all, sha256_file, validate_master
 from .timeline import WAIT_BLINKS, WAIT_S, clip_style
@@ -45,7 +45,9 @@ def _oracle(args, settings: Settings):
     )
 
 
-def _audio_label(audio: str, variant: str, bed: bool = False) -> str:
+def _audio_label(audio: str, variant: str, bed: bool = False, keys: str = "soft") -> str:
+    if audio == AUDIO_KEYS:
+        return f"keys:{keys}"
     if audio == AUDIO_HEARTBEAT:
         return "heartbeat+bed" if bed else "heartbeat"
     return "off" if audio == "off" else f"{audio}:{variant}"
@@ -59,6 +61,7 @@ def _clip_options(env=None) -> dict:
         "audio": clip_audio(env),
         "audio_variant": clip_audio_variant(env),
         "bed": clip_audio_bed(env),
+        "keys": clip_keys_sound(env),
         "frame": FRAME_PHONE if phone else FRAME_NONE,
         "phone": phone,
     }
@@ -66,10 +69,10 @@ def _clip_options(env=None) -> dict:
 
 def _clip_label(opts: dict) -> str:
     style = "app" if opts["phone"] else opts["style"]
-    fixed = opts["phone"] is not None or opts["audio"] == AUDIO_HEARTBEAT
+    fixed = opts["phone"] is not None or opts["audio"] in (AUDIO_HEARTBEAT, AUDIO_KEYS)
     wait = f"fixed:{WAIT_BLINKS}x{WAIT_S:.2f}s" if fixed else "latency"
     frame = opts["phone"].tag if opts["phone"] else "none"
-    return (f"style={style} audio={_audio_label(opts['audio'], opts['audio_variant'], opts['bed'])} "
+    return (f"style={style} audio={_audio_label(opts['audio'], opts['audio_variant'], opts['bed'], opts['keys'])} "
             f"frame={frame} wait={wait}")
 
 

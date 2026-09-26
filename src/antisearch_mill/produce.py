@@ -12,8 +12,8 @@ from .fonts import resolve_font
 from .ledger import ClipRow, Job, Ledger, now_iso
 from .oracle import Oracle, OracleError, Verdict
 from .render import ClipInfo, Layout, RenderError, extract_poster, render_clip
-from .audio import AUDIO_HEARTBEAT, AUDIO_PULSE, audio_tag as make_audio_tag
-from .audio import clip_audio, clip_audio_bed, clip_audio_variant, pulse_for_platforms
+from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, AUDIO_PULSE, audio_tag as make_audio_tag
+from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound, pulse_for_platforms
 from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
 from .timeline import (
     MAX_SECONDS, MIN_SECONDS, WAIT_BLINKS, build_timeline, clip_style, pause_for_style,
@@ -99,10 +99,11 @@ def produce_one(
     bed: bool | None = None,
     frame: str | None = None,
     phone: PhoneSpec | None = None,
+    keys: str | None = None,
 ) -> ProduceResult:
     """`frame="phone"` draws `phone` (or the env's scale and background) and implies the `app` screen.
 
-    The phone frame or heartbeat audio makes the clip the fixed template: the
+    The phone frame, heartbeat, or keys audio makes the clip the fixed template: the
     wait is WAIT_BLINKS blinks, whatever the oracle latency.
     """
     try:
@@ -125,15 +126,16 @@ def produce_one(
     mode = clip_audio() if audio is None else audio
     variant = clip_audio_variant() if audio_variant is None else audio_variant
     with_bed = clip_audio_bed() if bed is None else bed
+    keys = clip_keys_sound() if keys is None else keys
     frame = clip_frame() if frame is None else frame
     if frame == FRAME_PHONE:
         phone = phone or PhoneSpec(scale=phone_scale(), background=phone_background())
         style = "app"  # the phone shows the app screen
     else:
         phone = None
-    fixed = phone is not None or mode == AUDIO_HEARTBEAT
+    fixed = phone is not None or mode in (AUDIO_HEARTBEAT, AUDIO_KEYS)
     use_audio = pulse_for_platforms(job.platforms, mode)
-    audio_tag = make_audio_tag(mode, variant, mode == AUDIO_HEARTBEAT and with_bed) if use_audio else ""
+    audio_tag = make_audio_tag(mode, variant, mode == AUDIO_HEARTBEAT and with_bed, keys) if use_audio else ""
     if fixed:
         pause = wait_frames(layout.fps) / layout.fps
     elif style == "word":
@@ -167,6 +169,7 @@ def produce_one(
             heartbeat=use_audio and mode == AUDIO_HEARTBEAT,
             bed=with_bed,
             phone=phone,
+            keys=keys if use_audio and mode == AUDIO_KEYS else None,
         )
         problems = validate_master(info, layout, style_name)
         if problems:
@@ -266,6 +269,7 @@ def produce_all(
     bed: bool | None = None,
     frame: str | None = None,
     phone: PhoneSpec | None = None,
+    keys: str | None = None,
     layout: Layout | None = None,
     force: bool = False,
     limit: int | None = None,
@@ -277,6 +281,7 @@ def produce_all(
     mode = clip_audio() if audio is None else audio
     variant = clip_audio_variant() if audio_variant is None else audio_variant
     with_bed = clip_audio_bed() if bed is None else bed
+    keys = clip_keys_sound() if keys is None else keys
     frame = clip_frame() if frame is None else frame
     if frame == FRAME_PHONE and phone is None:
         phone = PhoneSpec(scale=phone_scale(), background=phone_background())
@@ -294,7 +299,7 @@ def produce_all(
         result = produce_one(
             job, oracle, ledger, font_path=font_path, layout=lay,
             pause_s=pause_s, latency_recorded=latency_recorded, style=style,
-            audio=mode, audio_variant=variant, bed=with_bed, frame=frame, phone=phone,
+            audio=mode, audio_variant=variant, bed=with_bed, frame=frame, phone=phone, keys=keys,
         )
         results.append(result)
         if result.status == "produced":
