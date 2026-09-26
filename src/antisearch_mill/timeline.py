@@ -23,16 +23,23 @@ The word-stays lock is withdrawn for the `app` style (2026-09-26, Soul + Carlos)
 On Enter the typed word vanishes with the keyboard, and the pause is only the
 centered blinking caret. The pause length is still the measured oracle latency
 and is not replaced with a fixed second.
+
+Fixed wait (founder, 2026-09-26), `wait="fixed"`: the template clip. The
+blinking-caret wait is WAIT_BLINKS whole caret blinks in every clip, whatever
+the input, the verdict, or the real oracle latency. Only the typing and the
+verdict may vary with length. This overrides the latency pause above, and only
+for clips rendered with the fixed wait (phone frame or heartbeat audio).
 """
 
 from __future__ import annotations
 
 import hashlib
 import logging
+import math
 import os
 import random
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +72,22 @@ APP_KEYBOARD_FRAC = APP_KEYBOARD_CSS_H / 640
 DEFAULT_CLIP_STYLE = "word"
 CLIP_STYLES = ("word", "app")
 
+# The product caret: CSS `blink 1.05s steps(1)`, 51% on.
+BLINK_PERIOD_S = 1.05
+BLINK_ON_FRACTION = 0.51
+
+# Three blinks, 3.15s. A little longer than the slowest recorded live verdict
+# (3.0s), so the clip is never faster than the product. Two blinks (2.1s) reads
+# as a glitch; four (4.2s) drags on short-form feeds. Three heartbeats count.
+WAIT_BLINKS = 3
+WAIT_S = WAIT_BLINKS * BLINK_PERIOD_S
+WAITS = ("latency", "fixed")
+
+
+def wait_frames(fps: int) -> int:
+    """Frames of the fixed wait. Rounded up so the last blink's off phase is whole."""
+    return math.ceil(round(WAIT_S * fps, 6))
+
 
 @dataclass(frozen=True)
 class State:
@@ -96,10 +119,29 @@ class Timeline:
     style: str = DEFAULT_CLIP_STYLE
     keyboard: tuple[KeySegment, ...] = ()
     exceeded_cap: bool = False
+    fixed_wait: bool = False
 
     @property
     def duration_s(self) -> float:
         return self.total_frames / self.fps
+
+    @property
+    def typed(self) -> str:
+        return next((s.text for s in reversed(self.states) if s.kind == "typing"), "")
+
+    def keystroke_frames(self) -> list[int]:
+        """The frame each typed character first appears on."""
+        return [s.start for s in self.states if s.kind == "typing" and s.text]
+
+    def segments(self) -> dict[str, int]:
+        """Frames per part. `typing` runs to Enter and includes the slide-in and the hold."""
+        loading = next(s for s in self.states if s.kind == "loading")
+        return {
+            "typing": self.submit_frame,
+            "enter": loading.start - self.submit_frame,
+            "wait": loading.end - loading.start,
+            "verdict": self.total_frames - self.verdict_frame,
+        }
 
     def keyboard_at(self, frame: int) -> float:
         """Visibility at one frame. Matches the renderer's linear expression."""
@@ -270,7 +312,43 @@ def _app_timeline(category: str, verdict: str, *, fps: int, pause_s: float) -> T
             APP_TARGET_S,
             pause / fps,
         )
+    return _app_states(
+        category, verdict, fps=fps, slide_in=slide_in, intervals=intervals, hold=hold,
+        slide_out=slide_out, pause=pause, result=result, exceeded=exceeded,
+    )
 
+
+def _app_fixed_timeline(category: str, verdict: str, *, fps: int) -> Timeline:
+    """The template: the wait is always `wait_frames`, so there is no cap to trim toward."""
+    intervals = char_intervals(category, fps, TYPING_CAP_S)
+    return _app_states(
+        category, verdict, fps=fps,
+        slide_in=max(0, round(APP_SLIDE_IN_S * fps)),
+        intervals=intervals,
+        hold=max(1, round(APP_HOLD_S * fps)),
+        slide_out=max(1, round(APP_SLIDE_OUT_S * fps)),
+        pause=wait_frames(fps),
+        result=max(1, round(APP_MIN_RESULT_S * fps)),
+        exceeded=False,
+        fixed=True,
+    )
+
+
+def _app_states(
+    category: str,
+    verdict: str,
+    *,
+    fps: int,
+    slide_in: int,
+    intervals: list[int],
+    hold: int,
+    slide_out: int,
+    pause: int,
+    result: int,
+    exceeded: bool,
+    fixed: bool = False,
+) -> Timeline:
+    total = slide_in + sum(intervals) + hold + slide_out + pause + result
     appear: list[int] = []
     t = slide_in
     for step in intervals:
@@ -285,7 +363,9 @@ def _app_timeline(category: str, verdict: str, *, fps: int, pause_s: float) -> T
         until = appear[k] if k < len(appear) else submit
         states.append(State(appear[k - 1], until, "typing", category[:k], True))
     # Enter: the word is gone. The keyboard and the line move during `dismiss`.
-    states.append(State(submit, pause_at, "dismiss", "", True))
+    # With the fixed wait the caret is also off here, so its first blink and the
+    # first heartbeat land together on the first wait frame.
+    states.append(State(submit, pause_at, "dismiss", "", not fixed))
     # Pause lock for `app`: the caret only. The typed word does not stay.
     states.append(State(pause_at, verdict_at, "loading", "", True))
     states.append(State(verdict_at, total, "result", verdict, False))
@@ -312,6 +392,7 @@ def _app_timeline(category: str, verdict: str, *, fps: int, pause_s: float) -> T
         style="app",
         keyboard=keyboard,
         exceeded_cap=exceeded,
+        fixed_wait=fixed,
     )
 
 
@@ -322,13 +403,22 @@ def build_timeline(
     fps: int = 30,
     pause_s: float = DEFAULT_PAUSE_S,
     style: str = DEFAULT_CLIP_STYLE,
+    wait: str = "latency",
 ) -> Timeline:
+    """`wait="fixed"` ignores `pause_s`: the wait is WAIT_BLINKS blinks in every clip."""
     if not category:
         raise ValueError("category is empty")
     if not verdict:
         raise ValueError("verdict is empty")
+    if wait not in WAITS:
+        raise ValueError(f"unknown wait {wait!r}; use latency or fixed")
     if style == "word":
+        if wait == "fixed":
+            tl = _word_timeline(category, verdict, fps=fps, pause_s=wait_frames(fps) / fps)
+            return replace(tl, fixed_wait=True)
         return _word_timeline(category, verdict, fps=fps, pause_s=pause_s)
     if style == "app":
+        if wait == "fixed":
+            return _app_fixed_timeline(category, verdict, fps=fps)
         return _app_timeline(category, verdict, fps=fps, pause_s=pause_s)
     raise ValueError(f"unknown clip style {style!r}; use word or app")
