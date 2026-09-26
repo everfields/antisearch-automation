@@ -8,8 +8,14 @@ no hand, no caption. The only text on screen is what the app itself shows.
 
 `PUBLISHER_CLIP_FRAME=none` (the default) renders exactly as before. `phone`
 draws the mockup at `PUBLISHER_CLIP_PHONE_SCALE` of the 9:16 height (0.80 by
-default) on `PUBLISHER_CLIP_PHONE_BG` (`black` by default, or `gradient`, a
-very dark grey radial falloff).
+default) on `PUBLISHER_CLIP_PHONE_BG`.
+
+Founder, 2026-09-26, second pass: on black or the dark gradient the phone
+disappears. The feed has to read "a phone" at a glance, so the calm surfaces
+are lighter than the phone: `stone` (mid warm grey), `bone` (off-white), and
+`sage` (a muted grey-green mid-tone). The phone stays a near-black slab with a
+graphite rim line, a pure-black bezel, and a soft contact shadow. `stone` is
+the default. `black` and `gradient` still work.
 """
 
 from __future__ import annotations
@@ -24,15 +30,21 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 FRAME_NONE = "none"
 FRAME_PHONE = "phone"
 CLIP_FRAMES = (FRAME_NONE, FRAME_PHONE)
-PHONE_BACKGROUNDS = ("black", "gradient")
+# Flat, calm surfaces. No saturated colour.
+SURFACES = {
+    "stone": (138, 133, 125),
+    "bone": (224, 219, 207),
+    "sage": (128, 134, 122),
+}
+PHONE_BACKGROUNDS = ("black", "gradient", *SURFACES)
 DEFAULT_PHONE_SCALE = 0.80
 MIN_PHONE_SCALE = 0.60
 MAX_PHONE_SCALE = 0.95
 # Screen aspect of a current slab phone (19.5:9), not the 9:16 video.
 SCREEN_ASPECT = 9 / 19.5
 
-BEZEL = (5, 5, 6)
-RIM = (38, 38, 40)
+BEZEL = (0, 0, 0)
+RIM = (74, 74, 78)
 BUTTON = (27, 27, 29)
 CAMERA = (0, 0, 0)
 CAMERA_RING = (20, 20, 22)
@@ -42,7 +54,7 @@ _SS = 2  # supersampling for clean curves
 @dataclass(frozen=True)
 class PhoneSpec:
     scale: float = DEFAULT_PHONE_SCALE
-    background: str = "black"
+    background: str = "stone"
     punch_hole: bool = True
     buttons: bool = True
 
@@ -99,13 +111,13 @@ def phone_scale(env: Mapping[str, str] | None = None) -> float:
 
 
 def phone_background(env: Mapping[str, str] | None = None) -> str:
-    """`PUBLISHER_CLIP_PHONE_BG`: `black` (default) or `gradient`."""
+    """`PUBLISHER_CLIP_PHONE_BG`: `stone` (default), `bone`, `sage`, `black`, or `gradient`."""
     source = os.environ if env is None else env
     raw = (source.get("PUBLISHER_CLIP_PHONE_BG") or "").strip().lower()
     if not raw:
-        return "black"
+        return "stone"
     if raw not in PHONE_BACKGROUNDS:
-        raise ValueError(f"PUBLISHER_CLIP_PHONE_BG={raw!r}; use black or gradient")
+        raise ValueError(f"PUBLISHER_CLIP_PHONE_BG={raw!r}; use {', '.join(PHONE_BACKGROUNDS)}")
     return raw
 
 
@@ -150,6 +162,8 @@ def geometry(spec: PhoneSpec, canvas_w: int = 1080, canvas_h: int = 1920) -> Pho
 def _background(w: int, h: int, kind: str) -> Image.Image:
     if kind == "black":
         return Image.new("RGB", (w, h), (0, 0, 0))
+    if kind in SURFACES:
+        return Image.new("RGB", (w, h), SURFACES[kind])
     # Radial falloff from just above center: about #161616 to #050505. Computed
     # in float, then an ordered dither, so the 8-bit steps do not band.
     lo, hi = 5.0, 22.0
@@ -197,7 +211,7 @@ def draw_phone(path: Path, spec: PhoneSpec, geom: PhoneGeometry) -> None:
         button("left", 0.175, 0.062)
         button("left", 0.250, 0.062)
         button("right", 0.215, 0.095)
-    rim = max(2, round(bw * 0.0045))
+    rim = max(2, round(bw * 0.005))
     draw.rounded_rectangle((bx, by, bx + bw - 1, by + bh - 1), radius=radius, fill=(*RIM, 255))
     draw.rounded_rectangle(
         (bx + rim, by + rim, bx + bw - 1 - rim, by + bh - 1 - rim),
@@ -226,7 +240,7 @@ def draw_phone(path: Path, spec: PhoneSpec, geom: PhoneGeometry) -> None:
         shadow = Image.new("L", (geom.canvas_w, geom.canvas_h), 0)
         ImageDraw.Draw(shadow).rounded_rectangle(
             (geom.body_x, geom.body_y + 14, geom.body_x + geom.body_w, geom.body_y + geom.body_h + 14),
-            radius=geom.radius, fill=150,
+            radius=geom.radius, fill=110 if spec.background in SURFACES else 150,
         )
         shadow = shadow.filter(ImageFilter.GaussianBlur(28))
         dark = Image.new("RGBA", base.size, (0, 0, 0, 255))
