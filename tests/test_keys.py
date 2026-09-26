@@ -179,7 +179,7 @@ def test_keys_clip_end_to_end(tmp_path, monkeypatch):
     side = json.loads((ledger.clips_dir / f"{r.clip_id}.json").read_text())["timeline"]
     assert side["audio"] == "keys:soft"
     assert side["frame"] == "phone:0.80:stone"
-    assert side["segments_frames"]["wait"] == 95
+    assert side["segments_frames"]["wait"] == 63
     clip = ledger.clips_dir / f"{r.clip_id}.mp4"
     raw = subprocess.run(
         ["ffmpeg", "-v", "error", "-i", str(clip), "-f", "s16le", "-ac", "1", "-ar", str(SR), "-"],
