@@ -43,12 +43,12 @@ def _peak(samples):
 # --- the fixed wait -----------------------------------------------------------
 
 
-def test_wait_is_three_whole_blinks():
-    assert WAIT_BLINKS == 3
-    assert WAIT_S == pytest.approx(3 * BLINK_PERIOD_S) == pytest.approx(3.15)
-    assert wait_frames(30) == 95  # 94.5 rounded up, so the third off phase is whole
-    assert wait_frames(60) == 189
-    assert wait_frames(25) == 79
+def test_wait_is_two_whole_blinks():
+    assert WAIT_BLINKS == 2
+    assert WAIT_S == pytest.approx(2 * BLINK_PERIOD_S) == pytest.approx(2.1)
+    assert wait_frames(30) == 63
+    assert wait_frames(60) == 126
+    assert wait_frames(25) == 53  # 52.5 rounded up, so the second off phase is whole
 
 
 @pytest.mark.parametrize("style", ["app", "word"])
@@ -63,14 +63,14 @@ def test_wait_is_identical_for_every_input_and_latency(style):
             waits.add(loading.end - loading.start)
             enters.add(loading.start - tl.submit_frame)
             assert tl.verdict_frame == loading.end
-    assert waits == {95}
+    assert waits == {63}
     assert len(enters) == 1
 
 
 def test_only_typing_and_verdict_vary():
     short = _fixed("thing", "love").segments()
     long = _fixed("situationship", "fixture situationship verdict").segments()
-    assert short["wait"] == long["wait"] == 95
+    assert short["wait"] == long["wait"] == 63
     assert short["enter"] == long["enter"] == 9
     assert short["verdict"] == long["verdict"] == round(APP_MIN_RESULT_S * 30)
     assert long["typing"] > short["typing"]
@@ -97,7 +97,7 @@ def test_heartbeat_lands_on_each_caret_blink():
     assert beats == pause_caret_frames(tl)
     assert len(beats) == WAIT_BLINKS
     assert beats[0] == loading.start
-    assert [b - loading.start for b in beats] == [0, 32, 63]
+    assert [b - loading.start for b in beats] == [0, 32]
 
 
 # --- env flags ----------------------------------------------------------------
@@ -311,7 +311,7 @@ def test_phone_heartbeat_clip(tmp_path):
     assert loud.peak_db < 0.0  # no clipping after AAC
 
     loading = next(s for s in tl.states if s.kind == "loading")
-    mid = _frame(clip, loading.start + (loading.end - loading.start) // 2)
+    mid = _frame(clip, loading.start + 40)  # second blink, caret on
     cy = g.screen_y + round(0.38 * g.screen_h)
     # caret on, centered in the screen, and nothing bright anywhere outside the screen
     assert _bright(mid, g.screen_x, g.screen_x + g.screen_w, cy - 40, cy + 40) > 5
@@ -364,9 +364,9 @@ def test_produce_ignores_latency_with_the_template(tmp_path, monkeypatch):
         assert r.status == "produced", r.detail
         sidecars[job] = json.loads((ledger.clips_dir / f"{r.clip_id}.json").read_text())["timeline"]
     for tl in sidecars.values():
-        assert tl["wait"] == "fixed" and tl["wait_blinks"] == 3
+        assert tl["wait"] == "fixed" and tl["wait_blinks"] == 2
         assert tl["audio"] == "heartbeat" and tl["frame"] == "phone:0.80:stone"
-    assert sidecars["thing"]["segments_frames"]["wait"] == sidecars["situationship"]["segments_frames"]["wait"] == 95
+    assert sidecars["thing"]["segments_frames"]["wait"] == sidecars["situationship"]["segments_frames"]["wait"] == 63
 
 
 def test_bad_frame_flag_fails_before_a_render(tmp_path, monkeypatch, capsys):

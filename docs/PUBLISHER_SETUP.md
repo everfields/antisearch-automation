@@ -120,8 +120,8 @@ At each network's slot, the GitHub Actions run (never the box):
    (default) or `muted`. `PUBLISHER_CLIP_FRAME=phone` draws the app screen inside a
    generic phone at `PUBLISHER_CLIP_PHONE_SCALE` of the height (default `0.80`) on
    `PUBLISHER_CLIP_PHONE_BG` (`stone` default, `bone`, `sage`; `black` and `gradient` kept).
-   With the phone, the keys, or the heartbeat, the wait is always 3 caret blinks
-   (95 frames, 3.167s), whatever the oracle latency.
+   With the phone, the keys, or the heartbeat, the wait is always 2 caret blinks
+   (63 frames, 2.1s), whatever the oracle latency.
 4. commits it to the public clips repo and waits for GitHub Pages;
 5. calls Buffer `createPost` (`shareNow`; LinkedIn country rows `customScheduled` for
    09:07 local);

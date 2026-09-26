@@ -76,10 +76,8 @@ CLIP_STYLES = ("word", "app")
 BLINK_PERIOD_S = 1.05
 BLINK_ON_FRACTION = 0.51
 
-# Three blinks, 3.15s. A little longer than the slowest recorded live verdict
-# (3.0s), so the clip is never faster than the product. Two blinks (2.1s) reads
-# as a glitch; four (4.2s) drags on short-form feeds. Three heartbeats count.
-WAIT_BLINKS = 3
+# Two blinks, 2.1s: blink, blink, verdict (Carlos, 2026-09-26; was three).
+WAIT_BLINKS = 2
 WAIT_S = WAIT_BLINKS * BLINK_PERIOD_S
 WAITS = ("latency", "fixed")
 
