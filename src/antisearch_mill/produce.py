@@ -12,9 +12,12 @@ from .fonts import resolve_font
 from .ledger import ClipRow, Job, Ledger, now_iso
 from .oracle import Oracle, OracleError, Verdict
 from .render import ClipInfo, Layout, RenderError, extract_poster, render_clip
-from .audio import clip_audio, clip_audio_variant, pulse_for_platforms
+from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, AUDIO_PULSE, audio_tag as make_audio_tag
+from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound, pulse_for_platforms
+from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
 from .timeline import (
-    MAX_SECONDS, MIN_SECONDS, build_timeline, clip_style, pause_for_style, pause_from_latency_ms,
+    MAX_SECONDS, MIN_SECONDS, WAIT_BLINKS, build_timeline, clip_style, pause_for_style,
+    pause_from_latency_ms, wait_frames,
 )
 
 
@@ -31,11 +34,25 @@ def render_style_name(style: str) -> str:
     return RENDER_STYLE if style == "word" else APP_RENDER_STYLE
 
 
-def clip_id_for(job_id: str, verdict: Verdict, pause_s: float, *, style: str = "word", audio: str = "") -> str:
+def clip_id_for(
+    job_id: str,
+    verdict: Verdict,
+    pause_s: float,
+    *,
+    style: str = "word",
+    audio: str = "",
+    frame: str = "",
+    fixed_wait: bool = False,
+) -> str:
     body = f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}"
     # Silent clips keep the historical hash. Pulse is part of the id only when it is actually muxed.
     if audio:
         body += f"\0{audio}"
+    # Same rule for the template: the phone and the fixed wait join the id only when used.
+    if frame:
+        body += f"\0{frame}"
+    if fixed_wait:
+        body += "\0wait:fixed"
     digest = hashlib.sha256(body.encode()).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
@@ -79,7 +96,16 @@ def produce_one(
     style: str | None = None,
     audio: str | None = None,
     audio_variant: str | None = None,
+    bed: bool | None = None,
+    frame: str | None = None,
+    phone: PhoneSpec | None = None,
+    keys: str | None = None,
 ) -> ProduceResult:
+    """`frame="phone"` draws `phone` (or the env's scale and background) and implies the `app` screen.
+
+    The phone frame, heartbeat, or keys audio makes the clip the fixed template: the
+    wait is WAIT_BLINKS blinks, whatever the oracle latency.
+    """
     try:
         verdict = oracle.ask(job.category)
     except OracleError as exc:
@@ -99,30 +125,51 @@ def produce_one(
     style = clip_style() if style is None else style
     mode = clip_audio() if audio is None else audio
     variant = clip_audio_variant() if audio_variant is None else audio_variant
-    use_pulse = pulse_for_platforms(job.platforms, mode)
-    audio_tag = f"pulse:{variant}" if use_pulse else ""
-    if style == "word":
+    with_bed = clip_audio_bed() if bed is None else bed
+    keys = clip_keys_sound() if keys is None else keys
+    frame = clip_frame() if frame is None else frame
+    if frame == FRAME_PHONE:
+        phone = phone or PhoneSpec(scale=phone_scale(), background=phone_background())
+        style = "app"  # the phone shows the app screen
+    else:
+        phone = None
+    fixed = phone is not None or mode in (AUDIO_HEARTBEAT, AUDIO_KEYS)
+    use_audio = pulse_for_platforms(job.platforms, mode)
+    audio_tag = make_audio_tag(mode, variant, mode == AUDIO_HEARTBEAT and with_bed, keys) if use_audio else ""
+    if fixed:
+        pause = wait_frames(layout.fps) / layout.fps
+    elif style == "word":
         # Unchanged: an explicit pause is stored as given; build_timeline still clamps it.
         pause = pause_from_latency_ms(verdict.latency_ms, recorded=latency_recorded) if pause_s is None else pause_s
     else:
         pause = pause_for_style(verdict.latency_ms, recorded=latency_recorded, style=style, explicit=pause_s)
-    clip_id = clip_id_for(job.id, verdict, pause, style=style, audio=audio_tag)
+    frame_tag = phone.tag if phone else ""
+    clip_id = clip_id_for(job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag, fixed_wait=fixed)
     style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
     poster_path = ledger.clips_dir / f"{clip_id}.png"
     sidecar_path = ledger.clips_dir / f"{clip_id}.json"
     try:
-        timeline = build_timeline(verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style)
+        timeline = build_timeline(
+            verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style,
+            wait="fixed" if fixed else "latency",
+        )
         comment = f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}"
-        if use_pulse:
+        if use_audio:
             comment += f";audio={audio_tag}"
+        if frame_tag:
+            comment += f";frame={frame_tag}"
         info = render_clip(
             timeline,
             clip_path,
             font_path=font_path,
             layout=layout,
             metadata={"title": verdict.verdict, "comment": comment},
-            pulse=variant if use_pulse else None,
+            pulse=variant if use_audio and mode == AUDIO_PULSE else None,
+            heartbeat=use_audio and mode == AUDIO_HEARTBEAT,
+            bed=with_bed,
+            phone=phone,
+            keys=keys if use_audio and mode == AUDIO_KEYS else None,
         )
         problems = validate_master(info, layout, style_name)
         if problems:
@@ -173,7 +220,19 @@ def produce_one(
                         {"style": timeline.style, "exceeded_cap": timeline.exceeded_cap}
                         if timeline.style == "app" else {}
                     ),
-                    **({"audio": audio_tag} if use_pulse else {}),
+                    **({"audio": audio_tag} if use_audio else {}),
+                    **({"frame": frame_tag} if frame_tag else {}),
+                    **(
+                        {
+                            "wait": "fixed",
+                            "wait_blinks": WAIT_BLINKS,
+                            "segments_frames": timeline.segments(),
+                            "segments_s": {
+                                k: round(v / timeline.fps, 3) for k, v in timeline.segments().items()
+                            },
+                        }
+                        if fixed else {}
+                    ),
                 },
             },
             indent=2,
@@ -207,6 +266,10 @@ def produce_all(
     style: str | None = None,
     audio: str | None = None,
     audio_variant: str | None = None,
+    bed: bool | None = None,
+    frame: str | None = None,
+    phone: PhoneSpec | None = None,
+    keys: str | None = None,
     layout: Layout | None = None,
     force: bool = False,
     limit: int | None = None,
@@ -217,6 +280,11 @@ def produce_all(
     style = clip_style() if style is None else style
     mode = clip_audio() if audio is None else audio
     variant = clip_audio_variant() if audio_variant is None else audio_variant
+    with_bed = clip_audio_bed() if bed is None else bed
+    keys = clip_keys_sound() if keys is None else keys
+    frame = clip_frame() if frame is None else frame
+    if frame == FRAME_PHONE and phone is None:
+        phone = PhoneSpec(scale=phone_scale(), background=phone_background())
     results: list[ProduceResult] = []
     produced = 0
     for job in jobs:
@@ -231,7 +299,7 @@ def produce_all(
         result = produce_one(
             job, oracle, ledger, font_path=font_path, layout=lay,
             pause_s=pause_s, latency_recorded=latency_recorded, style=style,
-            audio=mode, audio_variant=variant,
+            audio=mode, audio_variant=variant, bed=with_bed, frame=frame, phone=phone, keys=keys,
         )
         results.append(result)
         if result.status == "produced":

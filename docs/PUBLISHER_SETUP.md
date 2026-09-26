@@ -112,7 +112,16 @@ At each network's slot, the GitHub Actions run (never the box):
    `PUBLISHER_CLIP_AUDIO` defaults to `off` (silent AAC, every network). `pulse`
    adds a procedural bed on Instagram and TikTok only. `PUBLISHER_CLIP_AUDIO_VARIANT`
    defaults to `c` (blinks, then silence); `a` and `b` add a resolve. X, LinkedIn,
-   and Bluesky stay silent.
+   and Bluesky stay silent. `heartbeat` (Instagram and TikTok only) replaces the piano:
+   a key click per typed letter, an Enter, a lub-dub per caret blink, a silent verdict.
+   `PUBLISHER_CLIP_AUDIO_BED=on` adds a very quiet drone under the wait (default `off`).
+   `keys` (Instagram and TikTok only) is typing and Enter alone: a soft laptop key per
+   letter, silence through the wait and the verdict. `PUBLISHER_CLIP_KEYS_SOUND` is `soft`
+   (default) or `muted`. `PUBLISHER_CLIP_FRAME=phone` draws the app screen inside a
+   generic phone at `PUBLISHER_CLIP_PHONE_SCALE` of the height (default `0.80`) on
+   `PUBLISHER_CLIP_PHONE_BG` (`stone` default, `bone`, `sage`; `black` and `gradient` kept).
+   With the phone, the keys, or the heartbeat, the wait is always 3 caret blinks
+   (95 frames, 3.167s), whatever the oracle latency.
 4. commits it to the public clips repo and waits for GitHub Pages;
 5. calls Buffer `createPost` (`shareNow`; LinkedIn country rows `customScheduled` for
    09:07 local);

@@ -15,7 +15,11 @@ word. The keyboard slides out while the line moves once, linearly, from 38% of
 the keyboard-shortened height to 38% of the full height (`repositionTerminal`).
 
 No captions, no branding beyond the product's own footer: caption work is GTM's.
-No audio beyond the silent track the master already carries.
+Audio is the silent track unless a procedural bed is asked for (see `audio.py`).
+
+`phone` (`PUBLISHER_CLIP_FRAME=phone`) lays the `app` screen out at the phone
+screen's own pixel size and composites it under a code-drawn mockup (`phone.py`).
+The output is still the full 1080x1920 frame.
 
 Soul lock, 2026-09-25, still in force for `word`: the pause draws the typed
 input and a blinking caret only. No spinner, no dots, no "thinking" text.
@@ -35,15 +39,14 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 from .fonts import FontMetrics, metrics
-from .timeline import APP_KEYBOARD_FRAC, Timeline
+from .phone import PhoneSpec, draw_phone, geometry
+from .timeline import APP_KEYBOARD_CSS_H, BLINK_ON_FRACTION, BLINK_PERIOD_S, Timeline
 
 BG = "0x0A0A0A"
 FG = "0xE8E4D8"
 DIM = "0xE8E4D8@0.30"
 
 CSS_VIEWPORT_W = 360
-BLINK_PERIOD_S = 1.05
-BLINK_ON_FRACTION = 0.51
 
 
 class RenderError(RuntimeError):
@@ -144,8 +147,12 @@ def wrap_words(text: str, fm: FontMetrics, max_w: float) -> list[str]:
 
 
 def keyboard_height(lay: Layout) -> int:
-    """Output-pixel height of the `app` keyboard when it is fully in."""
-    return round(APP_KEYBOARD_FRAC * lay.height)
+    """Output-pixel height of the `app` keyboard when it is fully in.
+
+    182 CSS px at the layout's scale. On the 360x640 viewport this is the same
+    546 px as before; on the taller phone screen the keys keep their size.
+    """
+    return lay.px(APP_KEYBOARD_CSS_H)
 
 
 def terminal_center_y(height: float, keyboard_h: float, k: float) -> float:
@@ -450,7 +457,36 @@ def _app_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: P
     return f"{head}{body},format=yuv420p[v]"
 
 
-def build_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: Path) -> str:
+def screen_layout(phone: PhoneSpec, canvas: Layout) -> Layout:
+    """The app screen inside the phone, laid out at its own pixel size (no rescale blur)."""
+    geom = geometry(phone, canvas.width, canvas.height)
+    return Layout(width=geom.screen_w, height=geom.screen_h, fps=canvas.fps)
+
+
+def phone_input_index(timeline: Timeline) -> int:
+    """ffmpeg input of the phone overlay: after the audio, and after the keyboard for `app`."""
+    return 2 if timeline.style == "app" else 1
+
+
+def build_filtergraph(
+    timeline: Timeline,
+    font_path: str,
+    lay: Layout,
+    workdir: Path,
+    phone: PhoneSpec | None = None,
+) -> str:
+    if phone is not None:
+        geom = geometry(phone, lay.width, lay.height)
+        inner = build_filtergraph(timeline, font_path, screen_layout(phone, lay), workdir)
+        inner = inner[: -len("[v]")] + "[scr]"
+        idx = phone_input_index(timeline)
+        # Composite in planar RGB so the rounded screen edge blends without chroma fringes.
+        return (
+            f"{inner};"
+            f"[scr]pad={lay.width}:{lay.height}:{geom.screen_x}:{geom.screen_y}:color=black,format=gbrp[base];"
+            f"[{idx}:v]format=gbrap[ph];"
+            f"[base][ph]overlay=x=0:y=0:format=gbrp:eof_action=repeat,format=yuv420p[v]"
+        )
     if timeline.style == "app":
         return _app_filtergraph(timeline, font_path, lay, workdir)
     fm = metrics(font_path, lay.font_px)
@@ -577,7 +613,17 @@ def render_clip(
     metadata: dict[str, str] | None = None,
     keep_graph: Path | None = None,
     pulse: str | None = None,
+    heartbeat: bool = False,
+    bed: bool = False,
+    phone: PhoneSpec | None = None,
+    keys: str | None = None,
 ) -> ClipInfo:
+    """`pulse` is a pulse variant; `heartbeat` (with an optional `bed`) replaces it.
+    `keys` is a key voicing: typing and Enter only, silence after.
+
+    `phone` draws the screen inside the phone mockup. The output stays the
+    layout's full 9:16 frame either way.
+    """
     require_tools()
     lay = layout or Layout(fps=timeline.fps)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -585,17 +631,34 @@ def render_clip(
     dur = timeline.total_frames / timeline.fps
     with tempfile.TemporaryDirectory(prefix="mill-") as td:
         work = Path(td)
-        graph = build_filtergraph(timeline, font_path, lay, work)
+        graph = build_filtergraph(timeline, font_path, lay, work, phone=phone)
         if keep_graph:
             keep_graph.parent.mkdir(parents=True, exist_ok=True)
             keep_graph.write_text(graph, encoding="utf-8")
+        still = ["-loop", "1", "-framerate", str(timeline.fps), "-t", f"{dur:.4f}", "-i"]
         extra: list[str] = []
         if timeline.style == "app":
             kb = work / "keyboard.png"
-            draw_keyboard(kb, lay, font_path)
+            draw_keyboard(kb, screen_layout(phone, lay) if phone else lay, font_path)
             # Bounded still: overlay repeats the last frame, and -t stops the encode.
-            extra = ["-loop", "1", "-framerate", str(timeline.fps), "-t", f"{dur:.4f}", "-i", str(kb)]
-        if pulse:
+            extra += [*still, str(kb)]
+        if phone is not None:
+            frame_png = work / "phone.png"
+            draw_phone(frame_png, phone, geometry(phone, lay.width, lay.height))
+            extra += [*still, str(frame_png)]
+        if keys:
+            from .audio import write_keys_wav
+            wav = work / "keys.wav"
+            write_keys_wav(timeline, wav, keys)
+            audio_in = ["-i", str(wav)]
+            audio_codec = ["-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2"]
+        elif heartbeat:
+            from .audio import write_heartbeat_wav
+            wav = work / "heartbeat.wav"
+            write_heartbeat_wav(timeline, wav, bed=bed, work=work)
+            audio_in = ["-i", str(wav)]
+            audio_codec = ["-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2"]
+        elif pulse:
             from .audio import write_pulse_wav
             wav = work / "pulse.wav"
             write_pulse_wav(timeline, pulse, wav, work=work)
