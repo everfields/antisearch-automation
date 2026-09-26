@@ -130,15 +130,19 @@ A full 10-post queue lasts 2 days at 5 a day, 3 days at 3, and 10 days at 1.
 
 - A posting day runs **09:00 ET → 09:00 ET**; a 00:07 slot belongs to the day that
   started at 09:00.
-- Every slot is on a **fixed :07 minute**, never on the hour, matching the hourly
-  cron tick. Posts land 7–30 minutes after the slot because GitHub delays cron.
+- Every slot is on a **fixed :07 minute**, never on the hour. The cron wakes every
+  15 minutes in the same UTC hours, so a late GitHub start still falls inside the slot.
 - At least **90 minutes between two posts on the same network**, both in the slot
   plan and at run time.
 - One post per network per run.
-- A missed slot stays open for 2h, then expires; it never catches up in a burst.
+- A missed slot stays open until the next slot of that network, and at least 3h,
+  then expires. An expired slot is not owed, so a long outage does not post a backlog.
 
 **`PUBLISHER_CADENCE` picks the preset. Carlos's 5-everywhere is the default;
-`soul` is Soul's numbers:**
+`soul` is Soul's numbers. `reach` is Instagram 12:07 15:07 19:07 22:07 and
+TikTok 13:07 17:07 20:07 23:07 (ET), 4 each from day one, with X, LinkedIn, and
+Bluesky left on the `soul` slots. `reach` leaves the warm-up off unless
+`PUBLISHER_RAMP` is set.**
 
 | Network | `carlos` (5) ET | Madrid | `soul` ET | Madrid |
 | --- | --- | --- | --- | --- |
@@ -318,7 +322,8 @@ everything that can post natively.
 | `PUBLISHER_MEDIA_REPO`, `PUBLISHER_PUBLIC_BASE_URL` | variable | Clips repo + its Pages URL |
 | `PUBLISHER_LIVE_NETWORKS` | variable | The recorded first-of-class yes. `x` posts only when this lists it and the route is Buffer |
 | `PUBLISHER_CRON` | variable | unset = off; `dry-run`; `live` |
-| `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere) or `soul` (TikTok 5, X 5, Bluesky 3, IG 3, LinkedIn 1) |
+| `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere), `soul` (TikTok 5, X 5, Bluesky 3, IG 3, LinkedIn 1), or `reach` (IG 4, TikTok 4 from day one; X, LinkedIn, Bluesky stay on the `soul` slots) |
+| `PUBLISHER_RAMP` | variable, optional | `on` (default) warms a network from 1/day up to its cadence. Unset on `reach` means off. `off` posts the full cadence immediately |
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
 | `PUBLISHER_TREND_NETWORKS`, `PUBLISHER_TREND_CAP` | variable, optional | Trend lane: networks + rows per network per day (default 1, max 3). See `TREND_AND_REPLY_LANES.md` |
 | `PUBLISHER_WINNER_NETWORKS`, `PUBLISHER_WINNER_CAP` | variable, optional | Winner lane: networks + posts per day across networks (default 2, max 3); handles in `queue/winners/handles.json` |

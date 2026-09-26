@@ -4,7 +4,9 @@ name: publisher
 # LinkedIn Page, TikTok). Buffer free is an optional bridge (PUBLISHER_BRIDGE=buffer)
 # for networks whose native gate hasn't cleared. No browser, no Grok Bot box. Off by default.
 #   Manual: Actions -> publisher -> Run workflow (dry-run unless `live` is ticked).
-#   Cron:   hourly; runs only when the repo variable PUBLISHER_CRON is `dry-run` or `live`.
+#   Cron:   every 15 minutes in the ET posting window; runs only when the repo
+#           variable PUBLISHER_CRON is `dry-run` or `live`. A late or dropped
+#           start is still inside the slot window (`mill due` decides).
 # Slots are America/New_York wall-clock times (docs/PUBLISHER_SETUP.md); the cron
 # only wakes the job, and `mill due` decides from the tz database whether a slot
 # has come, so summer/winter time needs no edits here. Live posting also needs
@@ -27,8 +29,9 @@ on:
         description: Only this network (empty = all)
         default: ""
   schedule:
-    # :07 past every hour from 13:00 to 05:59 UTC = 09:00-00:59 ET in both EDT and EST.
-    - cron: "7 0-5,13-23 * * *"
+    # Every 15 min from 13:00 through 05:59 UTC covers 09:00-01:59 EDT and 08:00-00:59 EST.
+    # Wakes at :00/:15/:30/:45; slots stay on :07 and stay open until the next one.
+    - cron: "*/15 0-5,13-23 * * *"
 
 permissions:
   contents: write
@@ -55,6 +58,7 @@ jobs:
       PUBLISHER_REPLY_CAP: ${{ vars.PUBLISHER_REPLY_CAP }}
       PUBLISHER_WATCH_BLUESKY: ${{ vars.PUBLISHER_WATCH_BLUESKY }}
       PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
+      PUBLISHER_RAMP: ${{ vars.PUBLISHER_RAMP }}
       PUBLISHER_LANGUAGE: ${{ vars.PUBLISHER_LANGUAGE }}
       PUBLISHER_SLOTS_BLUESKY: ${{ vars.PUBLISHER_SLOTS_BLUESKY }}
       PUBLISHER_SLOTS_LINKEDIN: ${{ vars.PUBLISHER_SLOTS_LINKEDIN }}

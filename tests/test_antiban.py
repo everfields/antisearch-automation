@@ -34,6 +34,18 @@ def log(tmp_path):
     return PostLog(tmp_path / "state" / "posts.csv")
 
 
+def test_reach_cadence_defaults_the_ramp_off():
+    from antisearch_mill.publisher.antiban import ramp_enabled
+
+    assert ramp_enabled({"PUBLISHER_CADENCE": "reach"}) is False
+    assert ramp_enabled({"PUBLISHER_CADENCE": "reach", "PUBLISHER_RAMP": ""}) is False
+    assert ramp_enabled({"PUBLISHER_CADENCE": "reach", "PUBLISHER_RAMP": "off"}) is False
+    assert ramp_enabled({"PUBLISHER_CADENCE": "reach", "PUBLISHER_RAMP": "on"}) is True
+    assert ramp_enabled({}) is True
+    assert ramp_enabled({"PUBLISHER_CADENCE": "soul"}) is True
+    assert ramp_enabled({"PUBLISHER_CADENCE": "soul", "PUBLISHER_RAMP": "off"}) is False
+
+
 def test_ramp_starts_low_and_reaches_the_target():
     assert ramp_allowance(5, 0, ramp_days=14, start=1) == 1
     assert ramp_allowance(5, 0, ramp_days=14, start=2) == 2
@@ -83,7 +95,7 @@ def test_same_clip_and_same_caption_do_not_post_twice(ledger, log):
     env = {**LIVE_ENV, "PUBLISHER_RAMP": "off"}
     b = fake_adapter()
     assert go([job("one", caption="@acme.com")], ledger, log, {"bluesky": b}, env=env, now=NOW)[0].status == "published"
-    later = NOW + timedelta(minutes=91)  # past the 90 min gap, still inside the 2h grace of 19:07
+    later = NOW + timedelta(minutes=91)  # past the 90 min gap, still inside the grace window of 19:07
     again = go([job("two", caption="@acme.com")], ledger, log, {"bluesky": fake_adapter()}, env=env, now=later)
     assert again[0].status == "skipped_duplicate_caption"
 
