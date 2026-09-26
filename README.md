@@ -172,7 +172,10 @@ and every code-formatted example in README/SETUP.
     surface lighter than the phone, so it reads at a glance: `stone` (mid warm grey, default),
     `bone` (off-white), or `sage` (muted grey-green). `black` and `gradient` (very dark grey)
     are kept but the phone disappears on them. The phone is a near-black slab with a graphite
-    rim and a black bezel; the app screen is unchanged. `none` is the default
+    rim and a black bezel; the app screen is unchanged. Inside the phone the typed input and
+    the verdict use the Medium weight of the same font with FreeType autohinting, the screen
+    is drawn in RGB and converted to yuv420p once, and the master is CRF 14, so the ~35 px
+    text survives platform re-encodes. `none` is the default
   - `PUBLISHER_CLIP_AUDIO=heartbeat` (Instagram and TikTok only): a synthesized mechanical key
     click on the frame each letter appears, a heavier Enter, then a low lub-dub on every caret
     blink of the wait. The verdict is silence (variant `c`, locked). Seeded from the input, so
@@ -185,8 +188,8 @@ and every code-formatted example in README/SETUP.
     almost nothing above 6 kHz. Exact silence from the first wait frame through the verdict.
     `PUBLISHER_CLIP_KEYS_SOUND` is `soft` (default, a little plastic presence around 1 kHz) or
     `muted` (a duller thock). `heartbeat` and `pulse` are kept for back-compat
-  - with the phone frame, the keys, or the heartbeat, the wait is fixed: `WAIT_BLINKS = 3` caret blinks
-    of 1.05s, 3.15s nominal, 95 frames (3.167s) at 30 fps, in every clip. It overrides the
+  - with the phone frame, the keys, or the heartbeat, the wait is fixed: `WAIT_BLINKS = 2` caret blinks
+    of 1.05s (blink, blink, verdict), 63 frames (2.1s) at 30 fps, in every clip. It overrides the
     oracle latency. Only the typing and the verdict can vary with length. Segment frames are
     in the clip's sidecar JSON (`timeline.segments_frames`)
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long
