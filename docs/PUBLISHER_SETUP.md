@@ -228,6 +228,9 @@ That's 12 posts a day (17 with X), instead of 20–25.
 - **Rhythm:** each network's first post ever is an unowned word, then one in four.
 - **Verticals:**
   - Bluesky: companies / tech (X's brief);
+  - X (Buffer route only): companies / SaaS, its own inputs apart from Bluesky's.
+    Captions stay empty (no mentions, no links), the clip is silent, and it posts at
+    the conservative `soul` X slots under `reach` too;
   - LinkedIn: employers;
   - Instagram: places (restaurants, travel, hotels, entertainment);
   - TikTok: beauty / hair / skin (the lock; Carlos grouped TikTok with leisure,
