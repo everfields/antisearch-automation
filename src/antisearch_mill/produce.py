@@ -7,12 +7,14 @@ import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from . import CAPTURE_TAG, RENDER_STYLE, __version__
+from . import APP_RENDER_STYLE, CAPTURE_TAG, RENDER_STYLE, __version__
 from .fonts import resolve_font
 from .ledger import ClipRow, Job, Ledger, now_iso
 from .oracle import Oracle, OracleError, Verdict
 from .render import ClipInfo, Layout, RenderError, extract_poster, render_clip
-from .timeline import MAX_SECONDS, MIN_SECONDS, build_timeline, pause_from_latency_ms
+from .timeline import (
+    MAX_SECONDS, MIN_SECONDS, build_timeline, clip_style, pause_for_style, pause_from_latency_ms,
+)
 
 
 @dataclass
@@ -23,9 +25,14 @@ class ProduceResult:
     detail: str = ""
 
 
-def clip_id_for(job_id: str, verdict: Verdict, pause_s: float) -> str:
+def render_style_name(style: str) -> str:
+    """Pixel style stamped on the clip row. `word` keeps the historical name."""
+    return RENDER_STYLE if style == "word" else APP_RENDER_STYLE
+
+
+def clip_id_for(job_id: str, verdict: Verdict, pause_s: float, *, style: str = "word") -> str:
     digest = hashlib.sha256(
-        f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{RENDER_STYLE}\0{pause_s:.3f}".encode()
+        f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}".encode()
     ).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
@@ -38,10 +45,14 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def validate_master(info: ClipInfo, layout: Layout) -> list[str]:
+def validate_master(info: ClipInfo, layout: Layout, render_style: str = "") -> list[str]:
     problems = []
-    if not MIN_SECONDS - 0.05 <= info.duration_s <= MAX_SECONDS + 0.001:
+    name = render_style or RENDER_STYLE
+    # `app` may run past 5s when the oracle pause is long, and it is not padded to 5s.
+    if name != APP_RENDER_STYLE and not MIN_SECONDS - 0.05 <= info.duration_s <= MAX_SECONDS + 0.001:
         problems.append(f"duration {info.duration_s}s outside [{MIN_SECONDS}, {MAX_SECONDS}]")
+    if name == APP_RENDER_STYLE and info.duration_s < 1.0:
+        problems.append(f"duration {info.duration_s}s is empty")
     if (info.width, info.height) != (layout.width, layout.height):
         problems.append(f"size {info.width}x{info.height} != {layout.width}x{layout.height}")
     if info.width * 16 != info.height * 9:
@@ -62,6 +73,7 @@ def produce_one(
     layout: Layout,
     pause_s: float | None = None,
     latency_recorded: bool = True,
+    style: str | None = None,
 ) -> ProduceResult:
     try:
         verdict = oracle.ask(job.category)
@@ -79,13 +91,19 @@ def produce_one(
         attempts=verdict.attempts,
     )
 
-    pause = pause_from_latency_ms(verdict.latency_ms, recorded=latency_recorded) if pause_s is None else pause_s
-    clip_id = clip_id_for(job.id, verdict, pause)
+    style = clip_style() if style is None else style
+    if style == "word":
+        # Unchanged: an explicit pause is stored as given; build_timeline still clamps it.
+        pause = pause_from_latency_ms(verdict.latency_ms, recorded=latency_recorded) if pause_s is None else pause_s
+    else:
+        pause = pause_for_style(verdict.latency_ms, recorded=latency_recorded, style=style, explicit=pause_s)
+    clip_id = clip_id_for(job.id, verdict, pause, style=style)
+    style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
     poster_path = ledger.clips_dir / f"{clip_id}.png"
     sidecar_path = ledger.clips_dir / f"{clip_id}.json"
     try:
-        timeline = build_timeline(verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause)
+        timeline = build_timeline(verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style)
         info = render_clip(
             timeline,
             clip_path,
@@ -96,7 +114,7 @@ def produce_one(
                 "comment": f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}",
             },
         )
-        problems = validate_master(info, layout)
+        problems = validate_master(info, layout, style_name)
         if problems:
             raise RenderError("; ".join(problems))
         extract_poster(clip_path, poster_path, timeline.duration_s - 0.25)
@@ -124,7 +142,7 @@ def produce_one(
         size_bytes=info.size_bytes,
         sha256=sha256_file(clip_path),
         font=Path(font_path).name,
-        render_style=RENDER_STYLE,
+        render_style=style_name,
         mill_version=__version__,
         platforms="|".join(job.platforms),
         caption=job.caption,
@@ -141,6 +159,10 @@ def produce_one(
                     "submit_frame": timeline.submit_frame,
                     "verdict_frame": timeline.verdict_frame,
                     "pause_s": timeline.pause_s,
+                    **(
+                        {"style": timeline.style, "exceeded_cap": timeline.exceeded_cap}
+                        if timeline.style == "app" else {}
+                    ),
                 },
             },
             indent=2,
@@ -171,6 +193,7 @@ def produce_all(
     font: str = "",
     pause_s: float | None = None,
     latency_recorded: bool = True,
+    style: str | None = None,
     layout: Layout | None = None,
     force: bool = False,
     limit: int | None = None,
@@ -178,6 +201,7 @@ def produce_all(
 ) -> list[ProduceResult]:
     lay = layout or Layout()
     font_path = resolve_font(font)
+    style = clip_style() if style is None else style
     results: list[ProduceResult] = []
     produced = 0
     for job in jobs:
@@ -191,7 +215,7 @@ def produce_all(
             continue
         result = produce_one(
             job, oracle, ledger, font_path=font_path, layout=lay,
-            pause_s=pause_s, latency_recorded=latency_recorded,
+            pause_s=pause_s, latency_recorded=latency_recorded, style=style,
         )
         results.append(result)
         if result.status == "produced":

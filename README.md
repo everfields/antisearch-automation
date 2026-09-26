@@ -149,11 +149,17 @@ and every code-formatted example in README/SETUP.
   pause length is the oracle call's wall-clock latency, clamped to 1.2–3.5s. If that latency
   was not recorded, the pause is 2.0s
 - the pause does not copy the site's loading chrome. The site fetched 2026-09-25 hides the
-  typed line on submit. The clip keeps the input anyway. A later spinner, dots, or status
+  typed line on submit. The `word` clip keeps the input anyway. A later spinner, dots, or status
   word on the site is not drawn
+- `PUBLISHER_CLIP_STYLE=app` withdraws that word-stays lock (2026-09-26, Soul + Carlos) and
+  records the live screen: keyboard in, human typing, the finished word held ≥0.5s, Enter
+  clears the word and slides the keyboard out while the line moves once to 38% of the full
+  height, the caret blinks alone for the real oracle latency, the verdict holds ≥1.5s.
+  Target ≤4s, hard cap 5s; a long latency is not cut. Unset or `word` is the default above
+  and is what already-scheduled posts keep using
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long
 - the verdict frame is the cover
-- renders are byte-identical for the same (category, verdict, pause)
+- renders are byte-identical for the same (category, verdict, pause, style)
 - mp4 metadata: `title=<verdict>`, `comment=capture=synthetic-oracle;oracle=<live|fixture>;category=<...>`
 
 X gets a 720×1280 derivative at publish time (X's documented portrait max is
