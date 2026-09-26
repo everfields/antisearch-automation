@@ -103,7 +103,12 @@ Instagram native, LinkedIn and TikTok bridged. When LinkedIn is approved, set
 At each network's slot, the GitHub Actions run (never the box):
 1. picks the next row in blind order;
 2. freezes the verdict (one honest run);
-3. renders the 9:16 clip (about 5–8s, pause included: typed input and a blinking caret only);
+3. renders the 9:16 clip. `PUBLISHER_CLIP_STYLE=word` (the default, and what an unset
+   variable means) is the current clip: about 5–8s, the typed word stays up through
+   the pause with a blinking caret. `PUBLISHER_CLIP_STYLE=app` records the live
+   screen instead: the word vanishes on Enter, the keyboard closes, only the caret
+   blinks for the real oracle latency, then the verdict. Clips already rendered
+   are not rebuilt, so scheduled posts stay as they are until a new one is made;
 4. commits it to the public clips repo and waits for GitHub Pages;
 5. calls Buffer `createPost` (`shareNow`; LinkedIn country rows `customScheduled` for
    09:07 local);

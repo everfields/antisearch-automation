@@ -8,7 +8,19 @@ scaled 3x to 1080x1920 (exact 9:16):
   .cursor    inline-block 0.6ch x 1.05em, translateY(0.18em), blink 1.05s steps(1), 51% on
   .footer    "antisearch.ai", 11px, fg at 30% alpha, 14px from the bottom
 
+`word` (default) draws that screen with the typed word held through the pause.
+`app` adds a plain generic dark keyboard (near #0A0A0A, no brand, no suggestion
+bar, no emoji/mic row, no key popups, no status bar) and, on Enter, clears the
+word. The keyboard slides out while the line moves once, linearly, from 38% of
+the keyboard-shortened height to 38% of the full height (`repositionTerminal`).
+
 No captions, no branding beyond the product's own footer: caption work is GTM's.
+No audio beyond the silent track the master already carries.
+
+Soul lock, 2026-09-25, still in force for `word`: the pause draws the typed
+input and a blinking caret only. No spinner, no dots, no "thinking" text.
+The word-stays lock is withdrawn for the `app` style (2026-09-26, Soul + Carlos):
+the pause is the centered caret alone.
 """
 
 from __future__ import annotations
@@ -20,8 +32,10 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from PIL import Image, ImageDraw, ImageFont
+
 from .fonts import FontMetrics, metrics
-from .timeline import Timeline
+from .timeline import APP_KEYBOARD_FRAC, Timeline
 
 BG = "0x0A0A0A"
 FG = "0xE8E4D8"
@@ -129,7 +143,24 @@ def wrap_words(text: str, fm: FontMetrics, max_w: float) -> list[str]:
     return lines
 
 
-def layout_frame(text: str, kind: str, cursor: bool, fm: FontMetrics, lay: Layout) -> Frame:
+def keyboard_height(lay: Layout) -> int:
+    """Output-pixel height of the `app` keyboard when it is fully in."""
+    return round(APP_KEYBOARD_FRAC * lay.height)
+
+
+def terminal_center_y(height: float, keyboard_h: float, k: float) -> float:
+    """38% of the height still visible above a keyboard that is `k` of the way in."""
+    return 0.38 * (height - k * keyboard_h)
+
+
+def layout_frame(
+    text: str,
+    kind: str,
+    cursor: bool,
+    fm: FontMetrics,
+    lay: Layout,
+    center_y: float | None = None,
+) -> Frame:
     cursor_w = 0.6 * fm.ch
     if kind == "result":
         rows = wrap_words(text, fm, lay.max_text_w)
@@ -138,7 +169,8 @@ def layout_frame(text: str, kind: str, cursor: bool, fm: FontMetrics, lay: Layou
     cursor_row_extra = cursor and fm.width(rows[-1]) + cursor_w > lay.max_text_w
     n_rows = len(rows) + (1 if cursor_row_extra else 0)
 
-    top = lay.center_y - n_rows * lay.line_h / 2
+    cy = lay.center_y if center_y is None else center_y
+    top = cy - n_rows * lay.line_h / 2
     half_leading = (lay.line_h - (fm.ascent + fm.descent)) / 2
 
     def baseline(i: int) -> float:
@@ -194,7 +226,233 @@ def _merge(ranges: list[tuple[int, int]]) -> list[tuple[int, int]]:
     return out
 
 
+# Flat system-dark keys. The panel itself is the app background, so only the keys read.
+_KEY = (58, 58, 60, 255)
+_KEY_SPECIAL = (36, 36, 38, 255)
+_KEY_LABEL = (236, 236, 236, 255)
+
+
+def _key_label(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], text: str, font: ImageFont.FreeTypeFont) -> None:
+    x0, y0, x1, y1 = box
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    draw.text(
+        (x0 + (x1 - x0 - tw) / 2 - bbox[0], y0 + (y1 - y0 - th) / 2 - bbox[1]),
+        text,
+        font=font,
+        fill=_KEY_LABEL,
+    )
+
+
+def _draw_shift(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> None:
+    x0, y0, x1, y1 = box
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    w, h = (x1 - x0) * 0.16, (y1 - y0) * 0.22
+    draw.polygon(
+        [
+            (cx, cy - h),
+            (cx + w, cy + h * 0.05),
+            (cx + w * 0.42, cy + h * 0.05),
+            (cx + w * 0.42, cy + h),
+            (cx - w * 0.42, cy + h),
+            (cx - w * 0.42, cy + h * 0.05),
+            (cx - w, cy + h * 0.05),
+        ],
+        fill=_KEY_LABEL,
+    )
+
+
+def _draw_backspace(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> None:
+    x0, y0, x1, y1 = box
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    w, h = (x1 - x0) * 0.20, (y1 - y0) * 0.16
+    draw.polygon(
+        [(cx - w, cy), (cx - w * 0.25, cy - h), (cx + w, cy - h), (cx + w, cy + h), (cx - w * 0.25, cy + h)],
+        fill=_KEY_LABEL,
+    )
+
+
+def draw_keyboard(path: Path, lay: Layout, font_path: str) -> None:
+    """A generic dark QWERTY. No brand, suggestion bar, emoji/mic row, or status chrome."""
+    scale = lay.scale
+    w, h = lay.width, keyboard_height(lay)
+    img = Image.new("RGBA", (w, h), (0x0A, 0x0A, 0x0A, 255))
+    draw = ImageDraw.Draw(img)
+    pad_x = round(3 * scale)
+    gap_x = round(5 * scale)
+    gap_y = round(8 * scale)
+    key_h = round(36 * scale)
+    pad_top = round(6 * scale)
+    radius = round(5 * scale)
+    inner = w - 2 * pad_x
+    key_w = (inner - 9 * gap_x) // 10
+    row_used = 10 * key_w + 9 * gap_x
+    x_row1 = pad_x + (inner - row_used) // 2
+    letter_font = ImageFont.truetype(font_path, round(20 * scale))
+    small_font = ImageFont.truetype(font_path, round(13 * scale))
+
+    def key(x: int, y: int, kw: int, special: bool = False) -> tuple[int, int, int, int]:
+        box = (x, y, x + kw, y + key_h)
+        draw.rounded_rectangle(box, radius=radius, fill=_KEY_SPECIAL if special else _KEY)
+        return box
+
+    def row_y(i: int) -> int:
+        return pad_top + i * (key_h + gap_y)
+
+    y = row_y(0)
+    for i, ch in enumerate("qwertyuiop"):
+        box = key(x_row1 + i * (key_w + gap_x), y, key_w)
+        _key_label(draw, box, ch, letter_font)
+
+    y = row_y(1)
+    row2 = 9 * key_w + 8 * gap_x
+    x = (w - row2) // 2
+    for i, ch in enumerate("asdfghjkl"):
+        box = key(x + i * (key_w + gap_x), y, key_w)
+        _key_label(draw, box, ch, letter_font)
+
+    y = row_y(2)
+    special_w = round(key_w * 1.45)
+    letters = "zxcvbnm"
+    row3 = 2 * special_w + len(letters) * key_w + (len(letters) + 1) * gap_x
+    x = (w - row3) // 2
+    shift = key(x, y, special_w, special=True)
+    _draw_shift(draw, shift)
+    x += special_w + gap_x
+    for ch in letters:
+        box = key(x, y, key_w)
+        _key_label(draw, box, ch, letter_font)
+        x += key_w + gap_x
+    back = key(x, y, special_w, special=True)
+    _draw_backspace(draw, back)
+
+    y = row_y(3)
+    num_w = round(key_w * 1.55)
+    ret_w = round(key_w * 2.15)
+    space_w = inner - num_w - ret_w - 2 * gap_x
+    x = pad_x
+    num = key(x, y, num_w, special=True)
+    _key_label(draw, num, "123", small_font)
+    x += num_w + gap_x
+    key(x, y, space_w, special=True)
+    x += space_w + gap_x
+    ret = key(x, y, ret_w, special=True)
+    _key_label(draw, ret, "return", small_font)
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    img.save(path)
+
+
+def _k_expr(timeline: Timeline) -> str:
+    """ffmpeg expression for keyboard visibility. Same arithmetic as Timeline.keyboard_at."""
+    expr = "0"
+    for seg in reversed(timeline.keyboard):
+        if seg.end <= seg.start:
+            continue
+        if seg.end - seg.start <= 1:
+            piece = f"{seg.k1:.6f}"
+        else:
+            denom = seg.end - seg.start - 1
+            piece = f"{seg.k0:.6f}+({seg.k1 - seg.k0:.6f})*(n-{seg.start})/{denom}"
+        expr = f"if(between(n,{seg.start},{seg.end - 1}),{piece},{expr})"
+    return expr
+
+
+def _app_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: Path) -> str:
+    """`app` screen. Input 1 is the keyboard still; input 0 stays the silent audio."""
+    fm = metrics(font_path, lay.font_px)
+    fm_footer = metrics(font_path, lay.footer_px)
+    kb_h = keyboard_height(lay)
+    k_expr = _k_expr(timeline)
+
+    text_ranges: dict[Placed, list[tuple[int, int]]] = {}
+    cursor_ranges: dict[CursorBox, list[tuple[int, int]]] = {}
+    moving: list[tuple[int, int]] = []
+    for st in timeline.states:
+        k0 = timeline.keyboard_at(st.start)
+        k1 = timeline.keyboard_at(st.end - 1)
+        if abs(k0 - k1) > 1e-4:
+            if st.cursor:
+                moving.append((st.start, st.end))
+            continue
+        frame = layout_frame(
+            st.text, st.kind, st.cursor, fm, lay,
+            center_y=terminal_center_y(lay.height, kb_h, k0),
+        )
+        for p in frame.lines:
+            text_ranges.setdefault(p, []).append((st.start, st.end))
+        if frame.cursor:
+            cursor_ranges.setdefault(frame.cursor, []).append((st.start, st.end))
+
+    font = _q(font_path)
+    filters: list[str] = []
+
+    def drawtext(p: Placed, size: int, color: str, enable: str | None, idx: int) -> str:
+        tf = workdir / f"t{idx:04d}.txt"
+        tf.write_text(p.text, encoding="utf-8")
+        opts = [
+            f"fontfile={font}",
+            f"textfile={_q(str(tf))}",
+            "expansion=none",
+            f"fontsize={size}",
+            f"fontcolor={color}",
+            f"x={p.x}",
+            f"y={p.baseline}",
+            "y_align=baseline",
+        ]
+        if enable:
+            opts.append(f"enable={_q(enable)}")
+        return "drawtext=" + ":".join(opts)
+
+    # Footer sits under the keyboard, so the slide covers it the way the phone does.
+    filters.append(drawtext(footer_placement(lay, fm_footer), lay.footer_px, DIM, None, 0))
+    y_kb = f"H-overlay_h*({k_expr})"
+    head = (
+        f"[1:v]format=rgba[kb];"
+        f"color=c={BG}:s={lay.width}x{lay.height}:r={timeline.fps}:d={timeline.total_frames / timeline.fps:.4f},"
+        f"format=yuv420p,{filters[0]}[bg];"
+        f"[bg][kb]overlay=x=0:y={_q(y_kb)}:format=auto:eof_action=repeat:eval=frame"
+    )
+    filters = []
+    for idx, (p, ranges) in enumerate(text_ranges.items(), start=1):
+        filters.append(drawtext(p, lay.font_px, FG, _ranges_expr(_merge(ranges)), idx))
+
+    # Blink restarts on each keystroke and when the pause begins, same caret as `word`.
+    # `app` withdraws the word-stays lock (2026-09-26): once Enter lands, this caret
+    # is the only thing on the line until the verdict. Period is the app CSS, 1.05s.
+    period_f = BLINK_PERIOD_S * timeline.fps
+    on_f = period_f * BLINK_ON_FRACTION
+
+    def blink(ranges: list[tuple[int, int]]) -> str:
+        return "+".join(
+            f"between(n,{a},{b - 1})*lt(mod(n-{a},{period_f:g}),{on_f:g})" for a, b in sorted(ranges)
+        )
+
+    for box, ranges in cursor_ranges.items():
+        filters.append(
+            f"drawbox=x={box.x}:y={box.y}:w={box.w}:h={box.h}:color={FG}:t=fill:enable={_q(blink(ranges))}"
+        )
+    # drawbox's y expression has no frame number, so each frame of a slide is its own box.
+    # The caret stays on through a 0.30s slide: the on-phase of the 1.05s blink is longer.
+    for a, b in moving:
+        for n in range(a, b):
+            if (n - a) % period_f >= on_f:
+                continue
+            cy = terminal_center_y(lay.height, kb_h, timeline.keyboard_at(n))
+            box = layout_frame("", "loading", True, fm, lay, center_y=cy).cursor
+            assert box is not None
+            filters.append(
+                f"drawbox=x={box.x}:y={box.y}:w={box.w}:h={box.h}:color={FG}:t=fill:enable={_q(f'eq(n,{n})')}"
+            )
+
+    tail = ",".join(filters)
+    body = f",{tail}" if tail else ""
+    return f"{head}{body},format=yuv420p[v]"
+
+
 def build_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: Path) -> str:
+    if timeline.style == "app":
+        return _app_filtergraph(timeline, font_path, lay, workdir)
     fm = metrics(font_path, lay.font_px)
     fm_footer = metrics(font_path, lay.footer_px)
 
@@ -233,8 +491,9 @@ def build_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: 
     # Blink phase restarts at every keystroke and when the pause begins (native caret
     # behaviour). The product's free-running CSS blink is 1.05s, 51% on. During the
     # pause the completed input stays, so a blink-off frame is never an empty screen.
-    # Soul lock: that pause draws the input and this caret only. No spinner, dots,
-    # or "thinking" text, even if the live site adds them.
+    # Soul lock, still in force for `word`: that pause draws the input and this caret
+    # only. No spinner, dots, or "thinking" text, even if the live site adds them.
+    # The word-stays lock is withdrawn for the `app` style (2026-09-26, Soul + Carlos).
     # Integer frame arithmetic: a rounded float anchor can make t-anchor slightly
     # negative, and ffmpeg's floor-based mod() then wraps it into the off phase.
     period_f = BLINK_PERIOD_S * timeline.fps
@@ -324,13 +583,21 @@ def render_clip(
     tmp_out = out_path.with_suffix(".partial.mp4")
     dur = timeline.total_frames / timeline.fps
     with tempfile.TemporaryDirectory(prefix="mill-") as td:
-        graph = build_filtergraph(timeline, font_path, lay, Path(td))
+        work = Path(td)
+        graph = build_filtergraph(timeline, font_path, lay, work)
         if keep_graph:
             keep_graph.parent.mkdir(parents=True, exist_ok=True)
             keep_graph.write_text(graph, encoding="utf-8")
+        extra: list[str] = []
+        if timeline.style == "app":
+            kb = work / "keyboard.png"
+            draw_keyboard(kb, lay, font_path)
+            # Bounded still: overlay repeats the last frame, and -t stops the encode.
+            extra = ["-loop", "1", "-framerate", str(timeline.fps), "-t", f"{dur:.4f}", "-i", str(kb)]
         cmd = [
             "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
             "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+            *extra,
             "-filter_complex", graph,
             "-map", "[v]", "-map", "0:a",
             "-t", f"{dur:.4f}",
