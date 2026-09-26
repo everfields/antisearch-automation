@@ -185,8 +185,8 @@ and every code-formatted example in README/SETUP.
     almost nothing above 6 kHz. Exact silence from the first wait frame through the verdict.
     `PUBLISHER_CLIP_KEYS_SOUND` is `soft` (default, a little plastic presence around 1 kHz) or
     `muted` (a duller thock). `heartbeat` and `pulse` are kept for back-compat
-  - with the phone frame, the keys, or the heartbeat, the wait is fixed: `WAIT_BLINKS = 3` caret blinks
-    of 1.05s, 3.15s nominal, 95 frames (3.167s) at 30 fps, in every clip. It overrides the
+  - with the phone frame, the keys, or the heartbeat, the wait is fixed: `WAIT_BLINKS = 2` caret blinks
+    of 1.05s (blink, blink, verdict), 63 frames (2.1s) at 30 fps, in every clip. It overrides the
     oracle latency. Only the typing and the verdict can vary with length. Segment frames are
     in the clip's sidecar JSON (`timeline.segments_frames`)
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long
