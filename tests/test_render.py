@@ -26,6 +26,16 @@ def px(buf: bytes, x: int, y: int, w=1080):
     return tuple(buf[i:i + 3])
 
 
+def _audio_format(clip: Path) -> tuple[int, int]:
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "a:0",
+         "-show_entries", "stream=sample_rate,channels", "-of", "csv=p=0", str(clip)],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    rate, channels = out.split(",")
+    return int(rate), int(channels)
+
+
 def bright_pixels_in_rows(buf: bytes, y0: int, y1: int, w=1080) -> int:
     n = 0
     for y in range(y0, y1, 2):
@@ -130,6 +140,8 @@ def test_app_clip_matches_the_live_submit(tmp_path):
     assert (info.width, info.height) == (1080, 1920)
     assert info.duration_s <= 5.05
     assert (info.vcodec, info.pix_fmt, info.acodec) == ("h264", "yuv420p", "aac")
+    # Default audio stays the silent 48 kHz bed. Pulse is opt-in and is not this clip.
+    assert _audio_format(clip) == (48000, 2)
 
     lay = Layout()
     kb = keyboard_height(lay)

@@ -12,6 +12,7 @@ from .fonts import resolve_font
 from .ledger import ClipRow, Job, Ledger, now_iso
 from .oracle import Oracle, OracleError, Verdict
 from .render import ClipInfo, Layout, RenderError, extract_poster, render_clip
+from .audio import clip_audio, clip_audio_variant, pulse_for_platforms
 from .timeline import (
     MAX_SECONDS, MIN_SECONDS, build_timeline, clip_style, pause_for_style, pause_from_latency_ms,
 )
@@ -30,10 +31,12 @@ def render_style_name(style: str) -> str:
     return RENDER_STYLE if style == "word" else APP_RENDER_STYLE
 
 
-def clip_id_for(job_id: str, verdict: Verdict, pause_s: float, *, style: str = "word") -> str:
-    digest = hashlib.sha256(
-        f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}".encode()
-    ).hexdigest()[:8]
+def clip_id_for(job_id: str, verdict: Verdict, pause_s: float, *, style: str = "word", audio: str = "") -> str:
+    body = f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}"
+    # Silent clips keep the historical hash. Pulse is part of the id only when it is actually muxed.
+    if audio:
+        body += f"\0{audio}"
+    digest = hashlib.sha256(body.encode()).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
 
@@ -74,6 +77,8 @@ def produce_one(
     pause_s: float | None = None,
     latency_recorded: bool = True,
     style: str | None = None,
+    audio: str | None = None,
+    audio_variant: str | None = None,
 ) -> ProduceResult:
     try:
         verdict = oracle.ask(job.category)
@@ -92,27 +97,32 @@ def produce_one(
     )
 
     style = clip_style() if style is None else style
+    mode = clip_audio() if audio is None else audio
+    variant = clip_audio_variant() if audio_variant is None else audio_variant
+    use_pulse = pulse_for_platforms(job.platforms, mode)
+    audio_tag = f"pulse:{variant}" if use_pulse else ""
     if style == "word":
         # Unchanged: an explicit pause is stored as given; build_timeline still clamps it.
         pause = pause_from_latency_ms(verdict.latency_ms, recorded=latency_recorded) if pause_s is None else pause_s
     else:
         pause = pause_for_style(verdict.latency_ms, recorded=latency_recorded, style=style, explicit=pause_s)
-    clip_id = clip_id_for(job.id, verdict, pause, style=style)
+    clip_id = clip_id_for(job.id, verdict, pause, style=style, audio=audio_tag)
     style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
     poster_path = ledger.clips_dir / f"{clip_id}.png"
     sidecar_path = ledger.clips_dir / f"{clip_id}.json"
     try:
         timeline = build_timeline(verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style)
+        comment = f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}"
+        if use_pulse:
+            comment += f";audio={audio_tag}"
         info = render_clip(
             timeline,
             clip_path,
             font_path=font_path,
             layout=layout,
-            metadata={
-                "title": verdict.verdict,
-                "comment": f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}",
-            },
+            metadata={"title": verdict.verdict, "comment": comment},
+            pulse=variant if use_pulse else None,
         )
         problems = validate_master(info, layout, style_name)
         if problems:
@@ -163,6 +173,7 @@ def produce_one(
                         {"style": timeline.style, "exceeded_cap": timeline.exceeded_cap}
                         if timeline.style == "app" else {}
                     ),
+                    **({"audio": audio_tag} if use_pulse else {}),
                 },
             },
             indent=2,
@@ -194,6 +205,8 @@ def produce_all(
     pause_s: float | None = None,
     latency_recorded: bool = True,
     style: str | None = None,
+    audio: str | None = None,
+    audio_variant: str | None = None,
     layout: Layout | None = None,
     force: bool = False,
     limit: int | None = None,
@@ -202,6 +215,8 @@ def produce_all(
     lay = layout or Layout()
     font_path = resolve_font(font)
     style = clip_style() if style is None else style
+    mode = clip_audio() if audio is None else audio
+    variant = clip_audio_variant() if audio_variant is None else audio_variant
     results: list[ProduceResult] = []
     produced = 0
     for job in jobs:
@@ -216,6 +231,7 @@ def produce_all(
         result = produce_one(
             job, oracle, ledger, font_path=font_path, layout=lay,
             pause_s=pause_s, latency_recorded=latency_recorded, style=style,
+            audio=mode, audio_variant=variant,
         )
         results.append(result)
         if result.status == "produced":

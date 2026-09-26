@@ -576,6 +576,7 @@ def render_clip(
     layout: Layout | None = None,
     metadata: dict[str, str] | None = None,
     keep_graph: Path | None = None,
+    pulse: str | None = None,
 ) -> ClipInfo:
     require_tools()
     lay = layout or Layout(fps=timeline.fps)
@@ -594,9 +595,19 @@ def render_clip(
             draw_keyboard(kb, lay, font_path)
             # Bounded still: overlay repeats the last frame, and -t stops the encode.
             extra = ["-loop", "1", "-framerate", str(timeline.fps), "-t", f"{dur:.4f}", "-i", str(kb)]
+        if pulse:
+            from .audio import write_pulse_wav
+            wav = work / "pulse.wav"
+            write_pulse_wav(timeline, pulse, wav, work=work)
+            # Input 0 stays the audio, so the app keyboard remains input 1.
+            audio_in = ["-i", str(wav)]
+            audio_codec = ["-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-ac", "2"]
+        else:
+            audio_in = ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
+            audio_codec = ["-c:a", "aac", "-b:a", "96k", "-ar", "48000", "-ac", "2"]
         cmd = [
             "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-            "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+            *audio_in,
             *extra,
             "-filter_complex", graph,
             "-map", "[v]", "-map", "0:a",
@@ -605,7 +616,7 @@ def render_clip(
             "-c:v", "libx264", "-preset", "medium", "-crf", "18",
             "-pix_fmt", "yuv420p", "-profile:v", "high", "-level:v", "4.1",
             "-g", str(timeline.fps), "-bf", "2",
-            "-c:a", "aac", "-b:a", "96k", "-ar", "48000", "-ac", "2",
+            *audio_codec,
             "-map_metadata", "-1",
             "-fflags", "+bitexact", "-flags:v", "+bitexact", "-flags:a", "+bitexact",
             "-movflags", "+faststart",

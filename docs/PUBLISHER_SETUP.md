@@ -108,7 +108,11 @@ At each network's slot, the GitHub Actions run (never the box):
    the pause with a blinking caret. `PUBLISHER_CLIP_STYLE=app` records the live
    screen instead: the word vanishes on Enter, the keyboard closes, only the caret
    blinks for the real oracle latency, then the verdict. Clips already rendered
-   are not rebuilt, so scheduled posts stay as they are until a new one is made;
+   are not rebuilt, so scheduled posts stay as they are until a new one is made.
+   `PUBLISHER_CLIP_AUDIO` defaults to `off` (silent AAC, every network). `pulse`
+   adds a procedural bed on Instagram and TikTok only. `PUBLISHER_CLIP_AUDIO_VARIANT`
+   defaults to `c` (blinks, then silence); `a` and `b` add a resolve. X, LinkedIn,
+   and Bluesky stay silent.
 4. commits it to the public clips repo and waits for GitHub Pages;
 5. calls Buffer `createPost` (`shareNow`; LinkedIn country rows `customScheduled` for
    09:07 local);

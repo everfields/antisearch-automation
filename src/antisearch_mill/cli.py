@@ -16,6 +16,7 @@ from .config import CREDENTIALS, Settings, load_dotenv
 from .fonts import FontNotFound, resolve_font
 from .ledger import ALL_PLATFORMS, Ledger, QueueError, read_queue
 from .oracle import FixtureOracle, LiveOracle, OracleError
+from .audio import clip_audio, clip_audio_variant
 from .produce import produce_all, sha256_file, validate_master
 from .timeline import clip_style
 from .render import Layout, RenderError, contact_sheet, probe
@@ -43,6 +44,10 @@ def _oracle(args, settings: Settings):
     )
 
 
+def _audio_label(audio: str, variant: str) -> str:
+    return "off" if audio == "off" else f"{audio}:{variant}"
+
+
 def cmd_produce(args, settings: Settings) -> int:
     ledger = Ledger(settings.out_dir)
     try:
@@ -53,17 +58,21 @@ def cmd_produce(args, settings: Settings) -> int:
     oracle = _oracle(args, settings)
     try:
         style = clip_style()
+        audio = clip_audio()
+        variant = clip_audio_variant()
     except ValueError as exc:
         print(f"produce error: {exc}", file=sys.stderr)
         return 2
     print(f"produce: {len(jobs)} job(s) from {args.queue}, oracle={oracle.source} "
           f"({getattr(oracle, 'url', '')}), capture={CAPTURE_TAG}, style={style}, "
+          f"audio={_audio_label(audio, variant)}, "
           f"pause={args.pause or 'oracle latency'}")
     try:
         results = produce_all(
             jobs, oracle, ledger,
             font=settings.font_path, pause_s=args.pause, force=args.force,
             limit=args.limit, only=_split(args.only), style=style,
+            audio=audio, audio_variant=variant,
         )
     except (FontNotFound, RenderError) as exc:
         print(f"produce error: {exc}", file=sys.stderr)
@@ -129,6 +138,8 @@ def cmd_post(args, settings: Settings) -> int:
     env = dict(os.environ)
     try:
         style = clip_style(env)
+        audio = clip_audio(env)
+        variant = clip_audio_variant(env)
     except ValueError as exc:
         print(f"post error: {exc}", file=sys.stderr)
         return 2
@@ -163,13 +174,17 @@ def cmd_post(args, settings: Settings) -> int:
         oracle = DryRunOracle(store)
 
     def produce(job):
-        (result,) = produce_all([job], oracle, ledger, font=settings.font_path, force=True, style=style)
+        (result,) = produce_all(
+            [job], oracle, ledger, font=settings.font_path, force=True,
+            style=style, audio=audio, audio_variant=variant,
+        )
         if result.status == "failed":
             raise RuntimeError(result.detail)
         return ledger.clip_for_job(job.id)
 
     now = now_et()
     print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} style={style} "
+          f"audio={_audio_label(audio, variant)} "
           f"queue={' '.join(queues)} "
           f"pools={pools_dir} state={log.path} now={now:%Y-%m-%d %H:%M %Z} posting-day={posting_day(now)}")
     try:
