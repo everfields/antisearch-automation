@@ -365,23 +365,9 @@ def _k_expr(timeline: Timeline) -> str:
     return expr
 
 
-def _app_filtergraph(
-    timeline: Timeline,
-    font_path: str,
-    lay: Layout,
-    workdir: Path,
-    *,
-    text_font: str | None = None,
-    rgb: bool = False,
-) -> str:
-    """`app` screen. Input 1 is the keyboard still; input 0 stays the silent audio.
-
-    `text_font` draws the typed input and the verdict (the footer keeps `font_path`).
-    `rgb` keeps the whole screen in RGB and leaves the output in gbrp, so the text
-    is converted to yuv420p once, by the caller, instead of being drawn into 4:2:0.
-    """
-    text_font = text_font or font_path
-    fm = metrics(text_font, lay.font_px)
+def _app_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: Path) -> str:
+    """`app` screen. Input 1 is the keyboard still; input 0 stays the silent audio."""
+    fm = metrics(font_path, lay.font_px)
     fm_footer = metrics(font_path, lay.footer_px)
     kb_h = keyboard_height(lay)
     k_expr = _k_expr(timeline)
@@ -405,13 +391,14 @@ def _app_filtergraph(
         if frame.cursor:
             cursor_ranges.setdefault(frame.cursor, []).append((st.start, st.end))
 
+    font = _q(font_path)
     filters: list[str] = []
 
-    def drawtext(p: Placed, size: int, color: str, enable: str | None, idx: int, face: str = font_path) -> str:
+    def drawtext(p: Placed, size: int, color: str, enable: str | None, idx: int) -> str:
         tf = workdir / f"t{idx:04d}.txt"
         tf.write_text(p.text, encoding="utf-8")
-        opts = [*([f"ft_load_flags={TEXT_FT_FLAGS}"] if rgb and face == text_font else []),
-            f"fontfile={_q(face)}",
+        opts = [
+            f"fontfile={font}",
             f"textfile={_q(str(tf))}",
             "expansion=none",
             f"fontsize={size}",
@@ -427,16 +414,15 @@ def _app_filtergraph(
     # Footer sits under the keyboard, so the slide covers it the way the phone does.
     filters.append(drawtext(footer_placement(lay, fm_footer), lay.footer_px, DIM, None, 0))
     y_kb = f"H-overlay_h*({k_expr})"
-    pix, blend = ("gbrp", "gbrp") if rgb else ("yuv420p", "auto")
     head = (
         f"[1:v]format=rgba[kb];"
         f"color=c={BG}:s={lay.width}x{lay.height}:r={timeline.fps}:d={timeline.total_frames / timeline.fps:.4f},"
-        f"format={pix},{filters[0]}[bg];"
-        f"[bg][kb]overlay=x=0:y={_q(y_kb)}:format={blend}:eof_action=repeat:eval=frame"
+        f"format=yuv420p,{filters[0]}[bg];"
+        f"[bg][kb]overlay=x=0:y={_q(y_kb)}:format=auto:eof_action=repeat:eval=frame"
     )
     filters = []
     for idx, (p, ranges) in enumerate(text_ranges.items(), start=1):
-        filters.append(drawtext(p, lay.font_px, FG, _ranges_expr(_merge(ranges)), idx, text_font))
+        filters.append(drawtext(p, lay.font_px, FG, _ranges_expr(_merge(ranges)), idx))
 
     # Blink restarts on each keystroke and when the pause begins, same caret as `word`.
     # `app` withdraws the word-stays lock (2026-09-26): once Enter lands, this caret
@@ -468,27 +454,7 @@ def _app_filtergraph(
 
     tail = ",".join(filters)
     body = f",{tail}" if tail else ""
-    return f"{head}{body},format={pix}[v]"
-
-
-TEXT_WEIGHT = "Medium"
-# A cleaner master for the platform's own re-encode; the clip is mostly static, so it stays small.
-PHONE_CRF = 14
-# FreeType's autohinter snaps the stems of the ~35 px phone text to whole pixels.
-TEXT_FT_FLAGS = "force_autohint"
-
-
-def text_face(font_path: str) -> str:
-    """The typed input and the verdict in the phone: the same family one weight up, if installed.
-
-    Inside the phone the text is about 35 px; Regular's thin stems lose contrast in a
-    720p platform rendition, Medium's hold. Falls back to `font_path` when no sibling exists.
-    """
-    p = Path(font_path)
-    if "Regular" not in p.name:
-        return font_path
-    heavier = p.with_name(p.name.replace("Regular", TEXT_WEIGHT))
-    return str(heavier) if heavier.is_file() else font_path
+    return f"{head}{body},format=yuv420p[v]"
 
 
 def screen_layout(phone: PhoneSpec, canvas: Layout) -> Layout:
@@ -511,12 +477,7 @@ def build_filtergraph(
 ) -> str:
     if phone is not None:
         geom = geometry(phone, lay.width, lay.height)
-        inner_lay = screen_layout(phone, lay)
-        if timeline.style == "app":
-            # The screen stays RGB until the one yuv420p conversion below: no 4:2:0 text in between.
-            inner = _app_filtergraph(timeline, font_path, inner_lay, workdir, text_font=text_face(font_path), rgb=True)
-        else:
-            inner = build_filtergraph(timeline, font_path, inner_lay, workdir)
+        inner = build_filtergraph(timeline, font_path, screen_layout(phone, lay), workdir)
         inner = inner[: -len("[v]")] + "[scr]"
         idx = phone_input_index(timeline)
         # Composite in planar RGB so the rounded screen edge blends without chroma fringes.
@@ -524,8 +485,7 @@ def build_filtergraph(
             f"{inner};"
             f"[scr]pad={lay.width}:{lay.height}:{geom.screen_x}:{geom.screen_y}:color=black,format=gbrp[base];"
             f"[{idx}:v]format=gbrap[ph];"
-            f"[base][ph]overlay=x=0:y=0:format=gbrp:eof_action=repeat,"
-            f"scale=flags=accurate_rnd,format=yuv420p[v]"
+            f"[base][ph]overlay=x=0:y=0:format=gbrp:eof_action=repeat,format=yuv420p[v]"
         )
     if timeline.style == "app":
         return _app_filtergraph(timeline, font_path, lay, workdir)
@@ -716,7 +676,7 @@ def render_clip(
             "-map", "[v]", "-map", "0:a",
             "-t", f"{dur:.4f}",
             "-r", str(timeline.fps),
-            "-c:v", "libx264", "-preset", "medium", "-crf", str(PHONE_CRF if phone else 18),
+            "-c:v", "libx264", "-preset", "medium", "-crf", "18",
             "-pix_fmt", "yuv420p", "-profile:v", "high", "-level:v", "4.1",
             "-g", str(timeline.fps), "-bf", "2",
             *audio_codec,
