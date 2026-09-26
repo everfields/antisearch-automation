@@ -1,0 +1,47 @@
+# X = companies / SaaS: software and services a business picks. Bare inputs, never "best".
+# Captions stay empty on X: no mentions, no links, so no " | @?" holds here.
+# Kept apart from bluesky.txt (tech / companies), which keeps its own inputs.
+payroll software
+accounting software
+invoicing app
+website builder
+online store platform
+payment processor
+spreadsheet app
+presentation software
+form builder
+survey tool
+help desk software
+live chat tool
+email marketing tool
+seo tool
+social media scheduler
+team chat app
+wiki software
+whiteboard app
+screen recorder
+video editing software
+photo editor
+stock photo site
+no-code tool
+website hosting
+dns provider
+error monitoring tool
+uptime monitor
+authentication service
+e-signature app
+file transfer service
+meeting scheduler
+time tracking app
+expense app
+hr software
+applicant tracking system
+business bank
+corporate card
+tax software
+translation app
+read-later app
+rss reader
+budgeting app
+mind mapping app
+dictation app
