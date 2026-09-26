@@ -113,3 +113,9 @@ accounts, before anything is published.
   minor, not a private individual). Politicians are allowed. Handles are verified
   by a human before any tag. The trend lane's disaster/tragedy filter does not
   apply here.
+
+## Later / improvements
+
+### TikTok interaction lane (founder, 2026-09-26) — LATER, after video cadence is stable
+
+Insight: on TikTok direct posts underperform; interaction wins. Instead of (or besides) plain posts, go to the winner's own account: e.g. verdict 'dry shampoo' -> find the winning brand's post about that product and comment with our verdict video (video reply), or publish our video and link it from a comment on their post. Fully programmed flow: 1) take the winning verdict, 2) find and VERIFY the winner's official TikTok account, 3) decide per case: video-comment on their post, tag them from our post, or hashtag only, 4) execute via official APIs only (anti-ban rules apply). Also: recover the old screenshots of how we did it manually and store them as reference. Constitution check: verdict-only, no chat, no engagement bait text; overlaps with the existing winner-tag lane (@k18hair) — fold together. Status: backlog, not started.
