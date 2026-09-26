@@ -6,8 +6,9 @@
   time (DST from the tz database, never fixed offsets). A posting day runs 09:00 ET
   to 09:00 ET, so a midnight slot belongs to the day that started at 09:00. At most
   MAX_PER_NETWORK_PER_DAY posts per network per day and one per network per run.
-  A slot stays open for SLOT_GRACE, so a missed run is caught up soon after but
-  never dumps a backlog later in the night
+  A slot stays open until the next slot of that network, and at least SLOT_GRACE,
+  so a late or dropped cron start is caught once. An expired slot is not owed, so
+  a long outage never dumps a backlog burst.
 - stand-ins: a network standing in for a held one freezes once the held one is live
 - idempotency: one queue row posts once, on one network, ever. A `pending` row
   without an outcome (crash mid-post) blocks that row until a human checks it.
@@ -29,9 +30,9 @@ TZ = "America/New_York"
 DAY_START = time(9, 0)
 MAX_PER_NETWORK_PER_DAY = 5
 PER_RUN_PER_NETWORK = 1
-SLOT_MINUTE = 7  # every slot sits on the hourly cron tick: fixed, off the hour
+SLOT_MINUTE = 7  # every slot sits on a fixed :07, off the hour and off :30
 MIN_GAP = timedelta(minutes=90)  # between two posts on the same network
-SLOT_GRACE = timedelta(hours=2)  # a missed slot can still be served this long; after that it expires
+SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 
 # Business networks lean to the US morning, leisure networks to the afternoon and night (ET).
 # `PUBLISHER_CADENCE` picks a preset; `PUBLISHER_SLOTS_<NETWORK>` overrides one network.
@@ -56,6 +57,13 @@ CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
         "mastodon": ("09:07", "13:07", "18:07"),
         "reddit": ("13:07", "19:07"),
     },
+}
+# Instagram and TikTok at 4 from day one. X, LinkedIn, and Bluesky stay on the
+# conservative `soul` slots (X stays off unless Buffer is the route).
+CADENCES["reach"] = {
+    **CADENCES["soul"],
+    "instagram": ("12:07", "15:07", "19:07", "22:07"),
+    "tiktok": ("13:07", "17:07", "20:07", "23:07"),
 }
 DEFAULT_CADENCE = "carlos"
 
@@ -190,12 +198,32 @@ def slots_due(moment: datetime, slots: list[time]) -> int:
     return sum(1 for s in slot_times(posting_day(moment), slots) if s <= moment)
 
 
+def _slot_deadline(times: list[datetime], index: int) -> datetime:
+    """When `times[index]` stops being servable: the next slot, or SLOT_GRACE, whichever is later.
+
+    The last slot of the posting day has no later slot, so it gets SLOT_GRACE only.
+    It does not stay open until tomorrow's first slot.
+    """
+    slot = times[index]
+    floor = slot + SLOT_GRACE
+    if index + 1 < len(times):
+        return max(floor, times[index + 1])
+    return floor
+
+
 def open_now(moment: datetime, slots: list[time], used: int) -> int:
-    """Posts allowed right now: slots passed minus posts made, only while a slot is within its grace window."""
-    passed = [s for s in slot_times(posting_day(moment), slots) if s <= moment]
-    if len(passed) <= used or not any(moment - SLOT_GRACE < s for s in passed):
+    """Unfilled slots that have come and have not expired.
+
+    Posts fill the earliest slots first. A slot that has expired is not owed, so a
+    down stretch cannot dump every missed slot once the cron wakes. The runner
+    still posts at most one of these per network per run, and honors MIN_GAP.
+    """
+    times = slot_times(posting_day(moment), slots)
+    passed = [s for s in times if s <= moment]
+    if len(passed) <= used:
         return 0
-    return len(passed) - used
+    deadline = {s: _slot_deadline(times, i) for i, s in enumerate(times)}
+    return sum(1 for s in passed[used:] if moment < deadline[s])
 
 
 def next_slot(moment: datetime, slots: list[time]) -> datetime | None:

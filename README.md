@@ -52,7 +52,7 @@ One adapter per network behind `post(media, caption) -> url`
   Mastodon are built too.
 - **Cadence:** per-network slots in America/New_York on fixed :07 minutes, ≥90 min
   apart. The day starts 09:00 ET; ≤5 per network per day, one per run.
-  `PUBLISHER_CADENCE=carlos|soul` switches presets.
+  `PUBLISHER_CADENCE=carlos|soul|reach` switches presets.
 - **Fill:** queue rows first, then (optional) one trend row per network per day, then
   `queue/pools/`; unowned words open each wall and come back one in four.
 - **Lanes:** `mill winners` (inputs likely to crown an entity; the only text is its

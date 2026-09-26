@@ -46,16 +46,20 @@ gratuitously repetitive messages are not allowed.
 1. **Warm-up.** A network with no first-post date starts at 1 post/day
    (`PUBLISHER_RAMP_START`, 1 or 2) and reaches its cadence over
    `PUBLISHER_RAMP_DAYS` (default 14, allowed 1–60). Those posts are the
-   earliest slots of that cadence. A missed slot still expires after the
-   2 hour grace; a later slot does not fill it. The date is `first_post`
-   in `<state>/antiban.json`, written on the first post that actually goes
-   out. `PUBLISHER_RAMP=off` posts the full cadence immediately.
+   earliest slots of that cadence. A missed slot stays open until the next
+   slot of that network, and at least 3 hours, then expires. A later slot
+   does not refill an expired one. The date is `first_post` in
+   `<state>/antiban.json`, written on the first post that actually goes
+   out. `PUBLISHER_RAMP=off` posts the full cadence immediately. The `reach`
+   cadence (Instagram and TikTok at 4 from day one) leaves the ramp off
+   unless `PUBLISHER_RAMP` is set; `on` turns the warm-up back on.
 2. **Jitter.** Each slot gets a seeded offset of ±9 minutes. The resulting
    minute is never :00 or :30. The same slot keeps the same offset, so a
-   retry agrees. The cron still wakes at :07. If the offset is still ahead,
-   that one post waits (at most 9 minutes) inside the job. If the offset is
-   already past, the post goes out on the wake. `PUBLISHER_JITTER=off`
-   disables the wait. The wait is billed Actions time; see `docs/COST_PER_VIDEO.md`.
+   retry agrees. The cron wakes every 15 minutes; slots stay on :07. If the
+   offset is still ahead, that one post waits (at most 9 minutes) inside the
+   job. If the offset is already past, the post goes out on the wake.
+   `PUBLISHER_JITTER=off` disables the wait. The wait is billed Actions time;
+   see `docs/COST_PER_VIDEO.md`.
 3. **Dedupe.** On one network, the same clip id is not posted twice and the
    same non-empty caption is not posted twice. An empty caption is the
    video-only ritual and may repeat. An input is not repeated within
