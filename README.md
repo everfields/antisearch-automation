@@ -163,9 +163,26 @@ and every code-formatted example in README/SETUP.
   silent before the clip ends. `PUBLISHER_CLIP_AUDIO_VARIANT` defaults to `c`
   (blinks, then silence). `a` resolves to an open fifth with octave one register
   below, `b` to the same note an octave lower. X, LinkedIn, and Bluesky stay silent
+- the template (founder, 2026-09-26). Deterministic code only: no model at render time, no
+  licensed audio or samples. Every flag defaults off, so scheduled posts do not change:
+  - `PUBLISHER_CLIP_FRAME=phone` plays the `app` screen inside a generic phone drawn in code
+    (thin bezels, rounded corners, a centered punch-hole camera, side buttons; no logo, no
+    notch, no status bar, no captions). `PUBLISHER_CLIP_PHONE_SCALE` is the phone height over
+    the video height (default `0.80`, allowed 0.60–0.95). `PUBLISHER_CLIP_PHONE_BG` is `black`
+    (default) or `gradient` (a very dark grey radial falloff). `none` is the default
+  - `PUBLISHER_CLIP_AUDIO=heartbeat` (Instagram and TikTok only): a synthesized mechanical key
+    click on the frame each letter appears, a heavier Enter, then a low lub-dub on every caret
+    blink of the wait. The verdict is silence (variant `c`, locked). Seeded from the input, so
+    the same input gives the same audio. Sample peak -3 dBFS, true peak under -1 dBTP.
+    `PUBLISHER_CLIP_AUDIO_BED=on` adds a very quiet low drone (about 20 LU under the beat)
+    under the wait only; `off` is the default
+  - with the phone frame or the heartbeat, the wait is fixed: `WAIT_BLINKS = 3` caret blinks
+    of 1.05s, 3.15s nominal, 95 frames (3.167s) at 30 fps, in every clip. It overrides the
+    oracle latency. Only the typing and the verdict can vary with length. Segment frames are
+    in the clip's sidecar JSON (`timeline.segments_frames`)
 - verdict is lowercased and whitespace-collapsed; wraps like the product if long
 - the verdict frame is the cover
-- renders are byte-identical for the same (category, verdict, pause, style, pulse)
+- renders are byte-identical for the same (category, verdict, pause, style, audio, frame)
 - mp4 metadata: `title=<verdict>`, `comment=capture=synthetic-oracle;oracle=<live|fixture>;category=<...>`
 
 X gets a 720×1280 derivative at publish time (X's documented portrait max is
