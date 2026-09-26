@@ -1,4 +1,4 @@
-"""Procedural pulse bed: off by default, IG/TikTok only, under -24 LUFS."""
+"""Procedural pulse bed: off by default, IG/TikTok only, peak near -24 dBFS."""
 
 import hashlib
 import subprocess
@@ -7,8 +7,9 @@ from pathlib import Path
 import pytest
 
 from antisearch_mill.audio import (
-    LUFS_CEILING, PEAK_CEILING_DB, SR, clip_audio, clip_audio_variant, fit_loudness,
-    measure_loudness, pause_caret_frames, pulse_for_platforms, synthesize, write_pulse_wav,
+    BLINK_HZ, LOOP_SILENCE_S, LUFS_CEILING, SR, TARGET_PEAK_DB, clip_audio, clip_audio_variant,
+    fit_loudness, measure_loudness, note_plan, pause_caret_frames, pulse_for_platforms,
+    synthesize, write_pulse_wav,
 )
 from antisearch_mill.fonts import resolve_font
 from antisearch_mill.oracle import Verdict
@@ -52,12 +53,27 @@ def test_audio_mode_defaults_off_and_rejects_unknown():
         clip_audio({"PUBLISHER_CLIP_AUDIO": "music"})
 
 
-def test_variant_defaults_to_a():
-    assert clip_audio_variant({}) == "a"
+def test_variant_defaults_to_c():
+    assert clip_audio_variant({}) == "c"
     assert clip_audio_variant({"PUBLISHER_CLIP_AUDIO_VARIANT": "B"}) == "b"
-    assert clip_audio_variant({"PUBLISHER_CLIP_AUDIO_VARIANT": "c"}) == "c"
+    assert clip_audio_variant({"PUBLISHER_CLIP_AUDIO_VARIANT": "a"}) == "a"
     with pytest.raises(ValueError, match="PUBLISHER_CLIP_AUDIO_VARIANT"):
         clip_audio_variant({"PUBLISHER_CLIP_AUDIO_VARIANT": "d"})
+
+
+def test_every_blink_is_the_same_c3_and_the_resolve_has_no_third():
+    c3 = BLINK_HZ
+    assert 130.8 <= c3 <= 146.9  # low-mid, C3 to D3
+    for variant in ("a", "b", "c"):
+        blinks, _resolve = note_plan(variant)
+        assert blinks == (c3,)
+    fifth = note_plan("a")[1]
+    assert fifth == pytest.approx((c3 / 2, 97.99885899543733, c3))
+    for freq in fifth:
+        assert abs(freq - 82.41) > 5  # not a major or minor third
+        assert abs(freq - 164.81) > 5
+    assert note_plan("b")[1] == pytest.approx((c3 / 2,))
+    assert note_plan("c")[1] == ()
 
 
 @pytest.mark.parametrize("platforms", [("instagram",), ("tiktok",), ("instagram", "tiktok")])
@@ -98,46 +114,54 @@ def test_notes_land_on_caret_on_frames(thing_love):
 
 
 def test_typing_is_silent_and_blinks_are_not(thing_love, beds):
-    left, right = beds["a"]
     loading = next(s for s in thing_love.states if s.kind == "loading")
     start = int(round(loading.start / thing_love.fps * SR))
-    assert _peak(left[:start]) == 0.0
-    assert _peak(right[:start]) == 0.0
-    for frame in pause_caret_frames(thing_love):
-        at = int(round(frame / thing_love.fps * SR))
-        window = left[at + int(0.04 * SR): at + int(0.09 * SR)]
-        assert _rms(window) > 0.01
+    frames = pause_caret_frames(thing_love)
+    for variant, (left, right) in beds.items():
+        assert _peak(left[:start]) == 0.0, variant
+        assert _peak(right[:start]) == 0.0, variant
+        for frame in frames:
+            at = int(round(frame / thing_love.fps * SR))
+            window = left[at + int(0.02 * SR): at + int(0.07 * SR)]
+            assert _rms(window) > 0.01, variant
 
 
-def test_variant_b_differs_only_in_the_resolve(beds):
-    assert beds["a"][0] != beds["b"][0]
-    # Same blink notes: the buffers match until the verdict chord.
-    tl = _thing()
-    chord = int(round(tl.verdict_frame / tl.fps * SR))
-    assert beds["a"][0][:chord] == beds["b"][0][:chord]
+def test_blinks_match_until_the_verdict(beds, thing_love):
+    chord = int(round(thing_love.verdict_frame / thing_love.fps * SR))
+    assert beds["a"][0][:chord] == beds["b"][0][:chord] == beds["c"][0][:chord]
+    assert beds["a"][0][chord:chord + 4000] != beds["b"][0][chord:chord + 4000]
+    assert beds["b"][0][chord:chord + 4000] != beds["c"][0][chord:chord + 4000]
 
 
-def test_variant_c_is_silent_until_the_chord(thing_love, beds):
+def test_variant_c_adds_nothing_at_the_verdict(thing_love, beds):
     left, _right = beds["c"]
     chord = int(round(thing_love.verdict_frame / thing_love.fps * SR))
-    assert _peak(left[:chord]) == 0.0
-    body = left[chord + int(0.05 * SR): chord + int(0.15 * SR)]
-    assert _rms(body) > 0.01
-    # Still decaying at the end of the hold, then the short tail fade.
-    tail = left[-int(0.05 * SR):-int(0.02 * SR)]
-    assert _peak(tail) > 0.0
-    assert _peak(left[-8:]) < _peak(tail)
+    blink = int(round(pause_caret_frames(thing_love)[0] / thing_love.fps * SR))
+    strike = _rms(left[blink + int(0.02 * SR): blink + int(0.07 * SR)])
+    verdict = _rms(left[chord + int(0.02 * SR): chord + int(0.07 * SR)])
+    # The last blink is already dying. There is no new note on the verdict.
+    assert verdict < strike * 0.45
+    resolve = _rms(beds["a"][0][chord + int(0.02 * SR): chord + int(0.07 * SR)])
+    assert resolve > strike * 0.4
+
+
+def test_tail_is_silent_before_the_loop_point(beds):
+    silent = int(LOOP_SILENCE_S * SR)
+    for variant, (left, right) in beds.items():
+        assert _peak(left[-silent:]) == 0.0, variant
+        assert _peak(right[-silent:]) == 0.0, variant
+        # The fade into that silence has already given up the note.
+        assert _peak(left[-silent - int(0.02 * SR): -silent]) < _peak(left) * 0.25
 
 
 @pytest.mark.parametrize("variant", ["a", "b", "c"])
-def test_loudness_stays_under_the_ceiling(tmp_path, beds, variant):
+def test_loudness_peaks_near_minus_24_dbfs(tmp_path, beds, variant):
     left, right = beds[variant]
     work = tmp_path / variant
     work.mkdir()
     _scaled_l, _scaled_r, loud = fit_loudness(left, right, work)
     assert loud.integrated_lufs <= LUFS_CEILING
-    assert loud.peak_db <= PEAK_CEILING_DB
-    assert loud.integrated_lufs > -45  # a bed, not a muted file
+    assert TARGET_PEAK_DB - 2.0 <= loud.peak_db <= TARGET_PEAK_DB + 0.6
 
 
 def test_silent_clip_id_is_unchanged_when_audio_is_off():
@@ -181,7 +205,7 @@ def test_pulse_muxes_44100_stereo_aac(tmp_path, thing_love):
     assert out == "aac,44100,2"
     loud = measure_loudness(clip)
     assert loud.integrated_lufs <= LUFS_CEILING
-    assert loud.peak_db <= -0.1
+    assert TARGET_PEAK_DB - 6.0 <= loud.peak_db <= TARGET_PEAK_DB + 2.0
     # Same timeline, silent path, still 48 kHz. Byte-identical to a second silent render.
     silent = tmp_path / "silent.mp4"
     again = tmp_path / "silent-again.mp4"
@@ -196,4 +220,4 @@ def test_write_pulse_wav_is_stereo_44100(tmp_path, thing_love):
     loud = write_pulse_wav(thing_love, "c", dest, work=tmp_path)
     assert dest.is_file()
     assert loud.integrated_lufs <= LUFS_CEILING
-    assert loud.peak_db <= PEAK_CEILING_DB
+    assert TARGET_PEAK_DB - 2.0 <= loud.peak_db <= TARGET_PEAK_DB + 0.6

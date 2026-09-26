@@ -9,10 +9,15 @@ Founder, 2026-09-26: the track is never the protagonist. It is the sound of
 the pause. `PUBLISHER_CLIP_AUDIO=off` (the default) leaves the silent AAC
 track exactly as it was. `pulse` is IG/TikTok only.
 
-Variants (`PUBLISHER_CLIP_AUDIO_VARIANT`, default `a`):
-  a  low single notes on each caret blink, major-9 resolve
-  b  the same notes, suspended/ambiguous resolve
-  c  no blink notes, only a sparser resolve chord
+Soul, 2026-09-26: felt piano, dry, no sustain pedal, a short room.
+The same pitch on every blink, low-mid, around C3. No melody, no beat,
+no voice, no riser. The tail is already silent before the last frames,
+so a loop has a silent point. Keyboard and typing stay silent.
+
+Variants (`PUBLISHER_CLIP_AUDIO_VARIANT`, default `c`):
+  a  blinks, then an open fifth with octave one register below (no third)
+  b  blinks, then that same note one octave lower
+  c  blinks, then silence at the verdict
 """
 
 from __future__ import annotations
@@ -30,9 +35,11 @@ from .render import BLINK_ON_FRACTION, BLINK_PERIOD_S
 from .timeline import Timeline
 
 SR = 44100
-TARGET_LUFS = -27.0  # under the -24 ceiling; the bed stays behind the picture
+# Quieter than a normal feed. The peak sits near -24 dBFS; integrated is lower.
+TARGET_PEAK_DB = -24.0
 LUFS_CEILING = -24.0
-PEAK_CEILING_DB = -1.5
+# Exact silence at the end. The decay is finished before this, so a loop is silent.
+LOOP_SILENCE_S = 0.18
 
 AUDIO_OFF = "off"
 AUDIO_PULSE = "pulse"
@@ -40,14 +47,10 @@ AUDIO_MODES = (AUDIO_OFF, AUDIO_PULSE)
 AUDIO_VARIANTS = ("a", "b", "c")
 PULSE_NETWORKS = frozenset({"instagram", "tiktok"})
 
-# Equal temperament, A4 = 440. Low register on purpose.
-_C2 = 65.40639132514966
-_G2 = 97.99885899543733
-_E3 = 164.81377845643496
-_F3 = 174.61411571650194
-_G3 = 195.99771799087463
-_B3 = 246.94165062806206
-_D4 = 293.6647679174076
+# Equal temperament, A4 = 440. One pitch for every blink: C3, low-mid.
+BLINK_HZ = 130.8127826502993
+_C2 = BLINK_HZ / 2.0
+_G2 = 97.99885899543733  # a fifth above C2, not a third
 
 
 @dataclass(frozen=True)
@@ -68,11 +71,11 @@ def clip_audio(env: Mapping[str, str] | None = None) -> str:
 
 
 def clip_audio_variant(env: Mapping[str, str] | None = None) -> str:
-    """`PUBLISHER_CLIP_AUDIO_VARIANT`: `a` (default), `b`, or `c`."""
+    """`PUBLISHER_CLIP_AUDIO_VARIANT`: `c` (default), `a`, or `b`."""
     source = os.environ if env is None else env
     raw = (source.get("PUBLISHER_CLIP_AUDIO_VARIANT") or "").strip().lower()
     if not raw:
-        return "a"
+        return "c"
     if raw not in AUDIO_VARIANTS:
         raise ValueError(f"PUBLISHER_CLIP_AUDIO_VARIANT={raw!r}; use a, b, or c")
     return raw
@@ -110,22 +113,23 @@ def pause_caret_frames(timeline: Timeline) -> list[int]:
     return caret_on_frames(loading.start, loading.end, timeline.fps)
 
 
-def _voices(variant: str) -> tuple[tuple[tuple[float, float], ...], tuple[tuple[float, float], ...]]:
-    """(blink notes, resolve chord) as (freq, weight) pairs."""
+def note_plan(variant: str) -> tuple[tuple[float, ...], tuple[float, ...]]:
+    """Blink frequencies, then the verdict frequencies.
+
+    Every blink is C3. Nothing moves. `a` resolves a register below to
+    C2, G2, C3 (root, fifth, octave; no third). `b` resolves to C2 alone.
+    `c` adds nothing at the verdict.
+    """
     if variant not in AUDIO_VARIANTS:
         raise ValueError(f"unknown audio variant {variant!r}; use a, b, or c")
-    blink = ((_C2, 1.0),)
+    blink = (BLINK_HZ,)
     if variant == "a":
-        # C major 9, low and narrow: root, third, fifth, seventh, ninth.
-        chord = ((_C2, 1.0), (_E3, 0.42), (_G3, 0.36), (_B3, 0.22), (_D4, 0.14))
+        resolve = (_C2, _G2, BLINK_HZ)
     elif variant == "b":
-        # Csus4 add9. No third, so it never settles into major or minor.
-        chord = ((_C2, 1.0), (_F3, 0.40), (_G3, 0.34), (_D4, 0.16))
+        resolve = (_C2,)
     else:
-        blink = ()
-        # Open fifth only. Sparser than a or b, and still a chord.
-        chord = ((_C2, 1.0), (_G2, 0.55))
-    return blink, chord
+        resolve = ()
+    return blink, resolve
 
 
 def _env(i: int, attack_n: int, tau_n: float) -> float:
@@ -184,27 +188,97 @@ def _add_felt(buf: list[float], start: int, amp: float, seed: int) -> None:
         buf[start + i] += amp * math.exp(-i / tau) * state
 
 
+def _tau(start_s: float, total_s: float, cap: float) -> float:
+    """Exponential decay that is finished before the silent loop point.
+
+    No sustain pedal: the cap on a blink is short, so the note does not
+    carry into the next blink. A resolve may use more of the hold, and
+    still reaches the noise floor before the forced silence.
+    """
+    remain = total_s - start_s - LOOP_SILENCE_S - 0.05
+    tau = max(0.05, remain / 5.6)
+    return min(cap, tau)
+
+
 def synthesize(timeline: Timeline, variant: str) -> tuple[list[float], list[float]]:
     """Stereo float samples for the whole clip. Typing and the keyboard slide stay silent."""
     total = timeline.total_frames / timeline.fps
     n = int(math.ceil(total * SR))
     left = [0.0] * n
     right = [0.0] * n
-    blinks, chord = _voices(variant)
+    blinks, resolve = note_plan(variant)
     note_amp = 0.20
-    if blinks:
-        for frame in pause_caret_frames(timeline):
-            start = int(round(frame / timeline.fps * SR))
-            for freq, weight in blinks:
-                _place(left, right, start, freq, note_amp * weight, attack_s=0.030, tau_s=0.36)
-    remain = max(0.4, total - timeline.verdict_frame / timeline.fps)
-    # Still gently present at the last frames, not gated off.
-    tau = remain / 2.05
-    chord_at = int(round(timeline.verdict_frame / timeline.fps * SR))
-    for freq, weight in chord:
-        _place(left, right, chord_at, freq, note_amp * 0.85 * weight, attack_s=0.045, tau_s=tau)
-    _fade_tail(left, right)
+    # Dry felt attack. No swell, no riser.
+    for frame in pause_caret_frames(timeline):
+        start_s = frame / timeline.fps
+        start = int(round(start_s * SR))
+        tau = _tau(start_s, total, 0.15)
+        for freq in blinks:
+            _place(left, right, start, freq, note_amp, attack_s=0.010, tau_s=tau)
+    if resolve:
+        start_s = timeline.verdict_frame / timeline.fps
+        start = int(round(start_s * SR))
+        tau = _tau(start_s, total, 0.42)
+        # Open fifth stays balanced with a single blink, so the peak is the
+        # note, not a stack. Weights have no third.
+        weights = (0.58, 0.34, 0.24) if len(resolve) > 1 else (1.0,)
+        for freq, weight in zip(resolve, weights):
+            _place(left, right, start, freq, note_amp * weight, attack_s=0.016, tau_s=tau)
+    _short_room(left, (887, 1123, 1367, 1601), 241)
+    _short_room(right, (941, 1181, 1423, 1663), 293)
+    _silence_loop_point(left, right)
     return left, right
+
+
+def _short_room(buf: list[float], comb_delays: tuple[int, ...], ap_delay: int) -> None:
+    """A short room on a dry source. RT60 about 0.22s. Mostly the direct note."""
+    rt60 = 0.22
+    combs: list[list] = []
+    for d in comb_delays:
+        g = 10 ** (-3.0 * d / (rt60 * SR))
+        combs.append([g, [0.0] * d, 0])
+    ap = [0.0] * ap_delay
+    ap_i = 0
+    ap_g = 0.45
+    wet = 0.14
+    n = len(buf)
+    scale = 1.0 / len(combs)
+    for i in range(n):
+        x = buf[i]
+        y = 0.0
+        for comb in combs:
+            cb = comb[1]
+            idx = comb[2]
+            delayed = cb[idx]
+            cb[idx] = x + delayed * comb[0]
+            y += delayed
+            idx += 1
+            if idx == len(cb):
+                idx = 0
+            comb[2] = idx
+        comb_out = y * scale
+        delayed = ap[ap_i]
+        ap_out = -ap_g * comb_out + delayed
+        ap[ap_i] = comb_out + ap_g * delayed
+        ap_i += 1
+        if ap_i == ap_delay:
+            ap_i = 0
+        buf[i] = x + wet * ap_out
+
+
+def _silence_loop_point(left: list[float], right: list[float]) -> None:
+    """Fade into exact silence, then hold that silence to the last sample."""
+    n = len(left)
+    silent = min(n, int(LOOP_SILENCE_S * SR))
+    fade = min(n - silent, int(0.04 * SR))
+    for i in range(fade):
+        g = 0.5 * (1.0 + math.cos(math.pi * (i + 1) / fade))
+        k = n - silent - fade + i
+        left[k] *= g
+        right[k] *= g
+    for i in range(n - silent, n):
+        left[i] = 0.0
+        right[i] = 0.0
 
 
 def _place(left: list[float], right: list[float], start: int, freq: float, amp: float, *, attack_s: float, tau_s: float) -> None:
@@ -220,16 +294,6 @@ def _place(left: list[float], right: list[float], start: int, freq: float, amp: 
         side = 0.10 * (sa - sb)
         left[start + i] += mid + side
         right[start + i] += mid - side
-
-
-def _fade_tail(left: list[float], right: list[float]) -> None:
-    fade = int(0.015 * SR)
-    n = len(left)
-    for i in range(fade):
-        g = 0.5 * (1.0 + math.cos(math.pi * (i + 1) / fade))
-        k = n - fade + i
-        left[k] *= g
-        right[k] *= g
 
 
 def _peak_db(left: list[float], right: list[float]) -> float:
@@ -285,33 +349,21 @@ def _scale(left: list[float], right: list[float], gain: float) -> tuple[list[flo
 
 
 def fit_loudness(left: list[float], right: list[float], work: Path) -> tuple[list[float], list[float], Loudness]:
-    """Static gain so the file sits near -27 LUFS, never louder than -24, never near clipping.
+    """Static gain so the sample peak sits near -24 dBFS.
 
-    A static gain, not a compressor: the notes must not pump.
+    A static gain, not a compressor: the notes must not pump. Integrated
+    loudness stays under -24 LUFS because the peak itself is already quiet.
     """
-    # int16 clips anything above 0 dBFS, which would make the measurement a lie.
     peak_db = _peak_db(left, right)
-    if peak_db > -3.0:
-        left, right = _scale(left, right, 10 ** ((-3.0 - peak_db) / 20.0))
+    gain_db = 0.0 if peak_db <= -120.0 else TARGET_PEAK_DB - peak_db
+    # A hair under the target so int16 rounding does not land hotter.
+    gain_db -= 0.25
+    left, right = _scale(left, right, 10 ** (gain_db / 20.0))
     scratch = work / "level.wav"
     _write_wav(scratch, left, right)
-    measured = measure_loudness(scratch)
-    gain_db = TARGET_LUFS - measured.integrated_lufs
-    gain_db = min(24.0, max(-24.0, gain_db))
-    if measured.integrated_lufs + gain_db > LUFS_CEILING:
-        gain_db = LUFS_CEILING - measured.integrated_lufs
-    if measured.peak_db + gain_db > PEAK_CEILING_DB:
-        gain_db -= (measured.peak_db + gain_db) - PEAK_CEILING_DB
-    gain = 10 ** (gain_db / 20.0)
-    left, right = _scale(left, right, gain)
-    # Int16 rounding can push a sample over the ceiling. Leave a hair of room.
-    peak = max(_peak_db(left, right), -120.0)
-    if peak > PEAK_CEILING_DB:
-        left, right = _scale(left, right, 10 ** ((PEAK_CEILING_DB - peak) / 20.0))
-    _write_wav(scratch, left, right)
     final = measure_loudness(scratch)
-    if final.integrated_lufs > LUFS_CEILING or final.peak_db > -0.1:
-        extra = min(LUFS_CEILING - final.integrated_lufs, PEAK_CEILING_DB - final.peak_db, 0.0)
+    if final.peak_db > TARGET_PEAK_DB + 0.4 or final.integrated_lufs > LUFS_CEILING:
+        extra = min(TARGET_PEAK_DB - final.peak_db, LUFS_CEILING - final.integrated_lufs, 0.0)
         left, right = _scale(left, right, 10 ** (extra / 20.0))
         _write_wav(scratch, left, right)
         final = measure_loudness(scratch)
