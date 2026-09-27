@@ -564,7 +564,7 @@ def collect(state: Path, env: Mapping[str, str], *, now: datetime, http: Http | 
         if net == "instagram" and earlier_ig:
             col.notes.append("instagram: no new Buffer read this run; last Buffer numbers are under 26h old")
             continue
-        why = {"instagram": "Instagram comes only from Buffer post metrics, and none were refreshed",
+        why = {"instagram": "no Instagram post has real Buffer numbers yet (Buffer refreshes daily; logged-out pages show no counts)",
                "x": "the X embed endpoint returned nothing", "tiktok": "the public TikTok pages returned nothing"}[net]
         col.problems.append(f"{net}: {why}")
 

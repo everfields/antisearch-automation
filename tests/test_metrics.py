@@ -137,7 +137,7 @@ def test_public_run_joins_tiktok_by_post_time_and_x_by_url(tmp_path):
     assert accounts["tiktok"]["followers"] == "0" and accounts["tiktok"]["likes_total"] == "5"
     assert accounts["x"]["followers"] == "" and accounts["x"]["source"] == "unavailable"
     # Instagram had a published post and no source: loud, not zero
-    assert col.problems == ["instagram: Instagram comes only from Buffer post metrics, and none were refreshed"]
+    assert col.problems == ["instagram: no Instagram post has real Buffer numbers yet (Buffer refreshes daily; logged-out pages show no counts)"]
     assert not any(r["network"] == "instagram" for r in rows.values())
 
 
