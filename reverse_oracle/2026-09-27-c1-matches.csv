@@ -1,0 +1,22 @@
+rank,candidate_input,real_verdict,match,handle,target,vertical,market,followers_approx,site_links_handle,why
+1,toys,lego,exact,@lego,LEGO,experience,global,15M,unreachable (http 403),concept word; expected winner @lego
+2,party,rio carnival,exact,@visitbrasil,Visit Brasil,travel,global,1M,unreachable (http 403),concept word; expected winner @spain
+3,racing,formula 1,exact,@f1,Formula 1,experience,global,30M,yes,concept word; expected winner @f1
+4,makeup,pat mcgrath labs,exact,@patmcgrathreal,Pat McGrath Labs,beauty,us,4M,yes,concept word; expected winner @patmcgrathreal
+5,sunset,santorini,exact,@visitgreecegr,Visit Greece,travel,global,1M,yes,concept word; expected winner @visitgreecegr
+6,island,bali,exact,@indtravel,Wonderful Indonesia,travel,global,1M,yes,concept word; expected winner @visitgreecegr
+7,diving,raja ampat,exact,@indtravel,Wonderful Indonesia,travel,global,1M,yes,concept word; expected winner @indtravel
+8,canyon,grand canyon,exact,@grandcanyonnps,Grand Canyon National Park,travel,us,1M,no,concept word; expected winner @grandcanyonnps
+9,safari,serengeti national park,exact,@tanzaniatourism,Tanzania Tourism,travel,global,200k,no,concept word; expected winner @tanzaniatourism
+10,autumn,kyoto,exact,@visitjapan.us,Visit Japan (Americas),travel,us,140k,yes,concept word; expected winner @visitjapan.us
+11,fashion,hermès,exact,@hermes,Hermès,luxury,global,15.6M,unreachable (http 403),concept word; expected winner @parisjetaime
+12,airline,qatar airways,exact,@qatarairways,Qatar Airways,brand,global,6M,unreachable,concept word; expected winner @singaporeair
+13,sunrise,haleakalā,exact,@gohawaii,Hawaii Tourism,travel,us,1M,unreachable (http 403),concept word; expected winner @gohawaii
+14,getaway,maldives,exact,@visitmaldives,Visit Maldives,travel,global,700k,yes,concept word; expected winner @visitmaldives
+15,volcano,mount fuji,exact,@visitjapan.us,Visit Japan (Americas),travel,us,140k,yes,concept word; expected winner @gohawaii
+16,paradise,bora bora,exact,@tahititourisme,Tahiti Tourisme,travel,global,500k,unreachable (http 403),concept word; expected winner @tahititourisme
+17,waterfall,iguazú falls,exact,@visitbrasil,Visit Brasil,travel,global,1M,unreachable (http 403),concept word; expected winner @visitbrasil
+18,motorsport,formula 1,exact,@f1,Formula 1,experience,global,30M,yes,concept word; expected winner @f1
+19,skyscraper,burj khalifa,exact,@burjkhalifa,Burj Khalifa,travel,global,2M,unreachable (http 403),concept word; expected winner @burjkhalifa
+20,wanderlust,new zealand,exact,@purenewzealand,Tourism New Zealand,travel,global,1.3M,unreachable (http 403),concept word; expected winner @visitjapan.us
+21,destination,kyoto,exact,@visitjapan.us,Visit Japan (Americas),travel,us,140k,yes,concept word; expected winner @visitjapan.us

@@ -1,0 +1,513 @@
+{
+ "generator": "ordered list",
+ "author": "Claude Opus 5.5 (Cursor agent)",
+ "file": "queue/reverse_oracle/concepts-2026-09-27.json",
+ "items": 101,
+ "candidates": [
+  {
+   "input": "escape",
+   "target": "@visitmaldives",
+   "why": "concept word; expected winner @visitmaldives"
+  },
+  {
+   "input": "paradise",
+   "target": "@tahititourisme",
+   "why": "concept word; expected winner @tahititourisme"
+  },
+  {
+   "input": "wanderlust",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "sunset",
+   "target": "@visitgreecegr",
+   "why": "concept word; expected winner @visitgreecegr"
+  },
+  {
+   "input": "summer",
+   "target": "@italiait",
+   "why": "concept word; expected winner @italiait"
+  },
+  {
+   "input": "winter",
+   "target": "@ourfinland",
+   "why": "concept word; expected winner @ourfinland"
+  },
+  {
+   "input": "snow",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "safari",
+   "target": "@tanzaniatourism",
+   "why": "concept word; expected winner @tanzaniatourism"
+  },
+  {
+   "input": "island",
+   "target": "@visitgreecegr",
+   "why": "concept word; expected winner @visitgreecegr"
+  },
+  {
+   "input": "beach",
+   "target": "@visitmaldives",
+   "why": "concept word; expected winner @visitmaldives"
+  },
+  {
+   "input": "mountains",
+   "target": "@switzerland",
+   "why": "concept word; expected winner @switzerland"
+  },
+  {
+   "input": "nature",
+   "target": "@purenewzealand",
+   "why": "concept word; expected winner @purenewzealand"
+  },
+  {
+   "input": "culture",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "food",
+   "target": "@italiait",
+   "why": "concept word; expected winner @italiait"
+  },
+  {
+   "input": "cuisine",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "shopping",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "party",
+   "target": "@spain",
+   "why": "concept word; expected winner @spain"
+  },
+  {
+   "input": "nightlife",
+   "target": "@spain",
+   "why": "concept word; expected winner @spain"
+  },
+  {
+   "input": "holiday",
+   "target": "@italiait",
+   "why": "concept word; expected winner @italiait"
+  },
+  {
+   "input": "getaway",
+   "target": "@visitmaldives",
+   "why": "concept word; expected winner @visitmaldives"
+  },
+  {
+   "input": "destination",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "journey",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "awe",
+   "target": "@grandcanyonnps",
+   "why": "concept word; expected winner @grandcanyonnps"
+  },
+  {
+   "input": "wonder",
+   "target": "@grandcanyonnps",
+   "why": "concept word; expected winner @grandcanyonnps"
+  },
+  {
+   "input": "stars",
+   "target": "@nasa",
+   "why": "concept word; expected winner @nasa"
+  },
+  {
+   "input": "space",
+   "target": "@nasa",
+   "why": "concept word; expected winner @nasa"
+  },
+  {
+   "input": "exploration",
+   "target": "@natgeo",
+   "why": "concept word; expected winner @natgeo"
+  },
+  {
+   "input": "diving",
+   "target": "@indtravel",
+   "why": "concept word; expected winner @indtravel"
+  },
+  {
+   "input": "coral",
+   "target": "@australia",
+   "why": "concept word; expected winner @australia"
+  },
+  {
+   "input": "jungle",
+   "target": "@visitcostarica",
+   "why": "concept word; expected winner @visitcostarica"
+  },
+  {
+   "input": "rainforest",
+   "target": "@visitbrasil",
+   "why": "concept word; expected winner @visitbrasil"
+  },
+  {
+   "input": "waterfall",
+   "target": "@visitbrasil",
+   "why": "concept word; expected winner @visitbrasil"
+  },
+  {
+   "input": "autumn",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "spring",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "tulips",
+   "target": "@keukenhof",
+   "why": "concept word; expected winner @keukenhof"
+  },
+  {
+   "input": "magic",
+   "target": "@disneyparks",
+   "why": "concept word; expected winner @disneyparks"
+  },
+  {
+   "input": "fun",
+   "target": "@disneyparks",
+   "why": "concept word; expected winner @disneyparks"
+  },
+  {
+   "input": "racing",
+   "target": "@f1",
+   "why": "concept word; expected winner @f1"
+  },
+  {
+   "input": "motorsport",
+   "target": "@f1",
+   "why": "concept word; expected winner @f1"
+  },
+  {
+   "input": "speed",
+   "target": "@bugatti",
+   "why": "concept word; expected winner @bugatti"
+  },
+  {
+   "input": "celebration",
+   "target": "@domperignon",
+   "why": "concept word; expected winner @domperignon"
+  },
+  {
+   "input": "scent",
+   "target": "@maisonfranciskurkdjian",
+   "why": "concept word; expected winner @maisonfranciskurkdjian"
+  },
+  {
+   "input": "streetwear",
+   "target": "@supremenewyork",
+   "why": "concept word; expected winner @supremenewyork"
+  },
+  {
+   "input": "denim",
+   "target": "@levis",
+   "why": "concept word; expected winner @levis"
+  },
+  {
+   "input": "elegance",
+   "target": "@chanelofficial",
+   "why": "concept word; expected winner @chanelofficial"
+  },
+  {
+   "input": "glamour",
+   "target": "@visitmonaco",
+   "why": "concept word; expected winner @visitmonaco"
+  },
+  {
+   "input": "fashion",
+   "target": "@parisjetaime",
+   "why": "concept word; expected winner @parisjetaime"
+  },
+  {
+   "input": "style",
+   "target": "@chanelofficial",
+   "why": "concept word; expected winner @chanelofficial"
+  },
+  {
+   "input": "couture",
+   "target": "@dior",
+   "why": "concept word; expected winner @dior"
+  },
+  {
+   "input": "craftsmanship",
+   "target": "@hermes",
+   "why": "concept word; expected winner @hermes"
+  },
+  {
+   "input": "precision",
+   "target": "@rolex",
+   "why": "concept word; expected winner @rolex"
+  },
+  {
+   "input": "innovation",
+   "target": "@apple",
+   "why": "concept word; expected winner @apple"
+  },
+  {
+   "input": "design",
+   "target": "@apple",
+   "why": "concept word; expected winner @apple"
+  },
+  {
+   "input": "entertainment",
+   "target": "@netflix",
+   "why": "concept word; expected winner @netflix"
+  },
+  {
+   "input": "play",
+   "target": "@lego",
+   "why": "concept word; expected winner @lego"
+  },
+  {
+   "input": "toys",
+   "target": "@lego",
+   "why": "concept word; expected winner @lego"
+  },
+  {
+   "input": "games",
+   "target": "@nintendo",
+   "why": "concept word; expected winner @nintendo"
+  },
+  {
+   "input": "happiness",
+   "target": "@cocacola",
+   "why": "concept word; expected winner @cocacola"
+  },
+  {
+   "input": "energy",
+   "target": "@redbull",
+   "why": "concept word; expected winner @redbull"
+  },
+  {
+   "input": "adrenaline",
+   "target": "@redbull",
+   "why": "concept word; expected winner @redbull"
+  },
+  {
+   "input": "thrill",
+   "target": "@disneyparks",
+   "why": "concept word; expected winner @disneyparks"
+  },
+  {
+   "input": "basketball",
+   "target": "@nba",
+   "why": "concept word; expected winner @nba"
+  },
+  {
+   "input": "airline",
+   "target": "@singaporeair",
+   "why": "concept word; expected winner @singaporeair"
+  },
+  {
+   "input": "hospitality",
+   "target": "@fourseasons",
+   "why": "concept word; expected winner @fourseasons"
+  },
+  {
+   "input": "home",
+   "target": "@airbnb",
+   "why": "concept word; expected winner @airbnb"
+  },
+  {
+   "input": "skyscraper",
+   "target": "@burjkhalifa",
+   "why": "concept word; expected winner @burjkhalifa"
+  },
+  {
+   "input": "camera",
+   "target": "@leica_camera",
+   "why": "concept word; expected winner @leica_camera"
+  },
+  {
+   "input": "photography",
+   "target": "@natgeo",
+   "why": "concept word; expected winner @natgeo"
+  },
+  {
+   "input": "music",
+   "target": "@spotify",
+   "why": "concept word; expected winner @spotify"
+  },
+  {
+   "input": "sweetness",
+   "target": "@laduree",
+   "why": "concept word; expected winner @laduree"
+  },
+  {
+   "input": "indulgence",
+   "target": "@nutella",
+   "why": "concept word; expected winner @nutella"
+  },
+  {
+   "input": "pasta",
+   "target": "@italiait",
+   "why": "concept word; expected winner @italiait"
+  },
+  {
+   "input": "pizza",
+   "target": "@italiait",
+   "why": "concept word; expected winner @italiait"
+  },
+  {
+   "input": "wine",
+   "target": "@italiait",
+   "why": "concept word; expected winner @italiait"
+  },
+  {
+   "input": "ramen",
+   "target": "@visitjapan.us",
+   "why": "concept word; expected winner @visitjapan.us"
+  },
+  {
+   "input": "street food",
+   "target": "@amazingthailand",
+   "why": "concept word; expected winner @amazingthailand"
+  },
+  {
+   "input": "luxury",
+   "target": "@hermes",
+   "why": "concept word; expected winner @hermes"
+  },
+  {
+   "input": "beauty",
+   "target": "@fentybeauty",
+   "why": "concept word; expected winner @fentybeauty"
+  },
+  {
+   "input": "taste",
+   "target": "@italiait",
+   "why": "concept word; expected winner @italiait"
+  },
+  {
+   "input": "dream",
+   "target": "@disneyparks",
+   "why": "concept word; expected winner @disneyparks"
+  },
+  {
+   "input": "freedom",
+   "target": "@natgeo",
+   "why": "concept word; expected winner @natgeo"
+  },
+  {
+   "input": "silence",
+   "target": "@inspiredbyiceland",
+   "why": "concept word; expected winner @inspiredbyiceland"
+  },
+  {
+   "input": "peace",
+   "target": "@inspiredbyiceland",
+   "why": "concept word; expected winner @inspiredbyiceland"
+  },
+  {
+   "input": "calm",
+   "target": "@visitmaldives",
+   "why": "concept word; expected winner @visitmaldives"
+  },
+  {
+   "input": "glow",
+   "target": "@glossier",
+   "why": "concept word; expected winner @glossier"
+  },
+  {
+   "input": "makeup",
+   "target": "@patmcgrathreal",
+   "why": "concept word; expected winner @patmcgrathreal"
+  },
+  {
+   "input": "skin",
+   "target": "@cerave",
+   "why": "concept word; expected winner @cerave"
+  },
+  {
+   "input": "hair",
+   "target": "@olaplex",
+   "why": "concept word; expected winner @olaplex"
+  },
+  {
+   "input": "ocean",
+   "target": "@visitmaldives",
+   "why": "concept word; expected winner @visitmaldives"
+  },
+  {
+   "input": "sunrise",
+   "target": "@gohawaii",
+   "why": "concept word; expected winner @gohawaii"
+  },
+  {
+   "input": "canyon",
+   "target": "@grandcanyonnps",
+   "why": "concept word; expected winner @grandcanyonnps"
+  },
+  {
+   "input": "volcano",
+   "target": "@gohawaii",
+   "why": "concept word; expected winner @gohawaii"
+  },
+  {
+   "input": "glacier",
+   "target": "@inspiredbyiceland",
+   "why": "concept word; expected winner @inspiredbyiceland"
+  },
+  {
+   "input": "fireworks",
+   "target": "@disneyparks",
+   "why": "concept word; expected winner @disneyparks"
+  },
+  {
+   "input": "carnival",
+   "target": "@visitbrasil",
+   "why": "concept word; expected winner @visitbrasil"
+  },
+  {
+   "input": "architecture",
+   "target": "@burjkhalifa",
+   "why": "concept word; expected winner @burjkhalifa"
+  },
+  {
+   "input": "history",
+   "target": "@italiait",
+   "why": "concept word; expected winner @italiait"
+  },
+  {
+   "input": "art",
+   "target": "@museelouvre",
+   "why": "concept word; expected winner @museelouvre"
+  },
+  {
+   "input": "wellness",
+   "target": "@sixsenses",
+   "why": "concept word; expected winner @sixsenses"
+  },
+  {
+   "input": "relaxation",
+   "target": "@visitmaldives",
+   "why": "concept word; expected winner @visitmaldives"
+  },
+  {
+   "input": "serenity",
+   "target": "@aman",
+   "why": "concept word; expected winner @aman"
+  }
+ ]
+}
