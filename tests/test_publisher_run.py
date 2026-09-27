@@ -534,3 +534,111 @@ def test_a_buffer_scheduled_row_counts_on_the_day_it_goes_out(log):
     log.append(PostRow("ig-now", "instagram", "published", url="u", at="2026-09-27T16:10:00+00:00"))
     assert log.used_on(today, "instagram") == 1  # only the post that went out today
     assert log.used_on(later, "instagram") == 2  # the two scheduled for 30 Sep count there
+
+
+# publisher-state posts.csv on 2026-09-27, verbatim but for the captions: the header predates
+# `due_at`, so each schedule's send day is only in its Buffer note. The 13:27 ET gate read
+# "instagram slots passed 1/4, used 5 -> 0 due" from these rows and skipped the 12:07 slot.
+PROD_HEADER = "job_id,network,status,clip_id,verdict,remote_id,url,detail,at,category,caption,format\n"
+PROD_CONCEPTS = [  # queued 2026-09-27 (ET), each for 12:07 ET on a later day
+    ("ig-concept-fashion", "2026-09-27T13:54:41+00:00", "2026-09-30"),
+    ("ig-concept-wanderlust", "2026-09-27T14:16:31+00:00", "2026-09-28"),
+    ("ig-concept-paradise", "2026-09-27T14:16:31+00:00", "2026-09-29"),
+    ("ig-concept-sunset", "2026-09-27T14:16:31+00:00", "2026-10-01"),
+    ("ig-concept-island", "2026-09-27T14:16:31+00:00", "2026-10-02"),
+]
+
+
+def prod_log(log: PostLog, network: str = "instagram", travel: bool = True) -> PostLog:
+    lines = [PROD_HEADER]
+    if travel:  # queued 06:51 ET, went out 09:37 ET: a real post on 27 Sep
+        lines += [
+            f"ig-manual-travel,{network},pending,c,japan,,,,2026-09-27T10:51:37+00:00,travel,,video\n",
+            f"ig-manual-travel,{network},scheduled,c,japan,b0,buffer:b0,scheduled in Buffer for 2026-09-27 09:37 EDT "
+            "(America/New_York),2026-09-27T10:51:37+00:00,travel,,video\n",
+        ]
+    for i, (job_id, at, day) in enumerate(PROD_CONCEPTS):
+        lines += [
+            f"{job_id},{network},pending,c{i},v,,,,{at},{job_id[11:]},,video\n",
+            f"{job_id},{network},scheduled,c{i},v,b{i},buffer:b{i},scheduled in Buffer for {day} 12:07 EDT "
+            f"(America/New_York),{at},{job_id[11:]},,video\n",
+        ]
+    log.path.parent.mkdir(parents=True, exist_ok=True)
+    log.path.write_text("".join(lines), encoding="utf-8")
+    return log
+
+
+@pytest.mark.parametrize("network", ["instagram", "tiktok"])
+def test_buffer_schedules_queued_today_for_later_days_leave_todays_cap_alone(log, network):
+    prod_log(log, network, travel=False)
+    reach = slots_for(network, {"PUBLISHER_CADENCE": "reach"})
+    today = date(2026, 9, 27)
+    assert log.used_on(today, network) == 0  # was 5: every schedule counted on the day it was queued
+    first = slot_times(today, reach)[0]
+    assert open_now(first + timedelta(minutes=3), reach, log.used_on(today, network)) == 1  # today's first slot is owed
+    for _, _, day in PROD_CONCEPTS:
+        send_day = date.fromisoformat(day)
+        assert log.used_on(send_day, network) == 1  # each one reserves its own send day
+
+
+def test_the_27_sep_log_leaves_only_the_post_that_went_out_today_on_the_ig_cap(log):
+    prod_log(log)
+    today, reach = date(2026, 9, 27), slots_for("instagram", {"PUBLISHER_CADENCE": "reach"})
+    assert log.used_on(today, "instagram") == 1  # ig-manual-travel, out 09:37 ET; not the five concept reels
+    gate = datetime(2026, 9, 27, 13, 27, tzinfo=ET)
+    assert open_now(gate, reach, log.used_on(today, "instagram")) == 0  # 09:37 filled the 12:07 slot: 1 of 4 used
+    assert open_now(datetime(2026, 9, 27, 15, 10, tzinfo=ET), reach, log.used_on(today, "instagram")) == 1
+    assert [log.used_on(date(2026, 9, 28) + timedelta(days=n), "instagram") for n in range(5)] == [1] * 5
+
+
+def test_the_post_step_and_the_due_gate_agree_on_a_buffer_reserved_day(ledger, log):
+    prod_log(log, travel=False)
+    env = {**LIVE_ENV, "PUBLISHER_CADENCE": "reach", "PUBLISHER_LIVE_NETWORKS": "instagram"}
+    ig = fake_adapter("instagram")
+    jobs = [job(f"ig-auto-{i}", ("instagram",)) for i in range(3)]
+    for j in jobs:
+        clip(ledger, j.id)
+    reach = slots_for("instagram", env)
+
+    def fresh(out):
+        return [o.status for o in out if o.status != "skipped_already_posted"][0]
+
+    today = datetime(2026, 9, 27, 12, 10, tzinfo=ET)
+    assert open_now(today, reach, log.used_on(posting_day(today), "instagram")) == 1
+    assert fresh(go(jobs, ledger, log, {"instagram": ig}, env=env, now=today)) == "published"
+
+    # 28 Sep: wanderlust goes out from Buffer at 12:07, so that slot is taken and no auto post doubles it.
+    send = datetime(2026, 9, 28, 12, 10, tzinfo=ET)
+    assert open_now(send, reach, log.used_on(posting_day(send), "instagram")) == 0
+    assert fresh(go(jobs, ledger, log, {"instagram": ig}, env=env, now=send)) == "skipped_not_due"
+    later = datetime(2026, 9, 28, 15, 10, tzinfo=ET)
+    assert open_now(later, reach, log.used_on(posting_day(later), "instagram")) == 1
+    assert fresh(go(jobs, ledger, log, {"instagram": ig}, env=env, now=later)) == "published"
+    assert log.used_on(date(2026, 9, 28), "instagram") == 2
+
+
+def test_a_buffer_schedule_counts_on_its_send_day_whatever_is_logged_after_it(log):
+    queued, today, later = "2026-09-27T14:16:31+00:00", date(2026, 9, 27), date(2026, 9, 29)
+    note = "scheduled in Buffer for 2026-09-29 12:07 EDT (America/New_York)"
+    # taken down by hand after it was scheduled: the slot it held is on its send day, never today
+    log.append(PostRow("ig-deleted", "instagram", "pending", at=queued))
+    log.append(PostRow("ig-deleted", "instagram", "scheduled", remote_id="b1", detail=note, at=queued))
+    log.append(PostRow("ig-deleted", "instagram", "deleted", remote_id="b1", detail="taken down", at=queued))
+    # marked published by hand once Buffer sent it
+    log.append(PostRow("ig-sent", "instagram", "pending", at=queued))
+    log.append(PostRow("ig-sent", "instagram", "scheduled", remote_id="b2", detail=note, at=queued))
+    log.append(PostRow("ig-sent", "instagram", "published", remote_id="b2", url="u", at=queued))
+    # scheduled in Buffer by hand and logged without a pending row: still reserves its send day
+    log.append(PostRow("ig-by-hand", "instagram", "scheduled", remote_id="b3", at=queued,
+                       detail="scheduled in Buffer for 2026-09-29 16:07 UTC-04:00 (UTC-04:00)"))
+    # a failed schedule retried as a post sent now: the retry's day, not the dropped schedule's
+    log.append(PostRow("ig-retry", "instagram", "pending", at=queued, due_at="2026-09-29T16:07:00+00:00"))
+    log.append(PostRow("ig-retry", "instagram", "failed", detail="boom", at=queued, due_at="2026-09-29T16:07:00+00:00"))
+    log.append(PostRow("ig-retry", "instagram", "pending", at="2026-09-27T19:16:02+00:00"))
+    log.append(PostRow("ig-retry", "instagram", "published", url="u", at="2026-09-27T19:16:02+00:00"))
+    # a schedule that failed never takes a slot
+    log.append(PostRow("ig-failed", "instagram", "pending", at=queued, due_at="2026-09-29T16:07:00+00:00"))
+    log.append(PostRow("ig-failed", "instagram", "failed", detail="boom", at=queued, due_at="2026-09-29T16:07:00+00:00"))
+    assert log.used_on(today, "instagram") == 1  # ig-retry only
+    assert log.used_on(later, "instagram") == 3  # deleted, sent, by hand
+    assert log.used_on(later) == 3 and log.used_on(later, "tiktok") == 0
