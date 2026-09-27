@@ -15,6 +15,7 @@ honest run).
 from __future__ import annotations
 
 import json
+import os
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass
@@ -137,7 +138,7 @@ def rank(transport: Transport, day: date) -> tuple[list[Candidate], list[dict]]:
         value = to_input(a["title"])
         if re.search(r"\bseason\b", a["description"], re.I):
             value = re.sub(r"\s+\d+$", "", value)
-        if reason is None and (not value or input_problem(value, {})):
+        if reason is None and (not value or input_problem(value, dict(os.environ))):
             reason = "not a clean bare input"
         decisions.append({"title": a["title"], "input": value, "skipped": reason})
         if reason is None:

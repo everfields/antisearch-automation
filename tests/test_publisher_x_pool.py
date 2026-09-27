@@ -26,6 +26,7 @@ ET = ZoneInfo("America/New_York")
 ALREADY_ASKED = {"dog", "dry shampoo", "hangover cure", "love", "red flag", "situationship", "the ick", "thing", "time"}
 
 LIVE = {
+    "PUBLISHER_AI_INPUTS": "on",  # the X main line opens with "ai model"
     "PUBLISHER_CADENCE": "reach",
     "PUBLISHER_LIVE_NETWORKS": "tiktok,instagram,x",
     "PUBLISHER_ROUTE_X": "buffer",
@@ -44,9 +45,9 @@ LIVE = {
 }
 
 
-MAIN = ["search engine", "programming language", "phone", "social network", "browser"]  # "ai model" out (AI block)
+MAIN = ["ai model", "search engine", "programming language", "phone", "social network", "browser"]
 ROTATING = ["invention", "sin", "idea", "virtue", "empire", "fear", "book", "ceo", "overrated", "weakness", "writer"]
-DROPPED = {"ai model", "century", "language", "investor", "scientist", "athlete", "founder", "decade", "city", "sport",
+DROPPED = {"century", "language", "investor", "scientist", "athlete", "founder", "decade", "city", "sport",
            "meme", "emoji", "password", "font"}
 
 
@@ -69,7 +70,7 @@ def test_x_pool_meets_the_pool_bar():
     assert raw == main + rotating  # no duplicates
     for line in raw:
         assert line == line.lower() and "@" not in line and "http" not in line and "www." not in line
-        assert input_problem(line, {}) is None, line
+        assert input_problem(line, {"PUBLISHER_AI_INPUTS": "on"}) is None, line  # AI lines need the switch
     assert all(c == "" for _, c in read_pool(POOLS / "x.txt"))  # no tag holds: X is never tagged
 
 

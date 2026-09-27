@@ -49,7 +49,7 @@ def extract_input(text: str) -> str | None:
     x = TRAILING.sub("", m.group("x").strip())
     x = re.sub(r"^(?:a|an|the)\s+", "", x, flags=re.I)
     value = normalize_category(x)
-    if not value or len(value) > 55 or input_problem(value, {}):
+    if not value or len(value) > 55 or input_problem(value, dict(os.environ)):
         return None
     return value
 

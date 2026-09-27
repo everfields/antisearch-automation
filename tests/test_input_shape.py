@@ -80,7 +80,8 @@ def test_every_queued_or_pooled_input_passes_the_publisher_guard():
     from antisearch_mill.publisher.pools import read_pool
 
     inputs = [j.category for q in QUEUES for j in read_queue(q)] + [c for p in POOLS for c, _ in read_pool(p)]
-    bad = {c: input_problem(c, {}) for c in inputs if input_problem(c, {})}
+    on = {"PUBLISHER_AI_INPUTS": "on"}  # AI-category inputs are queued again; they go out only with the switch
+    bad = {c: input_problem(c, on) for c in inputs if input_problem(c, on)}
     assert bad == {}
 
 

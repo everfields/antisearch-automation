@@ -1,6 +1,7 @@
 """Until the oracle's AI self-bias fix ships, no AI-category input goes out on any lane."""
 
 import glob
+from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -25,13 +26,64 @@ def test_ai_category_inputs_are_blocked_and_the_switch_lifts_it():
         assert input_problem(w, {}) is None, w
 
 
-def test_no_queue_or_pool_holds_an_ai_input():
+def _queued_ai_inputs():
+    found = []
     files = [*glob.glob(str(ROOT / "queue" / "**" / "*.txt"), recursive=True),
              *glob.glob(str(ROOT / "queue" / "**" / "*.csv"), recursive=True)]
     for f in files:
         for line in open(f, encoding="utf-8"):
-            if line.strip() and not line.lstrip().startswith("#"):
-                assert not AI_CATEGORY.search(line.split(",")[1] if f.endswith(".csv") and "," in line else line), (f, line)
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            value = (line.split(",")[1] if f.endswith(".csv") and "," in line else line.split("|")[0]).strip()
+            if AI_CATEGORY.search(value):
+                found.append((Path(f).relative_to(ROOT).as_posix(), value))
+    return sorted(found)
+
+
+def test_queued_ai_inputs_go_out_only_with_the_switch_on():
+    queued = _queued_ai_inputs()
+    assert queued == [("queue/pools/bluesky.txt", "ai assistant"), ("queue/pools/x.txt", "ai model"),
+                      ("queue/winners/bluesky.txt", "ai lab")]  # reopened after the oracle fix (2026-09-27)
+    for _f, value in queued:
+        assert "AI-category" in (input_problem(value, {}) or ""), value  # switch off: blocked
+        assert input_problem(value, {"PUBLISHER_AI_INPUTS": "on"}) is None, value  # switch on: open
+
+
+def test_ai_verdicts_frozen_before_the_fix_are_stale_and_asked_again(tmp_path):
+    from antisearch_mill.oracle import FixtureOracle, Verdict
+    from antisearch_mill.publisher.verdicts import FrozenOracle, VerdictStore
+
+    store = VerdictStore(tmp_path / "verdicts.csv")
+    store.put(Verdict("ai model", "gpt-5", "gpt-5", "live", "u", 1, 1, "2026-09-27T09:17:00+00:00"))
+    store.put(Verdict("search engine", "kagi", "kagi", "live", "u", 1, 1, "2026-09-27T09:17:00+00:00"))
+    assert store.get("ai model") is None and "ai model" not in store.categories()  # the biased one is gone
+    assert store.get("search engine").verdict == "kagi"  # not an AI input: kept
+    oracle = FrozenOracle(FixtureOracle({"ai model": "claude opus 5.5"}), store)
+    assert oracle.ask("ai model").verdict == "claude opus 5.5"  # asked again, then frozen
+    assert store.get("ai model").verdict == "claude opus 5.5"  # the re-ask, not the stale row
+    assert FrozenOracle(FixtureOracle({}), store).ask("ai model").verdict == "claude opus 5.5"  # asked once only
+
+
+def test_a_reopened_job_posts_again_with_its_input_free(tmp_path):
+    from antisearch_mill.publisher.guard import REOPENED
+    from antisearch_mill.publisher.pools import pool_jobs
+    from antisearch_mill.publisher.verdicts import VerdictStore
+
+    log = PostLog(tmp_path / "state" / "posts.csv")
+    at = "2026-09-27T13:14:38+00:00"
+    log.append(PostRow("p-ai-model", "x", "published", "c", "gpt-5", "1", "u", at=at, category="ai model"))
+    log.append(PostRow("p-ai-model", "x", DELETED, "c", "gpt-5", "1", "u", at=at, category="ai model"))
+    pools = tmp_path / "pools"
+    pools.mkdir()
+    (pools / "x.txt").write_text("ai model\nsearch engine\n", encoding="utf-8")
+    store = VerdictStore(tmp_path / "state" / "verdicts.csv")
+    assert [j.category for j in pool_jobs("x", pools, log, store, set(), 2)] == ["search engine"]  # deleted: done
+    log.append(PostRow("p-ai-model", "x", REOPENED, "c", "gpt-5", "1", "u", "reopened", at=at, category="ai model"))
+    assert [j.category for j in pool_jobs("x", pools, log, store, set(), 2)] == ["ai model", "search engine"]
+    assert "ai model" not in log.used_inputs()
+    now = datetime(2026, 9, 28, 9, 40, tzinfo=ZoneInfo("America/New_York"))
+    assert not log.input_within("ai model", now, 30)  # the removed post does not hold its cooldown
+    assert published_posts(log.path, ("x",)) == []
 
 
 def test_the_publisher_rejects_an_ai_row(ledger, log):

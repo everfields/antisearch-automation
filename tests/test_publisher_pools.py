@@ -26,7 +26,7 @@ def state(tmp_path):
 
 
 def freeze(store, category):
-    store.put(Verdict(category, "x", "x", "live", "u", 0, 1, ""))
+    store.put(Verdict(category, "x", "x", "live", "u", 0, 1, "2026-09-28T00:00:00+00:00"))  # after the AI fix
 
 
 def test_read_pool_parses_comments_duplicates_and_tag_holds(pools):
