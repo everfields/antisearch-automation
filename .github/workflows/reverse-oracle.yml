@@ -1,15 +1,17 @@
 name: reverse-oracle
 
 # From target accounts (queue/reverse_oracle/targets.csv) to short inputs whose REAL
-# verdict names them: a generator model (GitHub Models via this run's token) proposes
-# inputs, each is verified with one call to the publisher's oracle path, under a budget.
+# verdict names them: a generator model (any OpenAI-compatible endpoint: secret
+# REVERSE_ORACLE_GENERATOR_KEY, vars REVERSE_ORACLE_GENERATOR_URL / REVERSE_ORACLE_MODEL),
+# or a reviewed candidates file, proposes inputs; each is verified with one call to the
+# publisher's oracle path, under a budget.
 # Every live verdict is frozen in publisher-state/verdicts.csv; results go to
 # publisher-state/reverse_oracle/. An input already frozen or tried is never asked again.
 # Nothing is posted or scheduled.
 #   Manual: Actions -> reverse-oracle -> Run workflow (dry-run unless `live` is ticked).
 
 on:
-  pull_request:  # TEMPORARY: one live run as run 2026-09-27-r1 (retried: the generator reply was unreadable), removed right after
+  pull_request:  # TEMPORARY: one live run as run 2026-09-27-r1 (candidates file: GitHub Models is retired), removed right after
     paths: [.github/workflows/reverse-oracle.yml]
   workflow_dispatch:
     inputs:
@@ -20,16 +22,15 @@ on:
       budget:
         description: Max live oracle calls
         default: "100"
-      model:
-        description: Generator model (GitHub Models id)
-        default: openai/gpt-4.1
+      candidates:
+        description: Candidates JSON instead of the generator (empty = generator)
+        default: ""
       run_id:
         description: Run id (a used id is never run again; empty = timestamp)
         default: ""
 
 permissions:
   contents: write
-  models: read
 
 concurrency:
   group: publisher  # shared with publisher.yml: one writer of publisher-state at a time
@@ -41,9 +42,11 @@ jobs:
     env:
       LIVE: ${{ github.event_name == 'pull_request' || inputs.live }}
       BUDGET: ${{ inputs.budget || '100' }}
-      MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
+      CANDIDATES: ${{ github.event_name == 'pull_request' && 'queue/reverse_oracle/candidates-2026-09-27.json' || inputs.candidates }}
+      REVERSE_ORACLE_GENERATOR_KEY: ${{ secrets.REVERSE_ORACLE_GENERATOR_KEY }}
+      REVERSE_ORACLE_GENERATOR_URL: ${{ vars.REVERSE_ORACLE_GENERATOR_URL }}
+      REVERSE_ORACLE_MODEL: ${{ vars.REVERSE_ORACLE_MODEL }}
       RUN_ID: ${{ github.event_name == 'pull_request' && '2026-09-27-r1' || inputs.run_id }}
-      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -61,8 +64,8 @@ jobs:
 
       - name: Reverse oracle
         run: |
-          python scripts/reverse_oracle.py --state state --budget "$BUDGET" --model "$MODEL" \
-            --check-sites $([ -n "$RUN_ID" ] && echo --run-id "$RUN_ID") $([ "$LIVE" = "true" ] && echo --live)
+          python scripts/reverse_oracle.py --state state --budget "$BUDGET" \
+            $([ -n "$CANDIDATES" ] && echo --candidates "$CANDIDATES") --check-sites $([ -n "$RUN_ID" ] && echo --run-id "$RUN_ID") $([ "$LIVE" = "true" ] && echo --live)
 
       - name: Save results and frozen verdicts
         if: always() && env.LIVE == 'true'

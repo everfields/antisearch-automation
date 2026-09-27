@@ -32,8 +32,8 @@ from .publisher.tags import NEVER_TAG_NAMES, NEVER_TAG_OWNERS
 from .publisher.verdicts import VerdictStore
 
 DEFAULT_BUDGET = 100
-DEFAULT_GENERATOR_URL = "https://models.github.ai/inference/chat/completions"
-DEFAULT_GENERATOR_MODEL = "openai/gpt-4.1"
+DEFAULT_GENERATOR_URL = "https://api.openai.com/v1/chat/completions"
+DEFAULT_GENERATOR_MODEL = "gpt-4.1"
 MAX_INPUT_WORDS = 3
 RESULT_COLUMNS = [
     "run_id", "round", "vertical", "target", "handle", "candidate_input", "why", "source",
@@ -207,7 +207,7 @@ def parse_candidates(text: str) -> dict[str, list[dict]]:
 
 
 class ChatGenerator:
-    """An OpenAI-compatible chat endpoint (GitHub Models by default, GITHUB_TOKEN)."""
+    """Any OpenAI-compatible chat endpoint (OpenAI by default; GitHub Models retired 2026-07-30)."""
 
     def __init__(self, url: str, key: str, model: str, *, examples: list[tuple[str, str]],
                  oracle_prompt: str = "", batch_size: int = 10, session: requests.Session | None = None,
@@ -435,8 +435,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--live", action="store_true", help="really call the oracle (else frozen/earlier only)")
     p.add_argument("--candidates", help="JSON candidates file instead of the generator")
     p.add_argument("--oracle-prompt", default="", help="file with the oracle's system prompt")
-    p.add_argument("--model", default=env("REVERSE_ORACLE_MODEL", DEFAULT_GENERATOR_MODEL))
-    p.add_argument("--generator-url", default=env("REVERSE_ORACLE_GENERATOR_URL", DEFAULT_GENERATOR_URL))
+    p.add_argument("--model", default=env("REVERSE_ORACLE_MODEL") or DEFAULT_GENERATOR_MODEL)
+    p.add_argument("--generator-url", default=env("REVERSE_ORACLE_GENERATOR_URL") or DEFAULT_GENERATOR_URL)
     p.add_argument("--batch-size", type=int, default=10)
     p.add_argument("--check-sites", action="store_true", help="check matched brands' sites link the handle")
     p.add_argument("--run-id", default="")
@@ -456,9 +456,10 @@ def main(argv: list[str] | None = None) -> int:
     if a.candidates:
         gen: Generator = StaticGenerator(json.loads(Path(a.candidates).read_text(encoding="utf-8")))
     else:
-        key = env("REVERSE_ORACLE_GENERATOR_KEY") or env("GITHUB_TOKEN")
+        key = env("REVERSE_ORACLE_GENERATOR_KEY") or env("OPENAI_API_KEY")
         if not key:
-            print("no generator key (REVERSE_ORACLE_GENERATOR_KEY or GITHUB_TOKEN)", file=sys.stderr)
+            print("no generator key (REVERSE_ORACLE_GENERATOR_KEY or OPENAI_API_KEY); "
+                  "or pass --candidates", file=sys.stderr)
             return 2
         gen = ChatGenerator(a.generator_url, key, a.model, examples=oracle_examples(store),
                             oracle_prompt=prompt, batch_size=a.batch_size)
@@ -466,7 +467,7 @@ def main(argv: list[str] | None = None) -> int:
     run_id = a.run_id or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%MZ")
     folder.mkdir(parents=True, exist_ok=True)
     (folder / f"{run_id}-candidates.json").write_text(
-        json.dumps({"model": getattr(gen, "model", "file"), "candidates": candidates}, indent=1,
+        json.dumps({"model": getattr(gen, "model", f"file {a.candidates}"), "candidates": candidates}, indent=1,
                    ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"candidates: {sum(len(v) for v in candidates.values())} for "
           f"{sum(1 for v in candidates.values() if v)} targets")
