@@ -237,3 +237,13 @@ def test_format_is_carried_and_x_is_compared_per_format(tmp_path):
     table = summary(state, NOW + timedelta(hours=4)).split("| X format A/B")[1]
     assert "| video | 1 | – | 2.0 | 1.0 | – |" in table and "| text | 1 | – | 5.0 | 2.0 | – |" in table
     assert col.problems  # Instagram still has no source here
+
+
+def test_buffer_scheduled_rows_are_measured_but_manual_notes_are_not(tmp_path):
+    state = state_dir(tmp_path)
+    extra = ("ig-manual-travel,instagram,scheduled,c8,japan,b-ig-8,buffer:b-ig-8,scheduled in Buffer,"
+             "2026-09-27T10:45:00+00:00,travel\n")
+    (state / "posts.csv").write_text(POSTS + extra, encoding="utf-8")
+    slugs = {r.slug for r in published_posts(state / "posts.csv")}
+    assert "ig-manual-travel" in slugs  # a Buffer-scheduled manual post is measured once it goes out
+    assert "t-old" not in slugs  # a scheduled note with no Buffer id stays out

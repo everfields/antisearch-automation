@@ -82,6 +82,14 @@ Setup, exact env vars and the honest limits per network:
 **[docs/PUBLISHER_SETUP.md](docs/PUBLISHER_SETUP.md)**. `mill publish` (below) is
 the older X/LinkedIn path and stays as it was.
 
+## Manual one-off posts (`mill manual-post`)
+
+`.github/workflows/manual-post.yml` (Run workflow; dry-run unless `live`) posts the rows of a
+reviewed file, `queue/manual/*.csv` with `id,category,network,due_et`, through the normal
+publisher and Buffer path. The row goes out once even if its network is paused, only with a
+verdict already frozen in `publisher-state/verdicts.csv`, scheduled for `due_et` in New York
+(or the same time the next day if passed), and its `posts.csv` row records caption and format.
+
 ## Metrics (`mill metrics`)
 
 `.github/workflows/metrics.yml` runs every 3 hours (and on demand) and appends per-post

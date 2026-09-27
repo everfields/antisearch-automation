@@ -1,0 +1,104 @@
+name: manual-post
+
+# One-off rows from a reviewed file (queue/manual/*.csv: id,category,network,due_et) through
+# the normal publisher/Buffer path. No browser. The file is the approval: the row goes out
+# once even if its network is paused in PUBLISHER_LIVE_NETWORKS. It posts only a verdict
+# already frozen in publisher-state/verdicts.csv (never asks the oracle), is scheduled in
+# Buffer for due_et (America/New_York, or the next day's same time if passed), and writes
+# its posts.csv row (caption, format). A row already in posts.csv is skipped.
+#   Manual: Actions -> manual-post -> Run workflow (dry-run unless `live` is ticked).
+# The clip settings are pinned to the current template defaults, not the repo's clip vars.
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: Row file
+        default: queue/manual/2026-09-27-ig-travel.csv
+      live:
+        description: Really post (Buffer)
+        type: boolean
+        default: false
+  pull_request:  # TEMPORARY: the 2026-09-27 travel test; removed after it is scheduled
+    paths:
+      - queue/manual/2026-09-27-ig-travel.csv
+      - .github/workflows/manual-post.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publisher  # shared with publisher.yml: one writer of publisher-state at a time
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-24.04
+    env:
+      FILE: ${{ inputs.file || 'queue/manual/2026-09-27-ig-travel.csv' }}
+      LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
+      PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
+      PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
+      PUBLISHER_IG_CAPTION: ${{ vars.PUBLISHER_IG_CAPTION }}
+      PUBLISHER_TAG_NETWORKS: ${{ vars.PUBLISHER_TAG_NETWORKS }}
+      PUBLISHER_BRIDGE: ${{ vars.PUBLISHER_BRIDGE }}
+      PUBLISHER_ROUTE_INSTAGRAM: ${{ vars.PUBLISHER_ROUTE_INSTAGRAM }}
+      PUBLISHER_ROUTE_TIKTOK: ${{ vars.PUBLISHER_ROUTE_TIKTOK }}
+      PUBLISHER_ROUTE_X: ${{ vars.PUBLISHER_ROUTE_X }}
+      PUBLISHER_MEDIA_REPO: ${{ vars.PUBLISHER_MEDIA_REPO }}
+      PUBLISHER_PUBLIC_BASE_URL: ${{ vars.PUBLISHER_PUBLIC_BASE_URL }}
+      PUBLISHER_MEDIA_TOKEN: ${{ secrets.PUBLISHER_MEDIA_TOKEN }}
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+      BUFFER_ORG_ID: ${{ vars.BUFFER_ORG_ID }}
+      BUFFER_CHANNEL_INSTAGRAM: ${{ vars.BUFFER_CHANNEL_INSTAGRAM }}
+      BUFFER_CHANNEL_TIKTOK: ${{ vars.BUFFER_CHANNEL_TIKTOK }}
+      BUFFER_CHANNEL_X: ${{ vars.BUFFER_CHANNEL_X }}
+      PUBLISHER_CLIP_FRAME: phone
+      PUBLISHER_CLIP_PHONE_BG: stone
+      PUBLISHER_CLIP_AUDIO: keys
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e .
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter
+
+      - name: Load publisher-state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git clone --quiet --depth 1 --branch publisher-state "$remote" state
+
+      - name: Post the row(s)
+        run: |
+          mill --out out manual-post --file "$FILE" --state state/posts.csv $([ "$LIVE" = "true" ] && echo --live)
+          sha256sum out/clips/*.mp4 | grep -v upload || true
+
+      - name: Save the post log
+        if: always() && env.LIVE == 'true'
+        run: |
+          cd state
+          git add -A .
+          git diff --cached --quiet && exit 0
+          git -c user.name=antisearch-publisher -c user.email=actions@users.noreply.github.com \
+            commit --quiet -m "manual post $(date -u +%FT%TZ)"
+          for i in 1 2 3 4; do
+            git push --quiet origin publisher-state && exit 0
+            sleep $((i * 5))
+            git pull --quiet --rebase origin publisher-state
+          done
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: manual-post-${{ github.run_id }}
+          path: |
+            out/dry_run_posts/
+            out/clips/
+            state/posts.csv
+          if-no-files-found: ignore
+          retention-days: 14

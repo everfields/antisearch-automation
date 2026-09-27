@@ -133,7 +133,8 @@ def _parse_dt(raw: str) -> datetime | None:
 
 
 def published_posts(posts_csv: Path, networks: tuple[str, ...] = NETWORKS) -> list[PostRef]:
-    """The latest `published` row per (job, network) for the collected networks."""
+    """The latest `published` row per (job, network), plus `scheduled` rows Buffer holds (they carry
+    its id). A `scheduled` row without one is a manual note that may never have gone out."""
     if not posts_csv.is_file():
         return []
     latest: dict[tuple[str, str], dict] = {}
@@ -143,7 +144,8 @@ def published_posts(posts_csv: Path, networks: tuple[str, ...] = NETWORKS) -> li
                 latest[(row["job_id"], row["network"])] = row
     refs = []
     for (slug, net), row in latest.items():
-        if row.get("status") != "published":
+        status = row.get("status")
+        if status != "published" and not (status == "scheduled" and row.get("remote_id")):
             continue
         at = _parse_dt(row.get("at", ""))
         if at is None:
