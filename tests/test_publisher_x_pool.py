@@ -44,9 +44,9 @@ LIVE = {
 }
 
 
-MAIN = ["ai model", "search engine", "programming language", "phone", "social network", "browser"]
+MAIN = ["search engine", "programming language", "phone", "social network", "browser"]  # "ai model" out (AI block)
 ROTATING = ["invention", "sin", "idea", "virtue", "empire", "fear", "book", "ceo", "overrated", "weakness", "writer"]
-DROPPED = {"century", "language", "investor", "scientist", "athlete", "founder", "decade", "city", "sport",
+DROPPED = {"ai model", "century", "language", "investor", "scientist", "athlete", "founder", "decade", "city", "sport",
            "meme", "emoji", "password", "font"}
 
 

@@ -57,7 +57,7 @@ def test_a_week_of_alternate_posts_records_both_formats_in_posts_csv(tmp_path):
     ledger = Ledger(tmp_path / "out")
     log = PostLog(tmp_path / "state" / "posts.csv")
     seen = []
-    posts = iter([("search engine", "kagi"), ("browser", "brave"), ("ai model", "gpt-5"), ("programming language", "python")])
+    posts = iter([("search engine", "kagi"), ("browser", "brave"), ("phone", "iphone 17 pro max"), ("programming language", "python")])
     for d in range(2):
         for hour, minute in ((9, 10), (16, 10)):
             now = datetime(2026, 9, 28, hour, minute, tzinfo=ET) + timedelta(days=d)
