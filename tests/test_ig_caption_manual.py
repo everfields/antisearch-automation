@@ -10,7 +10,7 @@ from antisearch_mill.ledger import Job, Ledger
 from antisearch_mill.oracle import Verdict
 from antisearch_mill.publish.http import RecordingTransport
 from antisearch_mill.publisher.buffer import BufferInstagram, BufferTikTok
-from antisearch_mill.publisher.guard import PostLog
+from antisearch_mill.publisher.guard import PostLog, PostRow
 from antisearch_mill.publisher.igcaption import hashtag, ig_caption, ig_caption_mode, ig_caption_problem
 from antisearch_mill.publisher.manual import ManualRow, next_window, read_manual, run_manual
 from antisearch_mill.publisher.media_host import GitHubPagesHost
@@ -349,3 +349,41 @@ def test_a_tag_scheduled_later_still_blocks_the_same_handle_before_it():
             return [{"at": "2026-10-05T12:07:00-04:00", "network": "instagram", "handle": "@k18hair", "job_id": "a"}]
 
     assert pick("k18", "instagram", ON, ALLOW, Log(), datetime(2026, 9, 30, 12, 7, tzinfo=ET), 4).handle == ""
+
+
+# --- the extra X post today (founder, 2026-09-27) -------------------------------
+
+
+def test_the_extra_x_row_waits_for_the_main_line_slot_and_then_goes_out(tmp_path):
+    from antisearch_mill.publisher.buffer import BufferX
+
+    rows = read_manual(ROOT / "queue" / "manual" / "2026-09-27-x-extra.csv")
+    assert [(r.id, r.category, r.network, r.due, r.exact) for r in rows] == [
+        ("x-extra-overrated", "overrated", "x", datetime(2026, 9, 27, 20, 53, tzinfo=ET), True)]
+    ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "state" / "posts.csv")
+    store = VerdictStore(tmp_path / "state" / "verdicts.csv")
+    store.put(Verdict("overrated", "fame", "fame", "live", "https://antisearch.ai/verdict", 2000, 1,
+                      "2026-09-27T09:18:00+00:00"))
+    # this morning's X post (since deleted and reopened) is today's one used X post
+    log.append(PostRow("p-ai-model", "x", "pending", at="2026-09-27T13:14:38+00:00", category="ai model"))
+    log.append(PostRow("p-ai-model", "x", "reopened", at="2026-09-27T13:14:38+00:00", category="ai model"))
+    env = {**ENV, "PUBLISHER_JITTER": "on", "PUBLISHER_ROUTE_X": "buffer", "BUFFER_CHANNEL_X": "ch-x",
+           "PUBLISHER_LIVE_NETWORKS": "tiktok,x"}
+
+    def produce(job):
+        _clip(ledger, job.id, store.get(job.category).verdict)
+        return ledger.clip_for_job(job.id)
+
+    def go(now):
+        host = GitHubPagesHost(None, env, sleep=lambda _s: None)
+        t = RecordingTransport(lambda r: host.dry_run_responder(r) if host.handles(r) else BufferX(None, env).dry_run_responder(r))
+        out = run_manual(rows, ledger, log, store, now=now, live=True, env=env, produce=produce,
+                         adapters={"x": BufferX}, transport=t, sleep=lambda _s: None)
+        return out, _creates(t)
+
+    early, creates = go(datetime(2026, 9, 27, 14, 0, tzinfo=ET))  # the 16:07 main-line slot has not posted yet
+    assert early[0].status == "skipped_would_block_slot" and "16:28" in early[0].detail and creates == []
+    log.append(PostRow("p-ai-model", "x", "pending", at="2026-09-27T20:28:00+00:00", category="ai model"))
+    log.append(PostRow("p-ai-model", "x", "published", url="u", at="2026-09-27T20:28:00+00:00", category="ai model"))
+    out, creates = go(datetime(2026, 9, 27, 16, 40, tzinfo=ET))  # after the main-line post
+    assert out[0].status == "scheduled" and creates[0]["dueAt"] == "2026-09-28T00:53:00.000Z"  # 20:53 ET, pinned

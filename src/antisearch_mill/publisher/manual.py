@@ -27,10 +27,12 @@ from urllib.parse import quote
 
 from ..publish.http import RecordingTransport, RequestsTransport
 from .base import Media
-from .guard import DONE, PENDING, SCHEDULED_STATES, PostLog, PostRow, approved_networks, slots_for, tz
+from .guard import (
+    DONE, PENDING, SCHEDULED_STATES, PostLog, PostRow, approved_networks, posting_day, slot_times, slots_for, tz,
+)
 from .antiban import jitter_enabled
 from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
-from .jitter import scheduled_offset
+from .jitter import scheduled_offset, slot_offsets
 from .run import Outcome, run_posts
 from .tags import TagLog, choose_tag, tag_networks
 from .verdicts import VerdictStore
@@ -112,10 +114,36 @@ def run_manual(
         when = next_window(row.due, now)
         if not row.exact and jitter_enabled(dict(env)):
             when += scheduled_offset(row.network, when, env)
+        ahead = _slot_ahead(row.network, when, now, log, env)
+        if ahead is not None:
+            out.append(Outcome(row.id, row.network, "skipped_would_block_slot",
+                               detail=f"it would take the {ahead:%H:%M %Z} automatic {row.network} slot; "
+                                      "run it again after that post is out"))
+            continue
         out += run_posts([job], ledger, log, now=now, live=live, ignore_slots=True, networks={row.network},
                          produce=produce, transport=transport, env=one_env, adapters=adapters,
                          tag_allowlist=tag_allowlist, schedule_at=when, **kwargs)
     return out
+
+
+def _slot_ahead(network: str, when: datetime, now: datetime, log: PostLog, env: Mapping[str, str]) -> datetime | None:
+    """The first automatic X slot still ahead today that this row would leave without room, or None.
+
+    A manual row counts against the day it goes out. On X (2 a day) one scheduled before a
+    same-day main-line slot has posted would fill the cap that slot needs (founder, 2026-09-27).
+    """
+    day = posting_day(when)
+    if network != "x" or day != posting_day(now):
+        return None
+    try:
+        slots = slots_for(network, dict(env))
+    except ValueError:
+        return None
+    offsets = slot_offsets(network, day, slots, env) if jitter_enabled(dict(env)) else [timedelta(0)] * len(slots)
+    ahead = [s + o for s, o in zip(slot_times(day, slots), offsets) if s + o > now]
+    if ahead and log.used_on(day, network) + 1 + len(ahead) > len(slots):
+        return ahead[0]
+    return None
 
 
 def _row_env(env: Mapping[str, str], row: ManualRow) -> dict[str, str]:
