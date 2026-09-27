@@ -82,6 +82,26 @@ Setup, exact env vars and the honest limits per network:
 **[docs/PUBLISHER_SETUP.md](docs/PUBLISHER_SETUP.md)**. `mill publish` (below) is
 the older X/LinkedIn path and stays as it was.
 
+## Metrics (`mill metrics`)
+
+`.github/workflows/metrics.yml` runs every 3 hours (and on demand) and appends per-post
+numbers to the `publisher-state` branch, read-only: it never logs in, drives a browser, or posts.
+
+- `metrics/posts_metrics.csv`: `ts_utc, network, post_id, url, input, verdict, slug, posted_at,
+  format, views, likes, comments, shares, saves, source, join`. `slug` is the `posts.csv` job id;
+  `format` (video, text, image) comes from `posts.csv`, blank legacy rows being videos.
+- `metrics/accounts.csv`: `ts_utc, network, handle, followers, likes_total, posts, source, note`.
+- `metrics/summary.md`: top posts by views and by engagement rate per network, last 24h and
+  7d, follower deltas, and the X format A/B (video vs text) over 7 days.
+- Sources: Buffer post metrics once a day when the key exposes them (trusted only once
+  Buffer has refreshed them; its default 0s are ignored); TikTok's public profile, embed
+  profile, and video pages; X's public embed endpoint (likes, replies). Instagram's public
+  pages have no counts when logged out, so Instagram depends on Buffer. X followers and X
+  views are not public and stay blank.
+- A number that no source reported is blank, never 0. A network with published posts
+  that returns nothing turns the run red, with the reason in the job summary.
+- Vars: `BUFFER_ORG_ID` (optional), `METRICS_TIKTOK_HANDLE` (default `antisearch`).
+
 ## CLI
 
 `mill` (or `PYTHONPATH=src python3 -m antisearch_mill`):

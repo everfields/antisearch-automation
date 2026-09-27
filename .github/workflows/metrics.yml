@@ -1,0 +1,95 @@
+name: metrics
+
+# Social metrics collector (read-only): per-post TikTok, Instagram and X numbers into
+# `publisher-state/metrics/` (append-only CSVs + summary.md). Never logs in, never posts.
+#   Cron:   every 3 hours at :23 (off the publisher's :00/:15/:30/:45 wakes).
+#   Manual: Actions -> metrics -> Run workflow (tick buffer_now to ask Buffer again today).
+#   PRs that touch the collector run it read-only: the snapshot is an artifact, nothing is pushed.
+# Buffer is asked at most once per ~20h (it refreshes metrics daily; its API budget is shared
+# with the publisher). A network that returns nothing turns the run red with a job summary.
+
+on:
+  schedule:
+    - cron: "23 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      buffer_now:
+        description: Ask Buffer now even if it was asked in the last 20h
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - src/antisearch_mill/metrics.py
+      - .github/workflows/metrics.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: metrics
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    env:
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+      BUFFER_ORG_ID: ${{ vars.BUFFER_ORG_ID }}
+      METRICS_TIKTOK_HANDLE: ${{ vars.METRICS_TIKTOK_HANDLE }}
+      METRICS_INSTAGRAM_HANDLE: ${{ vars.METRICS_INSTAGRAM_HANDLE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e .
+
+      - name: Load publisher-state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git clone --quiet --depth 1 --branch publisher-state "$remote" state
+
+      - name: Collect
+        id: collect
+        run: |
+          flags=()
+          if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ inputs.buffer_now }}" = "true" ]; then flags+=(--buffer-now); fi
+          set +e
+          mill metrics --state state "${flags[@]}"
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Save the snapshot (publisher-state/metrics/)
+        if: github.event_name != 'pull_request'
+        run: |
+          cd state
+          git add metrics
+          git diff --cached --quiet && exit 0
+          git -c user.name=antisearch-metrics -c user.email=actions@users.noreply.github.com \
+            commit --quiet -m "metrics $(date -u +%FT%TZ)"
+          for i in 1 2 3 4; do
+            git push --quiet origin publisher-state && exit 0
+            sleep $((i * 5))
+            git pull --quiet --rebase origin publisher-state
+          done
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: metrics-${{ github.run_id }}
+          path: state/metrics/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Fail loudly if a network returned nothing
+        if: steps.collect.outputs.code != '0'
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "::warning::metrics: a network returned nothing (see the job summary). Not blocking a PR check."
+            exit 0
+          fi
+          echo "::error::metrics: a network returned nothing (see the job summary)"
+          exit 1
