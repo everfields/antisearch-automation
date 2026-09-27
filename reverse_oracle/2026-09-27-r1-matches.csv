@@ -1,1 +1,69 @@
 rank,candidate_input,real_verdict,match,handle,target,vertical,market,followers_approx,site_links_handle,why
+1,zoo,san diego zoo,exact,@sandiegozoo,San Diego Zoo,experience,us,1.1M,yes,"one word, one zoo"
+2,city,london,exact,@visitlondon,Visit London,travel,global,1M,unreachable (http 403),city is london
+3,ruins,machu picchu,exact,@visitperu,Visit Peru,travel,global,700k,yes,machu picchu
+4,museum,louvre museum,exact,@museelouvre,Louvre,experience,global,5.3M,yes,the museum everyone expects
+5,circus,cirque du soleil,exact,@cirquedusoleil,Cirque du Soleil,experience,global,3M,yes,"one word, one circus"
+6,palace,palace of versailles,exact,@chateauversailles,Palace of Versailles,experience,global,1.3M,yes,"one word, one palace"
+7,travel,japan,exact,@visitjapan.us,Visit Japan (Americas),travel,us,140k,yes,travel is japan
+8,jewelry,cartier,exact,@cartier,Cartier,luxury,global,16.6M,unreachable (http 403),"one word, one maison"
+9,vacation,italy,exact,@italiait,Italia,travel,global,877k,yes,vacation is italy
+10,aquarium,monterey bay aquarium,exact,@montereybayaquarium,Monterey Bay Aquarium,experience,us,614k,yes,"one word, one aquarium"
+11,nightclub,hï ibiza,exact,@hiibizaofficial,Hï Ibiza,club,global,1M,yes,a club crowned outright
+12,ski trip,"zermatt, switzerland",exact,@switzerland,Switzerland Tourism,travel,global,1.2M,unreachable (http 406),zermatt
+13,art museum,louvre,exact,@museelouvre,Louvre,experience,global,5.3M,yes,new york's museum
+14,ibiza club,hï ibiza,exact,@hiibizaofficial,Hï Ibiza,club,global,1M,yes,the cherries
+15,blush brand,rare beauty,exact,@rarebeauty,Rare Beauty,beauty,us,7M,yes,the blush house
+16,hotel chain,four seasons,exact,@fourseasons,Four Seasons,hotel,global,4M,unreachable (http 403),one chain above all
+17,luxury city,dubai,exact,@visitdubai,Visit Dubai,travel,global,2M,unreachable (http 403),"luxury, crowned"
+18,hotel brand,aman,exact,@aman,Aman,hotel,global,1.3M,yes,quiet luxury in one word
+19,fine dining,disfrutar,exact,@disfrutarbarcelona,Disfrutar,restaurant,global,200k,no,the dining crown
+20,beauty store,sephora,exact,@sephora,Sephora,beauty,us,22M,yes,the store as the verdict
+21,luxury brand,hermès,exact,@hermes,Hermès,luxury,global,15.6M,unreachable (http 403),the definition of luxury
+22,beauty brand,fenty beauty,exact,@fentybeauty,Fenty Beauty,beauty,us,13.3M,yes,a clean two-word crown
+23,edm festival,tomorrowland,exact,@tomorrowland,Tomorrowland,experience,global,11M,no,the edm crown
+24,makeup brand,pat mcgrath labs,exact,@patmcgrathreal,Pat McGrath Labs,beauty,us,4M,yes,an artist's brand crowned
+25,burger chain,in-n-out burger,exact,@innout,In-N-Out Burger,restaurant,us,2M,yes,the burger answer
+26,resort brand,aman,exact,@aman,Aman,hotel,global,1.3M,yes,one resort brand
+27,tasting menu,disfrutar,exact,@disfrutarbarcelona,Disfrutar,restaurant,global,200k,no,the menu answer
+28,fashion brand,hermès,exact,@hermes,Hermès,luxury,global,15.6M,unreachable (http 403),the brand of fashion
+29,roman jeweler,bulgari,exact,@bulgari,Bulgari,luxury,global,12M,unreachable (http 403),rome in one house
+30,immersive art,teamlab borderless,exact,@teamlab,teamLab,experience,global,3M,yes,the immersive answer
+31,infinity pool,marina bay sands,exact,@marinabaysands,Marina Bay Sands,hotel,global,1.5M,unreachable,the pool on every feed
+32,family cruise,disney cruise line,exact,@disneycruiseline,Disney Cruise Line,cruise,us,1.5M,no,the family answer
+33,crinkle fries,shake shack,exact,@shakeshack,Shake Shack,restaurant,us,1.5M,yes,"fries, crowned"
+34,island resort,soneva jani,exact,@soneva,Soneva,hotel,global,500k,yes,the island answer
+35,french fashion,hermès,exact,@hermes,Hermès,luxury,global,15.6M,unreachable (http 403),paris in one house
+36,music festival,glastonbury,exact,@glastofest,Glastonbury Festival,experience,global,1.5M,yes,the festival answer
+37,italian fashion,prada,exact,@prada,Prada,luxury,global,35M,yes,italy's loudest house
+38,desert festival,burning man,exact,@burningman,Burning Man,experience,us,1.5M,yes,the desert answer
+39,concrete jungle,new york city,exact,@nycgo,NYC Tourism,travel,us,1M,no,the jungle answer
+40,luxury skincare,skinceuticals,exact,@skinceuticals,SkinCeuticals,beauty,us,1M,unreachable (http 403),the answer to luxury skin
+41,freestyle cruise,norwegian cruise line,exact,@norwegiancruiseline,Norwegian Cruise Line,cruise,us,1M,yes,cruise your way
+42,korean restaurant,atomix,exact,@atomixnyc,Atomix,restaurant,us,150k,no,korea in new york
+43,overwater bungalow,soneva jani,exact,@soneva,Soneva,hotel,global,500k,yes,the bungalow answer
+44,seafood restaurant,le bernardin,exact,@lebernardinny,Le Bernardin,restaurant,us,200k,no,the fish temple
+45,affordable skincare,cerave,exact,@cerave,CeraVe,beauty,us,2.5M,yes,"honest skin, crowned"
+46,city of love,paris,exact,@parisjetaime,Paris je t'aime,travel,global,700k,unreachable (http 403),the love answer
+47,museum in nyc,the metropolitan museum of art,exact,@metmuseum,The Met,experience,us,4.5M,unreachable (http 429),the nyc answer
+48,open air club,ushuaïa ibiza,exact,@ushuaiaibiza,Ushuaïa Ibiza,club,global,1.5M,no,the open-air crown
+49,club in ibiza,hï ibiza,exact,@hiibizaofficial,Hï Ibiza,club,global,1M,yes,the ibiza answer
+50,adults only cruise,virgin voyages,exact,@virginvoyages,Virgin Voyages,cruise,us,400k,yes,"no kids, crowned"
+51,festival in california,coachella,exact,@coachella,Coachella,experience,us,10M,yes,california's festival
+52,serum,skinceuticals c e ferulic,prefix,@skinceuticals,SkinCeuticals,beauty,us,1M,unreachable (http 403),c e ferulic: the serum
+53,lipstick,dior rouge dior,prefix,@dior,Dior,luxury,global,45M,yes,dior rouge dior: the red everyone knows
+54,supercar,ferrari 296 speciale,prefix,@ferrari,Ferrari,luxury,global,30M,unreachable (http 403),the red answer
+55,moisturizer,cerave moisturizing cream,prefix,@cerave,CeraVe,beauty,us,2.5M,yes,the drugstore hero
+56,fun ship,carnival jubilee,prefix,@carnival,Carnival Cruise Line,cruise,us,2M,no,the fun answer
+57,sports car,porsche 911 gt3 rs,prefix,@porsche,Porsche,luxury,global,32M,no,the 911 answer
+58,dive watch,rolex submariner 124060,prefix,@rolex,Rolex,luxury,global,14M,unreachable (http 403),the submariner answer
+59,asian hotel,rosewood hong kong,prefix,@rosewoodhotels,Rosewood Hotels,hotel,global,1M,yes,asia's hotel
+60,liquid blush,rare beauty soft pinch liquid blush,prefix,@rarebeauty,Rare Beauty,beauty,us,7M,yes,the blush that sold out
+61,luxury watch,patek philippe nautilus 5811/1g,prefix,@patekphilippe,Patek Philippe,luxury,global,2.7M,yes,the watch everyone pictures
+62,luxury hotel,rosewood hong kong,prefix,@rosewoodhotels,Rosewood Hotels,hotel,global,1M,yes,the hotel everyone trusts
+63,setting spray,charlotte tilbury airbrush flawless setting spray,prefix,@charlottetilbury,Charlotte Tilbury,beauty,global,6M,yes,the airbrush answer
+64,family vacation,walt disney world resort,prefix,@disneyparks,Disney Parks,experience,us,15M,no,the family answer
+65,engagement ring,tiffany® setting,prefix,@tiffanyandco,Tiffany & Co.,luxury,us,14M,unreachable (http 403),the ring behind every proposal
+66,clover necklace,van cleef & arpels vintage alhambra pendant,prefix,@vancleefarpels,Van Cleef & Arpels,luxury,global,5M,unreachable,the alhambra everyone wears
+67,hong kong hotel,rosewood hong kong,prefix,@rosewoodhotels,Rosewood Hotels,hotel,global,1M,yes,the harbour answer
+68,modern art museum,"museum of modern art, new york",prefix,@themuseumofmodernart,MoMA,experience,us,5.5M,yes,the museum of the modern

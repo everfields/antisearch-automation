@@ -1,4 +1,1251 @@
 {
- "model": "openai/gpt-4.1",
- "candidates": {}
+ "model": "file queue/reverse_oracle/candidates-2026-09-27.json",
+ "candidates": {
+  "@cartier": [
+   {
+    "input": "jewelry",
+    "why": "one word, one maison"
+   },
+   {
+    "input": "jewelry house",
+    "why": "the category crowns the house"
+   },
+   {
+    "input": "love bracelet",
+    "why": "an icon without its name"
+   }
+  ],
+  "@hermes": [
+   {
+    "input": "luxury brand",
+    "why": "the definition of luxury"
+   },
+   {
+    "input": "fashion house",
+    "why": "the house of houses"
+   },
+   {
+    "input": "handbag",
+    "why": "the bag everyone waits for"
+   }
+  ],
+  "@louisvuitton": [
+   {
+    "input": "luggage brand",
+    "why": "travel's most famous monogram"
+   },
+   {
+    "input": "trunk",
+    "why": "one word, a 170-year answer"
+   },
+   {
+    "input": "monogram",
+    "why": "a pattern that names itself"
+   }
+  ],
+  "@chanelofficial": [
+   {
+    "input": "fashion brand",
+    "why": "the brand of fashion"
+   },
+   {
+    "input": "little black dress",
+    "why": "the dress that made a house"
+   },
+   {
+    "input": "perfume brand",
+    "why": "one bottle, one name"
+   }
+  ],
+  "@dior": [
+   {
+    "input": "lipstick",
+    "why": "dior rouge dior: the red everyone knows"
+   },
+   {
+    "input": "couture house",
+    "why": "couture's own answer"
+   },
+   {
+    "input": "haute couture",
+    "why": "the phrase, the house"
+   }
+  ],
+  "@gucci": [
+   {
+    "input": "loafer",
+    "why": "the horsebit answer"
+   },
+   {
+    "input": "italian fashion",
+    "why": "italy's loudest house"
+   },
+   {
+    "input": "logo",
+    "why": "the logo as a verdict"
+   }
+  ],
+  "@prada": [
+   {
+    "input": "nylon bag",
+    "why": "the bag that made nylon luxury"
+   },
+   {
+    "input": "italian luxury",
+    "why": "quiet milan answer"
+   },
+   {
+    "input": "minimalist fashion",
+    "why": "less, crowned"
+   }
+  ],
+  "@tiffanyandco": [
+   {
+    "input": "engagement ring",
+    "why": "the ring behind every proposal"
+   },
+   {
+    "input": "blue box",
+    "why": "a color that names a jeweler"
+   },
+   {
+    "input": "jeweler",
+    "why": "one word, one jeweler"
+   }
+  ],
+  "@rolex": [
+   {
+    "input": "luxury watch",
+    "why": "the watch everyone pictures"
+   },
+   {
+    "input": "dive watch",
+    "why": "the submariner answer"
+   },
+   {
+    "input": "gold watch",
+    "why": "status in one phrase"
+   }
+  ],
+  "@patekphilippe": [
+   {
+    "input": "watch brand",
+    "why": "the connoisseur's verdict"
+   },
+   {
+    "input": "heirloom",
+    "why": "you never own one"
+   },
+   {
+    "input": "grand complication",
+    "why": "horology's summit"
+   }
+  ],
+  "@bulgari": [
+   {
+    "input": "roman jeweler",
+    "why": "rome in one house"
+   },
+   {
+    "input": "italian jewelry",
+    "why": "italy's jeweler"
+   },
+   {
+    "input": "serpent bracelet",
+    "why": "the serpenti icon"
+   }
+  ],
+  "@vancleefarpels": [
+   {
+    "input": "clover necklace",
+    "why": "the alhambra everyone wears"
+   },
+   {
+    "input": "high jewelry",
+    "why": "the summit of jewelry"
+   },
+   {
+    "input": "lucky charm",
+    "why": "luck, crowned"
+   }
+  ],
+  "@ferrari": [
+   {
+    "input": "supercar",
+    "why": "the red answer"
+   },
+   {
+    "input": "racing team",
+    "why": "the scuderia"
+   },
+   {
+    "input": "red car",
+    "why": "a color that is a brand"
+   }
+  ],
+  "@porsche": [
+   {
+    "input": "sports car",
+    "why": "the 911 answer"
+   },
+   {
+    "input": "car brand",
+    "why": "one brand for cars"
+   },
+   {
+    "input": "german car",
+    "why": "engineering in one word"
+   }
+  ],
+  "@ysl": [
+   {
+    "input": "tuxedo",
+    "why": "le smoking, the original"
+   },
+   {
+    "input": "french fashion",
+    "why": "paris in one house"
+   },
+   {
+    "input": "smoking jacket",
+    "why": "the jacket that made a house"
+   }
+  ],
+  "@fentybeauty": [
+   {
+    "input": "beauty brand",
+    "why": "a clean two-word crown"
+   },
+   {
+    "input": "foundation",
+    "why": "forty shades, one answer"
+   },
+   {
+    "input": "highlighter",
+    "why": "the glow answer"
+   }
+  ],
+  "@rarebeauty": [
+   {
+    "input": "liquid blush",
+    "why": "the blush that sold out"
+   },
+   {
+    "input": "blush",
+    "why": "one word, one blush"
+   },
+   {
+    "input": "kind beauty",
+    "why": "beauty with a heart"
+   }
+  ],
+  "@glossier": [
+   {
+    "input": "lip balm",
+    "why": "the balm dotcom answer"
+   },
+   {
+    "input": "no makeup makeup",
+    "why": "a whole aesthetic"
+   },
+   {
+    "input": "clean girl",
+    "why": "the look, the brand"
+   }
+  ],
+  "@charlottetilbury": [
+   {
+    "input": "setting spray",
+    "why": "the airbrush answer"
+   },
+   {
+    "input": "nude lipstick",
+    "why": "pillow talk without the name"
+   },
+   {
+    "input": "bridal makeup",
+    "why": "the wedding answer"
+   }
+  ],
+  "@maccosmetics": [
+   {
+    "input": "lipstick brand",
+    "why": "the counter everyone knows"
+   },
+   {
+    "input": "pro makeup",
+    "why": "artists' answer"
+   },
+   {
+    "input": "makeup counter",
+    "why": "the counter itself"
+   }
+  ],
+  "@narsissist": [
+   {
+    "input": "blush brand",
+    "why": "the blush house"
+   },
+   {
+    "input": "concealer",
+    "why": "the radiant answer"
+   },
+   {
+    "input": "bronzer",
+    "why": "sun in a compact"
+   }
+  ],
+  "@sephora": [
+   {
+    "input": "beauty store",
+    "why": "the store as the verdict"
+   },
+   {
+    "input": "makeup store",
+    "why": "one word for makeup shopping"
+   },
+   {
+    "input": "beauty retailer",
+    "why": "retail crowned"
+   }
+  ],
+  "@lamer": [
+   {
+    "input": "face cream",
+    "why": "the jar of legend"
+   },
+   {
+    "input": "luxury skincare",
+    "why": "the answer to luxury skin"
+   },
+   {
+    "input": "night cream",
+    "why": "sleep, crowned"
+   }
+  ],
+  "@cerave": [
+   {
+    "input": "moisturizer",
+    "why": "the drugstore hero"
+   },
+   {
+    "input": "skincare brand",
+    "why": "the dermatologist's answer"
+   },
+   {
+    "input": "cleanser",
+    "why": "one wash, one brand"
+   }
+  ],
+  "@theordinary": [
+   {
+    "input": "affordable skincare",
+    "why": "honest skin, crowned"
+   },
+   {
+    "input": "niacinamide",
+    "why": "the ingredient's brand"
+   },
+   {
+    "input": "budget skincare",
+    "why": "cheap and right"
+   }
+  ],
+  "@patmcgrathreal": [
+   {
+    "input": "makeup brand",
+    "why": "an artist's brand crowned"
+   },
+   {
+    "input": "eyeshadow palette",
+    "why": "mothership answer"
+   },
+   {
+    "input": "editorial makeup",
+    "why": "runway in one word"
+   }
+  ],
+  "@hudabeauty": [
+   {
+    "input": "false lashes",
+    "why": "the lash answer"
+   },
+   {
+    "input": "lashes",
+    "why": "one word, one brand"
+   },
+   {
+    "input": "contour",
+    "why": "the sculpt answer"
+   }
+  ],
+  "@skinceuticals": [
+   {
+    "input": "serum",
+    "why": "c e ferulic: the serum"
+   },
+   {
+    "input": "vitamin c serum",
+    "why": "the vitamin c answer"
+   },
+   {
+    "input": "antioxidant",
+    "why": "science, crowned"
+   }
+  ],
+  "@olaplex": [
+   {
+    "input": "hair repair",
+    "why": "the bond answer"
+   },
+   {
+    "input": "bond builder",
+    "why": "the category it made"
+   },
+   {
+    "input": "bleached hair",
+    "why": "the rescue"
+   }
+  ],
+  "@aman": [
+   {
+    "input": "hotel brand",
+    "why": "quiet luxury in one word"
+   },
+   {
+    "input": "hotel",
+    "why": "one word, one answer"
+   },
+   {
+    "input": "sanctuary",
+    "why": "silence, crowned"
+   }
+  ],
+  "@fourseasons": [
+   {
+    "input": "luxury hotel",
+    "why": "the hotel everyone trusts"
+   },
+   {
+    "input": "hotel chain",
+    "why": "one chain above all"
+   },
+   {
+    "input": "hotel service",
+    "why": "service, crowned"
+   }
+  ],
+  "@ritzcarlton": [
+   {
+    "input": "afternoon tea",
+    "why": "tea at the ritz"
+   },
+   {
+    "input": "grand hotel",
+    "why": "the grand answer"
+   },
+   {
+    "input": "luxury hotel chain",
+    "why": "the classic chain"
+   }
+  ],
+  "@sixsenses": [
+   {
+    "input": "wellness resort",
+    "why": "the wellness answer"
+   },
+   {
+    "input": "wellness retreat",
+    "why": "retreat, crowned"
+   },
+   {
+    "input": "eco resort",
+    "why": "green luxury"
+   }
+  ],
+  "@rosewoodhotels": [
+   {
+    "input": "hotel group",
+    "why": "the group answer"
+   },
+   {
+    "input": "luxury hotel group",
+    "why": "quiet group crown"
+   },
+   {
+    "input": "sense of place",
+    "why": "the brand's own idea"
+   }
+  ],
+  "@belmond": [
+   {
+    "input": "luxury train",
+    "why": "the orient express answer"
+   },
+   {
+    "input": "sleeper train",
+    "why": "nights on rails"
+   },
+   {
+    "input": "train journey",
+    "why": "travel by rail, crowned"
+   }
+  ],
+  "@mandarinorientalhotelgroup": [
+   {
+    "input": "hong kong hotel",
+    "why": "the harbour answer"
+   },
+   {
+    "input": "asian hotel",
+    "why": "asia's hotel"
+   },
+   {
+    "input": "hotel spa",
+    "why": "spa, crowned"
+   }
+  ],
+  "@oneandonlyresorts": [
+   {
+    "input": "island resort",
+    "why": "the island answer"
+   },
+   {
+    "input": "resort brand",
+    "why": "one resort brand"
+   },
+   {
+    "input": "beach resort",
+    "why": "the beach answer"
+   }
+  ],
+  "@soneva": [
+   {
+    "input": "resort",
+    "why": "soneva jani, the resort"
+   },
+   {
+    "input": "overwater villa",
+    "why": "the villa everyone saves"
+   },
+   {
+    "input": "barefoot luxury",
+    "why": "no shoes, all luxury"
+   }
+  ],
+  "@marinabaysands": [
+   {
+    "input": "infinity pool",
+    "why": "the pool on every feed"
+   },
+   {
+    "input": "rooftop pool",
+    "why": "the rooftop answer"
+   },
+   {
+    "input": "pool with a view",
+    "why": "the view, crowned"
+   }
+  ],
+  "@burjalarab": [
+   {
+    "input": "hotel in dubai",
+    "why": "the sail"
+   },
+   {
+    "input": "iconic hotel",
+    "why": "one hotel for icon"
+   },
+   {
+    "input": "sail hotel",
+    "why": "the shape is the answer"
+   }
+  ],
+  "@elevenmadisonpark": [
+   {
+    "input": "tasting menu",
+    "why": "the menu answer"
+   },
+   {
+    "input": "fine dining",
+    "why": "the dining crown"
+   },
+   {
+    "input": "restaurant in nyc",
+    "why": "new york's table"
+   }
+  ],
+  "@lebernardinny": [
+   {
+    "input": "seafood restaurant",
+    "why": "the fish temple"
+   },
+   {
+    "input": "fish restaurant",
+    "why": "one word for fish"
+   },
+   {
+    "input": "french restaurant",
+    "why": "french in new york"
+   }
+  ],
+  "@nomacph": [
+   {
+    "input": "restaurant",
+    "why": "one word, one restaurant"
+   },
+   {
+    "input": "foraging",
+    "why": "the forest on a plate"
+   },
+   {
+    "input": "new nordic",
+    "why": "the cuisine it made"
+   }
+  ],
+  "@noburestaurants": [
+   {
+    "input": "black cod",
+    "why": "miso black cod"
+   },
+   {
+    "input": "sushi restaurant",
+    "why": "sushi, crowned"
+   },
+   {
+    "input": "japanese restaurant",
+    "why": "the japanese answer"
+   }
+  ],
+  "@atomixnyc": [
+   {
+    "input": "korean restaurant",
+    "why": "korea in new york"
+   },
+   {
+    "input": "nyc restaurant",
+    "why": "new york's table"
+   },
+   {
+    "input": "korean tasting menu",
+    "why": "the menu answer"
+   }
+  ],
+  "@disfrutarbarcelona": [
+   {
+    "input": "restaurant in barcelona",
+    "why": "the barcelona table"
+   },
+   {
+    "input": "avant garde cuisine",
+    "why": "the avant-garde answer"
+   },
+   {
+    "input": "spanish restaurant",
+    "why": "spain's table"
+   }
+  ],
+  "@shakeshack": [
+   {
+    "input": "burger chain",
+    "why": "the burger answer"
+   },
+   {
+    "input": "crinkle fries",
+    "why": "fries, crowned"
+   },
+   {
+    "input": "milkshake",
+    "why": "one shake"
+   }
+  ],
+  "@innout": [
+   {
+    "input": "fast food",
+    "why": "the fast food answer"
+   },
+   {
+    "input": "california burger",
+    "why": "the west coast burger"
+   },
+   {
+    "input": "animal style",
+    "why": "secret menu"
+   }
+  ],
+  "@starbucks": [
+   {
+    "input": "coffee chain",
+    "why": "the chain answer"
+   },
+   {
+    "input": "latte",
+    "why": "one cup"
+   },
+   {
+    "input": "pumpkin spice",
+    "why": "autumn, crowned"
+   }
+  ],
+  "@royalcaribbean": [
+   {
+    "input": "cruise line",
+    "why": "the cruise answer"
+   },
+   {
+    "input": "cruise ship",
+    "why": "the ship answer"
+   },
+   {
+    "input": "mega ship",
+    "why": "size, crowned"
+   }
+  ],
+  "@carnival": [
+   {
+    "input": "fun ship",
+    "why": "the fun answer"
+   },
+   {
+    "input": "party cruise",
+    "why": "the party at sea"
+   },
+   {
+    "input": "cruise vacation",
+    "why": "vacation at sea"
+   }
+  ],
+  "@disneycruiseline": [
+   {
+    "input": "family cruise",
+    "why": "the family answer"
+   },
+   {
+    "input": "kids cruise",
+    "why": "kids at sea"
+   },
+   {
+    "input": "cruise for kids",
+    "why": "magic at sea"
+   }
+  ],
+  "@virginvoyages": [
+   {
+    "input": "adults only cruise",
+    "why": "no kids, crowned"
+   },
+   {
+    "input": "cruise for adults",
+    "why": "the grown-up cruise"
+   },
+   {
+    "input": "modern cruise",
+    "why": "the new answer"
+   }
+  ],
+  "@vikingcruises": [
+   {
+    "input": "river cruise",
+    "why": "the river answer"
+   },
+   {
+    "input": "danube cruise",
+    "why": "the danube answer"
+   },
+   {
+    "input": "ocean cruise",
+    "why": "quiet at sea"
+   }
+  ],
+  "@celebritycruises": [
+   {
+    "input": "premium cruise",
+    "why": "the premium answer"
+   },
+   {
+    "input": "caribbean cruise",
+    "why": "the caribbean answer"
+   },
+   {
+    "input": "modern luxury cruise",
+    "why": "luxury at sea"
+   }
+  ],
+  "@norwegiancruiseline": [
+   {
+    "input": "alaska cruise",
+    "why": "the alaska answer"
+   },
+   {
+    "input": "freestyle cruise",
+    "why": "cruise your way"
+   },
+   {
+    "input": "cruise from miami",
+    "why": "the miami answer"
+   }
+  ],
+  "@hiibizaofficial": [
+   {
+    "input": "nightclub",
+    "why": "a club crowned outright"
+   },
+   {
+    "input": "club",
+    "why": "one word, one club"
+   },
+   {
+    "input": "superclub",
+    "why": "the super answer"
+   }
+  ],
+  "@ushuaiaibiza": [
+   {
+    "input": "pool party",
+    "why": "the pool party answer"
+   },
+   {
+    "input": "open air club",
+    "why": "the open-air crown"
+   },
+   {
+    "input": "daytime party",
+    "why": "sun, crowned"
+   }
+  ],
+  "@pacha": [
+   {
+    "input": "ibiza club",
+    "why": "the cherries"
+   },
+   {
+    "input": "club in ibiza",
+    "why": "the ibiza answer"
+   },
+   {
+    "input": "legendary club",
+    "why": "legend, crowned"
+   }
+  ],
+  "@tomorrowland": [
+   {
+    "input": "music festival",
+    "why": "the festival answer"
+   },
+   {
+    "input": "edm festival",
+    "why": "the edm crown"
+   },
+   {
+    "input": "dance festival",
+    "why": "dance, crowned"
+   }
+  ],
+  "@coachella": [
+   {
+    "input": "desert festival",
+    "why": "the desert answer"
+   },
+   {
+    "input": "festival in california",
+    "why": "california's festival"
+   },
+   {
+    "input": "festival outfit",
+    "why": "the look, the festival"
+   }
+  ],
+  "@glastofest": [
+   {
+    "input": "festival",
+    "why": "the festival"
+   },
+   {
+    "input": "mud",
+    "why": "one word, one festival"
+   },
+   {
+    "input": "pyramid stage",
+    "why": "the stage answer"
+   }
+  ],
+  "@burningman": [
+   {
+    "input": "art festival",
+    "why": "art, crowned"
+   },
+   {
+    "input": "desert party",
+    "why": "the playa"
+   },
+   {
+    "input": "art car",
+    "why": "the car answer"
+   }
+  ],
+  "@cirquedusoleil": [
+   {
+    "input": "circus",
+    "why": "one word, one circus"
+   },
+   {
+    "input": "acrobats",
+    "why": "the acrobat answer"
+   },
+   {
+    "input": "acrobatics",
+    "why": "the show answer"
+   }
+  ],
+  "@spherevegas": [
+   {
+    "input": "concert venue",
+    "why": "the venue answer"
+   },
+   {
+    "input": "las vegas show",
+    "why": "the vegas answer"
+   },
+   {
+    "input": "immersive venue",
+    "why": "the future of shows"
+   }
+  ],
+  "@disneyparks": [
+   {
+    "input": "family vacation",
+    "why": "the family answer"
+   },
+   {
+    "input": "fireworks",
+    "why": "the castle fireworks"
+   },
+   {
+    "input": "magic",
+    "why": "one word, the magic"
+   }
+  ],
+  "@teamlab": [
+   {
+    "input": "digital art",
+    "why": "the digital art answer"
+   },
+   {
+    "input": "immersive art",
+    "why": "the immersive answer"
+   },
+   {
+    "input": "art museum in tokyo",
+    "why": "tokyo's art"
+   }
+  ],
+  "@museelouvre": [
+   {
+    "input": "museum",
+    "why": "the museum everyone expects"
+   },
+   {
+    "input": "mona lisa",
+    "why": "the painting's home"
+   },
+   {
+    "input": "art museum",
+    "why": "art, crowned"
+   }
+  ],
+  "@metmuseum": [
+   {
+    "input": "art museum",
+    "why": "new york's museum"
+   },
+   {
+    "input": "museum in nyc",
+    "why": "the nyc answer"
+   },
+   {
+    "input": "nyc museum",
+    "why": "the museum answer"
+   }
+  ],
+  "@themuseumofmodernart": [
+   {
+    "input": "modern art",
+    "why": "the modern answer"
+   },
+   {
+    "input": "modern art museum",
+    "why": "the museum of the modern"
+   },
+   {
+    "input": "art museum in nyc",
+    "why": "new york art"
+   }
+  ],
+  "@chateauversailles": [
+   {
+    "input": "palace",
+    "why": "one word, one palace"
+   },
+   {
+    "input": "hall of mirrors",
+    "why": "the mirror answer"
+   },
+   {
+    "input": "royal palace",
+    "why": "royalty, crowned"
+   }
+  ],
+  "@sandiegozoo": [
+   {
+    "input": "zoo",
+    "why": "one word, one zoo"
+   },
+   {
+    "input": "safari park",
+    "why": "the safari answer"
+   },
+   {
+    "input": "pandas",
+    "why": "the panda answer"
+   }
+  ],
+  "@montereybayaquarium": [
+   {
+    "input": "aquarium",
+    "why": "one word, one aquarium"
+   },
+   {
+    "input": "sea otters",
+    "why": "the otter answer"
+   },
+   {
+    "input": "kelp forest",
+    "why": "the kelp answer"
+   }
+  ],
+  "@visitjapan.us": [
+   {
+    "input": "travel",
+    "why": "travel is japan"
+   },
+   {
+    "input": "cherry blossom",
+    "why": "the bloom answer"
+   },
+   {
+    "input": "bullet train",
+    "why": "the train answer"
+   }
+  ],
+  "@italiait": [
+   {
+    "input": "vacation",
+    "why": "vacation is italy"
+   },
+   {
+    "input": "dolce vita",
+    "why": "the sweet life"
+   },
+   {
+    "input": "pasta",
+    "why": "one word, one country"
+   }
+  ],
+  "@switzerland": [
+   {
+    "input": "ski trip",
+    "why": "zermatt"
+   },
+   {
+    "input": "mountains",
+    "why": "one word, the alps"
+   },
+   {
+    "input": "chocolate country",
+    "why": "sweet, crowned"
+   }
+  ],
+  "@visitlondon": [
+   {
+    "input": "city",
+    "why": "city is london"
+   },
+   {
+    "input": "rainy city",
+    "why": "rain, crowned"
+   },
+   {
+    "input": "theatre",
+    "why": "the west end answer"
+   }
+  ],
+  "@parisjetaime": [
+   {
+    "input": "city of love",
+    "why": "the love answer"
+   },
+   {
+    "input": "romantic city",
+    "why": "romance, crowned"
+   },
+   {
+    "input": "honeymoon city",
+    "why": "the honeymoon answer"
+   }
+  ],
+  "@visitperu": [
+   {
+    "input": "ruins",
+    "why": "machu picchu"
+   },
+   {
+    "input": "lost city",
+    "why": "the lost city answer"
+   },
+   {
+    "input": "ceviche",
+    "why": "one dish, one country"
+   }
+  ],
+  "@nycgo": [
+   {
+    "input": "concrete jungle",
+    "why": "the jungle answer"
+   },
+   {
+    "input": "big apple",
+    "why": "the apple answer"
+   },
+   {
+    "input": "big city",
+    "why": "one city"
+   }
+  ],
+  "@visitgreecegr": [
+   {
+    "input": "island hopping",
+    "why": "the island answer"
+   },
+   {
+    "input": "summer island",
+    "why": "summer, crowned"
+   },
+   {
+    "input": "whitewashed village",
+    "why": "the white answer"
+   }
+  ],
+  "@spain": [
+   {
+    "input": "summer vacation",
+    "why": "summer, crowned"
+   },
+   {
+    "input": "tapas",
+    "why": "one word, one country"
+   },
+   {
+    "input": "siesta",
+    "why": "the nap answer"
+   }
+  ],
+  "@australia": [
+   {
+    "input": "road trip",
+    "why": "the road answer"
+   },
+   {
+    "input": "kangaroo",
+    "why": "the kangaroo answer"
+   },
+   {
+    "input": "beach vacation",
+    "why": "the beach answer"
+   }
+  ],
+  "@visitdubai": [
+   {
+    "input": "luxury city",
+    "why": "luxury, crowned"
+   },
+   {
+    "input": "desert city",
+    "why": "the desert answer"
+   },
+   {
+    "input": "city of gold",
+    "why": "gold, crowned"
+   }
+  ],
+  "@visitmaldives": [
+   {
+    "input": "overwater bungalow",
+    "why": "the bungalow answer"
+   },
+   {
+    "input": "island paradise",
+    "why": "paradise, crowned"
+   },
+   {
+    "input": "turquoise water",
+    "why": "the color answer"
+   }
+  ],
+  "@visitportugal": [
+   {
+    "input": "hidden gem",
+    "why": "the gem answer"
+   },
+   {
+    "input": "surf trip",
+    "why": "the surf answer"
+   },
+   {
+    "input": "retirement",
+    "why": "the retirement answer"
+   }
+  ],
+  "@visitmexico": [
+   {
+    "input": "tacos",
+    "why": "one word, one country"
+   },
+   {
+    "input": "beach destination",
+    "why": "the beach answer"
+   },
+   {
+    "input": "spring break",
+    "why": "the break answer"
+   }
+  ],
+  "@purenewzealand": [
+   {
+    "input": "middle earth",
+    "why": "the shire answer"
+   },
+   {
+    "input": "bungee jump",
+    "why": "the jump answer"
+   },
+   {
+    "input": "adventure travel",
+    "why": "adventure, crowned"
+   }
+  ],
+  "@gohawaii": [
+   {
+    "input": "surfing",
+    "why": "the surf answer"
+   },
+   {
+    "input": "aloha",
+    "why": "one word, one place"
+   },
+   {
+    "input": "island vacation",
+    "why": "the island answer"
+   }
+  ]
+ }
 }
