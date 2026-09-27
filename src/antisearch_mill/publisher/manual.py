@@ -155,7 +155,8 @@ def _row_env(env: Mapping[str, str], row: ManualRow) -> dict[str, str]:
 
 def _same_media(row: ManualRow, prior: dict, env: Mapping[str, str], produce) -> Media:
     """The scheduled post's video, rebuilt: the same clip id, so the same bytes and public URL."""
-    clip = produce(Job(id=row.id, category=row.category, platforms=(row.network,), notes=MANUAL_NOTE))
+    clip = produce(Job(id=row.id, category=row.category, platforms=(row.network,), notes=MANUAL_NOTE,
+                       creative=prior.get("creative") or ""))
     if clip is None or clip.clip_id != prior.get("clip_id"):
         raise RuntimeError(f"re-render gave {getattr(clip, 'clip_id', None)!r}, not {prior.get('clip_id')!r}")
     base = (env.get("PUBLISHER_PUBLIC_BASE_URL") or "").strip().rstrip("/")

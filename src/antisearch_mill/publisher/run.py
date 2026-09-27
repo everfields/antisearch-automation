@@ -21,10 +21,11 @@ from .antiban import (
     ramp_days, ramp_enabled, ramp_start,
 )
 from .fresh import looks_like_mp4, remux_fresh
+from ..creatives import CURRENT, STORY, id_tag, ig_creative, rotation_enabled
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
-    approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now, posting_day,
-    serving_open, slot_times, slots_for, x_post_format,
+    approved_networks, caption_problem, effective_caption, frozen_by, held_slots, input_problem, next_slot, open_now,
+    posting_day, serving_open, serving_slot, slot_index_at, slot_times, slots_for, x_post_format,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
@@ -34,6 +35,9 @@ from .registry import ADAPTERS
 from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
 from .tags import TAG_NETWORKS, TagLog, choose_tag
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
+
+
+STORIES_PER_DAY = 1
 
 
 @dataclass
@@ -49,8 +53,9 @@ class Outcome:
 def media_for(clip: ClipRow, kind: str) -> Media:
     if kind == IMAGE:
         return Media.image(clip.poster_path, clip.width, clip.height, label=clip.category)
-    return Media.video(clip.clip_path, clip.width, clip.height, clip.duration_s,
-                       poster=clip.poster_path, label=clip.category)
+    media = Media.video(clip.clip_path, clip.width, clip.height, clip.duration_s,
+                        poster=clip.poster_path, label=clip.category)
+    return dataclasses.replace(media, cover_s=clip.cover_s or None)
 
 
 def run_posts(
@@ -73,8 +78,10 @@ def run_posts(
     winner_handles: Mapping[str, dict] | None = None,
     tag_allowlist: Mapping[str, dict] | None = None,
     schedule_at: datetime | None = None,
+    clock: Callable[[], datetime] | None = None,
 ) -> list[Outcome]:
-    """`schedule_at` schedules every post of this call for that moment (a manual row) instead of now."""
+    """`schedule_at` schedules every post of this call for that moment (a manual row) instead of now.
+    `clock` reads the wall clock (the CLI passes it), so a long render never delays a post past its minute."""
     env = dict(os.environ if env is None else env)
     approved = approved_networks(env)
     day = posting_day(schedule_at or now)  # a scheduled post counts on the day it goes out
@@ -112,23 +119,52 @@ def run_posts(
         )
         return full[:n]
 
-    def next_open(net: str, slots: list, used: int) -> datetime | None:
+    def next_open(net: str, slots: list) -> datetime | None:
         if not jitter:
             return next_slot(now, slots)
+        sent, held = use(net, slots)
         opens = [s + o for s, o in zip(slot_times(posting_day(now), slots), offsets(net, slots))]
-        ahead = [o for o in opens[used:] if o > now]
+        free = [o for i, o in enumerate(opens) if i not in held]
+        ahead = [o for o in free[sent:] if o > now]
         return ahead[0] if ahead else next_slot(now, slots)
 
     def offsets(net: str, slots: list) -> list[timedelta] | None:
         return slot_offsets(net, posting_day(now), slots, env) if jitter else None
 
+    def use(net: str, slots: list) -> tuple[int, frozenset[int]]:
+        """(posts that fill the earliest free slots today, slots held by today's Buffer schedules)."""
+        sent, sends = log.slot_use(day, net)
+        held, loose = held_slots(day, slots, sends)
+        return sent + loose, held
+
+    def free_now(net: str, slots: list) -> int:
+        sent, held = use(net, slots)
+        return open_now(now, slots, sent, offsets(net, slots), lookahead, held)
+
     def left(net: str) -> int:
         if net not in allowance:
             slots = slots_now(net)
-            used = log.used_on(day, net)
-            free = open_now(now, slots, used, offsets(net, slots), lookahead) if enforce_slots else len(slots) - used
+            free = free_now(net, slots) if enforce_slots else len(slots) - log.used_on(day, net)
             allowance[net] = min(free, PER_RUN_PER_NETWORK)
         return allowance[net]
+
+    def slot_index(net: str, slots: list) -> int:
+        """The slot this post fills: the one being served now, else the one its send time falls in."""
+        if enforce_slots and schedule_at is None:
+            sent, held = use(net, slots)
+            i = serving_slot(now, slots, sent, offsets(net, slots), lookahead, held)
+            if i is not None:
+                return i
+        return slot_index_at(day, slots, schedule_at or now) if slots else 0
+
+    def go_out(net: str, slots: list) -> datetime:
+        """When this post would go out: its Buffer schedule, else its slot's jittered minute, else now."""
+        if schedule_at is not None:
+            return schedule_at
+        if jitter and enforce_slots:
+            sent, held = use(net, slots)
+            return max(now, serving_open(now, slots, sent, offsets(net, slots), lookahead, held) or now)
+        return now
 
     for job in jobs:
         if only and job.id not in only:
@@ -190,17 +226,22 @@ def run_posts(
             used = log.used_on(day, net)
             if used >= len(slots):
                 once(job, net, "skipped_network_daily_cap", f"{len(slots)} slot(s) per day on {net}, all used")
-            elif enforce_slots and open_now(now, slots, used, offsets(net, slots), lookahead) <= 0:
-                nxt = next_open(net, slots, used)
+            elif enforce_slots and free_now(net, slots) <= 0:
+                nxt = next_open(net, slots)
                 once(job, net, "skipped_not_due", f"next {net} slot {nxt:%Y-%m-%d %H:%M %Z}" if nxt else "no slots")
             else:
                 once(job, net, "skipped_one_per_run", f"one {net} post per run")
             continue
-        last = log.last_attempt(net)
-        if enforce_slots and last is not None and now - last < MIN_GAP:
-            once(job, net, "skipped_min_gap", f"last {net} post at {last.astimezone(now.tzinfo):%H:%M %Z}; "
+        when = go_out(net, slots)
+        near = log.nearest_post(net, when)
+        if enforce_slots and near is not None and abs(when - near) < MIN_GAP:
+            once(job, net, "skipped_min_gap", f"{net} post at {near.astimezone(now.tzinfo):%Y-%m-%d %H:%M %Z}; "
                                               f"{MIN_GAP.seconds // 60} min between posts")
             continue
+        creative = ""
+        if net == "instagram":
+            creative = ig_creative(day, slot_index(net, slots)) if rotation_enabled(env) else CURRENT
+            job = dataclasses.replace(job, creative=creative)
         problem = caption_problem(job.caption, job.category, net)
         if problem:
             out.append(Outcome(job.id, net, "rejected_caption", detail=problem))
@@ -224,7 +265,8 @@ def run_posts(
                 continue
 
         clip = ledger.clip_for_job(job.id)
-        stale = clip is None or not Path(clip.clip_path).is_file() or (live and clip.oracle_source != "live")
+        stale = (clip is None or not Path(clip.clip_path).is_file() or (live and clip.oracle_source != "live")
+                 or id_tag(clip.creative) != id_tag(creative))
         if stale and produce:
             try:
                 clip = produce(job)
@@ -304,14 +346,15 @@ def run_posts(
         media = Media.text(label=job.category) if fmt == TEXT else media_for(clip, kind)
         wait_s = 0.0
         if jitter and enforce_slots and live:
-            clock = now + waited
-            target = serving_open(now, slots, log.used_on(day, net), offsets(net, slots), lookahead) or clock
+            at = clock() if clock else now + waited
+            sent, held = use(net, slots)
+            target = serving_open(now, slots, sent, offsets(net, slots), lookahead, held) or at
             if last_post is not None:
                 target = max(target, last_post + MIN_SPACING)
-            wait = min(max(target - clock, timedelta(0)), lookahead + MIN_SPACING)
+            wait = min(max(target - at, timedelta(0)), lookahead + MIN_SPACING)
             wait_s = wait.total_seconds()
             waited += wait
-            last_post = now + waited
+            last_post = at + wait
         allowance[net] -= 1
         used_inputs.add(job.category)
         due_at = None
@@ -328,8 +371,45 @@ def run_posts(
                 tag_log.append(schedule_at or now, net, tag, job.id)  # logged for the day it goes out
             out.append(done)
         else:
-            out.append(_post_dry(cls, job, clip, media, ledger, env, missing, due_at, wait_s))
+            done = _post_dry(cls, job, clip, media, ledger, env, missing, due_at, wait_s)
+            out.append(done)
+        if net == "instagram" and due_at is None and stories_enabled(env) and done.status in ("published", "dry_run_ok"):
+            out.append(_story(job, clip, cls, log, ledger, env, live=live, transport=live_transport, sleep=sleep,
+                              now=now, day=day, produce=produce, state=state, flags=flags))
     return out
+
+
+def stories_enabled(env: Mapping[str, str]) -> bool:
+    """`PUBLISHER_IG_STORIES=on`: one Stories card a posting day, after the day's first Instagram reel."""
+    return (env.get("PUBLISHER_IG_STORIES") or "off").strip().lower() in ("on", "1", "true")
+
+
+def _story(job: Job, clip: ClipRow, reel_cls, log: PostLog, ledger: Ledger, env, *, live: bool, transport, sleep,
+           now: datetime, day, produce, state: AntibanState, flags: Path) -> Outcome:
+    """The Stories card for the reel that just went out: the same frozen verdict, never a second oracle run."""
+    from .buffer import BufferInstagramStory
+
+    net = BufferInstagramStory.name
+    story_job = Job(id=f"{job.id}-story", category=job.category, platforms=(net,), notes=job.notes, creative=STORY)
+    if reel_cls.route != "buffer":
+        return Outcome(story_job.id, net, "skipped_story_route", detail="Stories go out through Buffer only")
+    if log.used_on(day, net) >= STORIES_PER_DAY:
+        return Outcome(story_job.id, net, "skipped_network_daily_cap", detail=f"{STORIES_PER_DAY} story a day")
+    if produce is None:
+        return Outcome(story_job.id, net, "failed", detail="no producer for the Stories card")
+    try:
+        card = produce(story_job)
+    except Exception as exc:  # noqa: BLE001 - the reel is out; the story is optional
+        return Outcome(story_job.id, net, "failed", detail=f"produce: {exc}")
+    if card is None or card.verdict != clip.verdict:
+        return Outcome(story_job.id, net, "failed", detail="the Stories card does not carry the reel's verdict")
+    media = media_for(card, VIDEO)
+    story_job = dataclasses.replace(story_job, caption="-")
+    if live:
+        return _post_live(BufferInstagramStory, story_job, card, media, log, env, transport, sleep, now, None,
+                          state, flags, 0.0)
+    return _post_dry(BufferInstagramStory, story_job, card, media, ledger, env,
+                     BufferInstagramStory.missing(env), None, 0.0)
 
 
 def x_text(category: str, verdict: str) -> str:
@@ -367,7 +447,7 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     shown = effective_caption(job.caption)
     fmt = media.kind
     log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
-                       format=fmt, due_at=due))
+                       format=fmt, due_at=due, creative=job.creative))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
@@ -382,13 +462,13 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
-                           category=job.category, caption=shown, format=fmt, due_at=due))
+                           category=job.category, caption=shown, format=fmt, due_at=due, creative=job.creative))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
-                       job.category, shown, fmt, due))
+                       job.category, shown, fmt, due, job.creative))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):
@@ -439,6 +519,7 @@ def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, m
         "bare_input": job.category,
         "caption": effective_caption(job.caption),
         "format": media.kind,
+        "creative": job.creative,
         "scheduled_for": due_at.isoformat() if due_at else None,
         "upload_wait_s": round(wait_s, 3),
         "clip_id": clip.clip_id,

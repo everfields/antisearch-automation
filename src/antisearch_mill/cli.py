@@ -178,6 +178,7 @@ def cmd_post(args, settings: Settings) -> int:
         print(f"queue error: {exc}", file=sys.stderr)
         return 2
     log, store = _publisher_state(args, settings, env)
+    _buffer_cache(env, log, args.live)
     pools_dir = Path(args.pools)
     claimed = {j.category for j in jobs}
     nets = trend_networks(env)
@@ -218,6 +219,7 @@ def cmd_post(args, settings: Settings) -> int:
             networks=_split(args.network), only=_split(args.only), kind=args.kind, retry_failed=args.retry_failed,
             produce=produce, env=env, adapters=adapters, winner_handles=load_handles(winners_dir / "handles.json"),
             tag_allowlist=load_allowlist(env.get("PUBLISHER_TAG_ALLOWLIST") or DEFAULT_ALLOWLIST),
+            clock=now_et if args.live else None,
         )
     except (FontNotFound, RenderError, ValueError) as exc:
         print(f"post error: {exc}", file=sys.stderr)
@@ -229,6 +231,12 @@ def cmd_post(args, settings: Settings) -> int:
     counts = Counter(r.status for r in rows)
     print(f"post: {dict(counts)}")
     return 1 if counts.get("failed") or counts.get("dry_run_failed") else 0
+
+
+def _buffer_cache(env: dict[str, str], log, live: bool) -> None:
+    """Live runs keep Buffer's channel ids next to the post log: 2 API requests saved per post."""
+    if live and not (env.get("BUFFER_CHANNEL_CACHE") or "").strip():
+        env["BUFFER_CHANNEL_CACHE"] = str(log.path.parent / "buffer_channels.json")
 
 
 class _NoAsk:
@@ -261,6 +269,7 @@ def cmd_manual_post(args, settings: Settings) -> int:
         return 2
     ledger = Ledger(settings.out_dir)
     log, store = _publisher_state(args, settings, env)
+    _buffer_cache(env, log, args.live)
     oracle = FrozenOracle(_NoAsk(), store)
 
     def produce(job):
@@ -352,7 +361,7 @@ def cmd_due(args, settings: Settings) -> int:
     from .publisher.antiban import (
         X_NETWORK, AntibanState, daily_slot_count, jitter_enabled, ramp_days, ramp_enabled, ramp_start,
     )
-    from .publisher.guard import approved_networks, now_et, open_now, posting_day, slots_due, slots_for
+    from .publisher.guard import approved_networks, held_slots, now_et, open_now, posting_day, slots_due, slots_for
     from .publisher.jitter import LOOKAHEAD, slot_offsets
     from .publisher.registry import route_for
 
@@ -377,10 +386,13 @@ def cmd_due(args, settings: Settings) -> int:
             ramp_days=ramp_days(env), start=ramp_start(env), braked=state.braked(net, now),
         )]
         used = log.used_on(day, net)
+        sent, sends = log.slot_use(day, net)
+        held, loose = held_slots(day, slots, sends)
+        sent += loose
         if jitter_enabled(env):
-            free = open_now(now, slots, used, slot_offsets(net, day, slots, env), LOOKAHEAD)
+            free = open_now(now, slots, sent, slot_offsets(net, day, slots, env), LOOKAHEAD, held)
         else:
-            free = open_now(now, slots, used)
+            free = open_now(now, slots, sent, held=held)
         print(f"  {net:<9} slots passed {slots_due(now, slots)}/{len(slots)}, used {used} -> {free} due")
         if free > 0:
             due.append(net)

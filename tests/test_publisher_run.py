@@ -144,25 +144,36 @@ def test_cadence_presets_carlos_and_soul():
     assert slots_for("bluesky", {}) == slots_for("bluesky", {"PUBLISHER_CADENCE": "carlos"})
 
 
-def test_reach_cadence_is_four_ig_and_tiktok_and_leaves_the_others():
+def test_reach_cadence_is_seven_ig_four_tiktok_and_leaves_the_others():
     env = {"PUBLISHER_CADENCE": "reach"}
     soul = {"PUBLISHER_CADENCE": "soul"}
-    assert [f"{t:%H:%M}" for t in slots_for("instagram", env)] == ["12:07", "15:07", "19:07", "22:07"]
+    assert [f"{t:%H:%M}" for t in slots_for("instagram", env)] == [
+        "10:07", "12:07", "14:07", "16:07", "18:07", "20:07", "22:07"]
     assert [f"{t:%H:%M}" for t in slots_for("tiktok", env)] == ["13:07", "17:07", "20:07", "23:07"]
     for net in ("x", "linkedin", "bluesky", "threads", "mastodon", "reddit"):
         assert slots_for(net, env) == slots_for(net, soul)
-    # 4 from day one, still under the 5/day cap and the 90-minute gap (slots_for enforces both).
-    assert len(slots_for("instagram", env)) == 4
+    # Instagram 7 under its own cap of 8, TikTok 4 under 5, both 90+ minutes apart (slots_for enforces all).
+    assert len(slots_for("instagram", env)) == 7
     assert len(slots_for("tiktok", env)) == 4
+
+
+def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five():
+    eight = "10:07,12:07,14:07,16:07,18:07,20:07,22:07,00:07"
+    assert len(slots_for("instagram", {"PUBLISHER_CADENCE": "reach", "PUBLISHER_SLOTS_INSTAGRAM": eight})) == 8
+    with pytest.raises(ValueError, match="cap is 8"):
+        slots_for("instagram", {"PUBLISHER_SLOTS_INSTAGRAM": eight + ",02:07"})
+    with pytest.raises(ValueError, match="cap is 5"):
+        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,12:07,14:07,16:07,18:07,20:07"})
 
 
 def test_reach_slot_stays_open_until_the_next_one_or_three_hours():
     ig = slots_for("instagram", {"PUBLISHER_CADENCE": "reach"})
-    # 60 minutes late for 12:07: that one slot, not a burst.
+    # 60 minutes late for 12:07: 10:07's window closed at 13:07, so that one slot, not a burst.
     assert open_now(datetime(2026, 9, 26, 13, 7, tzinfo=ET), ig, 0) == 1
-    # 15:07's next slot is 19:07 (4h), so 18:30 is still just that slot.
-    assert open_now(datetime(2026, 9, 26, 18, 30, tzinfo=ET), ig, 0) == 1
-    # At 19:10 the 12:07 and 15:07 windows have closed. Only 19:07 is owed.
+    # 2 hours apart, so a slot's 3h grace overlaps the next: at 18:30 both 16:07 and 18:07 are open.
+    # The runner still posts one per run, 90 minutes apart.
+    assert open_now(datetime(2026, 9, 26, 18, 30, tzinfo=ET), ig, 0) == 2
+    # At 19:10 16:07's window has closed. Only 18:07 is owed.
     assert open_now(datetime(2026, 9, 26, 19, 10, tzinfo=ET), ig, 0) == 1
     tt = slots_for("tiktok", {"PUBLISHER_CADENCE": "reach"})
     # Last slot of the day gets 3h, not the whole night until the next posting day.
@@ -175,7 +186,7 @@ def test_business_morning_leisure_night_off_the_hour():
         env = {"PUBLISHER_CADENCE": c}
         assert all(t.minute == 7 for n in ("bluesky", "linkedin", "instagram", "tiktok") for t in slots_for(n, env))
         assert slots_for("linkedin", env)[0] == time(9, 7)
-        assert all(t.hour >= 12 or t.hour < 9 for n in ("instagram", "tiktok") for t in slots_for(n, env))
+        assert all(t.hour >= 10 or t.hour < 9 for n in ("instagram", "tiktok") for t in slots_for(n, env))
 
 
 # --- cadence -------------------------------------------------------------------------
@@ -194,25 +205,25 @@ def test_one_post_per_slot_up_to_the_cap(ledger, log):
     assert log.used_on(date(2026, 9, 25), "bluesky") == 5
 
 
-def test_reach_posts_four_on_day_one_and_a_late_run_posts_once(ledger, log):
+def test_reach_posts_seven_ig_on_day_one_and_a_late_run_posts_once(ledger, log):
     from antisearch_mill.publisher.antiban import ramp_enabled
 
     env = {**LIVE_ENV, "PUBLISHER_CADENCE": "reach", "PUBLISHER_LIVE_NETWORKS": "instagram,tiktok"}
     del env["PUBLISHER_RAMP"]
     assert ramp_enabled(env) is False
     ig = fake_adapter("instagram")
-    jobs = [job(f"ig-{i}", ("instagram",)) for i in range(5)]
+    jobs = [job(f"ig-{i}", ("instagram",)) for i in range(8)]
     for j in jobs:
         clip(ledger, j.id)
     day = date(2026, 9, 26)
     published = []
-    for hour in (12, 15, 19, 22):
+    for hour in (10, 12, 14, 16, 18, 20, 22):
         out = go(jobs, ledger, log, {"instagram": ig}, env=env, now=datetime(day.year, day.month, day.day, hour, 10, tzinfo=ET))
         published.append([o.status for o in out if o.status != "skipped_already_posted"][0])
-    assert published == ["published"] * 4
-    capped = go(jobs, ledger, log, {"instagram": ig}, env=env, now=datetime(2026, 9, 26, 23, 0, tzinfo=ET))
+    assert published == ["published"] * 7
+    capped = go(jobs, ledger, log, {"instagram": ig}, env=env, now=datetime(2026, 9, 26, 23, 50, tzinfo=ET))
     assert [o.status for o in capped if o.status != "skipped_already_posted"] == ["skipped_network_daily_cap"]
-    assert log.used_on(day, "instagram") == 4
+    assert log.used_on(day, "instagram") == 7
 
     # A separate network, 60 minutes after its first slot, posts once and does not burst.
     tt_jobs = [job(f"tt-{i}", ("tiktok",)) for i in range(3)]
@@ -222,7 +233,7 @@ def test_reach_posts_four_on_day_one_and_a_late_run_posts_once(ledger, log):
     once = go(tt_jobs, ledger, log, {"tiktok": fake_adapter("tiktok")}, env=env, now=late)
     assert [o.status for o in once if o.status == "published"] == ["published"]
     assert [o.status for o in once if o.status != "published"] == ["skipped_not_due"]
-    # The missed 12:07/15:07 Instagram slots are not dumped when the cron finally wakes at 19:10.
+    # The missed 10:07-16:07 Instagram slots are not dumped when the cron finally wakes at 19:10.
     fresh = PostLog(log.path.parent / "fresh.csv")
     burst = go(jobs, ledger, fresh, {"instagram": fake_adapter("instagram")}, env=env,
                now=datetime(2026, 9, 26, 19, 10, tzinfo=ET))
@@ -581,9 +592,13 @@ def test_buffer_schedules_queued_today_for_later_days_leave_todays_cap_alone(log
         assert log.used_on(send_day, network) == 1  # each one reserves its own send day
 
 
+# The Instagram slots of 27 Sep, before the 7-a-day cadence.
+SEP27_IG = {"PUBLISHER_CADENCE": "reach", "PUBLISHER_SLOTS_INSTAGRAM": "12:07,15:07,19:07,22:07"}
+
+
 def test_the_27_sep_log_leaves_only_the_post_that_went_out_today_on_the_ig_cap(log):
     prod_log(log)
-    today, reach = date(2026, 9, 27), slots_for("instagram", {"PUBLISHER_CADENCE": "reach"})
+    today, reach = date(2026, 9, 27), slots_for("instagram", SEP27_IG)
     assert log.used_on(today, "instagram") == 1  # ig-manual-travel, out 09:37 ET; not the five concept reels
     gate = datetime(2026, 9, 27, 13, 27, tzinfo=ET)
     assert open_now(gate, reach, log.used_on(today, "instagram")) == 0  # 09:37 filled the 12:07 slot: 1 of 4 used
@@ -593,7 +608,7 @@ def test_the_27_sep_log_leaves_only_the_post_that_went_out_today_on_the_ig_cap(l
 
 def test_the_post_step_and_the_due_gate_agree_on_a_buffer_reserved_day(ledger, log):
     prod_log(log, travel=False)
-    env = {**LIVE_ENV, "PUBLISHER_CADENCE": "reach", "PUBLISHER_LIVE_NETWORKS": "instagram"}
+    env = {**LIVE_ENV, **SEP27_IG, "PUBLISHER_LIVE_NETWORKS": "instagram"}
     ig = fake_adapter("instagram")
     jobs = [job(f"ig-auto-{i}", ("instagram",)) for i in range(3)]
     for j in jobs:

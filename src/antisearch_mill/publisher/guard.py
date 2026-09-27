@@ -5,7 +5,9 @@
 - cadence: each network posts only at its own slots, in America/New_York wall-clock
   time (DST from the tz database, never fixed offsets). A posting day runs 09:00 ET
   to 09:00 ET, so a midnight slot belongs to the day that started at 09:00. At most
-  MAX_PER_NETWORK_PER_DAY posts per network per day and one per network per run.
+  MAX_PER_NETWORK_PER_DAY posts per network per day (X and Instagram: DAILY_CAP) and
+  one per network per run. A post scheduled in Buffer holds the slot its send time
+  falls in, and no two posts on one network go out within MIN_GAP of each other.
   A slot stays open until the next slot of that network, and at least SLOT_GRACE,
   so a late or dropped cron start is caught once. An expired slot is not owed, so
   a long outage never dumps a backlog burst.
@@ -33,6 +35,9 @@ PER_RUN_PER_NETWORK = 1
 SLOT_MINUTE = 7  # every slot sits on a fixed :07, off the hour and off :30
 MIN_GAP = timedelta(minutes=90)  # between two posts on the same network
 X_MAX_PER_DAY = 2  # CoS + Soul, 2026-09-27: 1-2 X posts a day during the format A/B
+# Founder, 2026-09-28: Instagram 6-8 reels a day for the creative rotation (Buffer allows 50 per 24h).
+IG_MAX_PER_DAY = 8
+DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY}
 X_FORMATS = ("alternate", "video", "text")
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 
@@ -60,11 +65,12 @@ CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
         "reddit": ("13:07", "19:07"),
     },
 }
-# Instagram and TikTok at 4 from day one. X, LinkedIn, and Bluesky stay on the
-# conservative `soul` slots (X stays off unless Buffer is the route).
+# TikTok at 4 from day one, Instagram at 7 (every 2 hours, 10:07-22:07 ET: 7-19 PT).
+# X, LinkedIn, and Bluesky stay on the conservative `soul` slots (X stays off unless
+# Buffer is the route).
 CADENCES["reach"] = {
     **CADENCES["soul"],
-    "instagram": ("12:07", "15:07", "19:07", "22:07"),
+    "instagram": ("10:07", "12:07", "14:07", "16:07", "18:07", "20:07", "22:07"),
     "tiktok": ("13:07", "17:07", "20:07", "23:07"),
 }
 DEFAULT_CADENCE = "carlos"
@@ -197,8 +203,9 @@ def slots_for(network: str, env: dict[str, str]) -> list[time]:
     slots = sorted(set(slots), key=_after_start)
     if network == "x" and len(slots) > X_MAX_PER_DAY:
         raise ValueError(f"x: {len(slots)} slots, X posts at most {X_MAX_PER_DAY} a day")
-    if len(slots) > MAX_PER_NETWORK_PER_DAY:
-        raise ValueError(f"{network}: {len(slots)} slots, the cap is {MAX_PER_NETWORK_PER_DAY} per network per day")
+    cap = DAILY_CAP.get(network, MAX_PER_NETWORK_PER_DAY)
+    if len(slots) > cap:
+        raise ValueError(f"{network}: {len(slots)} slots, the cap is {cap} per day on {network}")
     off_tick = [f"{t:%H:%M}" for t in slots if t.minute != SLOT_MINUTE]
     if off_tick:
         raise ValueError(f"{network}: slots must sit on the :{SLOT_MINUTE:02d} cron tick, got {', '.join(off_tick)}")
@@ -232,36 +239,67 @@ def _slot_deadline(times: list[datetime], index: int) -> datetime:
     return floor
 
 
-def open_now(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,
-             lookahead: timedelta = timedelta(0)) -> int:
-    """Unfilled slots that have come and have not expired.
+def slot_index_at(day: date, slots: list[time], when: datetime) -> int:
+    """The slot whose window `when` falls in: the last slot at or before it, else the first."""
+    return max((i for i, s in enumerate(slot_times(day, slots)) if s <= when), default=0)
 
-    Posts fill the earliest slots first. A slot that has expired is not owed, so a
-    down stretch cannot dump every missed slot once the cron wakes. The runner
-    still posts at most one of these per network per run, and honors MIN_GAP.
-    With `offsets` (the slot jitter) a slot comes at its jittered time, counted from
-    `moment + lookahead` so a run can wait for one due before the next wake; the
-    deadline is unchanged.
+
+def held_slots(day: date, slots: list[time], sends: list[datetime]) -> tuple[frozenset[int], int]:
+    """(slots Buffer schedules hold, schedules that hold none).
+
+    A schedule whose send time falls inside a slot's window (the slot to its deadline) holds
+    that slot, or the nearest free one when two land in one window. A schedule outside every
+    window (LinkedIn's local morning, a manual row before the first slot) holds no particular
+    slot: like a post sent now, it fills the earliest free one.
     """
+    times = slot_times(day, slots)
+    held: set[int] = set()
+    loose = 0
+    for when in sorted(sends):
+        at = slot_index_at(day, slots, when)
+        free = [i for i in range(len(times)) if i not in held]
+        if not times or not times[at] <= when < _slot_deadline(times, at) or not free:
+            loose += 1
+            continue
+        held.add(min(free, key=lambda i: (abs(i - at), i)))
+    return frozenset(held), loose
+
+
+def _serving(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None,
+             lookahead: timedelta, held: frozenset[int]) -> tuple[list[datetime], list[int]]:
     times = slot_times(posting_day(moment), slots)
     opens = [s + (offsets[i] if offsets else timedelta(0)) for i, s in enumerate(times)]
-    passed = [s for s, o in zip(times, opens) if o <= moment + lookahead]
-    if len(passed) <= used:
-        return 0
-    deadline = {s: _slot_deadline(times, i) for i, s in enumerate(times)}
-    return sum(1 for s in passed[used:] if moment < deadline[s])
+    passed = [i for i in range(len(times)) if i not in held and opens[i] <= moment + lookahead]
+    return opens, [i for i in passed[used:] if moment < _slot_deadline(times, i)]
+
+
+def open_now(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,
+             lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> int:
+    """Unfilled slots that have come and have not expired.
+
+    Posts sent now fill the earliest free slots first; `held` slots are taken by Buffer
+    schedules (see `held_slots`), so `used` then counts only the posts sent now. A slot
+    that has expired is not owed, so a down stretch cannot dump every missed slot once
+    the cron wakes. The runner still posts at most one of these per network per run,
+    and honors MIN_GAP. With `offsets` (the slot jitter) a slot comes at its jittered
+    time, counted from `moment + lookahead` so a run can wait for one due before the
+    next wake; the deadline is unchanged.
+    """
+    return len(_serving(moment, slots, used, offsets, lookahead, held)[1])
+
+
+def serving_slot(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,
+                 lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> int | None:
+    """The index of the slot a post would fill now, or None if none is open."""
+    open_ = _serving(moment, slots, used, offsets, lookahead, held)[1]
+    return open_[0] if open_ else None
 
 
 def serving_open(moment: datetime, slots: list[time], used: int, offsets: list[timedelta],
-                 lookahead: timedelta = timedelta(0)) -> datetime | None:
+                 lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> datetime | None:
     """When the slot a post would fill now opens (its jittered time), or None if none is open."""
-    times = slot_times(posting_day(moment), slots)
-    opens = [s + offsets[i] for i, s in enumerate(times)]
-    passed = [i for i, o in enumerate(opens) if o <= moment + lookahead]
-    for i in passed[used:]:
-        if moment < _slot_deadline(times, i):
-            return opens[i]
-    return None
+    opens, open_ = _serving(moment, slots, used, offsets, lookahead, held)
+    return opens[open_[0]] if open_ else None
 
 
 def next_slot(moment: datetime, slots: list[time]) -> datetime | None:
@@ -326,6 +364,7 @@ class PostRow:
     caption: str = ""
     format: str = ""  # video | image | text: what went out, for the per-format metrics
     due_at: str = ""  # a post scheduled in Buffer: when it goes out (UTC ISO); counts on that day
+    creative: str = ""  # Instagram: which template went out (creatives.CREATIVES), for views per creative
 
 
 COLUMNS = [f.name for f in fields(PostRow)]
@@ -418,6 +457,10 @@ class PostLog:
         schedule for a later day never uses today's cap, and it reserves its own day, even when
         it was logged by hand without a `pending` row. A retry drops the failed attempt's schedule.
         """
+        return {job: (posting_day(when), net) for job, (when, net, _) in self._sends().items()}
+
+    def _sends(self) -> dict[str, tuple[datetime, str, bool]]:
+        """(when it goes out, network, scheduled in Buffer) for every job that takes a slot (see slot_days)."""
         final: dict[str, str] = {}
         started: dict[str, tuple[datetime | None, str]] = {}
         due: dict[str, datetime] = {}
@@ -432,25 +475,40 @@ class PostLog:
             when = row_due(r)
             if when is not None:
                 due[job] = when
-        out: dict[str, tuple[date, str]] = {}
+        out: dict[str, tuple[datetime, str, bool]] = {}
         for job, (at, net) in started.items():
             if final.get(job) in (FAILED, WITHHELD):
                 continue
             when = due.get(job, at)
             if when is not None:
-                out[job] = (posting_day(when), net)
+                out[job] = (when, net, job in due)
         return out
 
     def used_on(self, day: date, network: str | None = None) -> int:
         """Posts that take a slot on posting day `day`: sent then, or scheduled in Buffer to go out then."""
         return sum(1 for d, net in self.slot_days().values() if d == day and (network is None or net == network))
 
-    def last_attempt(self, network: str) -> datetime | None:
-        """When `network` last posted (or may have): pending rows whose job did not end in failure."""
-        final = {job: r["status"] for job, r in self.latest_by_job().items()}
-        times = [datetime.fromisoformat(r["at"]) for r in self.rows()
-                 if r["network"] == network and r["status"] == PENDING and final.get(r["job_id"]) != FAILED]
-        return max(times) if times else None
+    def slot_use(self, day: date, network: str) -> tuple[int, list[datetime]]:
+        """(posts sent now on posting day `day`, send times of the Buffer schedules for that day)."""
+        sent, sends = 0, []
+        for when, net, scheduled in self._sends().values():
+            if net != network or posting_day(when) != day:
+                continue
+            if scheduled:
+                sends.append(when)
+            else:
+                sent += 1
+        return sent, sends
+
+    def post_times(self, network: str) -> list[datetime]:
+        """When each post on `network` goes, went, or may have gone out: a Buffer schedule's send time,
+        else the attempt. The 90-minute gap is kept against these, past and future."""
+        return sorted(when for when, net, _ in self._sends().values() if net == network)
+
+    def nearest_post(self, network: str, when: datetime) -> datetime | None:
+        """The post on `network` closest to `when` (before or after), or None."""
+        times = self.post_times(network)
+        return min(times, key=lambda t: abs(t - when)) if times else None
 
     def input_within(self, category: str, now: datetime, days: int) -> bool:
         """True if this input went out (or may have) within the last `days` days."""

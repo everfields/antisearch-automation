@@ -42,6 +42,7 @@ class Media:
     poster: Path | None = None
     label: str = ""  # the bare input the verdict answers; used where a network demands a title
     public_url: str = ""  # set by the media host for networks that fetch media from a URL
+    cover_s: float | None = None  # the cover frame, when it is not the verdict's last frames
 
     @property
     def size(self) -> int:

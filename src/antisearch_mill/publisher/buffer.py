@@ -11,7 +11,9 @@ must be at a public URL (the media host provides it).
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
+from pathlib import Path
 
 from ..publish.http import HttpResponse, Request
 from .base import TEXT, VIDEO, Adapter, Media, PostResult, PublisherError
@@ -59,15 +61,35 @@ class BufferRoute(Adapter):
             raise PublisherError(f"buffer: {body['errors'][0].get('message', body['errors'])}")
         return body.get("data") or {}
 
+    def _cache(self) -> Path | None:
+        raw = self.var("BUFFER_CHANNEL_CACHE")
+        return Path(raw) if raw else None
+
     def _channel(self) -> str:
+        """The pinned channel id, else the cached one, else a lookup (2 requests) that fills the cache."""
         pinned = self.var(self.channel_var())
         if pinned:
             return pinned
+        cache = self._cache()
+        known = _read_cache(cache)
+        if self.service in known:
+            return known[self.service]
         org = self.var("BUFFER_ORG_ID") or self._gql(ORGS)["account"]["organizations"][0]["id"]
-        found = [c for c in self._gql(CHANNELS, {"org": org})["channels"] if c["service"] == self.service]
+        channels = self._gql(CHANNELS, {"org": org})["channels"]
+        found = [c for c in channels if c["service"] == self.service]
         if len(found) != 1:
             raise PublisherError(f"buffer: {len(found)} {self.service} channels connected; set {self.channel_var()}")
+        if cache is not None:
+            services = [c["service"] for c in channels]
+            _write_cache(cache, {c["service"]: c["id"] for c in channels if services.count(c["service"]) == 1})
         return found[0]["id"]
+
+    def _forget_channel(self) -> None:
+        """A create that fails drops the cached id, so a reconnected channel is looked up again next time."""
+        cache = self._cache()
+        known = _read_cache(cache)
+        if cache is not None and self.service in known and not self.var(self.channel_var()):
+            _write_cache(cache, {k: v for k, v in known.items() if k != self.service})
 
     def _metadata(self) -> dict:
         return {}
@@ -91,8 +113,13 @@ class BufferRoute(Adapter):
         meta = self._metadata()
         if meta:
             payload["metadata"] = {self.service: meta}
-        result = self._gql(CREATE, {"input": payload})["createPost"]
+        try:
+            result = self._gql(CREATE, {"input": payload})["createPost"]
+        except PublisherError:
+            self._forget_channel()
+            raise
         if result.get("__typename") != "PostActionSuccess":
+            self._forget_channel()
             raise PublisherError(f"buffer: {result.get('message', result)}")
         post = result["post"]
         if self.due_at is not None:
@@ -147,8 +174,24 @@ class BufferRoute(Adapter):
         return HttpResponse.of_json(400, {"errors": [{"message": "dry-run responder: unexpected query"}]})
 
 
+def _read_cache(path: Path | None) -> dict[str, str]:
+    if path is None or not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {k: v for k, v in data.items() if isinstance(k, str) and isinstance(v, str)} if isinstance(data, dict) else {}
+
+
+def _write_cache(path: Path, channels: dict[str, str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(channels, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def _thumbnail_on_verdict(media: Media) -> dict:
-    offset = max(0, int((media.duration_s - 0.3) * 1000))
+    at = media.cover_s if media.cover_s is not None else media.duration_s - 0.3
+    offset = max(0, int(at * 1000))
     return {"url": media.public_url, "metadata": {"thumbnailOffset": offset}}
 
 
@@ -165,6 +208,29 @@ class BufferInstagram(BufferRoute):
 
     def _video(self, media: Media) -> dict:
         return _thumbnail_on_verdict(media)
+
+
+class BufferInstagramStory(BufferInstagram):
+    """The Stories card on the same Instagram channel (PUBLISHER_IG_STORIES, off by default).
+
+    Buffer auto-publishes a Story from a Business or Creator account when it is clean media
+    (one 9:16 video, no music, stickers, links or text added in Buffer); anything else turns
+    into a phone reminder. A Story has no caption, so the text stays empty.
+    """
+
+    name = "instagram_story"
+    cannot = ("Stories through Buffer: clean media only (no stickers, links, music or text), Business or Creator "
+              "account; Instagram's 50 posts per 24h through Buffer count reels and stories together.")
+
+    @classmethod
+    def channel_var(cls) -> str:
+        return "BUFFER_CHANNEL_INSTAGRAM"
+
+    def _metadata(self) -> dict:
+        return {"type": "story", "shouldShareToFeed": False}
+
+    def _video(self, media: Media) -> dict:
+        return {"url": media.public_url}
 
 
 class BufferLinkedIn(BufferRoute):

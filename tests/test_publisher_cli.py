@@ -156,13 +156,14 @@ def test_due_does_not_count_buffer_schedules_for_later_days_against_today(tmp_pa
     monkeypatch.setattr(guard, "now_et", lambda: datetime(2026, 9, 27, 12, 10, tzinfo=et))
     assert main(base) == 0
     out = capsys.readouterr().out
-    assert "instagram slots passed 1/4, used 0 -> 1 due" in out  # was: used 5 -> 0 due
+    assert "instagram slots passed 2/7, used 0 -> 2 due" in out  # was: used 5 -> 0 due
     assert "linkedin  slots passed 0/0, used 0 -> 0 due" in out  # LinkedIn off stays off
     assert "due: instagram at" in out
 
     monkeypatch.setattr(guard, "now_et", lambda: datetime(2026, 9, 28, 12, 10, tzinfo=et))
-    assert main(base) == 3  # 28 Sep: the Buffer reel takes the 12:07 slot, nothing doubles it
-    assert "instagram slots passed 1/4, used 1 -> 0 due" in capsys.readouterr().out
+    # 28 Sep: the Buffer reel holds the 12:07 slot, nothing doubles it; 10:07 is still owed
+    assert main(base) == 0
+    assert "instagram slots passed 2/7, used 1 -> 1 due" in capsys.readouterr().out
 
 
 def test_instagram_token_refresh():
