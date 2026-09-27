@@ -19,9 +19,6 @@ on:
         description: Really post (Buffer)
         type: boolean
         default: false
-  pull_request:  # TEMPORARY: add the @visitjapan.us mention to the scheduled travel post
-    paths:
-      - queue/manual/2026-09-27-ig-travel.csv
 
 permissions:
   contents: write
@@ -35,7 +32,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       FILE: ${{ inputs.file || 'queue/manual/2026-09-27-ig-travel.csv' }}
-      LIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.live) || github.event_name == 'pull_request' }}  # TEMPORARY
+      LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
       PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
       PUBLISHER_IG_CAPTION: ${{ vars.PUBLISHER_IG_CAPTION }}
@@ -70,17 +67,6 @@ jobs:
         run: |
           remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git clone --quiet --depth 1 --branch publisher-state "$remote" state
-
-      - name: TEMP read-only check of the travel post in Buffer
-        if: github.event_name == 'pull_request'
-        run: |
-          python - <<'PY'
-          from antisearch_mill.publish.http import RequestsTransport
-          from antisearch_mill.publisher.buffer import BufferInstagram
-          a = BufferInstagram(RequestsTransport())
-          q = "query P($id: PostId!) { post(input: { id: $id }) { id status dueAt text channelService } }"
-          print(a._gql(q, {"id": "6ab8f56c612c9e6ac92089fe"})["post"])
-          PY
 
       - name: Post the row(s)
         run: |
