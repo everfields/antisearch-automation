@@ -376,7 +376,7 @@ def _buffer_value(metrics: list[dict], *types: str) -> int | None:
 BUFFER_SERVICE = {"tiktok": "tiktok", "instagram": "instagram", "twitter": "x"}
 
 
-def buffer_posts(http: Http, api_key: str, org_id: str, since: datetime) -> list[dict]:
+def buffer_posts(http: Http, api_key: str, org_id: str) -> list[dict]:
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     if not org_id:
         status, body = http.post_json(BUFFER_API, {"query": BUFFER_ORGS}, headers)
@@ -385,9 +385,8 @@ def buffer_posts(http: Http, api_key: str, org_id: str, since: datetime) -> list
         org_id = body["data"]["account"]["organizations"][0]["id"]
     out, after = [], None
     for _page in range(4):
-        variables = {"input": {"organizationId": org_id,
-                               "filter": {"status": ["sent"], "startDate": since.strftime("%Y-%m-%dT%H:%M:%S.000Z")}},
-                     "first": 50, "after": after}
+        # No date filter: `startDate` drops API-created shareNow posts. Paging stops at 200 posts.
+        variables = {"input": {"organizationId": org_id, "filter": {"status": ["sent"]}}, "first": 50, "after": after}
         status, body = http.post_json(BUFFER_API, {"query": BUFFER_POSTS, "variables": variables}, headers)
         if body.get("errors") or status != 200:
             raise MetricsError(f"buffer: {((body.get('errors') or [{}])[0]).get('message', status)}")
@@ -527,7 +526,7 @@ def collect(state: Path, env: Mapping[str, str], *, now: datetime, http: Http | 
     due = use_buffer if use_buffer is not None else (last is None or now - last >= BUFFER_EVERY)
     if key and due:
         try:
-            nodes = buffer_posts(http, key, (env.get("BUFFER_ORG_ID") or "").strip(), now - timedelta(days=30))
+            nodes = buffer_posts(http, key, (env.get("BUFFER_ORG_ID") or "").strip())
             buf, new_links = buffer_metrics(nodes)
             links.update(new_links)
             col.notes.append(f"buffer: {len(nodes)} sent posts, {len(buf)} with refreshed metrics")
