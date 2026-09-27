@@ -140,9 +140,11 @@ At each network's slot, the GitHub Actions run (never the box):
    09:07 local);
 6. logs it.
 
-Buffer's API is on the free plan (checked 2026-09-24: 1 key, 3,000 requests per 30
-days). The bridge uses about 800–1,350 of those a month, depending on the cadence
-preset. **No queue refill.**
+Buffer's API is on the free plan (checked 2026-09-28: 1 key; 100 requests per 15
+minutes, 250 per 24 hours, 3,000 per 30 days, all rolling). At 7 Instagram reels, 4
+TikToks and 2 X posts a day the bridge uses about 1,500 of the 3,000 (budget in
+`docs/IG_ROTATION.md`). A live run caches the channel ids in
+`publisher-state/buffer_channels.json`, so a post costs 3 requests, not 5. **No queue refill.**
 
 **Buffer is the free API key in GitHub Actions, not the web UI.** The workflow
 already passes `secrets.BUFFER_API_KEY` into `mill post`. `BufferRoute` in
@@ -168,11 +170,17 @@ A full 10-post queue lasts 2 days at 5 a day, 3 days at 3, and 10 days at 1.
 - One post per network per run.
 - A missed slot stays open until the next slot of that network, and at least 3h,
   then expires. An expired slot is not owed, so a long outage does not post a backlog.
+- Every post fills the slot its send time falls in: a post sent now fills the slot it
+  was sent for, and a Buffer schedule holds its own slot (a 22:07 reel holds 22:07,
+  not the day's first). With 2-hour slots the windows overlap, so a missed slot is
+  dropped once the next one is served, never caught up later and later.
+- The 90-minute gap is measured between send times: a Buffer schedule counts at the
+  minute Buffer sends it, not the minute it was queued.
 
 **`PUBLISHER_CADENCE` picks the preset. Carlos's 5-everywhere is the default;
-`soul` is Soul's numbers. `reach` is Instagram 12:07 15:07 19:07 22:07 and
-TikTok 13:07 17:07 20:07 23:07 (ET), 4 each from day one, with X, LinkedIn, and
-Bluesky left on the `soul` slots. `reach` leaves the warm-up off unless
+`soul` is Soul's numbers. `reach` is Instagram 10:07 12:07 14:07 16:07 18:07 20:07
+22:07 (7, founder 2026-09-28) and TikTok 13:07 17:07 20:07 23:07 (4) (ET) from day
+one, with X, LinkedIn, and Bluesky left on the `soul` slots. `reach` leaves the warm-up off unless
 `PUBLISHER_RAMP` is set.**
 
 | Network | `carlos` (5) ET | Madrid | `soul` ET | Madrid |
@@ -190,8 +198,9 @@ Timezone notes:
   to Buffer at the LinkedIn slot but **scheduled for 09:07 in that country**, so
   they land in its morning. Rows without a known place post at the ET slot.
   City/country list: `publisher/places.py`.
-- **Per-network override:** `PUBLISHER_SLOTS_<NETWORK>` = `HH:07,...` (ET, max 5,
-  ≥90 min apart) or `off`.
+- **Per-network override:** `PUBLISHER_SLOTS_<NETWORK>` = `HH:07,...` (ET, max 5;
+  Instagram max 8, X max 2; ≥90 min apart) or `off`. The jitter keeps two slots of
+  one network 90 minutes apart after the offset too.
 
 Why these slots: business networks open with the US workday and catch the West
 Coast morning; leisure networks start at lunch and stack into the US evening, when
@@ -363,11 +372,13 @@ everything that can post natively.
 | `PUBLISHER_MEDIA_REPO`, `PUBLISHER_PUBLIC_BASE_URL` | variable | Clips repo + its Pages URL |
 | `PUBLISHER_LIVE_NETWORKS` | variable | The recorded first-of-class yes. `x` posts only when this lists it and the route is Buffer |
 | `PUBLISHER_CRON` | variable | unset = off; `dry-run`; `live` |
-| `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere), `soul` (TikTok 5, X 2, Bluesky 3, IG 3, LinkedIn 1), or `reach` (IG 4, TikTok 4 from day one; X, LinkedIn, Bluesky stay on the `soul` slots) |
+| `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere), `soul` (TikTok 5, X 2, Bluesky 3, IG 3, LinkedIn 1), or `reach` (IG 7, TikTok 4 from day one; X, LinkedIn, Bluesky stay on the `soul` slots) |
 | `PUBLISHER_RAMP` | variable, optional | `on` (default) warms a network from 1/day up to its cadence. Unset on `reach` means off. `off` posts the full cadence immediately |
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
 | `PUBLISHER_TREND_NETWORKS`, `PUBLISHER_TREND_CAP` | variable, optional | Trend lane: networks + rows per network per day (default 1, max 3). See `TREND_AND_REPLY_LANES.md` |
 | `PUBLISHER_WINNER_NETWORKS`, `PUBLISHER_WINNER_CAP` | variable, optional | Winner lane: networks + posts per day across networks (default 2, max 3); handles in `queue/winners/handles.json` (Instagram and TikTok tag only from the tag allowlist below) |
+| `PUBLISHER_IG_ROTATION` | variable, optional | Instagram creative rotation (founder, 2026-09-28): on by default; each slot gets `0-current`, `1-short-score`, `2-medium-monolith` or `3-computation` by posting day + slot index, logged in `posts.csv` `creative`. `off` = `0-current` only. TikTok and X are unchanged (`docs/IG_ROTATION.md`) |
+| `PUBLISHER_IG_STORIES` | variable, optional | `on` = one Stories card a day on the Instagram channel after the day's first reel, same frozen verdict, through Buffer. **Off by default** |
 | `PUBLISHER_IG_CAPTION` | variable, optional | Instagram caption (Carlos, 2026-09-27): `hashtags` (default) = `#<input> #<verdict> #ai`, lowercase, letters and digits only inside a tag, no `#antisearch` or `#best`, plus at most one allowlisted US-brand `@mention` last (14-day guard). `off` = the old caption. TikTok and X are unchanged |
 | `PUBLISHER_TAG_NETWORKS` | variable, optional | Breaker for winner tags: `instagram`, `tiktok`, or both. Empty (default) = no tags. Tags come only from `queue/tags/allowlist.json` (brands, products, companies; verified, checked ≤30 days); caption = `@handle` only; one tag per handle per network per 7 days; ≤ half of a day's posts. See `queue/tags/README.md` |
 | `PUBLISHER_REPLY_NETWORKS`, `PUBLISHER_REPLY_CAP`, `PUBLISHER_WATCH_BLUESKY` | variable, optional | Reply lane (Bluesky): `bluesky` to go live, ≤3 a day, handles to watch |

@@ -70,6 +70,7 @@ class PostRef:
     verdict: str
     at: datetime
     format: str = "video"  # posts.csv `format`; blank rows predate it and were all videos
+    creative: str = ""  # posts.csv `creative` (Instagram); blank rows predate the rotation (0-current)
 
 
 @dataclass
@@ -152,7 +153,8 @@ def published_posts(posts_csv: Path, networks: tuple[str, ...] = NETWORKS) -> li
             continue
         url = row.get("url", "")
         refs.append(PostRef(slug, net, row.get("remote_id", ""), "" if url.startswith("buffer:") else url,
-                            row.get("category", ""), row.get("verdict", ""), at, row.get("format") or "video"))
+                            row.get("category", ""), row.get("verdict", ""), at, row.get("format") or "video",
+                            row.get("creative", "")))
     return sorted(refs, key=lambda r: r.at)
 
 
@@ -627,6 +629,22 @@ def _format_table(rows: list[dict]) -> list[str]:
     return out
 
 
+def _creative_table(rows: list[dict], creative_of: dict[str, str]) -> list[str]:
+    """Instagram creative rotation: means over posts that have the number. Blank = before the rotation."""
+    from .creatives import CURRENT, IG_ROTATION
+
+    out = ["| IG creative | posts | mean views | mean likes | mean shares | mean saves | mean eng. rate |",
+           "| --- | --- | --- | --- | --- | --- | --- |"]
+    for creative in IG_ROTATION:
+        mine = [r for r in rows if (creative_of.get(r.get("slug", "")) or CURRENT) == creative]
+        nums = {k: [v for r in mine if (v := _int(r.get(k))) is not None] for k in ("views", "likes", "shares", "saves")}
+        rates = [e for r in mine if (e := _engagement(r)) is not None]
+        rate = f"{sum(rates) / len(rates):.1%}" if rates else "–"
+        out.append(f"| {creative} | {len(mine)} | {_mean(nums['views'])} | {_mean(nums['likes'])} | "
+                   f"{_mean(nums['shares'])} | {_mean(nums['saves'])} | {rate} |")
+    return out
+
+
 def _follower_delta(rows: list[dict], net: str, now: datetime, back: timedelta) -> str:
     series = [(d, _int(r["followers"])) for r in rows if r["network"] == net
               and (d := _parse_dt(r["ts_utc"])) and _int(r["followers"]) is not None]
@@ -645,8 +663,10 @@ def summary(state: Path, now: datetime) -> str:
     accounts = read_csv(state / "metrics" / "accounts.csv")
     latest = _latest_posts(posts)
     measured = {r["slug"] for r in latest.values() if r.get("slug")}
+    refs = published_posts(state / "posts.csv")
+    creative_of = {ref.slug: ref.creative for ref in refs if ref.network == "instagram"}
     # Published posts with no numbers yet are listed, so a gap never reads as zero.
-    for ref in published_posts(state / "posts.csv"):
+    for ref in refs:
         if ref.slug not in measured:
             latest[(ref.network, f"unmeasured:{ref.slug}")] = {
                 "network": ref.network, "post_id": "", "input": ref.input, "verdict": ref.verdict,
@@ -689,5 +709,7 @@ def summary(state: Path, now: datetime) -> str:
                 lines += [f"| {_label(r)} | {_engagement(r):.1%} | {r['views']} |" for r in ranked]
             if net == "x" and title == "last 7d":
                 lines += ["", *_format_table(recent)]
+            if net == "instagram" and title == "last 7d":
+                lines += ["", *_creative_table(recent, creative_of)]
         lines.append("")
     return "\n".join(lines) + "\n"

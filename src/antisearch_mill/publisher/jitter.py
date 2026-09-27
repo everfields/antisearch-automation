@@ -3,7 +3,8 @@
 Each network, slot and posting day gets an offset of 0-40 minutes after its :07 slot,
 seeded by date + network + slot, so every rerun computes the same one. A slot opens at
 its offset, never before. The offsets of one day are drawn for all networks together,
-so no two networks land on the same minute, and none lands on :30. Daily caps and slot
+so no two networks land on the same minute, and none lands on :30. Two slots of one
+network stay MIN_GAP apart after the jitter (Instagram's slots are 2 hours apart). Daily caps and slot
 windows are unchanged: a slot still stays open until the next one (or SLOT_GRACE).
 
 The cron wakes every 15 minutes, so a run takes a slot whose offset falls before the
@@ -19,7 +20,7 @@ import random
 from datetime import date, datetime, time, timedelta
 from typing import Iterator, Mapping
 
-from .guard import CADENCES, cadence, posting_day, slot_times, slots_for, tz
+from .guard import CADENCES, MIN_GAP, cadence, posting_day, slot_times, slots_for, tz
 
 MAX_OFFSET = 40  # minutes after the :07 slot
 LOOKAHEAD = timedelta(minutes=15)  # the cron interval
@@ -35,10 +36,12 @@ def _draws(day: date, network: str, slot: time) -> Iterator[int]:
     yield from range(MAX_OFFSET + 1)
 
 
-def _pick(day: date, network: str, slot: time, nominal: datetime, taken: set[datetime]) -> int:
+def _pick(day: date, network: str, slot: time, nominal: datetime, taken: set[datetime],
+          after: datetime | None = None) -> int:
+    """A seeded offset on a free minute, and at least MIN_GAP after `after` (the network's previous slot)."""
     for off in _draws(day, network, slot):
         when = nominal + timedelta(minutes=off)
-        if when.minute not in _AVOID_MINUTES and when not in taken:
+        if when.minute not in _AVOID_MINUTES and when not in taken and (after is None or when - after >= MIN_GAP):
             return off
     return 0
 
@@ -59,10 +62,12 @@ def day_plan(day: date, env: Mapping[str, str]) -> dict[tuple[str, time], dateti
             slots = slots_for(net, dict(env))
         except ValueError:
             continue
+        prev = None
         for t, nominal in zip(slots, slot_times(day, slots)):
-            when = nominal + timedelta(minutes=_pick(day, net, t, nominal, taken))
+            when = nominal + timedelta(minutes=_pick(day, net, t, nominal, taken, prev))
             taken.add(when)
             plan[(net, t)] = when
+            prev = when
     return plan
 
 

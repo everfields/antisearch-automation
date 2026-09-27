@@ -39,8 +39,9 @@ def test_two_networks_never_land_on_the_same_minute():
 
 
 def test_a_slot_opens_at_its_offset_and_stays_open_until_the_next_slot():
-    slots = slots_for("instagram", REACH)  # 12:07, 15:07, 19:07, 22:07
-    offs = slot_offsets("instagram", DAY, slots, REACH)
+    env = {**REACH, "PUBLISHER_SLOTS_INSTAGRAM": "12:07,15:07,19:07,22:07"}
+    slots = slots_for("instagram", env)
+    offs = slot_offsets("instagram", DAY, slots, env)
     first = datetime(2026, 9, 28, 12, 7, tzinfo=ET) + offs[0]
     assert open_now(first - timedelta(minutes=1), slots, 0, offs) == 0  # never before the offset
     assert open_now(first, slots, 0, offs) == 1
@@ -124,7 +125,8 @@ def test_manual_rows_get_the_offset_unless_pinned(tmp_path):
     assert (a.exact, b.exact) == (False, True) and b.due == datetime(2026, 9, 29, 9, 37, tzinfo=ET)
     slot = datetime(2026, 9, 28, 12, 7, tzinfo=ET)
     ig = slots_for("instagram", REACH)
-    assert scheduled_offset("instagram", slot, REACH) == slot_offsets("instagram", DAY, ig, REACH)[0]  # same as the slot
+    assert ig[1] == slot.time()
+    assert scheduled_offset("instagram", slot, REACH) == slot_offsets("instagram", DAY, ig, REACH)[1]  # same as the slot
     other = scheduled_offset("linkedin", datetime(2026, 9, 28, 3, 7, tzinfo=ET), REACH)  # not a slot: a free minute
     assert timedelta(0) <= other <= timedelta(minutes=MAX_OFFSET)
 
