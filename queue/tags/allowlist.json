@@ -41,5 +41,53 @@
       "by": "cursor agent",
       "evidence": "official: Wikidata Q843887 lists Instagram username 'hermes' (https://www.wikidata.org/wiki/Q843887) and Hermès's LinkedIn company page links instagram.com/hermes; verified: the indexed profile page instagram.com/hermes shows the Verified badge, 15.5M followers, bio 'Hermès, contemporary artisan since 1837.'; posted in the last 7 days: HypeAuditor's daily table has 3,497 posts on 21 Sep 2026 (https://hypeauditor.com/fr/instagram/hermes/) and Social Blade shows 3,500 on 27 Sep 2026 (https://socialblade.com/instagram/user/hermes), so 3 posts after 21 Sep. Global: Hermès's single worldwide account, picked by the founder."
     }
+  },
+  "new zealand": {
+    "kind": "brand",
+    "note": "Tourism New Zealand, New Zealand's official tourism board; concept pair wanderlust -> new zealand (Soul's taste pass, 2026-09-27)",
+    "instagram": {
+      "handle": "@purenewzealand",
+      "verified": true,
+      "checked": "2026-09-27",
+      "market": "global",
+      "by": "cursor agent (evidence: CoS)",
+      "evidence": "official: newzealand.com's social media terms name @purenewzealand as Tourism New Zealand's account (https://www.newzealand.com/us/utilities/social-media-terms-of-use/). Verified and recent: direct instagram.com profile view by CoS, Sun 27 Sep 2026 about 16:05 Madrid (blue badge visible; date = latest non-pinned post): verified, 1,266,183 followers, latest post 23 Sep 2026."
+    }
+  },
+  "bora bora": {
+    "kind": "brand",
+    "note": "Tahiti Tourisme, the tourism board of The Islands of Tahiti (Bora Bora); concept pair paradise -> bora bora (Soul's taste pass, 2026-09-27)",
+    "instagram": {
+      "handle": "@tahititourisme",
+      "verified": true,
+      "checked": "2026-09-27",
+      "market": "global",
+      "by": "cursor agent (evidence: CoS)",
+      "evidence": "official: Tahiti Tourisme's LinkedIn company page links instagram.com/tahititourisme (https://pf.linkedin.com/company/tahititourisme); tahiti-infos names it the official tourism account (https://www.tahiti-infos.com/actualite/Comptes-francais-a-suivre-pour-Tahiti-avec-le-plus-de-followers-instagram_a49.html). Verified and recent: direct instagram.com profile view by CoS, Sun 27 Sep 2026 about 16:05 Madrid (blue badge visible; date = latest non-pinned post): verified, 249,396 followers, latest post 24 Sep 2026."
+    }
+  },
+  "santorini": {
+    "kind": "brand",
+    "note": "Visit Greece, the Greek National Tourism Organisation (Santorini); concept pair sunset -> santorini (Soul's taste pass, 2026-09-27)",
+    "instagram": {
+      "handle": "@visitgreecegr",
+      "verified": true,
+      "checked": "2026-09-27",
+      "market": "global",
+      "by": "cursor agent (evidence: CoS)",
+      "evidence": "official: visitgreece.gr links instagram.com/visitgreecegr (checked 2026-09-27). Verified and recent: direct instagram.com profile view by CoS, Sun 27 Sep 2026 about 16:05 Madrid (blue badge visible; date = latest non-pinned post): verified, 687,855 followers, latest post 26 Sep 2026."
+    }
+  },
+  "bali": {
+    "kind": "brand",
+    "note": "Wonderful Indonesia, Indonesia's Ministry of Tourism (Bali); concept pair island -> bali (Soul's taste pass, 2026-09-27). Not @indtravel: not verified, 3,020 followers (CoS profile view and Social Blade, 2026-09-27)",
+    "instagram": {
+      "handle": "@wonderfulindonesia",
+      "verified": true,
+      "checked": "2026-09-27",
+      "market": "global",
+      "by": "cursor agent (evidence: CoS)",
+      "evidence": "official: bio 'Official Account of Indonesia's Ministry of Tourism' (https://infldb.com/top-brands/Indonesia); HypeAuditor lists it as the Wonderful Indonesia account (https://hypeauditor.com/instagram/wonderfulindonesia/). Verified and recent: direct instagram.com profile view by CoS, Sun 27 Sep 2026 about 16:05 Madrid (blue badge visible; date = latest non-pinned post): verified, 1,512,204 followers, latest post 27 Sep 2026."
+    }
   }
 }

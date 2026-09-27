@@ -19,12 +19,12 @@ only if every rule below holds, otherwise it goes out untagged.
 - **Spam guard:** one tag per handle per network per 7 days, and at most half of a
   network's posts on a day are tagged. A scheduled post's tag counts on the day it goes out.
 - **Concept mention reels** (`queue/manual/2026-09-28-ig-mentions.csv`): an entry is added
-  only after a web check on the day of scheduling shows the account is official, verified,
-  and has posted in the last 7 days. `hermès` → `@hermes` passed on 2026-09-27. Four pairs
-  failed and have no row: @purenewzealand, @tahititourisme and @visitgreecegr have no web
-  evidence of a post in the last 7 days (and none of @visitgreecegr's badge); @indtravel is
-  no longer the ministry's account (3k followers), and @wonderfulindonesia is not shown
-  verified or active.
+  only after a check on the day of scheduling shows the account is official, verified,
+  and has posted in the last 7 days. On 2026-09-27: `hermès` → `@hermes` from web evidence;
+  `new zealand` → `@purenewzealand`, `bora bora` → `@tahititourisme`, `santorini` →
+  `@visitgreecegr` and `bali` → `@wonderfulindonesia` from a direct Instagram profile view
+  by CoS (badge and latest post), with official links from web evidence. `@indtravel` is
+  rejected: not verified, 3,020 followers.
 - **Breaker:** `PUBLISHER_TAG_NETWORKS` (for example `tiktok` or `instagram,tiktok`).
   Empty, the default, means no tags anywhere.
 - Never hashtags, collaborator invites, or hidden text.
