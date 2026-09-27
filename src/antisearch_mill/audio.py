@@ -69,6 +69,8 @@ AUDIO_MODES = (AUDIO_OFF, AUDIO_PULSE, AUDIO_HEARTBEAT, AUDIO_KEYS)
 KEY_SOUNDS = ("soft", "muted", "tick", "tap", "glass")
 DEFAULT_KEY_SOUND = "tap"  # founder, 2026-09-27: a phone tap, not a laptop key
 SCREEN_KEY_PEAK_SPREAD_DB = 0.3
+# Soul, 2026-09-27: the phone taps sit 3 dB under the laptop keys (keys about -25.5, Enter -23.8 dBFS).
+SCREEN_LEVEL_OFFSET_DB = -3.0
 # Per-key sample peak, like a laptop heard from arm's length. Enter sits a little above.
 KEY_PEAK_DB = -22.5
 KEY_PEAK_SPREAD_DB = 0.8
@@ -863,11 +865,11 @@ def _synthesize_screen_keys(timeline: Timeline, sound: str) -> tuple[list[float]
 
     for i, frame in enumerate(timeline.keystroke_frames()):
         rng = _rng("screen-key", sound, typed, i)
-        level = KEY_PEAK_DB + rng.uniform(-SCREEN_KEY_PEAK_SPREAD_DB, SCREEN_KEY_PEAK_SPREAD_DB)
+        level = KEY_PEAK_DB + SCREEN_LEVEL_OFFSET_DB + rng.uniform(-SCREEN_KEY_PEAK_SPREAD_DB, SCREEN_KEY_PEAK_SPREAD_DB)
         _mix_into(left, right, at(frame), screen_key(rng, voice), 10 ** (level / 20.0))
     enter_rng = _rng("screen-enter", sound, typed)
     _mix_into(left, right, at(timeline.submit_frame), screen_key(enter_rng, voice, enter=True),
-              10 ** (ENTER_PEAK_DB / 20.0))
+              10 ** ((ENTER_PEAK_DB + SCREEN_LEVEL_OFFSET_DB) / 20.0))
     loading = next(s for s in timeline.states if s.kind == "loading")
     for i in range(min(n, at(loading.start)), n):
         left[i] = 0.0

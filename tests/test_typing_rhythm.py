@@ -3,7 +3,7 @@
 import pytest
 
 from antisearch_mill.audio import (
-    ENTER_PEAK_DB, KEY_PEAK_DB, KEY_VOICES, SCREEN_VOICES, SR, _rng, clip_keys_sound, screen_key, soft_key,
+    ENTER_PEAK_DB, KEY_PEAK_DB, KEY_VOICES, SCREEN_LEVEL_OFFSET_DB, SCREEN_VOICES, SR, _rng, clip_keys_sound, screen_key, soft_key,
     synthesize_keys,
 )
 from antisearch_mill.oracle import Verdict
@@ -123,10 +123,11 @@ def test_tap_is_the_default_and_the_clip_is_silent_after_enter():
     for f in keys:
         a = int(round(f / 30 * SR))
         peaks.append(20 * math.log10(_peak(left[a:a + int(0.02 * SR)])))
-    assert all(abs(p - KEY_PEAK_DB) <= 0.5 for p in peaks)
+    assert SCREEN_LEVEL_OFFSET_DB == -3.0
+    assert all(abs(p - (KEY_PEAK_DB - 3.0)) <= 0.5 for p in peaks)  # about -25.5 dBFS per tap
     assert max(peaks) - min(peaks) < 1.0  # a phone tap barely varies
     a = int(round(tl.submit_frame / 30 * SR))
-    assert 20 * math.log10(_peak(left[a:a + int(0.03 * SR)])) == pytest.approx(ENTER_PEAK_DB, abs=0.3)
+    assert 20 * math.log10(_peak(left[a:a + int(0.03 * SR)])) == pytest.approx(ENTER_PEAK_DB - 3.0, abs=0.3)
     loading = next(s for s in tl.states if s.kind == "loading")
     start = int(round(loading.start / 30 * SR))
     assert _peak(left[start:]) == 0.0 and _peak(right[start:]) == 0.0
