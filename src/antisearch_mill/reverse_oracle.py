@@ -1,9 +1,10 @@
 """Reverse oracle: from a target account to the short inputs whose real verdict names it.
 
-For each target (a big Instagram account) a generator model, given the oracle's system
-prompt when available and real input -> verdict pairs from the frozen store, proposes a
-few short universal inputs. Each input is then verified with ONE call to the publisher's
-oracle path (`LiveOracle`, the same endpoint the clips use), under a hard call budget.
+The generator is the oracle itself run backwards: the live oracle's model, system prompt
+and settings, read from the product's source and deployed config (never edited), asked a
+reverse question about the target ("category topped by cartier"). Each proposed input is
+then verified forward with ONE call to the publisher's oracle path (`LiveOracle`, the same
+endpoint the clips use), under a hard call budget.
 An input already frozen or already tried by an earlier run is never asked again.
 Results go to `<state>/reverse_oracle/`; every live verdict is frozen in verdicts.csv
 unless `--freeze matched`. Nothing is posted or scheduled.
@@ -12,28 +13,29 @@ unless `--freeze matched`. Nothing is posted or scheduled.
 from __future__ import annotations
 
 import argparse
+import ast
 import csv
+import hashlib
 import json
+import os
 import re
 import sys
 import time
 import unicodedata
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Callable, Iterable, Protocol
+from typing import Callable, Iterable, Mapping, Protocol
 
 import requests
 
-from .config import Settings, env
+from .config import Settings
 from .oracle import LiveOracle, Oracle, OracleError, normalize_category
 from .publisher.guard import input_problem
 from .publisher.tags import NEVER_TAG_NAMES, NEVER_TAG_OWNERS
 from .publisher.verdicts import VerdictStore
 
 DEFAULT_BUDGET = 100
-DEFAULT_GENERATOR_URL = "https://api.openai.com/v1/chat/completions"
-DEFAULT_GENERATOR_MODEL = "gpt-4.1"
 MAX_INPUT_WORDS = 3
 RESULT_COLUMNS = [
     "run_id", "round", "vertical", "target", "handle", "candidate_input", "why", "source",
@@ -155,125 +157,172 @@ def input_reason(text: str, target: Target, others: Iterable[Target] = ()) -> st
     return None
 
 
-def oracle_examples(store: VerdictStore, limit: int = 120) -> list[tuple[str, str]]:
-    if not store.path.is_file():
-        return []
-    with store.path.open(newline="", encoding="utf-8") as fh:
-        rows = [r for r in csv.DictReader(fh) if r.get("source") == "live"]
-    return [(r["category"], r["verdict"]) for r in rows[-limit:]]
+REVERSE_TEMPLATES = ("category topped by {winner}", "what {winner} is the answer to")
+CANARY = "\u2301"
+SPEC_ENV = ("OPENAI_MODEL", "OPENAI_BASE_URL", "REASONING_EFFORT", "ORACLE_TIMEOUT_S", "ORACLE_PROMPT_VERSION")
 
 
-def generator_messages(targets: list[Target], per_target: int, examples: list[tuple[str, str]],
-                       oracle_prompt: str) -> list[dict]:
-    context = oracle_prompt.strip() or (
-        "The oracle's exact system prompt is not available here. What is known: antisearch.ai takes one "
-        "bare input (a category, word or phrase) and answers with the one thing it would crown for it, as one "
-        "short lowercase verdict, no explanation.")
-    shots = "\n".join(f"{i} -> {v}" for i, v in examples)
-    system = (
-        "You help find inputs for an oracle. The oracle's own instructions follow between the markers.\n"
-        f"<oracle>\n{context}\n</oracle>\n\n"
-        f"Real input -> verdict pairs from the live oracle:\n{shots}\n\n"
-        "For each target, propose inputs that the oracle would most likely answer with exactly the "
-        "target's name (brand-level, not one product), judging from how it answers above.\n"
-        "Rules for every input: lowercase plain English ascii; 1 or 2 words (3 at most); short, "
-        "beautiful, universal (anyone anywhere would type it); never contains the target's name, any of "
-        "its aliases, or a ranking word (e.g. top, greatest); no numbers.\n"
-        f"Give up to {per_target} inputs per target, most likely first, each with a few words on why "
-        "the pair would strike a viewer.\n"
-        'Reply with JSON only: {"targets": [{"handle": "@x", "candidates": [{"input": "...", "why": "..."}]}]}'
-    )
-    listing = "\n".join(f"{t.handle}: {t.name} ({t.vertical}; also answers: {', '.join(t.aliases)})"
-                        for t in targets)
-    return [{"role": "system", "content": system}, {"role": "user", "content": f"Targets:\n{listing}"}]
+@dataclass(frozen=True)
+class OracleSpec:
+    """The live oracle's own model call, read from the product's source and deployed config."""
+    system_prompt: str  # the template; {current_date} / {current_date_year} are filled per call
+    prompt_version: str
+    model: str
+    base_url: str
+    reasoning_effort: str
+    max_completion_tokens: int
+    timeout_s: float
+    user_template: str  # e.g. "<<<QUERY\n{category}\nQUERY>>>"
+
+    @property
+    def prompt_sha256(self) -> str:
+        return hashlib.sha256(self.system_prompt.encode("utf-8")).hexdigest()
+
+    def system_for(self, today: date) -> str:
+        return self.system_prompt.format(current_date=today.strftime("%B %d, %Y"),
+                                         current_date_year=today.year)
 
 
-def parse_candidates(text: str) -> dict[str, list[dict]]:
-    text = text.strip()
-    start, end = text.find("{"), text.rfind("}")
-    data = json.loads(text[start:end + 1] if 0 <= start < end else text)
-    out: dict[str, list[dict]] = {}
-    for item in data.get("targets", []):
-        handle = str(item.get("handle", "")).strip().lower()
-        cands = []
-        for c in item.get("candidates", []):
-            if isinstance(c, str):
-                c = {"input": c}
-            cands.append({"input": normalize_category(str(c.get("input", ""))),
-                          "why": " ".join(str(c.get("why", "")).split())})
-        if handle:
-            out[handle if handle.startswith("@") else "@" + handle] = cands
+def _assigned(tree: ast.Module, name: str) -> ast.expr | None:
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+            return node.value
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == name:
+            return node.value
+    return None
+
+
+def _field_defaults(tree: ast.Module, cls: str) -> dict[str, object]:
+    out: dict[str, object] = {}
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == cls:
+            for item in node.body:
+                if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name) and item.value is not None:
+                    try:
+                        out[item.target.id] = ast.literal_eval(item.value)
+                    except ValueError:
+                        pass
     return out
 
 
-class ChatGenerator:
-    """Any OpenAI-compatible chat endpoint (OpenAI by default; GitHub Models retired 2026-07-30)."""
+def load_oracle_spec(source: str | Path, environ: Mapping[str, str]) -> OracleSpec:
+    """Read, never import or edit, the product's `prompts.py`, `settings.py` and `oracle.py`.
+    Deployed env overrides settings the way the product's pydantic settings do."""
+    src = Path(source)
+    prompts = ast.parse((src / "prompts.py").read_text(encoding="utf-8"))
+    table = ast.literal_eval(_assigned(prompts, "PROMPTS"))
+    active = _assigned(prompts, "ACTIVE")
+    default_version = ast.literal_eval(active.args[1]) if isinstance(active, ast.Call) else ast.literal_eval(active)
+    version = environ.get("ORACLE_PROMPT_VERSION") or default_version
+    if version not in table:
+        raise ValueError(f"prompt version {version!r} not in prompts.py")
 
-    def __init__(self, url: str, key: str, model: str, *, examples: list[tuple[str, str]],
-                 oracle_prompt: str = "", batch_size: int = 10, session: requests.Session | None = None,
-                 sleep: Callable[[float], None] = time.sleep, pause_s: float = 7.0, log=print):
-        self.url, self.key, self.model = url, key, model
-        self.examples, self.oracle_prompt = examples, oracle_prompt
-        self.batch_size = batch_size
+    defaults = _field_defaults(ast.parse((src / "settings.py").read_text(encoding="utf-8")), "Settings")
+    def setting(name: str):
+        return environ.get(name.upper()) or defaults.get(name)
+
+    call = (src / "oracle.py").read_text(encoding="utf-8")
+    tokens = re.search(r"max_completion_tokens\s*=\s*(\d+)", call)
+    user = re.search(r'user_message\s*=\s*f"(.*?)"', call)
+    if not tokens or not user:
+        raise ValueError("oracle.py: could not read max_completion_tokens / user_message")
+    base_url = setting("openai_base_url")
+    if not base_url:
+        raise ValueError("no OPENAI_BASE_URL: the product would bill a default endpoint")
+    return OracleSpec(
+        system_prompt=table[version], prompt_version=version, model=str(setting("openai_model")),
+        base_url=str(base_url), reasoning_effort=str(setting("reasoning_effort")),
+        max_completion_tokens=int(tokens.group(1)), timeout_s=float(setting("oracle_timeout_s") or 15.0),
+        user_template=user.group(1).encode().decode("unicode_escape"))
+
+
+def clean_value(raw: str) -> str:
+    return normalize_category(raw.replace(CANARY, "").strip().strip('"').strip("'"))
+
+
+class OracleReverseGenerator:
+    """The oracle run backwards: the product's own model, system prompt and settings, with a
+    reverse question ("category topped by cartier") as the query. Nothing else differs."""
+
+    generator = "oracle-reverse"
+
+    def __init__(self, spec: OracleSpec, api_key: str, *, templates: Iterable[str] = REVERSE_TEMPLATES,
+                 max_calls: int = 200, session: requests.Session | None = None, today: date | None = None,
+                 sleep: Callable[[float], None] = time.sleep, log=print):
+        self.spec, self.key = spec, api_key
+        self.templates = tuple(templates)
+        self.max_calls = max_calls
         self.session = session or requests.Session()
-        self._sleep, self.pause_s, self.log = sleep, pause_s, log
+        self.today = today or datetime.now(timezone.utc).date()
+        self._sleep, self.log = sleep, log
         self.calls = 0
 
-    def _call(self, messages: list[dict]) -> str:
-        body = {"model": self.model, "messages": messages, "temperature": 0.7,
-                "response_format": {"type": "json_object"}}
-        for attempt in range(4):
-            resp = self.session.post(self.url, json=body, timeout=120, headers={
-                "Authorization": f"Bearer {self.key}", "Content-Type": "application/json"})
+    @property
+    def model(self) -> str:
+        return self.spec.model
+
+    def body(self, query: str) -> dict:
+        return {"model": self.spec.model,
+                "messages": [{"role": "system", "content": self.spec.system_for(self.today)},
+                             {"role": "user", "content": self.spec.user_template.replace("{category}", query)}],
+                "reasoning_effort": self.spec.reasoning_effort,
+                "max_completion_tokens": self.spec.max_completion_tokens}
+
+    def ask(self, query: str) -> str:
+        url = self.spec.base_url.rstrip("/") + "/chat/completions"
+        for attempt in range(2):
             self.calls += 1
+            try:
+                resp = self.session.post(url, json=self.body(query), timeout=self.spec.timeout_s * 2,
+                                         headers={"Authorization": f"Bearer {self.key}",
+                                                  "Content-Type": "application/json"})
+            except requests.RequestException as exc:
+                if attempt:
+                    raise RuntimeError(f"network: {exc.__class__.__name__}") from exc
+                continue
             if resp.status_code == 429 or resp.status_code >= 500:
-                wait = float(resp.headers.get("Retry-After") or 20 * (attempt + 1))
-                self.log(f"  generator http {resp.status_code}; waiting {wait:.0f}s")
-                self._sleep(min(wait, 120))
+                if attempt:
+                    raise RuntimeError(f"http {resp.status_code}")
+                self._sleep(float(resp.headers.get("Retry-After") or 10))
                 continue
             if resp.status_code != 200:
-                raise RuntimeError(f"generator http {resp.status_code}: {resp.text[:200]}")
-            try:
-                content = resp.json()["choices"][0]["message"]["content"] or ""
-            except (ValueError, KeyError, IndexError, TypeError) as exc:
-                raise RuntimeError(f"generator reply is not a chat completion: {resp.text[:300]!r}") from exc
-            if not content.strip():
-                raise RuntimeError(f"generator reply is empty: {resp.text[:300]!r}")
-            return content
-        raise RuntimeError("generator kept failing")
+                raise RuntimeError(f"http {resp.status_code}: {resp.text[:160]}")
+            return (resp.json()["choices"][0]["message"].get("content") or "").strip()
+        raise RuntimeError("no answer")
 
     def propose(self, targets: list[Target], per_target: int) -> dict[str, list[dict]]:
         out: dict[str, list[dict]] = {}
-        for i in range(0, len(targets), self.batch_size):
-            batch = targets[i:i + self.batch_size]
-            if i:
-                self._sleep(self.pause_s)
-            messages = generator_messages(batch, per_target, self.examples, self.oracle_prompt)
-            content = ""
-            try:
-                content = self._call(messages)
-                got = parse_candidates(content)
-            except (RuntimeError, ValueError, KeyError, AttributeError, requests.RequestException) as exc:
-                if content:
-                    exc = f"{exc}; reply starts {content[:300]!r}"
-                self.log(f"  generator batch {i // self.batch_size + 1} failed: {exc}")
-                continue
-            for t in batch:
-                out[t.handle.lower()] = got.get(t.handle.lower(), [])[:per_target]
+        for t in targets:
+            cands: list[dict] = []
+            for template in self.templates[:per_target]:
+                if self.calls >= self.max_calls:
+                    self.log(f"generator cap of {self.max_calls} calls reached")
+                    return out
+                query = template.format(winner=t.aliases[0])
+                try:
+                    value = clean_value(self.ask(query))
+                except (RuntimeError, KeyError, ValueError) as exc:
+                    self.log(f"  generator {t.handle} {query!r}: {exc}")
+                    continue
+                self.log(f"  generator {t.handle}: {query!r} -> {value!r}")
+                if value and value != "no" and value not in {c["input"] for c in cands}:
+                    cands.append({"input": value, "why": f"oracle backwards: {query}"})
+            out[t.handle.lower()] = cands
         return out
 
 
-class StaticGenerator:
-    """Candidates from a JSON file ({"@handle": [{"input", "why"}]}), e.g. a saved run."""
+class ReplayGenerator:
+    """Replays the candidates of an earlier oracle-reverse run (its candidates.json)."""
 
-    def __init__(self, data: dict[str, list]):
-        self.data = {k.lower(): [c if isinstance(c, dict) else {"input": c} for c in v]
-                     for k, v in data.items()}
+    def __init__(self, saved: dict):
+        if saved.get("generator") != OracleReverseGenerator.generator:
+            raise ValueError("replay needs a candidates.json written by the oracle-reverse generator")
+        self.saved = saved
+        self.model = saved.get("model", "")
 
     def propose(self, targets: list[Target], per_target: int) -> dict[str, list[dict]]:
-        return {t.handle.lower(): [{"input": normalize_category(c.get("input", "")), "why": c.get("why", "")}
-                                   for c in self.data.get(t.handle.lower(), [])][:per_target]
-                for t in targets}
+        data = {k.lower(): v for k, v in self.saved.get("candidates", {}).items()}
+        return {t.handle.lower(): data.get(t.handle.lower(), []) for t in targets}
 
 
 def earlier_results(folder: Path) -> dict[str, Result]:
@@ -428,16 +477,15 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="reverse_oracle", description=__doc__.splitlines()[0])
     p.add_argument("--targets", default="queue/reverse_oracle/targets.csv")
     p.add_argument("--state", default="state", help="publisher-state checkout (verdicts.csv, reverse_oracle/)")
+    p.add_argument("--oracle-source", help="the product's app dir (prompts.py, settings.py, oracle.py); read only")
+    p.add_argument("--replay", help="candidates.json of an earlier oracle-reverse run instead of generating")
+    p.add_argument("--template", action="append", help="reverse question, {winner} = the target's first alias")
+    p.add_argument("--per-target", type=int, default=2, help="reverse questions asked per target")
+    p.add_argument("--generator-calls", type=int, default=200, help="max model calls for the generator")
     p.add_argument("--budget", type=int, default=DEFAULT_BUDGET, help="max live oracle calls (default 100)")
-    p.add_argument("--per-target", type=int, default=3, help="candidates asked of the generator per target")
     p.add_argument("--freeze", choices=("all", "matched"), default="all",
                    help="freeze every live verdict (one honest run per input) or only matched ones")
     p.add_argument("--live", action="store_true", help="really call the oracle (else frozen/earlier only)")
-    p.add_argument("--candidates", help="JSON candidates file instead of the generator")
-    p.add_argument("--oracle-prompt", default="", help="file with the oracle's system prompt")
-    p.add_argument("--model", default=env("REVERSE_ORACLE_MODEL") or DEFAULT_GENERATOR_MODEL)
-    p.add_argument("--generator-url", default=env("REVERSE_ORACLE_GENERATOR_URL") or DEFAULT_GENERATOR_URL)
-    p.add_argument("--batch-size", type=int, default=10)
     p.add_argument("--check-sites", action="store_true", help="check matched brands' sites link the handle")
     p.add_argument("--run-id", default="")
     a = p.parse_args(argv)
@@ -449,28 +497,39 @@ def main(argv: list[str] | None = None) -> int:
     if a.run_id and (folder / f"{a.run_id}-results.csv").exists():
         print(f"run {a.run_id} already ran; nothing to do")
         return 0
-    prompt = Path(a.oracle_prompt).read_text(encoding="utf-8") if a.oracle_prompt else env("ORACLE_SYSTEM_PROMPT")
-    print(f"targets: {len(targets)}; budget: {a.budget} oracle calls; freeze: {a.freeze}; "
-          f"oracle prompt: {'given' if prompt.strip() else 'not available (examples only)'}")
-
-    if a.candidates:
-        gen: Generator = StaticGenerator(json.loads(Path(a.candidates).read_text(encoding="utf-8")))
-    else:
-        key = env("REVERSE_ORACLE_GENERATOR_KEY") or env("OPENAI_API_KEY")
-        if not key:
-            print("no generator key (REVERSE_ORACLE_GENERATOR_KEY or OPENAI_API_KEY); "
-                  "or pass --candidates", file=sys.stderr)
-            return 2
-        gen = ChatGenerator(a.generator_url, key, a.model, examples=oracle_examples(store),
-                            oracle_prompt=prompt, batch_size=a.batch_size)
-    candidates = gen.propose(targets, a.per_target)
     run_id = a.run_id or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%MZ")
+
+    if a.replay:
+        saved = json.loads(Path(a.replay).read_text(encoding="utf-8"))
+        gen: Generator = ReplayGenerator(saved)
+        meta = {k: v for k, v in saved.items() if k != "candidates"}
+    else:
+        if not a.oracle_source:
+            print("--oracle-source is required: the generator is the oracle's own prompt and model",
+                  file=sys.stderr)
+            return 2
+        spec = load_oracle_spec(a.oracle_source, os.environ)
+        key = os.environ.get("OPENAI_API_KEY", "").strip()
+        if not key:
+            print("no OPENAI_API_KEY for the oracle's model endpoint", file=sys.stderr)
+            return 2
+        gen = OracleReverseGenerator(spec, key, templates=a.template or REVERSE_TEMPLATES,
+                                     max_calls=a.generator_calls)
+        meta = {"generator": gen.generator, "model": spec.model, "endpoint": spec.base_url,
+                "prompt_version": spec.prompt_version, "prompt_sha256": spec.prompt_sha256,
+                "reasoning_effort": spec.reasoning_effort, "max_completion_tokens": spec.max_completion_tokens,
+                "user_template": spec.user_template, "templates": list(gen.templates[:a.per_target]),
+                "date": gen.today.isoformat()}
+    print(f"targets: {len(targets)}; budget: {a.budget} oracle calls; freeze: {a.freeze}; generator: "
+          + ", ".join(f"{k}={meta[k]}" for k in ("generator", "model", "prompt_version", "reasoning_effort")
+                      if k in meta))
+    candidates = gen.propose(targets, a.per_target)
     folder.mkdir(parents=True, exist_ok=True)
+    meta["generator_calls"] = getattr(gen, "calls", 0)
     (folder / f"{run_id}-candidates.json").write_text(
-        json.dumps({"model": getattr(gen, "model", f"file {a.candidates}"), "candidates": candidates}, indent=1,
-                   ensure_ascii=False) + "\n", encoding="utf-8")
+        json.dumps({**meta, "candidates": candidates}, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"candidates: {sum(len(v) for v in candidates.values())} for "
-          f"{sum(1 for v in candidates.values() if v)} targets")
+          f"{sum(1 for v in candidates.values() if v)} targets ({meta['generator_calls']} generator calls)")
 
     settings = Settings.from_env()
     oracle = LiveOracle(settings.oracle_url, min_interval_s=settings.oracle_min_interval_s,

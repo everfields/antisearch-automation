@@ -128,47 +128,112 @@ def test_ranking_striking_simple_first(tmp_path, targets):
     assert [r.input for r in ro.ranked_matches(rows)] == ["hotel", "jewelry", "luxury brand", "ring"]
 
 
-def test_generator_batches_and_parses(targets):
-    calls = []
+PROMPTS_PY = '''import os
+ACTIVE = os.environ.get("ORACLE_PROMPT_VERSION", "v2")
+PROMPTS: dict[str, str] = {
+    # a comment
+    "v3": """newer {current_date}""",
+    "v2": """You are the oracle. Today is {current_date} ({current_date_year}).""",
+}
+SYSTEM_PROMPT = PROMPTS[ACTIVE]
+'''
+SETTINGS_PY = '''from pydantic_settings import BaseSettings
+class Settings(BaseSettings):
+    openai_api_key: str = Field(...)
+    openai_model: str = "model-x"
+    openai_base_url: str | None = None
+    reasoning_effort: str = "medium"
+    oracle_timeout_s: float = 15.0
+'''
+ORACLE_PY = '''async def call_oracle(category):
+    user_message = f"<<<QUERY\\n{category}\\nQUERY>>>"
+    await c(max_completion_tokens=2048)
+'''
+
+
+@pytest.fixture
+def source(tmp_path):
+    d = tmp_path / "app"
+    d.mkdir()
+    (d / "prompts.py").write_text(PROMPTS_PY, encoding="utf-8")
+    (d / "settings.py").write_text(SETTINGS_PY, encoding="utf-8")
+    (d / "oracle.py").write_text(ORACLE_PY, encoding="utf-8")
+    return d
+
+
+def test_spec_is_read_from_the_product_source_and_deployed_env(source):
+    spec = ro.load_oracle_spec(source, {"OPENAI_BASE_URL": "https://foundry.example/openai/v1/",
+                                        "OPENAI_MODEL": "gpt-6-astra"})
+    assert spec.prompt_version == "v2" and spec.model == "gpt-6-astra"
+    assert spec.reasoning_effort == "medium" and spec.max_completion_tokens == 2048
+    assert spec.user_template == "<<<QUERY\n{category}\nQUERY>>>"
+    from datetime import date
+    assert spec.system_for(date(2026, 9, 27)) == "You are the oracle. Today is September 27, 2026 (2026)."
+    assert ro.load_oracle_spec(source, {"OPENAI_BASE_URL": "u", "ORACLE_PROMPT_VERSION": "v3"}).prompt_version == "v3"
+    with pytest.raises(ValueError, match="OPENAI_BASE_URL"):
+        ro.load_oracle_spec(source, {})
+
+
+def test_generator_is_the_oracle_call_with_a_reverse_query(source, targets):
+    from datetime import date
+    spec = ro.load_oracle_spec(source, {"OPENAI_BASE_URL": "https://foundry.example/openai/v1/"})
+    sent = []
 
     class Resp:
-        def __init__(self, status, payload):
-            self.status_code, self._p, self.headers, self.text = status, payload, {}, ""
+        def __init__(self, status, content):
+            self.status_code, self.headers, self.text = status, {}, ""
+            self._c = content
 
         def json(self):
-            return self._p
+            return {"choices": [{"message": {"content": self._c}}]}
+
+    answers = iter([Resp(503, ""), Resp(200, "Jewelry\u2301"), Resp(200, "jewelry\u2301"), Resp(200, "no\u2301"),
+                    Resp(200, "Fashion House\u2301")])
 
     class Session:
         def post(self, url, json, timeout, headers):
-            calls.append(json)
-            if len(calls) == 1:
-                return Resp(429, {})
-            names = [line.split(":")[0] for line in json["messages"][1]["content"].splitlines()[1:]]
-            content = {"targets": [{"handle": h, "candidates": [{"input": "Jewelry ", "why": "one word"}]}
-                                   for h in names]}
-            return Resp(200, {"choices": [{"message": {"content": "```json\n" + __import__("json").dumps(content)
-                                                                  + "\n```"}}]})
+            sent.append((url, json, headers))
+            return next(answers)
 
-    gen = ro.ChatGenerator("u", "k", "m", examples=[("travel", "japan")], batch_size=3, session=Session(),
-                           sleep=lambda s: None)
+    gen = ro.OracleReverseGenerator(spec, "k", session=Session(), today=date(2026, 9, 27), max_calls=5,
+                                    sleep=lambda s: None, log=lambda *_: None)
     out = gen.propose(targets, 2)
-    assert set(out) == {"@cartier", "@hermes", "@aman", "@tiffanyandco"}
-    assert out["@aman"] == [{"input": "jewelry", "why": "one word"}]
-    assert len(calls) == 3  # one 429 retried, then two batches
-    system = calls[1]["messages"][0]["content"]
-    assert "travel -> japan" in system and "not available" in system
+    assert out["@cartier"] == [{"input": "jewelry", "why": "oracle backwards: category topped by cartier"}]
+    assert out["@hermes"] == [{"input": "fashion house", "why": "oracle backwards: what hermès is the answer to"}]
+    assert "@aman" not in out  # the call cap stopped the generator
+    url, body, headers = sent[1]
+    assert url == "https://foundry.example/openai/v1/chat/completions"
+    assert headers["Authorization"] == "Bearer k"
+    assert body == {"model": "model-x", "reasoning_effort": "medium", "max_completion_tokens": 2048, "messages": [
+        {"role": "system", "content": "You are the oracle. Today is September 27, 2026 (2026)."},
+        {"role": "user", "content": "<<<QUERY\ncategory topped by cartier\nQUERY>>>"}]}
 
 
-def test_main_writes_state_files(tmp_path, monkeypatch):
+def test_replay_only_accepts_oracle_reverse_candidates(targets):
+    with pytest.raises(ValueError):
+        ro.ReplayGenerator({"model": "file", "candidates": {}})
+    gen = ro.ReplayGenerator({"generator": "oracle-reverse", "candidates": {"@Cartier": [{"input": "jewelry"}]}})
+    assert gen.propose(targets, 2)["@cartier"] == [{"input": "jewelry"}]
+
+
+def test_main_requires_the_oracle_source(tmp_path, monkeypatch):
+    targets = tmp_path / "t.csv"
+    targets.write_text(TARGETS, encoding="utf-8")
+    assert ro.main(["--targets", str(targets), "--state", str(tmp_path / "s")]) == 2
+
+
+def test_main_replay_writes_state_files(tmp_path):
     targets = tmp_path / "t.csv"
     targets.write_text(TARGETS, encoding="utf-8")
     cands = tmp_path / "c.json"
-    cands.write_text(json.dumps({"@cartier": ["jewelry"]}), encoding="utf-8")
+    cands.write_text(json.dumps({"generator": "oracle-reverse", "model": "m",
+                                 "candidates": {"@cartier": [{"input": "jewelry"}]}}), encoding="utf-8")
     state = tmp_path / "state"
     VerdictStore(state / "verdicts.csv").put(FixtureOracle({"jewelry": "cartier"}).ask("jewelry"))
-    assert ro.main(["--targets", str(targets), "--state", str(state), "--candidates", str(cands),
+    assert ro.main(["--targets", str(targets), "--state", str(state), "--replay", str(cands),
                     "--run-id", "r"]) == 0
     with (state / "reverse_oracle" / "r-matches.csv").open() as fh:
         rows = list(csv.DictReader(fh))
     assert rows[0]["candidate_input"] == "jewelry" and rows[0]["handle"] == "@cartier"
-    assert (state / "reverse_oracle" / "r-candidates.json").is_file()
+    saved = json.loads((state / "reverse_oracle" / "r-candidates.json").read_text())
+    assert saved["generator"] == "oracle-reverse" and saved["model"] == "m"
