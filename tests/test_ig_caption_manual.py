@@ -256,9 +256,83 @@ def test_the_ig_mention_queue_is_ordered_and_not_scheduled():
     jobs = read_queue(ROOT / "queue" / "ig_mentions.csv")
     order = [j.category for j in jobs]
     assert order[:5] == ["city", "national park", "museum", "burger", "hair tool"]  # 1,2,3,4,8,10 (1 is scheduled)
-    assert order[-3:] == ["perfume", "watch", "singer"]  # 13,16,18 last
-    assert len(order) == 17 and all(j.platforms == ("instagram",) and j.caption == "" for j in jobs)
+    assert order[14:17] == ["perfume", "watch", "singer"]  # 13,16,18 last of Soul's list
+    assert order[17:] == ["getaway", "party", "racing", "toys", "sunrise", "couture", "streetwear", "airline",
+                          "canyon", "skyscraper"]  # the concept pairs Soul kept, held, or marked as filler
+    assert "shopping" not in order  # killed: never scheduled
+    assert len(order) == 27 and all(j.platforms == ("instagram",) and j.caption == "" for j in jobs)
     assert "ig_mentions" not in DEFAULT_POST_QUEUES  # queued, not scheduled
     assert "ig_mentions" not in (ROOT / ".github" / "workflows" / "publisher.yml").read_text()
     for lst in [*(ROOT / "queue" / "pools").glob("*.txt"), *(ROOT / "queue" / "winners").glob("*.txt")]:
         assert not set(order) & {c for c, _ in read_pool(lst)}, lst.name  # the queue owns these inputs
+
+
+# --- concept mention reels (Soul's taste pass, 2026-09-27) ----------------------
+
+
+def test_instagram_takes_a_global_brand_account_but_not_another_market(tmp_path):
+    log = TagLog(tmp_path / "tags.csv")
+    now = datetime(2026, 9, 30, 12, 7, tzinfo=ET)
+    allow = {**ALLOW, "hermès": {"kind": "brand", "instagram": {"handle": "@hermes", "verified": True,
+                                                                  "checked": "2026-09-27", "market": "global"}}}
+    assert choose_tag("hermès", "instagram", ON, allow, log, now, 4).handle == "@hermes"
+    assert choose_tag("dior", "instagram", ON, allow, log, now, 4).handle == ""  # "fr" is neither US nor global
+
+
+def test_the_concept_row_file_schedules_only_the_pairs_that_passed_the_check():
+    (row,) = read_manual(ROOT / "queue" / "manual" / "2026-09-28-ig-mentions.csv")
+    assert (row.id, row.category, row.network) == ("ig-concept-fashion", "fashion", "instagram")
+    assert row.due == datetime(2026, 9, 30, 12, 7, tzinfo=ET)
+    text = (ROOT / "queue" / "manual" / "2026-09-28-ig-mentions.csv").read_text()
+    for dropped in ("wanderlust", "paradise", "sunset", "island"):
+        assert f"# ig-concept-{dropped}," in text
+
+
+def test_the_hermes_mention_keeps_the_accent(tmp_path):
+    from antisearch_mill.publisher.tags import allowlisted, load_allowlist
+
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    tag = allowlisted("hermès", "instagram", allow, datetime(2026, 9, 30).date())
+    assert tag.handle == "@hermes" and allow["hermès"]["instagram"]["market"] == "global"
+    assert ig_caption("fashion", "hermès", tag.handle) == "#fashion #hermès #ai @hermes"
+
+
+def test_rows_scheduled_days_ahead_each_keep_their_mention(tmp_path):
+    ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "state" / "posts.csv")
+    store = VerdictStore(tmp_path / "state" / "verdicts.csv")
+    allow = {}
+    for n, (cat, verdict) in enumerate([("wanderlust", "new zealand"), ("paradise", "bora bora"),
+                                        ("fashion", "hermès")]):
+        store.put(Verdict(cat, verdict, verdict, "live", "https://antisearch.ai/verdict", 2000, 1,
+                          "2026-09-27T13:19:22+00:00"))
+        allow[verdict] = {"kind": "brand", "instagram": {"handle": f"@h{n}", "verified": True,
+                                                         "checked": "2026-09-27", "market": "global"}}
+    rows = [ManualRow(f"ig-concept-{c}", c, "instagram", datetime(2026, 9, 28 + i, 12, 7, tzinfo=ET))
+            for i, c in enumerate(["wanderlust", "paradise", "fashion"])]
+    env = {**ENV, "PUBLISHER_LIVE_NETWORKS": "tiktok,x"}
+    t = _transport(env)
+
+    def produce(job):
+        _clip(ledger, job.id, store.get(job.category).verdict)
+        return ledger.clip_for_job(job.id)
+
+    out = run_manual(rows, ledger, log, store, now=datetime(2026, 9, 27, 10, 0, tzinfo=ET), live=True, env=env,
+                     produce=produce, adapters={"instagram": BufferInstagram}, transport=t, sleep=lambda _s: None,
+                     tag_allowlist=allow)
+    assert [o.status for o in out] == ["scheduled"] * 3
+    assert [(c["text"], c["dueAt"]) for c in _creates(t)] == [
+        ("#wanderlust #newzealand #ai @h0", "2026-09-28T16:07:00.000Z"),
+        ("#paradise #borabora #ai @h1", "2026-09-29T16:07:00.000Z"),
+        ("#fashion #hermès #ai @h2", "2026-09-30T16:07:00.000Z")]
+    tags = TagLog(log.path.parent / "tags.csv").rows()
+    assert [r["at"][:10] for r in tags] == ["2026-09-28", "2026-09-29", "2026-09-30"]  # the day each goes out
+
+
+def test_a_tag_scheduled_later_still_blocks_the_same_handle_before_it():
+    from antisearch_mill.publisher.tags import choose_tag as pick
+
+    class Log:
+        def rows(self):
+            return [{"at": "2026-10-05T12:07:00-04:00", "network": "instagram", "handle": "@k18hair", "job_id": "a"}]
+
+    assert pick("k18", "instagram", ON, ALLOW, Log(), datetime(2026, 9, 30, 12, 7, tzinfo=ET), 4).handle == ""

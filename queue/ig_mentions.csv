@@ -17,3 +17,17 @@ igm-athlete,athlete,instagram,,"#17 expected 'lebron james'; verdict 'michael jo
 igm-perfume,perfume,instagram,,"#13 expected 'chanel no. 5'; verdict 'frédéric malle portrait of a lady'; match no; no mention: verdict does not match"
 igm-watch,watch,instagram,,"#16 expected 'rolex submariner'; verdict 'patek philippe grandmaster chime 6300gr'; match no; no mention: verdict does not match"
 igm-singer,singer,instagram,,"#18 expected 'taylor swift'; verdict 'beyoncé'; match no; no mention: a person is never tagged"
+# Concept pairs, Soul's taste pass (2026-09-27); verdicts frozen on publisher-state in run 2026-09-27-c1. Nothing here is scheduled by the publisher.
+# SCHEDULED (queue/manual/2026-09-28-ig-mentions.csv): igc-fashion,fashion,instagram,,"hermès -> @hermes; Wed 30 Sep 12:07 NY"
+# DROPPED 2026-09-27 (handle check failed; re-check to reinstate on its day): wanderlust -> new zealand @purenewzealand (Mon 28 Sep); paradise -> bora bora @tahititourisme (Tue 29 Sep); sunset -> santorini @visitgreecegr (Thu 1 Oct); island -> bali (Fri 2 Oct: @indtravel is not the ministry's account any more; @wonderfulindonesia not shown verified or active)
+igc-getaway,getaway,instagram,,"HOLD: maldives -> @visitmaldives; not before 7 days after bora bora airs"
+igc-party,party,instagram,,"KEEP, not scheduled: rio carnival -> @visitbrasil"
+igc-racing,racing,instagram,,"KEEP, not scheduled: formula 1 -> @f1"
+igc-toys,toys,instagram,,"KEEP, not scheduled: lego -> @lego"
+igc-sunrise,sunrise,instagram,,"KEEP, not scheduled: haleakalā -> @gohawaii"
+igc-couture,couture,instagram,,"KEEP, not scheduled: schiaparelli -> @schiaparelli"
+igc-streetwear,streetwear,instagram,,"KEEP, not scheduled: stüssy -> @stussy"
+igc-airline,airline,instagram,,"KEEP, not scheduled: qatar airways -> @qatarairways"
+igc-canyon,canyon,instagram,,"FILLER: grand canyon -> @grandcanyonnps"
+igc-skyscraper,skyscraper,instagram,,"FILLER: burj khalifa -> @burjkhalifa"
+# KILLED (never schedule): shopping -> amazon @amazon

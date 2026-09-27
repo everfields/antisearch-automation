@@ -36,12 +36,13 @@ TAG_KINDS = ("brand", "product", "company")
 RECHECK_DAYS = 30
 TAG_COOLDOWN = timedelta(days=7)
 # Instagram (Carlos, 2026-09-27): the mention rides the hashtag caption, only for a verified
-# US brand account (`"market": "us"` on the entry), never the same handle within 14 days.
+# US brand account (`"market": "us"`), or a brand's single worldwide account the founder picked
+# (`"market": "global"`), never the same handle within 14 days.
 COOLDOWNS = {"instagram": timedelta(days=14)}
 # Never crown amika or any Bansk brand: an entry naming amika, or owned by Bansk, is never tagged.
 NEVER_TAG_NAMES = ("amika",)
 NEVER_TAG_OWNERS = ("bansk",)
-MARKET_REQUIRED = {"instagram": "us"}
+MARKETS_ALLOWED = {"instagram": ("us", "global")}
 DEFAULT_ALLOWLIST = "queue/tags/allowlist.json"
 
 
@@ -95,9 +96,9 @@ def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today
         handle = "@" + handle
     if not account.get("verified") or not HANDLE.match(handle):
         return Tag("", f"{name} has no verified {network} handle on the allowlist")
-    market = MARKET_REQUIRED.get(network)
-    if market and str(account.get("market") or "").lower() != market:
-        return Tag("", f"{name} on {network} is not marked as a {market.upper()} account")
+    markets = MARKETS_ALLOWED.get(network)
+    if markets and str(account.get("market") or "").lower() not in markets:
+        return Tag("", f"{name} on {network} is not marked as a US or global account")
     try:
         checked = date.fromisoformat(str(account.get("checked") or ""))
     except ValueError:
@@ -142,7 +143,8 @@ def choose_tag(verdict: str, network: str, env: Mapping[str, str], allowlist: Ma
     rows = [r for r in log.rows() if r["network"] == network]
     when = [(r, datetime.fromisoformat(r["at"])) for r in rows]
     cooldown = COOLDOWNS.get(network, TAG_COOLDOWN)
-    if any(r["handle"] == tag.handle.lower() and now - at < cooldown for r, at in when):
+    # `now` is when the post goes out; a tag already scheduled later counts too
+    if any(r["handle"] == tag.handle.lower() and abs(now - at) < cooldown for r, at in when):
         return Tag("", f"{tag.handle} was tagged on {network} in the last {cooldown.days} days")
     today = sum(1 for _r, at in when if posting_day(at) == posting_day(now))
     if today + 1 > slots_today // 2:
