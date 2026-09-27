@@ -49,3 +49,9 @@ in the last 7 days. Add each only after that check:
 | skinceuticals c e ferulic | `@skinceuticals` | |
 
 People are never rows (LeBron James, Taylor Swift), whatever the verdict.
+
+**Reverse-oracle candidates** (`candidates-2026-09-27.csv`): large Instagram lifestyle
+accounts, each paired with a short input whose live verdict (one call each, frozen in
+`verdicts.csv` on publisher-state) names that account. None of them is in the allowlist
+yet. The verified badge and last-post date are still unconfirmed because Instagram blocked
+logged-out checks. They are awaiting review with Soul and the founder.
