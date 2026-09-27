@@ -37,3 +37,11 @@ From a target account to the short inputs whose **real** verdict names it.
 **Run `2026-09-27-r1`** (superseded): its candidates were written by the Cursor agent
 (`candidates-2026-09-27.json`), not the oracle. Its 100 verdicts are real and frozen,
 and later runs reuse them for free.
+
+**Run `2026-09-27-r2`** (the oracle backwards, `publisher-state` `e0ab3c1`):
+- Generator: `gpt-6-astra`, prompt `v1.6.4` (sha256 `a88e28ed…`), `reasoning_effort` medium,
+  `max_completion_tokens` 2048. 178 backwards calls gave 138 distinct inputs.
+- Verification: 84 forward calls with no errors, plus 16 inputs already frozen; the
+  candidates ran out before the budget of 100.
+- Result: 56 matching inputs (45 exact) for 50 of 89 targets.
+- Not a real match: `three-dimensional shape` → `sphere` (the shape, not @spherevegas).
