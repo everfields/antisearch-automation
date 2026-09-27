@@ -240,17 +240,20 @@ def test_reach_posts_seven_ig_on_day_one_and_a_late_run_posts_once(ledger, log):
     assert [o.status for o in burst if o.status == "published"] == ["published"]
 
 
-def test_late_wake_respects_min_gap_between_two_open_slots(ledger, log):
+def test_late_wake_posts_once_for_two_open_slots_and_drops_the_missed_one(ledger, log):
     env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "bluesky"}
     jobs = [job("one"), job("two"), job("three")]
     for j in jobs:
         clip(ledger, j.id)
-    # 09:07 is still open at 11:10 because the gap to 11:07 is under 3h. One run posts one.
+    # 09:07 is still open at 11:10 because the gap to 11:07 is under 3h. One run posts one, for 11:07.
     now = datetime(2026, 9, 26, 11, 10, tzinfo=ET)
     first = go(jobs, ledger, log, {"bluesky": fake_adapter()}, env=env, now=now)
     assert [o.status for o in first if o.status == "published"] == ["published"]
+    minutes_later = go(jobs, ledger, log, {"bluesky": fake_adapter()}, env=env, now=now + timedelta(minutes=45))
+    assert [o.status for o in minutes_later if o.status != "skipped_already_posted"] == ["skipped_min_gap"]
+    # The missed 09:07 is not caught up later: its window closed at 12:07, and 11:07 was served.
     hour_later = go(jobs, ledger, log, {"bluesky": fake_adapter()}, env=env, now=now + timedelta(minutes=60))
-    assert [o.status for o in hour_later if o.status != "skipped_already_posted"] == ["skipped_min_gap"]
+    assert [o.status for o in hour_later if o.status != "skipped_already_posted"] == ["skipped_not_due"]
 
 
 def test_explicit_ramp_still_limits_reach_on_day_one(ledger, log):
@@ -405,7 +408,7 @@ def test_hold_for_tag_blocks_queue_rows_but_not_pool_rows(ledger, log):
     assert [o.status for o in go(pooled, ledger, log, {"bluesky": b})] == ["held_for_tag", "published"]
     clip(ledger, "rain")
     mixed = [job("password-manager", caption="@?"), job("rain", notes="pool:unowned")]
-    out = go(mixed, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 25, 21, 0, tzinfo=ET))
+    out = go(mixed, ledger, log, {"bluesky": b}, now=datetime(2026, 9, 26, 9, 10, tzinfo=ET))
     assert [o.status for o in out] == ["held_for_tag", "published"]  # a held queue row never stalls the pool
 
 

@@ -239,6 +239,36 @@ def test_format_is_carried_and_x_is_compared_per_format(tmp_path):
     assert col.problems  # Instagram still has no source here
 
 
+def test_instagram_views_are_compared_per_creative(tmp_path):
+    import csv
+
+    from antisearch_mill.metrics import POST_FIELDS
+
+    state = tmp_path / "state"
+    (state / "metrics").mkdir(parents=True)
+    posts = [("p-a", "2-medium-monolith", 900), ("p-b", "2-medium-monolith", 300), ("p-c", "3-computation", 50),
+             ("p-old", "", 120)]
+    with (state / "posts.csv").open("w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["job_id", "network", "status", "clip_id", "verdict", "remote_id", "url", "detail", "at", "category",
+                    "caption", "format", "due_at", "creative"])
+        for slug, creative, _ in posts:
+            w.writerow([slug, "instagram", "published", "c", "v", f"b-{slug}", "", "", "2026-09-27T01:00:00+00:00",
+                        slug, "", "video", "", creative])
+    with (state / "metrics" / "posts_metrics.csv").open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=POST_FIELDS)
+        w.writeheader()
+        for slug, _, views in posts:
+            w.writerow({"ts_utc": "2026-09-27T09:00:00+00:00", "network": "instagram", "post_id": f"b-{slug}",
+                        "slug": slug, "posted_at": "2026-09-27T01:00:00+00:00", "views": views, "likes": 1,
+                        "source": "buffer@x"})
+    table = summary(state, NOW).split("| IG creative")[1]
+    assert "| 0-current | 1 | 120.0 |" in table  # a blank creative is a post from before the rotation
+    assert "| 2-medium-monolith | 2 | 600.0 |" in table
+    assert "| 3-computation | 1 | 50.0 |" in table
+    assert "| 1-short-score | 0 | – |" in table
+
+
 def test_buffer_scheduled_rows_are_measured_but_manual_notes_are_not(tmp_path):
     state = state_dir(tmp_path)
     extra = ("ig-manual-travel,instagram,scheduled,c8,japan,b-ig-8,buffer:b-ig-8,scheduled in Buffer,"

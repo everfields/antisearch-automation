@@ -244,25 +244,32 @@ def slot_index_at(day: date, slots: list[time], when: datetime) -> int:
     return max((i for i, s in enumerate(slot_times(day, slots)) if s <= when), default=0)
 
 
-def held_slots(day: date, slots: list[time], sends: list[datetime]) -> tuple[frozenset[int], int]:
-    """(slots Buffer schedules hold, schedules that hold none).
+def taken_slots(day: date, slots: list[time], posts: list[tuple[datetime, bool]],
+                offsets: list[timedelta] | None = None,
+                lookahead: timedelta = timedelta(0)) -> tuple[frozenset[int], int]:
+    """(the slots the day's posts fill, posts that fill no particular slot).
 
-    A schedule whose send time falls inside a slot's window (the slot to its deadline) holds
-    that slot, or the nearest free one when two land in one window. A schedule outside every
-    window (LinkedIn's local morning, a manual row before the first slot) holds no particular
-    slot: like a post sent now, it fills the earliest free one.
+    `posts` are (send time, scheduled in Buffer), taken in send-time order. Each post fills
+    the latest free slot whose window holds its send time; the window runs from the slot
+    to its deadline. A post sent now counts from the slot's jittered minute, less
+    `lookahead`: that is when the runner may take it. So a post fills the slot it was sent
+    for, and a Buffer schedule holds its own slot (a 22:07 reel holds 22:07, not the day's
+    first). A post outside every window (LinkedIn's local morning, a manual row before the
+    first slot, an --ignore-slots run) fills no particular slot; `open_now` has those fill
+    the earliest free ones.
     """
     times = slot_times(day, slots)
-    held: set[int] = set()
+    opens = [s + (offsets[i] if offsets else timedelta(0)) for i, s in enumerate(times)]
+    taken: set[int] = set()
     loose = 0
-    for when in sorted(sends):
-        at = slot_index_at(day, slots, when)
-        free = [i for i in range(len(times)) if i not in held]
-        if not times or not times[at] <= when < _slot_deadline(times, at) or not free:
+    for when, scheduled in sorted(posts):
+        fits = [i for i in range(len(times)) if i not in taken
+                and (times[i] if scheduled else opens[i] - lookahead) <= when < _slot_deadline(times, i)]
+        if fits:
+            taken.add(max(fits))
+        else:
             loose += 1
-            continue
-        held.add(min(free, key=lambda i: (abs(i - at), i)))
-    return frozenset(held), loose
+    return frozenset(taken), loose
 
 
 def _serving(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None,
@@ -277,29 +284,29 @@ def open_now(moment: datetime, slots: list[time], used: int, offsets: list[timed
              lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> int:
     """Unfilled slots that have come and have not expired.
 
-    Posts sent now fill the earliest free slots first; `held` slots are taken by Buffer
-    schedules (see `held_slots`), so `used` then counts only the posts sent now. A slot
-    that has expired is not owed, so a down stretch cannot dump every missed slot once
-    the cron wakes. The runner still posts at most one of these per network per run,
-    and honors MIN_GAP. With `offsets` (the slot jitter) a slot comes at its jittered
-    time, counted from `moment + lookahead` so a run can wait for one due before the
-    next wake; the deadline is unchanged.
+    `held` are the slots the day's posts fill (see `taken_slots`); `used` more posts fill
+    the earliest free ones. A slot that has expired is not owed, so a down stretch cannot
+    dump every missed slot once the cron wakes. The runner still posts at most one of these
+    per network per run, and honors MIN_GAP. With `offsets` (the slot jitter) a slot comes
+    at its jittered time, counted from `moment + lookahead` so a run can wait for one due
+    before the next wake; the deadline is unchanged.
     """
     return len(_serving(moment, slots, used, offsets, lookahead, held)[1])
 
 
 def serving_slot(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,
                  lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> int | None:
-    """The index of the slot a post would fill now, or None if none is open."""
+    """The slot a post sent now fills: the latest open one (an earlier one still open was missed,
+    and the 90-minute gap closes it), or None if none is open."""
     open_ = _serving(moment, slots, used, offsets, lookahead, held)[1]
-    return open_[0] if open_ else None
+    return open_[-1] if open_ else None
 
 
 def serving_open(moment: datetime, slots: list[time], used: int, offsets: list[timedelta],
                  lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> datetime | None:
     """When the slot a post would fill now opens (its jittered time), or None if none is open."""
     opens, open_ = _serving(moment, slots, used, offsets, lookahead, held)
-    return opens[open_[0]] if open_ else None
+    return opens[open_[-1]] if open_ else None
 
 
 def next_slot(moment: datetime, slots: list[time]) -> datetime | None:
@@ -488,17 +495,10 @@ class PostLog:
         """Posts that take a slot on posting day `day`: sent then, or scheduled in Buffer to go out then."""
         return sum(1 for d, net in self.slot_days().values() if d == day and (network is None or net == network))
 
-    def slot_use(self, day: date, network: str) -> tuple[int, list[datetime]]:
-        """(posts sent now on posting day `day`, send times of the Buffer schedules for that day)."""
-        sent, sends = 0, []
-        for when, net, scheduled in self._sends().values():
-            if net != network or posting_day(when) != day:
-                continue
-            if scheduled:
-                sends.append(when)
-            else:
-                sent += 1
-        return sent, sends
+    def slot_posts(self, day: date, network: str) -> list[tuple[datetime, bool]]:
+        """(send time, scheduled in Buffer) of each post that takes a slot on posting day `day`."""
+        return [(when, scheduled) for when, net, scheduled in self._sends().values()
+                if net == network and posting_day(when) == day]
 
     def post_times(self, network: str) -> list[datetime]:
         """When each post on `network` goes, went, or may have gone out: a Buffer schedule's send time,

@@ -361,7 +361,9 @@ def cmd_due(args, settings: Settings) -> int:
     from .publisher.antiban import (
         X_NETWORK, AntibanState, daily_slot_count, jitter_enabled, ramp_days, ramp_enabled, ramp_start,
     )
-    from .publisher.guard import approved_networks, held_slots, now_et, open_now, posting_day, slots_due, slots_for
+    from .publisher.guard import approved_networks, now_et, open_now, posting_day, slots_due, slots_for, taken_slots
+    from datetime import timedelta
+
     from .publisher.jitter import LOOKAHEAD, slot_offsets
     from .publisher.registry import route_for
 
@@ -386,13 +388,9 @@ def cmd_due(args, settings: Settings) -> int:
             ramp_days=ramp_days(env), start=ramp_start(env), braked=state.braked(net, now),
         )]
         used = log.used_on(day, net)
-        sent, sends = log.slot_use(day, net)
-        held, loose = held_slots(day, slots, sends)
-        sent += loose
-        if jitter_enabled(env):
-            free = open_now(now, slots, sent, slot_offsets(net, day, slots, env), LOOKAHEAD, held)
-        else:
-            free = open_now(now, slots, sent, held=held)
+        offsets, ahead = (slot_offsets(net, day, slots, env), LOOKAHEAD) if jitter_enabled(env) else (None, timedelta(0))
+        held, loose = taken_slots(day, slots, log.slot_posts(day, net), offsets, ahead)
+        free = open_now(now, slots, loose, offsets, ahead, held)
         print(f"  {net:<9} slots passed {slots_due(now, slots)}/{len(slots)}, used {used} -> {free} due")
         if free > 0:
             due.append(net)

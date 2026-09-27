@@ -20,7 +20,7 @@ from antisearch_mill.publish.http import RecordingTransport
 from antisearch_mill.publisher.base import Media
 from antisearch_mill.publisher.buffer import BufferInstagram, BufferInstagramStory, BufferTikTok, _thumbnail_on_verdict
 from antisearch_mill.publisher.guard import (
-    MIN_GAP, PostLog, PostRow, held_slots, open_now, posting_day, serving_slot, slot_times, slots_for,
+    MIN_GAP, PostLog, PostRow, open_now, posting_day, serving_slot, slot_times, slots_for, taken_slots,
 )
 from antisearch_mill.publisher.jitter import day_plan, slot_offsets
 from antisearch_mill.publisher.media_host import GitHubPagesHost
@@ -133,16 +133,36 @@ def test_jitter_keeps_ninety_minutes_between_two_instagram_slots_every_day():
 def test_a_late_buffer_schedule_holds_its_own_slot_not_the_first():
     day, slots = date(2026, 9, 28), slots_for("instagram", REACH)
     late = datetime(2026, 9, 28, 22, 7, tzinfo=ET)
-    assert held_slots(day, slots, [late]) == (frozenset({6}), 0)
+    assert taken_slots(day, slots, [(late, True)]) == (frozenset({6}), 0)
     at_1010 = datetime(2026, 9, 28, 10, 10, tzinfo=ET)
     assert open_now(at_1010, slots, 0, held=frozenset({6})) == 1  # the 10:07 slot is still owed
     assert serving_slot(at_1010, slots, 0, held=frozenset({6})) == 0
-    assert open_now(datetime(2026, 9, 28, 22, 10, tzinfo=ET), slots, 6, held=frozenset({6})) == 0  # 22:07 is held
-    # two schedules in one window: the second takes the nearest free slot
-    assert held_slots(day, slots, [late, late + timedelta(minutes=20)]) == (frozenset({5, 6}), 0)
+    assert open_now(datetime(2026, 9, 28, 22, 10, tzinfo=ET), slots, 0, held=frozenset({0, 1, 2, 3, 4, 5, 6})) == 0
+    # two schedules in one window: the second takes the latest free slot that still holds it
+    assert taken_slots(day, slots, [(late, True), (late + timedelta(minutes=20), True)]) == (frozenset({5, 6}), 0)
     # outside every window (LinkedIn's local morning, a row before the first slot): no slot of its own
-    assert held_slots(day, slots, [datetime(2026, 9, 29, 3, 7, tzinfo=ET)]) == (frozenset(), 1)
-    assert held_slots(day, slots, [datetime(2026, 9, 28, 9, 37, tzinfo=ET)]) == (frozenset(), 1)
+    assert taken_slots(day, slots, [(datetime(2026, 9, 29, 3, 7, tzinfo=ET), True)]) == (frozenset(), 1)
+    assert taken_slots(day, slots, [(datetime(2026, 9, 28, 9, 37, tzinfo=ET), True)]) == (frozenset(), 1)
+    # a post sent now fills the slot it was sent for, even inside an earlier slot's 3-hour window
+    assert taken_slots(day, slots, [(datetime(2026, 9, 28, 12, 10, tzinfo=ET), False)]) == (frozenset({1}), 0)
+
+
+def test_a_late_evening_never_serves_one_slot_twice(ledger, log):
+    """Two-hour slots with 3-hour windows overlap: a missed slot is dropped, never caught up later and later."""
+    log.append(PostRow("ig-early", "instagram", "pending", at="2026-09-28T19:16:02+00:00"))  # 15:16 ET, the 14:07 slot
+    log.append(PostRow("ig-early", "instagram", "published", url="u", at="2026-09-28T19:16:02+00:00"))
+    jobs = [job(f"ig-{i}", ("instagram",)) for i in range(8)]
+    seen: list = []
+    produce = _producer(ledger, seen)
+    t, posted = datetime(2026, 9, 28, 18, 45, tzinfo=ET), []
+    while t < datetime(2026, 9, 29, 2, 0, tzinfo=ET):
+        out = run_posts(jobs, ledger, log, now=t, live=True, env=IG_ENV, adapters={"instagram": fake_adapter("instagram")},
+                        produce=produce, sleep=lambda s: None)
+        posted += [(f"{t:%H:%M}", o.job_id) for o in out if o.status == "published"]
+        t += timedelta(minutes=15)
+    assert [p[0] for p in posted] == ["18:45", "20:15", "22:15"]  # 18:07, 20:07, 22:07; the missed 16:07 is dropped
+    day = date(2026, 9, 28)
+    assert [c for _, c in seen] == [ig_creative(day, 4), ig_creative(day, 5), ig_creative(day, 6)]
 
 
 def test_a_late_buffer_reel_leaves_the_morning_slots_to_the_auto_posts(ledger, log):

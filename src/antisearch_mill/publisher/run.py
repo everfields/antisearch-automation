@@ -24,8 +24,8 @@ from .fresh import looks_like_mp4, remux_fresh
 from ..creatives import CURRENT, STORY, id_tag, ig_creative, rotation_enabled
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
-    approved_networks, caption_problem, effective_caption, frozen_by, held_slots, input_problem, next_slot, open_now,
-    posting_day, serving_open, serving_slot, slot_index_at, slot_times, slots_for, x_post_format,
+    approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now,
+    posting_day, serving_open, serving_slot, slot_index_at, slot_times, slots_for, taken_slots, x_post_format,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
@@ -132,10 +132,9 @@ def run_posts(
         return slot_offsets(net, posting_day(now), slots, env) if jitter else None
 
     def use(net: str, slots: list) -> tuple[int, frozenset[int]]:
-        """(posts that fill the earliest free slots today, slots held by today's Buffer schedules)."""
-        sent, sends = log.slot_use(day, net)
-        held, loose = held_slots(day, slots, sends)
-        return sent + loose, held
+        """(today's posts that fill no particular slot, the slots today's posts fill)."""
+        held, loose = taken_slots(day, slots, log.slot_posts(day, net), offsets(net, slots), lookahead)
+        return loose, held
 
     def free_now(net: str, slots: list) -> int:
         sent, held = use(net, slots)

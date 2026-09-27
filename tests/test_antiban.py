@@ -78,7 +78,7 @@ def test_same_clip_and_same_caption_do_not_post_twice(ledger, log):
     env = {**LIVE_ENV, "PUBLISHER_RAMP": "off"}
     b = fake_adapter()
     assert go([job("one", caption="@acme.com")], ledger, log, {"bluesky": b}, env=env, now=NOW)[0].status == "published"
-    later = NOW + timedelta(minutes=91)  # past the 90 min gap, still inside the grace window of 19:07
+    later = datetime(2026, 9, 26, 9, 10, tzinfo=ET)  # the next free slot
     again = go([job("two", caption="@acme.com")], ledger, log, {"bluesky": fake_adapter()}, env=env, now=later)
     assert again[0].status == "skipped_duplicate_caption"
 
