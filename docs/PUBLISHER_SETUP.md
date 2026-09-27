@@ -354,6 +354,7 @@ everything that can post natively.
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
 | `PUBLISHER_TREND_NETWORKS`, `PUBLISHER_TREND_CAP` | variable, optional | Trend lane: networks + rows per network per day (default 1, max 3). See `TREND_AND_REPLY_LANES.md` |
 | `PUBLISHER_WINNER_NETWORKS`, `PUBLISHER_WINNER_CAP` | variable, optional | Winner lane: networks + posts per day across networks (default 2, max 3); handles in `queue/winners/handles.json` (Instagram and TikTok tag only from the tag allowlist below) |
+| `PUBLISHER_IG_CAPTION` | variable, optional | Instagram caption (Carlos, 2026-09-27): `hashtags` (default) = `#<input> #<verdict> #ai`, lowercase, letters and digits only inside a tag, no `#antisearch` or `#best`, plus at most one allowlisted US-brand `@mention` last (14-day guard). `off` = the old caption. TikTok and X are unchanged |
 | `PUBLISHER_TAG_NETWORKS` | variable, optional | Breaker for winner tags: `instagram`, `tiktok`, or both. Empty (default) = no tags. Tags come only from `queue/tags/allowlist.json` (brands, products, companies; verified, checked ≤30 days); caption = `@handle` only; one tag per handle per network per 7 days; ≤ half of a day's posts. See `queue/tags/README.md` |
 | `PUBLISHER_REPLY_NETWORKS`, `PUBLISHER_REPLY_CAP`, `PUBLISHER_WATCH_BLUESKY` | variable, optional | Reply lane (Bluesky): `bluesky` to go live, ≤3 a day, handles to watch |
 | `PUBLISHER_LANGUAGE` | variable, optional | `en` (default, Carlos's lock); anything else lifts the English check |

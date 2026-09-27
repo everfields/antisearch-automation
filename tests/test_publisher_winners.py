@@ -96,7 +96,7 @@ def test_the_only_text_is_the_verified_handle(tmp_path):
              ledger, log, {"instagram": ig, "tiktok": tt})
     assert [o.status for o in out] == ["published", "published"]
     # Instagram and TikTok tag only from the tag allowlist (brands, products, companies); a country is none
-    assert ig.calls[0][2] == "" and tt.calls[0][2] == ""
+    assert ig.calls[0][2] == "#countryforhavingfun #spain #ai" and tt.calls[0][2] == ""
 
 
 def test_a_public_figure_publishes_untagged_on_instagram_and_tiktok(tmp_path):
@@ -104,7 +104,8 @@ def test_a_public_figure_publishes_untagged_on_instagram_and_tiktok(tmp_path):
     ig = fake_adapter("instagram")
     clip(ledger, "w-ceo", verdict="elon musk")
     (o,) = go([wjob("w-ceo", "ceo", "instagram")], ledger, log, {"instagram": ig})
-    assert o.status == "published" and ig.calls[0][2] == ""  # never people, even with a verified handle
+    # never a mention of a person, even with a verified handle; the name is only a hashtag
+    assert o.status == "published" and ig.calls[0][2] == "#ceo #elonmusk #ai"
 
 
 def test_a_private_individual_is_withheld_and_its_input_is_spent(tmp_path):
@@ -138,4 +139,4 @@ def test_dry_run_plan_shows_the_resolved_tag(tmp_path):
     (o,) = go([wjob("w-fun", "country for having fun", "instagram")], ledger, log,
               {"instagram": InstagramAdapter}, env={}, live=False)
     plan = json.loads(open(o.artifact).read())
-    assert plan["caption"] == "" and "tags are off on instagram" in plan["source"]
+    assert plan["caption"] == "#countryforhavingfun #spain #ai" and "tags are off on instagram" in plan["source"]

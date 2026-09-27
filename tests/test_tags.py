@@ -22,7 +22,7 @@ DAY = date(2026, 9, 28)
 ALLOW = {
     "k18": {"kind": "brand", "aliases": ["k18 airwash dry shampoo"],
             "tiktok": {"handle": "@k18hair", "verified": True, "checked": "2026-09-27"},
-            "instagram": {"handle": "k18hair", "verified": True, "checked": "2026-09-27"}},
+            "instagram": {"handle": "k18hair", "verified": True, "checked": "2026-09-27", "market": "us"}},
     "dyson": {"kind": "company", "tiktok": {"handle": "@dyson", "verified": False, "checked": "2026-09-27"}},
     "old brand": {"kind": "brand", "tiktok": {"handle": "@old", "verified": True, "checked": "2026-06-01"}},
     "elon musk": {"kind": "person", "tiktok": {"handle": "@elonmusk", "verified": True, "checked": "2026-09-27"}},
@@ -113,9 +113,11 @@ def test_live_tiktok_and_instagram_captions_are_only_the_handle_and_x_is_never_t
     assert [o.status for o in out] == ["published", "published", "published"]
     by_channel = {c["channelId"]: c for c in creates}
     assert by_channel["ch-tt"]["text"] == "@k18hair"
-    assert by_channel["ch-ig"]["text"] == "@k18hair"  # Buffer has no reel user tags: the caption path
+    # Buffer has no reel user tags: the mention rides the hashtag caption, last
+    assert by_channel["ch-ig"]["text"] == "#hairmask #k18 #ai @k18hair"
     for c in (by_channel["ch-tt"], by_channel["ch-ig"]):
-        assert "userTags" not in json.dumps(c) and "#" not in c["text"] and "collaborator" not in json.dumps(c).lower()
+        assert "userTags" not in json.dumps(c) and "collaborator" not in json.dumps(c).lower()
+    assert "#" not in by_channel["ch-tt"]["text"]  # hashtags are Instagram only
     assert by_channel["ch-x"]["text"] == "hair oil\nk18" and by_channel["ch-x"]["assets"] == []
     tags = TagLog(log.path.parent / "tags.csv").rows()
     assert [(r["network"], r["handle"]) for r in tags] == [("tiktok", "@k18hair"), ("instagram", "@k18hair")]

@@ -120,7 +120,8 @@ def test_docs_never_show_best_x_as_an_input(doc):
 
 GUARD_REJECT_LINE = ("src/antisearch_mill/publisher/guard.py", "RANKED = re.compile(")
 # replies.py reads other people's "what's the ... X?" posts and strips the word; its output is tested below.
-DETECTOR_FILES = {"src/antisearch_mill/publisher/replies.py"}
+# igcaption.py names #best only to refuse it in an Instagram caption (tests/test_igcaption.py).
+DETECTOR_FILES = {"src/antisearch_mill/publisher/replies.py", "src/antisearch_mill/publisher/igcaption.py"}
 
 
 def test_source_never_templates_best_into_the_input():

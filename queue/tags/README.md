@@ -10,8 +10,11 @@ only if every rule below holds, otherwise it goes out untagged.
   set `verified: true`, `checked: YYYY-MM-DD`, `by: <who>`, and `evidence`. A check
   older than 30 days stops the tag until someone re-checks.
 - **Networks:** `instagram` and `tiktok` only. X is never tagged.
-- **Caption:** the tag is the whole caption, `@handle`. Buffer cannot user-tag reels
-  (its API has user tags on images only), so Instagram uses the caption too.
+- **Caption:** on TikTok the tag is the whole caption, `@handle`. On Instagram the caption
+  is `#<input> #<verdict> #ai` and the tag rides last as its one `@mention` (Buffer
+  cannot user-tag reels; its API has user tags on images only).
+- **Instagram:** only a verified **US** brand account, marked `"market": "us"` on the
+  entry's `instagram` block, and never the same handle within **14 days**.
 - **Spam guard:** one tag per handle per network per 7 days, and at most half of a
   network's posts on a day are tagged.
 - **Breaker:** `PUBLISHER_TAG_NETWORKS` (for example `tiktok` or `instagram,tiktok`).
