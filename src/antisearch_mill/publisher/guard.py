@@ -32,14 +32,15 @@ MAX_PER_NETWORK_PER_DAY = 5
 PER_RUN_PER_NETWORK = 1
 SLOT_MINUTE = 7  # every slot sits on a fixed :07, off the hour and off :30
 MIN_GAP = timedelta(minutes=90)  # between two posts on the same network
+X_MAX_PER_DAY = 1  # CoS + Soul, 2026-09-27: X posts plain text, once a day
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 
 # Business networks lean to the US morning, leisure networks to the afternoon and night (ET).
 # `PUBLISHER_CADENCE` picks a preset; `PUBLISHER_SLOTS_<NETWORK>` overrides one network.
 CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
-    "carlos": {  # 5 per network per day
+    "carlos": {  # 5 per network per day (X: 1, see X_MAX_PER_DAY)
         "bluesky": ("09:07", "11:07", "13:07", "16:07", "19:07"),
-        "x": ("09:07", "11:07", "13:07", "16:07", "19:07"),
+        "x": ("09:07",),
         "linkedin": ("09:07", "11:07", "13:07", "15:07", "17:07"),
         "instagram": ("12:07", "16:07", "19:07", "21:07", "23:07"),
         "tiktok": ("14:07", "18:07", "20:07", "22:07", "00:07"),
@@ -47,9 +48,9 @@ CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
         "mastodon": ("09:07", "11:07", "13:07", "16:07", "19:07"),
         "reddit": ("10:07", "13:07", "16:07", "19:07", "22:07"),
     },
-    "soul": {  # TikTok 5, X 5, Bluesky 3, Instagram 3, LinkedIn 1
+    "soul": {  # TikTok 5, X 1, Bluesky 3, Instagram 3, LinkedIn 1
         "bluesky": ("09:07", "13:07", "18:07"),
-        "x": ("09:07", "11:07", "13:07", "16:07", "19:07"),
+        "x": ("09:07",),
         "linkedin": ("09:07",),
         "instagram": ("13:07", "19:07", "22:07"),
         "tiktok": ("14:07", "18:07", "20:07", "22:07", "00:07"),
@@ -176,6 +177,8 @@ def slots_for(network: str, env: dict[str, str]) -> list[time]:
             raise ValueError(f"PUBLISHER_SLOTS_{network.upper()}: {s!r} is not HH:MM (24h, America/New_York)")
         slots.append(time(int(m.group(1)), int(m.group(2))))
     slots = sorted(set(slots), key=_after_start)
+    if network == "x" and len(slots) > X_MAX_PER_DAY:
+        raise ValueError(f"x: {len(slots)} slots, X posts at most {X_MAX_PER_DAY} a day")
     if len(slots) > MAX_PER_NETWORK_PER_DAY:
         raise ValueError(f"{network}: {len(slots)} slots, the cap is {MAX_PER_NETWORK_PER_DAY} per network per day")
     off_tick = [f"{t:%H:%M}" for t in slots if t.minute != SLOT_MINUTE]

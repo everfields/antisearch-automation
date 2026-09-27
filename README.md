@@ -195,7 +195,9 @@ and every code-formatted example in README/SETUP.
 - mp4 metadata: `title=<verdict>`, `comment=capture=synthetic-oracle;oracle=<live|fixture>;category=<...>`
 
 X gets a 720×1280 derivative at publish time (X's documented portrait max is
-1200×1900); LinkedIn, TikTok and Instagram get the 1080×1920 master.
+1200×1900); LinkedIn, TikTok and Instagram get the 1080×1920 master. The own
+publisher (`mill post`) sends X no video at all: plain text, the lowercase input
+on line 1 and the lowercase verdict on line 2, once a day.
 
 ### Metadata row (`out/clips.csv`)
 

@@ -172,7 +172,7 @@ def test_x_is_not_auto_posted(ledger, log):
     assert out[0].status == "skipped_x_off"
 
 
-def test_x_buffer_dry_run_plans_one_video_url(ledger, log):
+def test_x_buffer_dry_run_plans_plain_text_and_no_media(ledger, log):
     import json
     from pathlib import Path
 
@@ -190,8 +190,9 @@ def test_x_buffer_dry_run_plans_one_video_url(ledger, log):
     assert plan["route"] == "buffer" and plan["network"] == "x" and plan["error"] is None
     post = next(r for r in plan["requests"] if "CreatePost" in (r.get("json") or {}).get("query", ""))
     payload = post["json"]["variables"]["input"]
-    assert payload["assets"] == [{"video": {"url": plan["media"]["public_url"]}}]
-    assert len(payload["assets"]) == 1 and "thumbnailOffset" not in json.dumps(payload["assets"])
+    assert payload["text"] == "thing\nlove" and payload["assets"] == []
+    assert plan["media"]["kind"] == "text" and plan["media"]["public_url"] == ""
+    assert not any("api.github.com" in (r.get("url") or "") for r in plan["requests"])  # nothing uploaded
 
 
 def test_x_live_needs_the_live_list_and_refuses_links_mentions_and_near_copies(ledger, log):
@@ -202,13 +203,18 @@ def test_x_live_needs_the_live_list_and_refuses_links_mentions_and_near_copies(l
     clip(ledger, "dry-shampoos")
     x = fake_adapter("x")
     x.route = "buffer"
-    assert go([job("thing", ("x",))], ledger, log, {"x": x}, env=LIVE_ENV, now=NOW)[0].status == "skipped_not_approved"
+    x.kinds = frozenset({"video", "text"})
+    slot = datetime(2026, 9, 25, 9, 30, tzinfo=ET)  # X's one slot is 09:07 ET
+    assert go([job("thing", ("x",))], ledger, log, {"x": x}, env=LIVE_ENV, now=slot)[0].status == "skipped_not_approved"
     env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "x"}
-    assert "link" in go([job("thing", ("x",), caption="https://antisearch.ai")], ledger, log, {"x": x}, env=env, now=NOW)[0].detail
-    assert "mention" in go([job("thing", ("x",), caption="@antisearch_ai")], ledger, log, {"x": x}, env=env, now=NOW)[0].detail
-    assert go([job("dry-shampoo", ("x",), caption="dry shampoo")], ledger, log, {"x": x}, env=env, now=NOW)[0].status == "published"
-    later = NOW + timedelta(minutes=91)
-    again = go([job("dry-shampoos", ("x",), caption="dry shampoos")], ledger, log, {"x": x}, env=env, now=later)
+    assert "link" in go([job("thing", ("x",), caption="https://antisearch.ai")], ledger, log, {"x": x}, env=env, now=slot)[0].detail
+    assert "mention" in go([job("thing", ("x",), caption="@antisearch_ai")], ledger, log, {"x": x}, env=env, now=slot)[0].detail
+    assert go([job("dry-shampoo", ("x",), caption="dry shampoo")], ledger, log, {"x": x}, env=env, now=slot)[0].status == "published"
+    assert x.calls[-1][1:3] == ("text", "dry shampoo\nlove")  # plain text: input, then verdict
+    assert go([job("thing", ("x",))], ledger, log, {"x": x}, env=env, now=slot + timedelta(minutes=91))[0].status \
+        == "skipped_network_daily_cap"  # one X post a day
+    tomorrow = slot + timedelta(days=1)
+    again = go([job("dry-shampoos", ("x",), caption="dry shampoos")], ledger, log, {"x": x}, env=env, now=tomorrow)
     assert again[0].status == "skipped_duplicate_caption"
     assert winner_networks({"PUBLISHER_WINNER_NETWORKS": "instagram,x"}) == ["instagram"]
 

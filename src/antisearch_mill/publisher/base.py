@@ -20,6 +20,7 @@ from ..publish.http import HttpError, HttpResponse, Request, Transport
 
 VIDEO = "video"
 IMAGE = "image"
+TEXT = "text"  # X: two lowercase lines, no media
 PUBLISHED = "published"
 DRAFTED = "drafted"
 
@@ -54,6 +55,10 @@ class Media:
               poster: str | Path | None = None, label: str = "", public_url: str = "") -> "Media":
         return cls(Path(path), VIDEO, "video/mp4", width, height, duration_s,
                    Path(poster) if poster else None, label, public_url)
+
+    @classmethod
+    def text(cls, label: str = "") -> "Media":
+        return cls(Path(""), TEXT, "text/plain", 0, 0, label=label)
 
     @classmethod
     def image(cls, path: str | Path, width: int, height: int, label: str = "") -> "Media":
