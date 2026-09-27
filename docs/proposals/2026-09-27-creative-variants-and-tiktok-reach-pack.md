@@ -12,17 +12,7 @@ turning a variant on is its own reviewed change.
 | `classic` (default) | today's clip, unchanged (same bytes, same clip ids) | 5–6 s |
 | `music_classical` | classic picture plus a soft felt-piano bed. Broken A-minor chords under the typing, the harmony held on F then G through the wait, a rolled C major (add9) on the verdict frame. About −18 LUFS, keys on top. | same |
 | `music_upbeat` | classic picture plus a 120 bpm bed. Hats and filtered plucks under the typing, a snare roll and a noise rise through the wait, and the drop (kick, clap, bass, chord stabs) on the verdict frame. About −13 LUFS. | same |
-| `motion` | a composition around the same moment (below) | 10 s |
-
-**`motion`, "the monolith":**
-1. A hairline of cold light opens into a tall black slab (1.2 s).
-2. The app screen plays inside the slab, with a slow push-in, grain and a vignette.
-3. On the verdict frame: a soft diagonal light sweep, a breath of push-in, the rim light brightening and the room lifting slightly.
-4. The slab dissolves, and the verdict rises alone in large lowercase type with the input small above it (2.2 s hold), then a fade to black.
-
-The motion piece is still lowercase with one verdict, no chat and no share card; the only
-URL is the app's existing footer. Its bed is a cold sub swell at the reveal, a glass fifth
-on the verdict and a low thud when the verdict stands alone, ending in silence.
+| `motion` | the cinematic monolith, scored by `monolith_score`. The motion-first direction, the camera grammar and the music decision are in `docs/CREATIVE_DIRECTION.md`, which supersedes this row. | 8.5 s |
 
 **How it's built:**
 - **Sound:** every bed is original synthesis (`music.py`): no samples, loops, stock tracks or licences, and no spend. Music is muxed only where the clip already carries audio (Instagram and TikTok).

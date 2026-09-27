@@ -196,9 +196,24 @@ def produce_one(
             if phone is not None:
                 g = geometry(phone, layout.width, layout.height)
                 screen = (g.screen_x, g.screen_y, g.screen_w, g.screen_h)
-            info = apply_creative(creative, clip_path, timeline, category=verdict.category, verdict=verdict.verdict,
-                                  font_path=font_path, layout=layout, screen=screen, audio=use_audio,
-                                  metadata={"title": verdict.verdict, "comment": comment})
+            source = source_screen = None
+            if creative == "motion":  # the camera goes close: a 2x render of the same screen keeps text sharp
+                big = Layout(width=layout.width * 2, height=layout.height * 2, fps=layout.fps)
+                source = clip_path.with_suffix(".src2x.mp4")
+                render_clip(timeline, source, font_path=font_path, layout=big, phone=phone)
+                if phone is not None:
+                    g2 = geometry(phone, big.width, big.height)
+                    source_screen = (g2.screen_x, g2.screen_y, g2.screen_w, g2.screen_h)
+                else:
+                    source_screen = (0, 0, big.width, big.height)
+            try:
+                info = apply_creative(creative, clip_path, timeline, category=verdict.category,
+                                      verdict=verdict.verdict, font_path=font_path, layout=layout, screen=screen,
+                                      audio=use_audio, metadata={"title": verdict.verdict, "comment": comment},
+                                      source=source, source_screen=source_screen)
+            finally:
+                if source is not None:
+                    source.unlink(missing_ok=True)
             problems = validate_master(info, layout, style_name)
             if problems:
                 raise RenderError("; ".join(problems))

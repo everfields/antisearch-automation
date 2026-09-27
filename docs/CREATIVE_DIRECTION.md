@@ -40,7 +40,7 @@ like an event, without adding words, faces or noise the brand wouldn't say.
 2. **Works muted.** Meaning is carried by picture and on-screen text; sound is a bonus. The typed input must be large enough to read on a phone in feed.
 3. **Tension, then release.** Watch time comes from the pause, not the answer. The creative's biggest lever is making the 2.4 s wait feel like held breath rather than dead air.
 4. **A payoff worth sending.** The verdict is a take, like "fame" for overrated or "japan" for travel. The last frames must present it so cleanly that it is screenshot- and send-worthy. That is still not a share card: no logo, URL, CTA or "follow for more".
-5. **Short, and it loops.** About 8 s: long enough for the story, short enough to finish. If the last frame melts into the first, a loop reads as a rewatch.
+5. **Short, and it loops.** About 8.5 s: long enough for the story, short enough to finish. If the last frame melts into the first, a loop reads as a rewatch.
 6. **Original, every time.** Every frame and every note is ours, so there is no "reposted content" risk and no audio rights issue on business accounts.
 
 ## 3. Options considered
@@ -59,9 +59,9 @@ like an event, without adding words, faces or noise the brand wouldn't say.
 One light source, near-black and stone, one cold highlight.
 
 **Camera grammar, with tension and release built from camera distance:**
-1. **Frame 0, already moving:** the slab is present and the camera is already pushing in. A hairline of light traces the slab's edge in the first 0.4 s: the only "intro".
-2. **Typing:** the camera sits close on the input line (about 1.25×), so the typed words are legible in a muted feed. It drifts slowly, and the drift direction is seeded by the input.
-3. **The wait:** the camera keeps pushing in, a little faster each blink, and the room darkens slightly. That is held breath.
+1. **Frame 0, already moving:** frame 0 is dark (the loop's join). Within 0.15 s the whole monolith is there, its rim traced in light, and the camera dives from wide (1.1×) onto the input line in 0.9 s, while the first letters land. That dive is the hook.
+2. **Typing:** the camera sits close on the input line (about 1.9–2×), so the typed words read large in a muted feed. The app layer is rendered at 2× for this, so the close-up never upscales text. The slab drifts slowly, and the drift direction is seeded by the input.
+3. **The wait:** as Enter lands, the camera re-frames from the input line onto the verdict line, then keeps pushing in faster as the caret blinks, and the room darkens slightly. That is held breath. The verdict then appears dead centre, in close-up.
 4. **The verdict:** the camera releases, pulling back to reveal the whole monolith. One soft diagonal light sweep crosses it and the rim light blooms. That is the exhale.
 5. **The plate:** the slab dissolves, and the verdict stands alone in large lowercase type with tracking, the input small above it in stone.
 6. **Loop:** the plate sinks back to the exact darkness of frame 0, so the loop joins.
@@ -104,12 +104,12 @@ classical with a pulse and a landing. That is what earns the watch time.
 | risk | mitigation |
 | --- | --- |
 | Synthesized instruments sound cheap, hurting a premium-feeling brand | Few voices, restraint, a real room reverb, no fast runs; pads and bells, which synthesize convincingly. Judge by ear before any live test. |
-| 8 s is too long: completion drops | The verdict arrives at about 5.6 s. If completion is worse than classic, cut the plate hold first, then the intro. |
+| 8.5 s is too long: completion drops | The verdict arrives at about 4.7 s. If completion is worse than classic, cut the plate hold first. |
 | Dark frames band after platform re-encode | Grain as dither; avoid pure black gradients; test after the platform's encode, not just our file. |
-| Upscaled screen text looks soft when the camera pushes in | Cap the push at 1.28× with Lanczos resampling; if it's still soft, render the app layer at 2× (a later step). |
+| Screen text looks soft when the camera pushes in | Done in the build: the app layer is rendered at 2× for the motion piece, and the camera draws the slab from it at the camera's zoom. |
 | Same template daily causes fatigue | Seeded variation (drift, sweep angle); swap the creative arm on metrics, not on taste. |
 | Brand drift ("this looks like an ad") | No logo, no URL on the plate, no CTA, no share card. One verdict, lowercase. |
-| Render cost in Actions | About 30 s per clip in pure Python plus ffmpeg: acceptable for 10 or so clips a day. |
+| Render cost in Actions | About 45 s per clip (the 2× app render plus Python compositing): acceptable for 10 or so clips a day. |
 | We over-trust this doc | It is a set of hypotheses. The metrics decide. |
 
 ## 7. How we will know

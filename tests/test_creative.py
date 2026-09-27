@@ -10,7 +10,7 @@ import pytest
 from antisearch_mill.creative import CLASSIC, CREATIVES, clip_creative, motion_plan
 from antisearch_mill.fonts import resolve_font
 from antisearch_mill.ledger import Job, Ledger
-from antisearch_mill.music import SR, classical_bed, motion_bed, upbeat_bed
+from antisearch_mill.music import SR, classical_bed, fit_tempo, monolith_score, upbeat_bed
 from antisearch_mill.oracle import FixtureOracle, Verdict
 from antisearch_mill.produce import clip_id_for, produce_one
 from antisearch_mill.render import Layout, probe
@@ -52,8 +52,37 @@ def test_the_beds_are_original_seeded_and_timed_to_the_verdict():
     cl = classical_bed("travel|japan", total, submit, verdict)
     assert cl.peak() <= 10 ** (-6 / 20) + 1e-6
     assert _rms(cl.l, verdict, verdict + 0.5) > _rms(cl.l, verdict - 0.5, verdict)  # it resolves on the verdict
-    mo = motion_bed("travel|japan", 10.0, 1.2, 5.5, 7.0)
-    assert _rms(mo.l, 9.7, 10.0) < 0.2 * _rms(mo.l, 1.2, 5.0)  # silence at the end
+
+
+
+def test_the_monolith_score_lands_the_verdict_on_a_beat_and_ends_where_it_began():
+    start, submit, verdict, plate, total = 0.4, 2.27, 4.67, 6.2, 8.57
+    bpm = fit_tempo(start, verdict)
+    assert 62 <= bpm <= 80
+    beats = (verdict - start) * bpm / 60
+    assert abs(beats - round(beats)) < 1e-9  # the verdict is a downbeat
+    score = monolith_score("travel|japan", total, start, submit, verdict, plate)
+    assert score.len == int(round(total * SR)) and score.peak() <= 10 ** (-4 / 20) + 1e-6
+    typing, wait, landing = _rms(score.l, start, submit), _rms(score.l, submit, verdict), _rms(score.l, verdict, verdict + 0.8)
+    assert landing > 1.5 * wait and landing > 1.5 * typing  # tension, then the release on the verdict
+    assert _rms(score.l, total - 0.15, total) < 0.25 * landing  # it sinks back, so the loop joins
+
+
+def test_the_camera_frames_the_words_then_releases_to_the_monolith():
+    from antisearch_mill.creative import CAMERA_WIDE, INPUT_LINE, VERDICT_LINE, _Monolith
+    from antisearch_mill.render import Layout
+
+    tl = build_timeline("travel", "japan", fps=30, pause_s=1.0, style="app", wait="fixed", typing="human")
+    plan = motion_plan(tl)
+    mono = _Monolith(plan, tl, category="travel", verdict="japan", font_path=resolve_font(""), layout=Layout(),
+                     screen=(0, 0, 900, 1956), source_size=(1080, 1920))
+    assert mono.camera(0) == (CAMERA_WIDE, 0.5)  # frame 0: the whole monolith
+    zoom, focus = mono.camera(mono.submit_i - 1)
+    assert zoom > 1.8 and focus == INPUT_LINE  # close on the typed words
+    zoom, focus = mono.camera(mono.verdict_i - 1)
+    assert zoom > 1.9 and abs(focus - VERDICT_LINE) < 1e-9  # pushing in on the verdict line
+    zoom, focus = mono.camera(plan.outro_start - 1)
+    assert zoom < 1.05 and abs(focus - 0.5) < 0.01  # released: the whole slab
 
 
 def test_the_motion_piece_runs_6_to_12_seconds():
