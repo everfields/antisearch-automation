@@ -1,23 +1,25 @@
-job_id,network,status,clip_id,verdict,remote_id,url,detail,at,category
-t-dry-shampoo,tiktok,scheduled,t-dry-shampoo-4ea56ea1,k18 airwash dry shampoo,,,manual Buffer upload by GTM for 2026-09-24 22:07 America/New_York (2026-09-25 04:07 Madrid); mark failed if it never went out,2026-09-24T22:41:17+00:00,dry shampoo
-p-time,tiktok,scheduled,p-time-03541ddf,now,,,manual Buffer upload by GTM for 2026-09-25 00:07 America/New_York (06:07 Madrid); mark failed if it never went out,2026-09-24T22:41:21+00:00,time
-p-love,instagram,scheduled,p-love-e71af99c,unconditional love,,,manual Buffer upload by GTM for 2026-09-24 22:07 America/New_York (2026-09-25 04:07 Madrid); mark failed if it never went out,2026-09-24T22:41:21+00:00,love
-p-dog,linkedin,scheduled,p-dog-54e517c1,golden retriever,,,manual Buffer upload by GTM for 2026-09-25 09:07 America/New_York (15:07 Madrid); mark failed if it never went out,2026-09-24T22:41:22+00:00,dog
-s-situationship,instagram,pending,s-situationship-057bbd1b,clear boundaries,,,,2026-09-26T16:28:47+00:00,situationship
-s-situationship,instagram,published,s-situationship-057bbd1b,clear boundaries,6ab7f2e59f89edbefe7815c0,buffer:6ab7f2e59f89edbefe7815c0,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-26T16:28:47+00:00,situationship
-s-red-flag,tiktok,pending,s-red-flag-6b88b670,controlling behavior,,,,2026-09-26T17:18:28+00:00,red flag
-s-red-flag,tiktok,published,s-red-flag-6b88b670,controlling behavior,6ab7fe930f79a37c5d35c50d,buffer:6ab7fe930f79a37c5d35c50d,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-26T17:18:28+00:00,red flag
-s-hangover-cure,instagram,pending,s-hangover-cure-4aa20837,time,,,,2026-09-26T19:15:20+00:00,hangover cure
-s-hangover-cure,instagram,published,s-hangover-cure-4aa20837,time,6ab819f8ccccb9429c37db86,buffer:6ab819f8ccccb9429c37db86,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-26T19:15:20+00:00,hangover cure
-s-the-ick,tiktok,pending,s-the-ick-108a2054,rudeness to waitstaff,,,,2026-09-26T21:24:46+00:00,the ick
-s-the-ick,tiktok,published,s-the-ick-108a2054,rudeness to waitstaff,6ab83856ccccb9429c3ab20f,buffer:6ab83856ccccb9429c3ab20f,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-26T21:24:46+00:00,the ick
-p-restaurant-in-barcelona,instagram,pending,p-restaurant-in-barcelona-f9659623,disfrutar,,,,2026-09-26T23:18:17+00:00,restaurant in barcelona
-p-restaurant-in-barcelona,instagram,published,p-restaurant-in-barcelona-f9659623,disfrutar,6ab852ee4b4b9f2c1c5b6062,https://www.instagram.com/reel/DdxMvP2lNKQ/,,2026-09-26T23:18:17+00:00,restaurant in barcelona
-p-a-feeling,x,pending,p-a-feeling-725bad0d,love,,,,2026-09-26T23:18:17+00:00,a feeling
-p-a-feeling,x,published,p-a-feeling-725bad0d,love,6ab85336ccccb9429c3d616c,https://twitter.com/antisearch_ai/status/2103988085931327520,,2026-09-26T23:18:17+00:00,a feeling
-p-a-sound,tiktok,pending,p-a-sound-b88e9c1f,rain on a roof,,,,2026-09-27T00:20:39+00:00,a sound
-p-a-sound,tiktok,published,p-a-sound-b88e9c1f,rain on a roof,6ab861964b4b9f2c1c5cf40f,buffer:6ab861964b4b9f2c1c5cf40f,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-27T00:20:39+00:00,a sound
-p-a-color,instagram,pending,p-a-color-82466014,blue,,,,2026-09-27T02:14:47+00:00,a color
-p-a-color,instagram,published,p-a-color-82466014,blue,6ab87c573d66d464e5c4959d,buffer:6ab87c573d66d464e5c4959d,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-27T02:14:47+00:00,a color
-p-sunscreen,tiktok,pending,p-sunscreen-392cd72a,la roche-posay uvmune 400 invisible fluid spf50+,,,,2026-09-27T03:16:04+00:00,sunscreen
-p-sunscreen,tiktok,published,p-sunscreen-392cd72a,la roche-posay uvmune 400 invisible fluid spf50+,6ab88aa10f79a37c5d4398a6,buffer:6ab88aa10f79a37c5d4398a6,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-27T03:16:04+00:00,sunscreen
+job_id,network,status,clip_id,verdict,remote_id,url,detail,at,category,caption,format
+t-dry-shampoo,tiktok,scheduled,t-dry-shampoo-4ea56ea1,k18 airwash dry shampoo,,,manual Buffer upload by GTM for 2026-09-24 22:07 America/New_York (2026-09-25 04:07 Madrid); mark failed if it never went out,2026-09-24T22:41:17+00:00,dry shampoo,,
+p-time,tiktok,scheduled,p-time-03541ddf,now,,,manual Buffer upload by GTM for 2026-09-25 00:07 America/New_York (06:07 Madrid); mark failed if it never went out,2026-09-24T22:41:21+00:00,time,,
+p-love,instagram,scheduled,p-love-e71af99c,unconditional love,,,manual Buffer upload by GTM for 2026-09-24 22:07 America/New_York (2026-09-25 04:07 Madrid); mark failed if it never went out,2026-09-24T22:41:21+00:00,love,,
+p-dog,linkedin,scheduled,p-dog-54e517c1,golden retriever,,,manual Buffer upload by GTM for 2026-09-25 09:07 America/New_York (15:07 Madrid); mark failed if it never went out,2026-09-24T22:41:22+00:00,dog,,
+s-situationship,instagram,pending,s-situationship-057bbd1b,clear boundaries,,,,2026-09-26T16:28:47+00:00,situationship,,
+s-situationship,instagram,published,s-situationship-057bbd1b,clear boundaries,6ab7f2e59f89edbefe7815c0,buffer:6ab7f2e59f89edbefe7815c0,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-26T16:28:47+00:00,situationship,,
+s-red-flag,tiktok,pending,s-red-flag-6b88b670,controlling behavior,,,,2026-09-26T17:18:28+00:00,red flag,,
+s-red-flag,tiktok,published,s-red-flag-6b88b670,controlling behavior,6ab7fe930f79a37c5d35c50d,buffer:6ab7fe930f79a37c5d35c50d,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-26T17:18:28+00:00,red flag,,
+s-hangover-cure,instagram,pending,s-hangover-cure-4aa20837,time,,,,2026-09-26T19:15:20+00:00,hangover cure,,
+s-hangover-cure,instagram,published,s-hangover-cure-4aa20837,time,6ab819f8ccccb9429c37db86,buffer:6ab819f8ccccb9429c37db86,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-26T19:15:20+00:00,hangover cure,,
+s-the-ick,tiktok,pending,s-the-ick-108a2054,rudeness to waitstaff,,,,2026-09-26T21:24:46+00:00,the ick,,
+s-the-ick,tiktok,published,s-the-ick-108a2054,rudeness to waitstaff,6ab83856ccccb9429c3ab20f,buffer:6ab83856ccccb9429c3ab20f,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-26T21:24:46+00:00,the ick,,
+p-restaurant-in-barcelona,instagram,pending,p-restaurant-in-barcelona-f9659623,disfrutar,,,,2026-09-26T23:18:17+00:00,restaurant in barcelona,,
+p-restaurant-in-barcelona,instagram,published,p-restaurant-in-barcelona-f9659623,disfrutar,6ab852ee4b4b9f2c1c5b6062,https://www.instagram.com/reel/DdxMvP2lNKQ/,,2026-09-26T23:18:17+00:00,restaurant in barcelona,,
+p-a-feeling,x,pending,p-a-feeling-725bad0d,love,,,,2026-09-26T23:18:17+00:00,a feeling,,
+p-a-feeling,x,published,p-a-feeling-725bad0d,love,6ab85336ccccb9429c3d616c,https://twitter.com/antisearch_ai/status/2103988085931327520,,2026-09-26T23:18:17+00:00,a feeling,,
+p-a-sound,tiktok,pending,p-a-sound-b88e9c1f,rain on a roof,,,,2026-09-27T00:20:39+00:00,a sound,,
+p-a-sound,tiktok,published,p-a-sound-b88e9c1f,rain on a roof,6ab861964b4b9f2c1c5cf40f,buffer:6ab861964b4b9f2c1c5cf40f,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-27T00:20:39+00:00,a sound,,
+p-a-color,instagram,pending,p-a-color-82466014,blue,,,,2026-09-27T02:14:47+00:00,a color,,
+p-a-color,instagram,published,p-a-color-82466014,blue,6ab87c573d66d464e5c4959d,buffer:6ab87c573d66d464e5c4959d,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-27T02:14:47+00:00,a color,,
+p-sunscreen,tiktok,pending,p-sunscreen-392cd72a,la roche-posay uvmune 400 invisible fluid spf50+,,,,2026-09-27T03:16:04+00:00,sunscreen,,
+p-sunscreen,tiktok,published,p-sunscreen-392cd72a,la roche-posay uvmune 400 invisible fluid spf50+,6ab88aa10f79a37c5d4398a6,buffer:6ab88aa10f79a37c5d4398a6,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-27T03:16:04+00:00,sunscreen,,
+ig-manual-travel,instagram,pending,ig-manual-travel-ff56d0e5,japan,,,,2026-09-27T10:51:37+00:00,travel,#travel #japan #ai,video
+ig-manual-travel,instagram,scheduled,ig-manual-travel-ff56d0e5,japan,6ab8f56c612c9e6ac92089fe,buffer:6ab8f56c612c9e6ac92089fe,scheduled in Buffer for 2026-09-27 09:37 EDT (America/New_York),2026-09-27T10:51:37+00:00,travel,#travel #japan #ai,video
