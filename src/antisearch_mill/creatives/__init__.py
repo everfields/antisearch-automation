@@ -1,6 +1,6 @@
 """Instagram creatives: one fixed template each, rendered on CPU from the clip's timeline and text.
 
-The Instagram publisher rotates four reel creatives (docs/CREATIVE_DIRECTION.md):
+The Instagram publisher rotates four reel creatives (docs/IG_ROTATION.md):
   0-current           the current clip, unchanged
   1-short-score       the current picture, the keys plus the template score
   2-medium-monolith   the monolith: the camera dives onto the input, then the verdict alone

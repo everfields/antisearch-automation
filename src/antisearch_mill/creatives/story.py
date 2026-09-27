@@ -93,7 +93,7 @@ class StoryCard:
         self.line_y = round(self.input_y + 96)
         self.line_w = round(W * 0.34)
         rng = _rng(f"story|{category}|{verdict}")
-        self.grains = [Image.merge("RGB", [Image.effect_noise((W // 2, H // 2), 2.4)] * 3).resize((W, H), Image.BICUBIC)
+        self.grains = [Image.merge("RGB", [Image.effect_noise((W // 4, H // 4), 1.6)] * 3).resize((W, H), Image.BICUBIC)
                        for _ in range(3)]
         self.phase = rng.random()
 

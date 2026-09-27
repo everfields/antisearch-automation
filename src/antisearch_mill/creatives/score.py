@@ -1,4 +1,4 @@
-"""The creatives' score (docs/CREATIVE_DIRECTION.md): minimalist classical, synthesized in code.
+"""The creatives' score (docs/IG_ROTATION.md): minimalist classical, synthesized in code.
 
 No samples, loops, soundfont or stock track, so there is nothing to license and nothing to
 pay for. The tempo is fitted so the verdict lands on a beat. A quiet A-minor piano ostinato

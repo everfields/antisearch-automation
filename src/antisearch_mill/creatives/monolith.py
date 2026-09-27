@@ -1,4 +1,4 @@
-"""Creative 2, "the monolith" (docs/CREATIVE_DIRECTION.md), and the motion under creative 3.
+"""Creative 2, "the monolith" (docs/IG_ROTATION.md), and the motion under creative 3.
 
 An 8.5 s cinematic piece around the same typing-to-verdict moment:
 1. Frame 0 is dark, so the loop joins.
