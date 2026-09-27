@@ -115,9 +115,10 @@ At each network's slot, the GitHub Actions run (never the box):
    and Bluesky stay silent. `heartbeat` (Instagram and TikTok only) replaces the piano:
    a key click per typed letter, an Enter, a lub-dub per caret blink, a silent verdict.
    `PUBLISHER_CLIP_AUDIO_BED=on` adds a very quiet drone under the wait (default `off`).
-   `keys` (Instagram and TikTok only) is typing and Enter alone: a soft laptop key per
-   letter, silence through the wait and the verdict. `PUBLISHER_CLIP_KEYS_SOUND` is `soft`
-   (default) or `muted`. `PUBLISHER_CLIP_FRAME=phone` draws the app screen inside a
+   `keys` (Instagram and TikTok only) is typing and Enter alone: one key click per
+   letter, silence through the wait and the verdict. `PUBLISHER_CLIP_KEYS_SOUND` is `tap`
+   (default, a phone on-screen tap), `tick`, `glass`, or the laptop keys `soft` / `muted`.
+   `PUBLISHER_CLIP_TYPING` is `human` (default), `steady`, or `legacy`. `PUBLISHER_CLIP_FRAME=phone` draws the app screen inside a
    generic phone at `PUBLISHER_CLIP_PHONE_SCALE` of the height (default `0.80`) on
    `PUBLISHER_CLIP_PHONE_BG` (`stone` default, `bone`, `sage`; `black` and `gradient` kept).
    With the phone, the keys, or the heartbeat, the wait is always 2 caret blinks

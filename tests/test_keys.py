@@ -46,12 +46,12 @@ def _at(tl, frame):
 
 def test_keys_flags():
     assert clip_audio({"PUBLISHER_CLIP_AUDIO": "keys"}) == "keys"
-    assert clip_keys_sound({}) == "soft"
+    assert clip_keys_sound({}) == "tap"
     assert clip_keys_sound({"PUBLISHER_CLIP_KEYS_SOUND": "Muted"}) == "muted"
     with pytest.raises(ValueError, match="PUBLISHER_CLIP_KEYS_SOUND"):
         clip_keys_sound({"PUBLISHER_CLIP_KEYS_SOUND": "clicky"})
     assert audio_tag("keys", "c", True, "muted") == "keys:muted"
-    assert KEY_SOUNDS == ("soft", "muted")
+    assert KEY_SOUNDS == ("soft", "muted", "tick", "tap", "glass")
 
 
 @pytest.mark.parametrize("platforms,on", [(("instagram",), True), (("tiktok",), True),
@@ -60,7 +60,7 @@ def test_keys_only_on_instagram_and_tiktok(platforms, on):
     assert pulse_for_platforms(platforms, "keys") is on
 
 
-@pytest.fixture(scope="module", params=KEY_SOUNDS)
+@pytest.fixture(scope="module", params=("soft", "muted"))
 def mix(request):
     tl = _fixed()
     return request.param, tl, synthesize_keys(tl, request.param)
@@ -94,7 +94,7 @@ def test_silence_through_the_wait_and_the_verdict(mix):
     assert len(left) >= _at(tl, tl.total_frames) - 1
 
 
-@pytest.mark.parametrize("sound", KEY_SOUNDS)
+@pytest.mark.parametrize("sound", ("soft", "muted"))
 def test_soft_keys_are_darker_than_the_mechanical_click(sound):
     voice = KEY_VOICES[sound]
     soft = soft_key(_rng("k", 0), voice)
@@ -177,7 +177,7 @@ def test_keys_clip_end_to_end(tmp_path, monkeypatch):
     )
     assert r.status == "produced", r.detail
     side = json.loads((ledger.clips_dir / f"{r.clip_id}.json").read_text())["timeline"]
-    assert side["audio"] == "keys:soft"
+    assert side["audio"] == "keys:tap"
     assert side["frame"] == "phone:0.80:stone"
     assert side["segments_frames"]["wait"] == 63
     clip = ledger.clips_dir / f"{r.clip_id}.mp4"
@@ -198,5 +198,5 @@ def test_keys_without_phone_still_fixes_the_wait(tmp_path, monkeypatch):
     from antisearch_mill.cli import _clip_label, _clip_options
 
     opts = _clip_options({"PUBLISHER_CLIP_AUDIO": "keys", "PUBLISHER_CLIP_STYLE": "app"})
-    assert "wait=fixed" in _clip_label(opts) and "audio=keys:soft" in _clip_label(opts)
+    assert "wait=fixed" in _clip_label(opts) and "audio=keys:tap" in _clip_label(opts)
     assert "wait=latency" in _clip_label(_clip_options({}))
