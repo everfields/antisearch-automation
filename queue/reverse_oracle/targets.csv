@@ -1,0 +1,90 @@
+vertical,name,handle,market,site,followers_approx,aliases
+luxury,Cartier,@cartier,global,https://www.cartier.com,16.6M,cartier
+luxury,Hermès,@hermes,global,https://www.hermes.com,15.6M,hermès|hermes
+luxury,Louis Vuitton,@louisvuitton,global,https://www.louisvuitton.com,55M,louis vuitton
+luxury,Chanel,@chanelofficial,global,https://www.chanel.com,60M,chanel
+luxury,Dior,@dior,global,https://www.dior.com,45M,dior|christian dior
+luxury,Gucci,@gucci,global,https://www.gucci.com,52M,gucci
+luxury,Prada,@prada,global,https://www.prada.com,35M,prada
+luxury,Tiffany & Co.,@tiffanyandco,us,https://www.tiffany.com,14M,tiffany & co.|tiffany & co|tiffany and co|tiffany
+luxury,Rolex,@rolex,global,https://www.rolex.com,14M,rolex
+luxury,Patek Philippe,@patekphilippe,global,https://www.patek.com,2.7M,patek philippe
+luxury,Bulgari,@bulgari,global,https://www.bulgari.com,12M,bulgari|bvlgari
+luxury,Van Cleef & Arpels,@vancleefarpels,global,https://www.vancleefarpels.com,5M,van cleef & arpels|van cleef and arpels|van cleef
+luxury,Ferrari,@ferrari,global,https://www.ferrari.com,30M,ferrari
+luxury,Porsche,@porsche,global,https://www.porsche.com,32M,porsche
+luxury,Saint Laurent,@ysl,global,https://www.ysl.com,30M,saint laurent|yves saint laurent|ysl
+beauty,Fenty Beauty,@fentybeauty,us,https://fentybeauty.com,13.3M,fenty beauty|fenty
+beauty,Rare Beauty,@rarebeauty,us,https://www.rarebeauty.com,7M,rare beauty
+beauty,Glossier,@glossier,us,https://www.glossier.com,3M,glossier
+beauty,Charlotte Tilbury,@charlottetilbury,global,https://www.charlottetilbury.com,6M,charlotte tilbury
+beauty,MAC Cosmetics,@maccosmetics,us,https://www.maccosmetics.com,26M,mac cosmetics|mac
+beauty,NARS,@narsissist,us,https://www.narscosmetics.com,10M,nars|nars cosmetics
+beauty,Sephora,@sephora,us,https://www.sephora.com,22M,sephora
+beauty,La Mer,@lamer,us,https://www.cremedelamer.com,4M,la mer|crème de la mer|creme de la mer
+beauty,CeraVe,@cerave,us,https://www.cerave.com,2.5M,cerave
+beauty,The Ordinary,@theordinary,global,https://theordinary.com,4M,the ordinary
+beauty,Pat McGrath Labs,@patmcgrathreal,us,https://www.patmcgrath.com,4M,pat mcgrath labs|pat mcgrath
+beauty,Huda Beauty,@hudabeauty,global,https://hudabeauty.com,54M,huda beauty
+beauty,SkinCeuticals,@skinceuticals,us,https://www.skinceuticals.com,1M,skinceuticals
+beauty,Olaplex,@olaplex,us,https://olaplex.com,2.5M,olaplex
+hotel,Aman,@aman,global,https://www.aman.com,1.3M,aman
+hotel,Four Seasons,@fourseasons,global,https://www.fourseasons.com,4M,four seasons
+hotel,The Ritz-Carlton,@ritzcarlton,us,https://www.ritzcarlton.com,2M,the ritz-carlton|ritz-carlton|ritz carlton|the ritz
+hotel,Six Senses,@sixsenses,global,https://www.sixsenses.com,1M,six senses
+hotel,Rosewood Hotels,@rosewoodhotels,global,https://www.rosewoodhotels.com,1M,rosewood|rosewood hotels
+hotel,Belmond,@belmond,global,https://www.belmond.com,1M,belmond
+hotel,Mandarin Oriental,@mandarinorientalhotelgroup,global,https://www.mandarinoriental.com,1M,mandarin oriental
+hotel,One&Only Resorts,@oneandonlyresorts,global,https://www.oneandonlyresorts.com,1M,one&only|one & only|one and only
+hotel,Soneva,@soneva,global,https://soneva.com,500k,soneva|soneva jani|soneva fushi|soneva kiri
+hotel,Marina Bay Sands,@marinabaysands,global,https://www.marinabaysands.com,1.5M,marina bay sands
+hotel,Burj Al Arab,@burjalarab,global,https://www.jumeirah.com,1.5M,burj al arab|burj al arab jumeirah
+restaurant,Eleven Madison Park,@elevenmadisonpark,us,https://www.elevenmadisonpark.com,700k,eleven madison park
+restaurant,Le Bernardin,@lebernardinny,us,https://www.le-bernardin.com,200k,le bernardin
+restaurant,Noma,@nomacph,global,https://noma.dk,700k,noma
+restaurant,Nobu,@noburestaurants,global,https://www.noburestaurants.com,800k,nobu
+restaurant,Atomix,@atomixnyc,us,https://www.atomixnyc.com,150k,atomix
+restaurant,Disfrutar,@disfrutarbarcelona,global,https://www.disfrutarbarcelona.com,200k,disfrutar
+restaurant,Shake Shack,@shakeshack,us,https://shakeshack.com,1.5M,shake shack
+restaurant,In-N-Out Burger,@innout,us,https://www.in-n-out.com,2M,in-n-out|in-n-out burger|in n out
+restaurant,Starbucks,@starbucks,us,https://www.starbucks.com,18M,starbucks
+cruise,Royal Caribbean,@royalcaribbean,us,https://www.royalcaribbean.com,2.5M,royal caribbean|royal caribbean international
+cruise,Carnival Cruise Line,@carnival,us,https://www.carnival.com,2M,carnival|carnival cruise line
+cruise,Disney Cruise Line,@disneycruiseline,us,https://disneycruise.disney.go.com,1.5M,disney cruise line
+cruise,Virgin Voyages,@virginvoyages,us,https://www.virginvoyages.com,400k,virgin voyages
+cruise,Viking,@vikingcruises,us,https://www.vikingcruises.com,500k,viking|viking cruises|viking river cruises
+cruise,Celebrity Cruises,@celebritycruises,us,https://www.celebritycruises.com,1M,celebrity cruises
+cruise,Norwegian Cruise Line,@norwegiancruiseline,us,https://www.ncl.com,1M,norwegian cruise line
+club,Hï Ibiza,@hiibizaofficial,global,https://www.hiibiza.com,1M,hï ibiza|hi ibiza
+club,Ushuaïa Ibiza,@ushuaiaibiza,global,https://www.theushuaiaexperience.com,1.5M,ushuaïa ibiza|ushuaia ibiza|ushuaïa|ushuaia
+club,Pacha Ibiza,@pacha,global,https://www.pacha.com,1M,pacha|pacha ibiza
+experience,Tomorrowland,@tomorrowland,global,https://www.tomorrowland.com,11M,tomorrowland
+experience,Coachella,@coachella,us,https://www.coachella.com,10M,coachella
+experience,Glastonbury Festival,@glastofest,global,https://www.glastonburyfestivals.co.uk,1.5M,glastonbury|glastonbury festival
+experience,Burning Man,@burningman,us,https://burningman.org,1.5M,burning man
+experience,Cirque du Soleil,@cirquedusoleil,global,https://www.cirquedusoleil.com,3M,cirque du soleil
+experience,Sphere,@spherevegas,us,https://www.thespherevegas.com,1.5M,sphere|the sphere|sphere las vegas
+experience,Disney Parks,@disneyparks,us,https://disneyparks.disney.go.com,15M,disney parks|disneyland|walt disney world|disney world|magic kingdom|tokyo disneysea
+experience,teamLab,@teamlab,global,https://www.teamlab.art,3M,teamlab|teamlab borderless|teamlab planets
+experience,Louvre,@museelouvre,global,https://www.louvre.fr,5.3M,louvre|louvre museum|the louvre|musée du louvre
+experience,The Met,@metmuseum,us,https://www.metmuseum.org,4.5M,the met|metropolitan museum of art|the metropolitan museum of art|met museum
+experience,MoMA,@themuseumofmodernart,us,https://www.moma.org,5.5M,moma|museum of modern art|the museum of modern art
+experience,Palace of Versailles,@chateauversailles,global,https://www.chateauversailles.fr,1.3M,palace of versailles|versailles|château de versailles|chateau de versailles
+experience,San Diego Zoo,@sandiegozoo,us,https://sandiegozoo.org,1.1M,san diego zoo
+experience,Monterey Bay Aquarium,@montereybayaquarium,us,https://www.montereybayaquarium.org,614k,monterey bay aquarium
+travel,Visit Japan (Americas),@visitjapan.us,us,https://www.japan.travel/en/us/,140k,japan
+travel,Italia,@italiait,global,https://www.italia.it,877k,italy|italia
+travel,Switzerland Tourism,@switzerland,global,https://www.myswitzerland.com,1.2M,switzerland|zermatt|zermatt switzerland
+travel,Visit London,@visitlondon,global,https://www.visitlondon.com,1M,london
+travel,Paris je t'aime,@parisjetaime,global,https://parisjetaime.com,700k,paris
+travel,Visit Peru,@visitperu,global,https://www.peru.travel,700k,peru|machu picchu
+travel,NYC Tourism,@nycgo,us,https://www.nyctourism.com,1M,new york|new york city|nyc
+travel,Visit Greece,@visitgreecegr,global,https://www.visitgreece.gr,1M,greece|santorini
+travel,Spain,@spain,global,https://www.spain.info,1.5M,spain
+travel,Tourism Australia,@australia,global,https://www.australia.com,5M,australia
+travel,Visit Dubai,@visitdubai,global,https://www.visitdubai.com,2M,dubai
+travel,Visit Maldives,@visitmaldives,global,https://visitmaldives.com,700k,maldives|the maldives
+travel,Visit Portugal,@visitportugal,global,https://www.visitportugal.com,700k,portugal|lisbon
+travel,Visit Mexico,@visitmexico,global,https://www.visitmexico.com,800k,mexico
+travel,Tourism New Zealand,@purenewzealand,global,https://www.newzealand.com,1.3M,new zealand
+travel,Hawaii Tourism,@gohawaii,us,https://www.gohawaii.com,1M,hawaii|maui

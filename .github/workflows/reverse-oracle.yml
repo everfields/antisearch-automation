@@ -1,0 +1,86 @@
+name: reverse-oracle
+
+# From target accounts (queue/reverse_oracle/targets.csv) to short inputs whose REAL
+# verdict names them: a generator model (GitHub Models via this run's token) proposes
+# inputs, each is verified with one call to the publisher's oracle path, under a budget.
+# Every live verdict is frozen in publisher-state/verdicts.csv; results go to
+# publisher-state/reverse_oracle/. An input already frozen or tried is never asked again.
+# Nothing is posted or scheduled.
+#   Manual: Actions -> reverse-oracle -> Run workflow (dry-run unless `live` is ticked).
+
+on:
+  workflow_dispatch:
+    inputs:
+      live:
+        description: Really call the oracle
+        type: boolean
+        default: false
+      budget:
+        description: Max live oracle calls
+        default: "100"
+      model:
+        description: Generator model (GitHub Models id)
+        default: openai/gpt-4.1
+      run_id:
+        description: Run id (a used id is never run again; empty = timestamp)
+        default: ""
+
+permissions:
+  contents: write
+  models: read
+
+concurrency:
+  group: publisher  # shared with publisher.yml: one writer of publisher-state at a time
+  cancel-in-progress: false
+
+jobs:
+  reverse:
+    runs-on: ubuntu-24.04
+    env:
+      LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
+      BUDGET: ${{ inputs.budget || '100' }}
+      MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
+      RUN_ID: ${{ inputs.run_id }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e .
+
+      - name: Load publisher-state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git clone --quiet --depth 1 --branch publisher-state "$remote" state
+
+      - name: Reverse oracle
+        run: |
+          python scripts/reverse_oracle.py --state state --budget "$BUDGET" --model "$MODEL" \
+            --check-sites $([ -n "$RUN_ID" ] && echo --run-id "$RUN_ID") $([ "$LIVE" = "true" ] && echo --live)
+
+      - name: Save results and frozen verdicts
+        if: always() && env.LIVE == 'true'
+        run: |
+          cd state
+          git add -A verdicts.csv reverse_oracle
+          git diff --cached --quiet && exit 0
+          git -c user.name=antisearch-publisher -c user.email=actions@users.noreply.github.com \
+            commit --quiet -m "reverse oracle $(date -u +%FT%TZ)"
+          for i in 1 2 3 4; do
+            git push --quiet origin publisher-state && exit 0
+            sleep $((i * 5))
+            git pull --quiet --rebase origin publisher-state
+          done
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reverse-oracle-${{ github.run_id }}
+          path: state/reverse_oracle/
+          if-no-files-found: ignore
+          retention-days: 14
