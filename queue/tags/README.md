@@ -14,9 +14,17 @@ only if every rule below holds, otherwise it goes out untagged.
   is `#<input> #<verdict> #ai` and the tag rides last as its one `@mention` (Buffer
   cannot user-tag reels; its API has user tags on images only).
 - **Instagram:** only a verified **US** brand account, marked `"market": "us"` on the
-  entry's `instagram` block, and never the same handle within **14 days**.
+  entry's `instagram` block, or a brand's single worldwide account the founder picked,
+  marked `"market": "global"`. Never the same handle within **14 days**.
 - **Spam guard:** one tag per handle per network per 7 days, and at most half of a
-  network's posts on a day are tagged.
+  network's posts on a day are tagged. A scheduled post's tag counts on the day it goes out.
+- **Concept mention reels** (`queue/manual/2026-09-28-ig-mentions.csv`): an entry is added
+  only after a web check on the day of scheduling shows the account is official, verified,
+  and has posted in the last 7 days. `hermès` → `@hermes` passed on 2026-09-27. Four pairs
+  failed and have no row: @purenewzealand, @tahititourisme and @visitgreecegr have no web
+  evidence of a post in the last 7 days (and none of @visitgreecegr's badge); @indtravel is
+  no longer the ministry's account (3k followers), and @wonderfulindonesia is not shown
+  verified or active.
 - **Breaker:** `PUBLISHER_TAG_NETWORKS` (for example `tiktok` or `instagram,tiktok`).
   Empty, the default, means no tags anywhere.
 - Never hashtags, collaborator invites, or hidden text.

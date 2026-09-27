@@ -245,7 +245,7 @@ def run_posts(
                 continue
             if net in TAG_NETWORKS:
                 # Instagram and TikTok tag only from the allowlist, never from the winner handle map.
-                picked = choose_tag(clip.verdict, net, env, allowlist, tag_log, now, len(slots_now(net)))
+                picked = choose_tag(clip.verdict, net, env, allowlist, tag_log, schedule_at or now, len(slots_now(net)))
                 tag, note = picked.handle, picked.reason
             else:
                 tag = res.handle if res.handle and not caption_problem(res.handle, job.category, net) else ""
@@ -254,7 +254,7 @@ def run_posts(
             if net not in TAG_NETWORKS:
                 tag = ""  # the winner lane's own tags keep the lifetime caption dedupe
         elif net in TAG_NETWORKS and not effective_caption(job.caption):
-            picked = choose_tag(clip.verdict, net, env, allowlist, tag_log, now, len(slots_now(net)))
+            picked = choose_tag(clip.verdict, net, env, allowlist, tag_log, schedule_at or now, len(slots_now(net)))
             tag = picked.handle
             if tag:
                 job = dataclasses.replace(job, caption=tag, notes=f"{job.notes}; tag: {picked.reason}")
@@ -305,7 +305,7 @@ def run_posts(
         if live:
             done = _post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at, state, flags, wait_s)
             if tag and done.status in DONE:
-                tag_log.append(now, net, tag, job.id)
+                tag_log.append(schedule_at or now, net, tag, job.id)  # logged for the day it goes out
             out.append(done)
         else:
             out.append(_post_dry(cls, job, clip, media, ledger, env, missing, due_at, wait_s))

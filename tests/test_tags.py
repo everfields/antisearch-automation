@@ -39,7 +39,7 @@ def test_breaker_is_off_by_default_and_never_includes_x():
 
 def test_seed_allowlist_is_japan_on_instagram_then_k18_on_tiktok():
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
-    assert list(allow) == ["japan", "k18"]
+    assert list(allow) == ["japan", "k18", "hermès"]
     assert allowlisted("japan", "instagram", allow, DAY).handle == "@visitjapan.us"
     assert allowlisted("k18 airwash dry shampoo", "tiktok", allow, DAY).handle == "@k18hair"
     assert allowlisted("k18", "instagram", allow, DAY).handle == ""

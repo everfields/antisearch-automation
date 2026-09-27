@@ -136,7 +136,7 @@ def _maybe_edit(row: ManualRow, prior: dict, log: PostLog, store: VerdictStore, 
         return Outcome(row.id, row.network, "skipped_already_posted", prior.get("url", ""),
                        "caption already has its mention")  # an edit only ever adds one, never swaps or drops it
     tag_log = TagLog(log.path.parent / "tags.csv")
-    picked = choose_tag(frozen.verdict, row.network, env, dict(tag_allowlist or {}), tag_log, now,
+    picked = choose_tag(frozen.verdict, row.network, env, dict(tag_allowlist or {}), tag_log, row.due,
                         len(slots_for(row.network, dict(env))))
     caption = ig_caption(row.category, frozen.verdict, picked.handle)
     problem = ig_caption_problem(caption)
@@ -166,5 +166,5 @@ def _maybe_edit(row: ManualRow, prior: dict, log: PostLog, store: VerdictStore, 
                        prior["remote_id"], prior.get("url", ""), note[:500], prior["at"], row.category, caption,
                        prior.get("format", "")))
     if picked.handle:
-        tag_log.append(now, row.network, picked.handle, row.id)
+        tag_log.append(row.due, row.network, picked.handle, row.id)
     return Outcome(row.id, row.network, "caption_edited", prior.get("url", ""), note)
