@@ -110,9 +110,19 @@ class BufferRoute(Adapter):
         return PostResult(f"buffer:{post['id']}", post["id"],
                           note=f"handed to Buffer, status {post.get('status')}; the network link appears in Buffer once sent")
 
-    def edit_text(self, post_id: str, text: str) -> dict:
-        """Change the caption of a post Buffer still holds; its schedule stays as it is."""
-        result = self._gql(EDIT, {"input": {"id": post_id, "text": text}})["editPost"]
+    def edit_text(self, post_id: str, text: str, media: Media | None = None) -> dict:
+        """Change the caption of a post Buffer still holds; its schedule stays as it is.
+
+        Buffer re-validates the whole post on edit (Instagram needs its video and type), so
+        `media` resends the same asset and metadata the post was created with.
+        """
+        payload: dict = {"id": post_id, "text": text}
+        if media is not None:
+            payload["assets"] = [{"video": self._video(media)}]
+            meta = self._metadata()
+            if meta:
+                payload["metadata"] = {self.service: meta}
+        result = self._gql(EDIT, {"input": payload})["editPost"]
         if result.get("__typename") != "PostActionSuccess":
             raise PublisherError(f"buffer: {result.get('message', result)}")
         return result["post"]

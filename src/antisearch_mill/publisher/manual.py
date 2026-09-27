@@ -21,7 +21,10 @@ from typing import Callable, Mapping
 
 from ..ledger import ClipRow, Job, Ledger
 from ..oracle import normalize_category
+from urllib.parse import quote
+
 from ..publish.http import RecordingTransport, RequestsTransport
+from .base import Media
 from .guard import DONE, PENDING, SCHEDULED_STATES, PostLog, PostRow, approved_networks, slots_for, tz
 from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
 from .run import Outcome, run_posts
@@ -84,7 +87,7 @@ def run_manual(
         one_env = _row_env(env, row)
         if prior and prior["status"] in SCHEDULED_STATES and prior.get("remote_id") and row.network == "instagram":
             out.append(_maybe_edit(row, prior, log, store, one_env, now=now, live=live, adapters=adapters,
-                                   transport=transport, tag_allowlist=tag_allowlist))
+                                   transport=transport, tag_allowlist=tag_allowlist, produce=produce))
             continue
         if prior and (prior["status"] in DONE or prior["status"] == PENDING):
             out.append(Outcome(row.id, row.network, "skipped_already_posted", prior.get("url", ""),
@@ -110,8 +113,18 @@ def _row_env(env: Mapping[str, str], row: ManualRow) -> dict[str, str]:
     return {**env, "PUBLISHER_LIVE_NETWORKS": ",".join(sorted(live)), "PUBLISHER_TAG_NETWORKS": ",".join(sorted(tags))}
 
 
+def _same_media(row: ManualRow, prior: dict, env: Mapping[str, str], produce) -> Media:
+    """The scheduled post's video, rebuilt: the same clip id, so the same bytes and public URL."""
+    clip = produce(Job(id=row.id, category=row.category, platforms=(row.network,), notes=MANUAL_NOTE))
+    if clip is None or clip.clip_id != prior.get("clip_id"):
+        raise RuntimeError(f"re-render gave {getattr(clip, 'clip_id', None)!r}, not {prior.get('clip_id')!r}")
+    base = (env.get("PUBLISHER_PUBLIC_BASE_URL") or "").strip().rstrip("/")
+    url = f"{base}/{quote(f'clips/{Path(clip.clip_path).name}')}"
+    return Media.video(clip.clip_path, clip.width, clip.height, clip.duration_s, label=row.category, public_url=url)
+
+
 def _maybe_edit(row: ManualRow, prior: dict, log: PostLog, store: VerdictStore, env: Mapping[str, str], *,
-                now: datetime, live: bool, adapters: Mapping, transport, tag_allowlist) -> Outcome:
+                now: datetime, live: bool, adapters: Mapping, transport, tag_allowlist, produce) -> Outcome:
     if now + LEAD >= row.due:
         return Outcome(row.id, row.network, "skipped_already_posted", prior.get("url", ""),
                        "scheduled post is due or out: its caption is left as it went")
@@ -136,13 +149,17 @@ def _maybe_edit(row: ManualRow, prior: dict, log: PostLog, store: VerdictStore, 
     if not hasattr(cls, "edit_text"):
         return Outcome(row.id, row.network, "failed", detail=f"{cls.route} route cannot edit a scheduled post")
     note = f"caption edited in Buffer: {caption!r}" + (f" ({picked.reason})" if picked.handle else "")
+    try:
+        media = _same_media(row, prior, env, produce)
+    except Exception as exc:  # noqa: BLE001 - reported, the scheduled post is untouched
+        return Outcome(row.id, row.network, "failed", detail=f"edit: {exc}")
     if not live:
         adapter = cls(RecordingTransport(lambda r: cls(None, env).dry_run_responder(r)), env)
-        adapter.edit_text(prior["remote_id"], caption)
-        return Outcome(row.id, row.network, "dry_run_caption_edit", detail=note)
+        adapter.edit_text(prior["remote_id"], caption, media)
+        return Outcome(row.id, row.network, "dry_run_caption_edit", detail=f"{note}; video {media.public_url}")
     adapter = cls(transport or RequestsTransport(), env)
     try:
-        adapter.edit_text(prior["remote_id"], caption)
+        adapter.edit_text(prior["remote_id"], caption, media)
     except Exception as exc:  # noqa: BLE001 - reported, the scheduled post is untouched
         return Outcome(row.id, row.network, "failed", detail=f"edit: {exc.__class__.__name__}: {exc}")
     log.append(PostRow(row.id, row.network, prior["status"], prior.get("clip_id", ""), prior.get("verdict", ""),

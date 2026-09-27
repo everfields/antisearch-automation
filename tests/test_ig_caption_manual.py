@@ -209,7 +209,13 @@ def test_a_scheduled_manual_row_gets_its_mention_by_editing_the_caption(tmp_path
     assert first[0].status == "scheduled" and creates[0]["text"] == "#travel #japan #ai"
     out, creates, log = _manual(tmp_path, [row], datetime(2026, 9, 27, 7, 10, tzinfo=ET), frozen=False, allow=allow)
     assert out[0].status == "caption_edited" and creates == []  # the same post, never a second one
-    assert _manual.edits == [{"id": "dry-post", "text": "#travel #japan #ai @visitjapan.us"}]  # schedule kept
+    (edit,) = _manual.edits
+    assert (edit["id"], edit["text"]) == ("dry-post", "#travel #japan #ai @visitjapan.us")
+    assert "mode" not in edit and "dueAt" not in edit  # the schedule is kept
+    # Buffer re-validates the whole post on edit: the same video and reel type go with it
+    assert edit["assets"] == [{"video": {"url": "https://everfields.github.io/antisearch-clips/clips/ig-manual-travel.mp4",
+                                         "metadata": {"thumbnailOffset": 3500}}}]
+    assert edit["metadata"] == {"instagram": {"type": "reel", "shouldShareToFeed": True}}
     last = log.rows()[-1]
     assert (last["status"], last["remote_id"], last["caption"], last["format"]) == (
         "scheduled", "dry-post", "#travel #japan #ai @visitjapan.us", "video")
