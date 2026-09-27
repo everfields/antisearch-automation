@@ -20,8 +20,12 @@ halves that network for 72h. The rules and the switches are in
 inputs (`ai model` → gpt-5 was deleted from X; `posts.csv` marks it `deleted`, so it is
 never reposted). Until the fix ships in `the_best`, no AI-category input (ai model, llm,
 chatbot, ai company, ai app, coding agent and the like) goes out on any pool, queue,
-trend or reply lane; `input_problem` rejects them. Set `PUBLISHER_AI_INPUTS=on` once
-the fix is live.
+trend or reply lane; `input_problem` rejects them. The fix went live at 15:00 UTC the
+same day, and the repo variable `PUBLISHER_AI_INPUTS=on` (passed by `publisher.yml` and
+`manual-post.yml`) reopens them. Any AI-category verdict frozen before 15:00 UTC is
+stale: `VerdictStore` ignores it, so the next live run asks the oracle again. The
+deleted `p-ai-model` post is marked `reopened` in `posts.csv` (a `reopened` job may post
+again and its input is free); a `deleted` post otherwise never goes out again.
 
 **English lock (Carlos).** All public text is English by default until he says
 otherwise:

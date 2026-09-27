@@ -95,6 +95,8 @@ PENDING = "pending"
 FAILED = "failed"
 WITHHELD = "withheld"  # frozen, not posted: a minor or a private individual (sensitive)
 DELETED = "deleted"  # taken down after it went out: never reposted, input stays used, no metrics
+# A deleted job a human reopens (a new verdict to come): it may post again, and its input is free.
+REOPENED = "reopened"
 DONE = ("published", "drafted", "scheduled", WITHHELD, DELETED)
 SCHEDULED_STATES = ("scheduled",)
 
@@ -275,7 +277,7 @@ def next_slot(moment: datetime, slots: list[time]) -> datetime | None:
 class PostRow:
     job_id: str
     network: str
-    status: str  # pending | published | drafted | scheduled | failed | withheld | deleted
+    status: str  # pending | published | drafted | scheduled | failed | withheld | deleted | reopened
     clip_id: str = ""
     verdict: str = ""
     remote_id: str = ""
@@ -392,7 +394,7 @@ class PostLog:
             return False
         cutoff = now - timedelta(days=days)
         for row in self.latest_by_job().values():
-            if row.get("category") != category or row.get("status") in (FAILED, WITHHELD):
+            if row.get("category") != category or row.get("status") in (FAILED, WITHHELD, REOPENED):
                 continue
             try:
                 at = datetime.fromisoformat(row["at"])
@@ -406,7 +408,8 @@ class PostLog:
 
     def used_inputs(self) -> set[str]:
         """Inputs that went (or may have gone) out anywhere: an input is never repeated, ever."""
-        return {r.get("category", "") for r in self.latest_by_job().values() if r["status"] != FAILED} - {""}
+        return {r.get("category", "") for r in self.latest_by_job().values()
+                if r["status"] not in (FAILED, REOPENED)} - {""}
 
     def lifetime(self, network: str) -> int:
         """Posts on `network` that went (or may have gone) out, ever; drives the unowned-word rhythm."""

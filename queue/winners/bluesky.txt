@@ -1,6 +1,7 @@
 # Winner lane, Bluesky (the X stand-in: tech, companies, sport). Bluesky tags only verified domain handles.
 smartphone brand
 laptop brand
+ai lab
 electric car company
 streaming service
 football club
