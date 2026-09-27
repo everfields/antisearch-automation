@@ -342,6 +342,31 @@ def cmd_buffer_channels(args, settings: Settings) -> int:
     return 0
 
 
+def cmd_metrics(args, settings: Settings) -> int:
+    """Collect per-post metrics into <state>/metrics/, rebuild summary.md, fail if a network gave nothing."""
+    from datetime import datetime, timezone
+
+    from .metrics import collect, summary
+
+    state = Path(args.state)
+    now = datetime.now(timezone.utc)
+    use_buffer = True if args.buffer_now else (False if args.no_buffer else None)
+    col = collect(state, dict(os.environ), now=now, use_buffer=use_buffer)
+    text = summary(state, now)
+    (state / "metrics" / "summary.md").write_text(text, encoding="utf-8")
+    report = [f"metrics: {len(col.posts)} post row(s), {len(col.accounts)} account row(s)"]
+    report += [f"  note: {n}" for n in col.notes]
+    report += [f"  PROBLEM: {p}" for p in col.problems]
+    print("\n".join(report))
+    job = os.environ.get("GITHUB_STEP_SUMMARY")
+    if job:
+        head = "## ❌ Metrics: a network returned nothing\n\n" if col.problems else "## Metrics collected\n\n"
+        body = "".join(f"- **{p}**\n" for p in col.problems) + "".join(f"- {n}\n" for n in col.notes)
+        with open(job, "a", encoding="utf-8") as fh:
+            fh.write(head + body + "\n" + text)
+    return 1 if col.problems else 0
+
+
 def cmd_networks(args, settings: Settings) -> int:
     from zoneinfo import ZoneInfo
 
@@ -568,6 +593,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("winners", help="winner lane: handle map status (which handles still need a badge check)")
     sp.add_argument("--winners", default="queue/winners")
     sp.set_defaults(func=cmd_winners)
+
+    sp = sub.add_parser("metrics", help="collect per-post TikTok/Instagram/X metrics into <state>/metrics/ (read-only)")
+    sp.add_argument("--state", default="state", help="publisher-state checkout (default: ./state)")
+    sp.add_argument("--buffer-now", action="store_true", help="ask Buffer even if it was asked in the last 20h")
+    sp.add_argument("--no-buffer", action="store_true", help="public sources only")
+    sp.set_defaults(func=cmd_metrics)
 
     sp = sub.add_parser("networks", help="own publisher: routes, slots (ET + Madrid), credentials, pool runway")
     sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
