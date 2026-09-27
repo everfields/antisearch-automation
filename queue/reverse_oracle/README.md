@@ -45,3 +45,14 @@ and later runs reuse them for free.
   candidates ran out before the budget of 100.
 - Result: 56 matching inputs (45 exact) for 50 of 89 targets.
 - Not a real match: `three-dimensional shape` → `sphere` (the shape, not @spherevegas).
+
+**Run `2026-09-27-c1`** (concept words, founder framing; `publisher-state` `03ee50a`):
+- Inputs: 101 one-word concepts in `concepts-2026-09-27.json`, and winner handles in
+  `concept-targets.csv`. The Cursor agent (Claude Opus 5.5) wrote both from model knowledge,
+  committed them in `b2b59dc` before any web check, and ran them with `--ordered`.
+- Verification: 98 forward calls with no errors, 2 inputs already frozen, and `carnival`
+  skipped because it names a brand. 21 inputs matched.
+- Handle check (`handle-evidence-2026-09-27.csv`, via `scripts/verify_handles.py` plus web
+  search): 6 of 20 randomly sampled model-knowledge handles were wrong (30%, against a 2%
+  bar), and one more outside the sample. The method is not trusted: every handle needs
+  web evidence before use. The wrong ones are corrected in `concept-targets.csv`.

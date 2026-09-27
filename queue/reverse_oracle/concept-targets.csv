@@ -79,19 +79,19 @@ travel,Visit London,@visitlondon,global,https://www.visitlondon.com,1M,london
 travel,Paris je t'aime,@parisjetaime,global,https://parisjetaime.com,700k,paris
 travel,Visit Peru,@visitperu,global,https://www.peru.travel,700k,peru|machu picchu|cusco
 travel,NYC Tourism,@nycgo,us,https://www.nyctourism.com,1M,new york|new york city|nyc
-travel,Visit Greece,@visitgreecegr,global,https://www.visitgreece.gr,1M,"greece|santorini|mykonos|crete|cyclades|cyclades, greece|greek islands|milos|oia|oia, santorini"
+travel,Visit Greece,@visitgreecegr,global,https://www.visitgreece.gr,690k,"greece|santorini|mykonos|crete|cyclades|cyclades, greece|greek islands|milos|oia|oia, santorini"
 travel,Spain,@spain,global,https://www.spain.info,1.5M,spain|ibiza|mallorca|barcelona|seville|madrid|san sebastián|san sebastian|canary islands
 travel,Tourism Australia,@australia,global,https://www.australia.com,5M,australia|sydney|uluru|great barrier reef
 travel,Visit Dubai,@visitdubai,global,https://www.visitdubai.com,2M,dubai|dubai
-travel,Visit Maldives,@visitmaldives,global,https://visitmaldives.com,700k,maldives|the maldives|the maldives
+travel,Visit Maldives,@visitmaldives,global,https://visitmaldives.com,523k,maldives|the maldives|the maldives
 travel,Visit Portugal,@visitportugal,global,https://www.visitportugal.com,700k,portugal|lisbon|lisbon|porto|madeira|algarve|azores
 travel,Visit Mexico,@visitmexico,global,https://www.visitmexico.com,800k,mexico|tulum|cancún|cancun|oaxaca|mexico city
 travel,Tourism New Zealand,@purenewzealand,global,https://www.newzealand.com,1.3M,new zealand|queenstown|milford sound|fiordland
-travel,Hawaii Tourism,@gohawaii,us,https://www.gohawaii.com,1M,hawaii|maui|kauai|oahu|waikiki|banzai pipeline|big island|haleakalā|haleakala
-travel,Tahiti Tourisme,@tahititourisme,global,https://tahititourisme.com,500k,bora bora|tahiti|french polynesia|moorea
+travel,Hawaii Tourism,@gohawaii,us,https://www.gohawaii.com,140-220k,hawaii|maui|kauai|oahu|waikiki|banzai pipeline|big island|haleakalā|haleakala
+travel,Tahiti Tourisme,@tahititourisme,global,https://tahititourisme.com,248k,bora bora|tahiti|french polynesia|moorea
 travel,Visit Finland,@ourfinland,global,https://www.visitfinland.com,500k,finland|lapland|finnish lapland|rovaniemi
 travel,Magical Kenya,@magicalkenya,global,https://magicalkenya.com,300k,kenya|masai mara|maasai mara|maasai mara national reserve
-travel,Tanzania Tourism,@tanzaniatourism,global,https://www.tanzaniatourism.go.tz,200k,tanzania|serengeti|serengeti national park|zanzibar|kilimanjaro|mount kilimanjaro|ngorongoro crater
+travel,Tanzania Tourism,@tanzania_unforgettable,global,https://www.tanzaniatourism.go.tz,85k,tanzania|serengeti|serengeti national park|zanzibar|kilimanjaro|mount kilimanjaro|ngorongoro crater
 travel,Visit Iceland,@inspiredbyiceland,global,https://www.visiticeland.com,500k,iceland
 travel,Visit Norway,@visitnorway,global,https://www.visitnorway.com,1M,"norway|lofoten|lofoten islands|tromsø|tromsø, norway|geirangerfjord"
 travel,Destination Canada,@explorecanada,global,https://travel.destinationcanada.com,1.5M,canada|banff|banff national park|lake louise
@@ -99,36 +99,36 @@ travel,Grand Canyon National Park,@grandcanyonnps,us,https://www.nps.gov/grca,1M
 travel,Yosemite National Park,@yosemitenps,us,https://www.nps.gov/yose,1M,yosemite|yosemite national park|yosemite valley
 travel,Yellowstone National Park,@yellowstonenps,us,https://www.nps.gov/yell,1M,yellowstone|yellowstone national park
 travel,Wonderful Indonesia,@indtravel,global,https://www.indonesia.travel,1M,indonesia|bali|raja ampat|komodo
-travel,Amazing Thailand,@amazingthailand,global,https://www.tourismthailand.org,500k,thailand|bangkok|phuket
+travel,Amazing Thailand,@tourismthailand,global,https://www.tourismthailand.org,500k,thailand|bangkok|phuket
 travel,Visit Singapore,@visit_singapore,global,https://www.visitsingapore.com,1M,singapore
 travel,Visit Monaco,@visitmonaco,global,https://www.visitmonaco.com,300k,monaco|monte carlo|monte-carlo
 travel,Visit Costa Rica,@visitcostarica,global,https://www.visitcostarica.com,1M,costa rica
-travel,Visit Morocco,@visitmorocco,global,https://www.visitmorocco.com,500k,morocco|marrakech|marrakesh
+travel,Visit Morocco,@visit_morocco_,global,https://www.visitmorocco.com,500k,morocco|marrakech|marrakesh
 travel,Experience Egypt,@experienceegypt,global,https://www.experienceegypt.eg,500k,egypt|great pyramid of giza|pyramids of giza|giza
 travel,Go Türkiye,@goturkiye,global,https://goturkiye.com,1M,türkiye|turkey|cappadocia|istanbul
 travel,Croatia Full of Life,@croatiafulloflife,global,https://croatia.hr,500k,croatia|dubrovnik
-travel,Visit Brasil,@visitbrasil,global,https://visitbrasil.com,1M,brazil|rio de janeiro|rio carnival|rio de janeiro carnival|iguazu falls|iguaçu falls
+travel,Visit Brasil,@visitbrasil,global,https://visitbrasil.com,231k,brazil|rio de janeiro|rio carnival|rio de janeiro carnival|iguazu falls|iguaçu falls
 travel,Visit California,@visitcalifornia,us,https://www.visitcalifornia.com,1M,california|big sur|pacific coast highway
 travel,Brand USA,@visittheusa,us,https://www.gousa.com,1M,usa|united states|the united states
 travel,I amsterdam,@iamsterdam,global,https://www.iamsterdam.com,1M,amsterdam
-travel,Keukenhof,@keukenhof,global,https://keukenhof.nl,500k,keukenhof
+travel,Keukenhof,@visitkeukenhof,global,https://keukenhof.nl,500k,keukenhof
 travel,Burj Khalifa,@burjkhalifa,global,https://www.burjkhalifa.ae,2M,burj khalifa
-travel,Eiffel Tower,@la_tour_eiffel,global,https://www.toureiffel.paris,800k,eiffel tower|la tour eiffel
+travel,Eiffel Tower,@toureiffelofficielle,global,https://www.toureiffel.paris,800k,eiffel tower|la tour eiffel
 luxury,Lamborghini,@lamborghini,global,https://www.lamborghini.com,50M,lamborghini
 luxury,Bugatti,@bugatti,global,https://www.bugatti.com,20M,bugatti|bugatti chiron|bugatti tourbillon
 luxury,Dom Pérignon,@domperignon,global,https://www.domperignon.com,1M,dom pérignon|dom perignon
 luxury,Moët & Chandon,@moetchandon,global,https://www.moet.com,1.5M,moët & chandon|moet & chandon|moët|moet
 beauty,Maison Francis Kurkdjian,@maisonfranciskurkdjian,global,https://www.franciskurkdjian.com,1.5M,maison francis kurkdjian|baccarat rouge 540
-luxury,Mikimoto,@mikimoto_official,global,https://www.mikimoto.com,500k,mikimoto
+luxury,Mikimoto,@official_mikimoto,global,https://www.mikimoto.com,500k,mikimoto
 fashion,Supreme,@supremenewyork,us,https://www.supremenewyork.com,14M,supreme
 fashion,Levi's,@levis,us,https://www.levi.com,10M,levi's|levis|levi's 501|levi's 501 original
 fashion,Nike,@nike,us,https://www.nike.com,300M,nike
 fashion,adidas,@adidas,global,https://www.adidas.com,30M,adidas
-experience,Formula 1,@f1,global,https://www.formula1.com,30M,formula 1|formula one|f1
+experience,Formula 1,@f1,global,https://www.formula1.com,44M,formula 1|formula one|f1
 experience,NBA,@nba,us,https://www.nba.com,90M,nba
 experience,Disney,@disney,us,https://www.disney.com,100M,disney|walt disney
 experience,Netflix,@netflix,us,https://www.netflix.com,40M,netflix
-experience,LEGO,@lego,global,https://www.lego.com,15M,lego
+experience,LEGO,@lego,global,https://www.lego.com,14M,lego
 experience,Nintendo,@nintendo,global,https://www.nintendo.com,10M,nintendo
 experience,NASA,@nasa,us,https://www.nasa.gov,95M,nasa
 experience,National Geographic,@natgeo,us,https://www.nationalgeographic.com,280M,national geographic|nat geo
@@ -145,5 +145,9 @@ brand,Spotify,@spotify,global,https://www.spotify.com,10M,spotify
 brand,Leica,@leica_camera,global,https://leica-camera.com,2M,leica|leica m11|leica q3|leica m11-p
 beauty,Aesop,@aesopskincare,global,https://www.aesop.com,2M,aesop
 brand,Dyson,@dyson,global,https://www.dyson.com,3M,dyson
-brand,Ladurée,@laduree,global,https://www.laduree.com,1M,ladurée|laduree
+brand,Ladurée,@maisonladuree,global,https://www.laduree.com,1M,ladurée|laduree
 brand,Tesla,@teslamotors,us,https://www.tesla.com,11M,tesla
+brand,Amazon,@amazon,us,https://www.amazon.com,6.8M,amazon
+fashion,Schiaparelli,@schiaparelli,global,https://www.schiaparelli.com,3.6M,schiaparelli
+fashion,Stüssy,@stussy,us,https://www.stussy.com,4M,stüssy|stussy
+experience,Sagrada Família,@basilicasagradafamilia,global,https://sagradafamilia.org,1M,sagrada família|sagrada familia|basilica of the sagrada família
