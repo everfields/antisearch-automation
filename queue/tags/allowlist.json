@@ -1,8 +1,24 @@
 {
   "_readme": "Tag allowlist for Instagram and TikTok. See README.md in this folder. Only brands, products and companies; never people. A handle is tagged only with verified=true and a checked date in the last 30 days.",
+  "japan": {
+    "kind": "brand",
+    "note": "Visit Japan: the destination brand of JNTO, Japan's official tourism board (CoS, 2026-09-27)",
+    "instagram": {
+      "handle": "@visitjapan.us",
+      "verified": true,
+      "checked": "2026-09-27",
+      "market": "us",
+      "by": "cursor agent",
+      "evidence": "instagram.com public profile data for visitjapan.us: full_name 'Visit Japan / Americas', is_verified true, business account, 139,609 followers, posts on 2026-09-20/24/26, bio 'Official JNTO Americas account'; JNTO's own sites (japan.travel/en/us, jnto.go.jp/eng) link instagram.com/visitjapan.us. @visitjapanus (no dot) is not JNTO's: Instagram's lookup returns 404."
+    }
+  },
   "k18": {
     "kind": "brand",
-    "aliases": ["k18 hair", "k18 airwash", "k18 airwash dry shampoo"],
+    "aliases": [
+      "k18 hair",
+      "k18 airwash",
+      "k18 airwash dry shampoo"
+    ],
     "tiktok": {
       "handle": "@k18hair",
       "verified": true,

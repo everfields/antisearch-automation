@@ -219,6 +219,63 @@ def char_intervals(category: str, fps: int, budget_s: float) -> list[int]:
     return frames
 
 
+# Typing rhythm for the fixed-wait template (`PUBLISHER_CLIP_TYPING`).
+#   legacy  every key about 65 ms, capped at 1.5 s: short words fly by
+#   human   per key 70 + 550/len ms (about 180 ms for "thing", 95 ms for
+#           "restaurant in barcelona"), +/-25% jitter, a longer beat after a
+#           space, all capped at HUMAN_TYPING_CAP_S so long inputs stay short
+#   steady  total 0.60 + 0.05 s per key, capped at STEADY_TYPING_CAP_S, even keys
+TYPING_RHYTHMS = ("legacy", "human", "steady")
+DEFAULT_TYPING = "human"
+HUMAN_TYPING_CAP_S = 1.5  # the legacy cap: long inputs keep today's clip length
+STEADY_TYPING_CAP_S = 1.6
+
+
+def clip_typing(env: Mapping[str, str] | None = None) -> str:
+    """`PUBLISHER_CLIP_TYPING`: `human` (default), `steady`, or `legacy`. Fixed-wait clips only."""
+    source = os.environ if env is None else env
+    raw = (source.get("PUBLISHER_CLIP_TYPING") or "").strip().lower()
+    if not raw:
+        return DEFAULT_TYPING
+    if raw not in TYPING_RHYTHMS:
+        raise ValueError(f"PUBLISHER_CLIP_TYPING={raw!r}; use human, steady, or legacy")
+    return raw
+
+
+def rhythm_intervals(category: str, fps: int, rhythm: str) -> list[int]:
+    """Per-key frames for a rhythm. Appear times are rounded cumulatively, so the total holds."""
+    if rhythm == "legacy":
+        return char_intervals(category, fps, TYPING_CAP_S)
+    if rhythm not in TYPING_RHYTHMS:
+        raise ValueError(f"unknown typing rhythm {rhythm!r}; use human, steady, or legacy")
+    n = len(category)
+    rng = random.Random(_seed(category))
+    if rhythm == "human":
+        base = (70.0 + 550.0 / n) / 1000.0
+        raw = [base * (1 + rng.uniform(-0.25, 0.25)) for _ in category]
+        for i in range(1, n):
+            if category[i - 1] == " ":
+                raw[i] *= 1.35  # the next word starts a beat later
+        cap = HUMAN_TYPING_CAP_S
+    else:
+        base = (0.60 + 0.05 * n) / n
+        raw = [base * (1 + rng.uniform(-0.12, 0.12)) for _ in category]
+        cap = STEADY_TYPING_CAP_S
+    raw[0] *= 1.3  # a thumb finding the first key
+    total = sum(raw)
+    if total > cap:
+        raw = [r * cap / total for r in raw]
+    frames: list[int] = []
+    t = 0.0
+    prev = 0
+    for r in raw:
+        t += r
+        at = max(prev + 1, round(t * fps))
+        frames.append(at - prev)
+        prev = at
+    return frames
+
+
 def _human_char_frames(category: str, fps: int) -> list[int]:
     """Uncapped human keystrokes. The `app` hard cap trims these later if it must."""
     rng = random.Random(_seed(category))
@@ -316,9 +373,9 @@ def _app_timeline(category: str, verdict: str, *, fps: int, pause_s: float) -> T
     )
 
 
-def _app_fixed_timeline(category: str, verdict: str, *, fps: int) -> Timeline:
+def _app_fixed_timeline(category: str, verdict: str, *, fps: int, typing: str = "legacy") -> Timeline:
     """The template: the wait is always `wait_frames`, so there is no cap to trim toward."""
-    intervals = char_intervals(category, fps, TYPING_CAP_S)
+    intervals = rhythm_intervals(category, fps, typing)
     return _app_states(
         category, verdict, fps=fps,
         slide_in=max(0, round(APP_SLIDE_IN_S * fps)),
@@ -402,8 +459,12 @@ def build_timeline(
     pause_s: float = DEFAULT_PAUSE_S,
     style: str = DEFAULT_CLIP_STYLE,
     wait: str = "latency",
+    typing: str = "legacy",
 ) -> Timeline:
-    """`wait="fixed"` ignores `pause_s`: the wait is WAIT_BLINKS blinks in every clip."""
+    """`wait="fixed"` ignores `pause_s`: the wait is WAIT_BLINKS blinks in every clip.
+
+    `typing` picks the fixed-wait `app` rhythm; every other path keeps its own.
+    """
     if not category:
         raise ValueError("category is empty")
     if not verdict:
@@ -417,6 +478,6 @@ def build_timeline(
         return _word_timeline(category, verdict, fps=fps, pause_s=pause_s)
     if style == "app":
         if wait == "fixed":
-            return _app_fixed_timeline(category, verdict, fps=fps)
+            return _app_fixed_timeline(category, verdict, fps=fps, typing=typing)
         return _app_timeline(category, verdict, fps=fps, pause_s=pause_s)
     raise ValueError(f"unknown clip style {style!r}; use word or app")

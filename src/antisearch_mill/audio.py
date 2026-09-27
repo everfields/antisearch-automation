@@ -34,7 +34,9 @@ is typing and Enter. A normal laptop keyboard (low-profile chiclet keys): a soft
 short, muted thock, little click, low level, subtle per-key variation. Enter is
 a little weightier and still soft. Exact silence from the end of the Enter
 slide through the wait and the verdict. No heartbeat, no drone, no piano.
-`PUBLISHER_CLIP_KEYS_SOUND` picks the voicing: `soft` (default) or `muted`.
+`PUBLISHER_CLIP_KEYS_SOUND` picks the voicing: `tap` (default since 2026-09-27),
+`tick`, or `glass` (phone on-screen clicks), or the earlier laptop keys `soft` and
+`muted`. Every voicing is original synthesis in this file: no samples.
 """
 
 from __future__ import annotations
@@ -64,7 +66,11 @@ AUDIO_PULSE = "pulse"
 AUDIO_HEARTBEAT = "heartbeat"
 AUDIO_KEYS = "keys"
 AUDIO_MODES = (AUDIO_OFF, AUDIO_PULSE, AUDIO_HEARTBEAT, AUDIO_KEYS)
-KEY_SOUNDS = ("soft", "muted")
+KEY_SOUNDS = ("soft", "muted", "tick", "tap", "glass")
+DEFAULT_KEY_SOUND = "tap"  # founder, 2026-09-27: a phone tap, not a laptop key
+SCREEN_KEY_PEAK_SPREAD_DB = 0.3
+# Soul, 2026-09-27: the phone taps sit 3 dB under the laptop keys (keys about -25.5, Enter -23.8 dBFS).
+SCREEN_LEVEL_OFFSET_DB = -3.0
 # Per-key sample peak, like a laptop heard from arm's length. Enter sits a little above.
 KEY_PEAK_DB = -22.5
 KEY_PEAK_SPREAD_DB = 0.8
@@ -112,17 +118,17 @@ def clip_audio_bed(env: Mapping[str, str] | None = None) -> bool:
 
 
 def clip_keys_sound(env: Mapping[str, str] | None = None) -> str:
-    """`PUBLISHER_CLIP_KEYS_SOUND`: `soft` (default) or `muted`. Only `keys` uses it."""
+    """`PUBLISHER_CLIP_KEYS_SOUND`: a KEY_SOUNDS voicing. Only `keys` uses it."""
     source = os.environ if env is None else env
     raw = (source.get("PUBLISHER_CLIP_KEYS_SOUND") or "").strip().lower()
     if not raw:
-        return "soft"
+        return DEFAULT_KEY_SOUND
     if raw not in KEY_SOUNDS:
-        raise ValueError(f"PUBLISHER_CLIP_KEYS_SOUND={raw!r}; use soft or muted")
+        raise ValueError(f"PUBLISHER_CLIP_KEYS_SOUND={raw!r}; use {', '.join(KEY_SOUNDS)}")
     return raw
 
 
-def audio_tag(mode: str, variant: str, bed: bool, keys: str = "soft") -> str:
+def audio_tag(mode: str, variant: str, bed: bool, keys: str = DEFAULT_KEY_SOUND) -> str:
     """What is actually muxed, for the clip id and metadata. Empty when silent."""
     if mode == AUDIO_KEYS:
         return f"keys:{keys}"
@@ -740,8 +746,10 @@ def _peak(sig: list[float]) -> float:
 
 def synthesize_keys(timeline: Timeline, sound: str = "soft") -> tuple[list[float], list[float]]:
     """Typing and Enter only. Exact zeros from the first wait frame to the end."""
-    if sound not in KEY_VOICES:
-        raise ValueError(f"unknown key sound {sound!r}; use soft or muted")
+    if sound not in KEY_VOICES and sound not in SCREEN_VOICES:
+        raise ValueError(f"unknown key sound {sound!r}; use {', '.join(KEY_SOUNDS)}")
+    if sound in SCREEN_VOICES:
+        return _synthesize_screen_keys(timeline, sound)
     voice = KEY_VOICES[sound]
     fps = timeline.fps
     n = int(math.ceil(timeline.total_frames / fps * SR))
@@ -773,3 +781,97 @@ def write_keys_wav(timeline: Timeline, dest: Path, sound: str = "soft") -> None:
     """44.1 kHz stereo, at the absolute key levels above. No normalization: each key is already set."""
     left, right = synthesize_keys(timeline, sound)
     _write_wav(dest, left, right)
+
+
+# Phone on-screen keyboard clicks (founder, 2026-09-27): finer, drier, shorter than
+# the laptop keys. One or two damped partials and at most a trace of transient: no
+# body, no thud, no bottom-out. Every tap is nearly the same sample, like a phone.
+# Original synthesis in this file; no recording, sample pack, or third-party sound.
+@dataclass(frozen=True)
+class ScreenVoice:
+    partials: tuple[tuple[float, float, float], ...]  # (hz, gain, decay tau s)
+    noise_gain: float
+    noise_tau_s: float
+    highpass_hz: float
+    lowpass_hz: float
+    dur_s: float
+
+
+SCREEN_VOICES = {
+    # A fine, high tick: one 3.2 kHz partial and a breath of air.
+    "tick": ScreenVoice(((3200.0, 1.0, 0.0009),), 0.25, 0.0004, 900.0, 7000.0, 0.012),
+    # A small dry tock: 1.6 kHz with a trace of 420 Hz under it.
+    "tap": ScreenVoice(((1600.0, 1.0, 0.0014), (420.0, 0.12, 0.0014)), 0.12, 0.0004, 300.0, 6000.0, 0.014),
+    # Two inharmonic partials, no noise at all: the cleanest.
+    "glass": ScreenVoice(((2400.0, 1.0, 0.0008), (3700.0, 0.45, 0.0006)), 0.0, 0.0004, 900.0, 7000.0, 0.010),
+}
+
+
+def _highpass(sig: list[float], cutoff_hz: float) -> list[float]:
+    """RBJ Butterworth highpass biquad, one pass."""
+    w0 = 2.0 * math.pi * cutoff_hz / SR
+    alpha = math.sin(w0) / (2.0 * 0.7071067811865476)
+    cw = math.cos(w0)
+    a0 = 1.0 + alpha
+    b0 = (1.0 + cw) / 2.0 / a0
+    b1 = -(1.0 + cw) / a0
+    b2 = b0
+    a1 = -2.0 * cw / a0
+    a2 = (1.0 - alpha) / a0
+    out = [0.0] * len(sig)
+    x1 = x2 = y1 = y2 = 0.0
+    for i, x in enumerate(sig):
+        y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
+        out[i] = y
+        x2, x1 = x1, x
+        y2, y1 = y1, y
+    return out
+
+
+def screen_key(rng: random.Random, voice: ScreenVoice, *, enter: bool = False) -> list[float]:
+    """One on-screen tap, normalized to a peak of 1.0. Enter is the same tap, a little lower and longer."""
+    pitch = (0.82 if enter else 1.0) * (1 + rng.uniform(-0.015, 0.015))
+    stretch = 1.35 if enter else 1.0
+    n = int(voice.dur_s * stretch * SR)
+    sig = [0.0] * n
+    att = max(1, int(0.00015 * SR))
+    for hz, gain, tau in voice.partials:
+        ring = _ring(n, hz * pitch, tau * stretch, att / SR)
+        for i in range(n):
+            sig[i] += gain * ring[i]
+    if voice.noise_gain > 0:
+        burst = _burst(min(n, int(0.002 * SR)), rng, voice.noise_tau_s, 2000.0)
+        for i, v in enumerate(burst):
+            sig[i] += voice.noise_gain * v
+    sig = _highpass(sig, voice.highpass_hz)
+    sig = _lowpass(sig, voice.lowpass_hz, passes=1)
+    fade = max(1, int(0.002 * SR))
+    for i in range(min(fade, n)):
+        sig[n - fade + i] *= 0.5 + 0.5 * math.cos(math.pi * (i + 1) / fade)
+    peak = _peak(sig)
+    return [v / peak for v in sig] if peak > 0 else sig
+
+
+def _synthesize_screen_keys(timeline: Timeline, sound: str) -> tuple[list[float], list[float]]:
+    voice = SCREEN_VOICES[sound]
+    fps = timeline.fps
+    n = int(math.ceil(timeline.total_frames / fps * SR))
+    left = [0.0] * n
+    right = [0.0] * n
+    typed = timeline.typed
+
+    def at(frame: int) -> int:
+        return int(round(frame / fps * SR))
+
+    for i, frame in enumerate(timeline.keystroke_frames()):
+        rng = _rng("screen-key", sound, typed, i)
+        level = KEY_PEAK_DB + SCREEN_LEVEL_OFFSET_DB + rng.uniform(-SCREEN_KEY_PEAK_SPREAD_DB, SCREEN_KEY_PEAK_SPREAD_DB)
+        _mix_into(left, right, at(frame), screen_key(rng, voice), 10 ** (level / 20.0))
+    enter_rng = _rng("screen-enter", sound, typed)
+    _mix_into(left, right, at(timeline.submit_frame), screen_key(enter_rng, voice, enter=True),
+              10 ** ((ENTER_PEAK_DB + SCREEN_LEVEL_OFFSET_DB) / 20.0))
+    loading = next(s for s in timeline.states if s.kind == "loading")
+    for i in range(min(n, at(loading.start)), n):
+        left[i] = 0.0
+        right[i] = 0.0
+    return left, right

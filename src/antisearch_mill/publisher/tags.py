@@ -35,6 +35,13 @@ TAG_NETWORKS = ("instagram", "tiktok")
 TAG_KINDS = ("brand", "product", "company")
 RECHECK_DAYS = 30
 TAG_COOLDOWN = timedelta(days=7)
+# Instagram (Carlos, 2026-09-27): the mention rides the hashtag caption, only for a verified
+# US brand account (`"market": "us"` on the entry), never the same handle within 14 days.
+COOLDOWNS = {"instagram": timedelta(days=14)}
+# Never crown amika or any Bansk brand: an entry naming amika, or owned by Bansk, is never tagged.
+NEVER_TAG_NAMES = ("amika",)
+NEVER_TAG_OWNERS = ("bansk",)
+MARKET_REQUIRED = {"instagram": "us"}
 DEFAULT_ALLOWLIST = "queue/tags/allowlist.json"
 
 
@@ -75,6 +82,11 @@ def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today
     if found is None:
         return Tag("", "verdict not on the tag allowlist")
     name, entry = found
+    names = [name, *(normalize_category(x) for x in entry.get("aliases", [])),
+             *(str((entry.get(n) or {}).get("handle") or "").lower() for n in TAG_NETWORKS)]
+    if (any(bad in n for n in names for bad in NEVER_TAG_NAMES)
+            or str(entry.get("owner") or "").strip().lower() in NEVER_TAG_OWNERS):
+        return Tag("", f"{name} is never tagged (amika or a Bansk brand)")
     if entry.get("kind") not in TAG_KINDS or entry.get("sensitive"):
         return Tag("", f"{name} is not a brand, product, or company")
     account = entry.get(network) or {}
@@ -83,6 +95,9 @@ def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today
         handle = "@" + handle
     if not account.get("verified") or not HANDLE.match(handle):
         return Tag("", f"{name} has no verified {network} handle on the allowlist")
+    market = MARKET_REQUIRED.get(network)
+    if market and str(account.get("market") or "").lower() != market:
+        return Tag("", f"{name} on {network} is not marked as a {market.upper()} account")
     try:
         checked = date.fromisoformat(str(account.get("checked") or ""))
     except ValueError:
@@ -126,8 +141,9 @@ def choose_tag(verdict: str, network: str, env: Mapping[str, str], allowlist: Ma
         return tag
     rows = [r for r in log.rows() if r["network"] == network]
     when = [(r, datetime.fromisoformat(r["at"])) for r in rows]
-    if any(r["handle"] == tag.handle.lower() and now - at < TAG_COOLDOWN for r, at in when):
-        return Tag("", f"{tag.handle} was tagged on {network} in the last 7 days")
+    cooldown = COOLDOWNS.get(network, TAG_COOLDOWN)
+    if any(r["handle"] == tag.handle.lower() and now - at < cooldown for r, at in when):
+        return Tag("", f"{tag.handle} was tagged on {network} in the last {cooldown.days} days")
     today = sum(1 for _r, at in when if posting_day(at) == posting_day(now))
     if today + 1 > slots_today // 2:
         return Tag("", f"tags are at half of today's {slots_today} {network} post(s)")

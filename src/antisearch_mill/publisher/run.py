@@ -31,6 +31,7 @@ from .media_host import GitHubPagesHost
 from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
 from .registry import ADAPTERS
+from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
 from .tags import TAG_NETWORKS, TagLog, choose_tag
 
 
@@ -70,10 +71,12 @@ def run_posts(
     adapters: Mapping[str, type[Adapter]] = ADAPTERS,
     winner_handles: Mapping[str, dict] | None = None,
     tag_allowlist: Mapping[str, dict] | None = None,
+    schedule_at: datetime | None = None,
 ) -> list[Outcome]:
+    """`schedule_at` schedules every post of this call for that moment (a manual row) instead of now."""
     env = dict(os.environ if env is None else env)
     approved = approved_networks(env)
-    day = posting_day(now)
+    day = posting_day(schedule_at or now)  # a scheduled post counts on the day it goes out
     state = AntibanState(log.path.parent / "antiban.json")
     flags = log.path.parent / "flags"
     state.apply_reach(log.path.parent / "metrics.csv", now, flags)
@@ -256,6 +259,14 @@ def run_posts(
             if tag:
                 job = dataclasses.replace(job, caption=tag, notes=f"{job.notes}; tag: {picked.reason}")
 
+        if net == "instagram" and ig_caption_mode(env) == "hashtags":
+            # Carlos, 2026-09-27: `#<input> #<verdict> #ai`, plus the one allowlisted mention if any.
+            caption = ig_caption(job.category, clip.verdict, tag if tag.startswith("@") else "")
+            problem = ig_caption_problem(caption)
+            if problem:
+                out.append(Outcome(job.id, net, "rejected_caption", detail=f"{problem}: {caption!r}"))
+                continue
+            job = dataclasses.replace(job, caption=caption)
         shown = effective_caption(job.caption)
         if net == X_NETWORK and (job.notes.startswith("trend:") or job.notes.startswith("winner")):
             out.append(Outcome(job.id, net, "skipped_x_no_trend", detail="X takes no trend-lane posts and no automated mentions"))
@@ -289,6 +300,8 @@ def run_posts(
         zone = local_tz(job.category) if net in LOCAL_MORNING_NETWORKS and cls.route == "buffer" else None
         if zone is not None:
             due_at = local_morning_after(now, zone)
+        if schedule_at is not None:
+            due_at = schedule_at
         if live:
             done = _post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at, state, flags, wait_s)
             if tag and done.status in DONE:

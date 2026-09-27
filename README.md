@@ -82,6 +82,14 @@ Setup, exact env vars and the honest limits per network:
 **[docs/PUBLISHER_SETUP.md](docs/PUBLISHER_SETUP.md)**. `mill publish` (below) is
 the older X/LinkedIn path and stays as it was.
 
+## Manual one-off posts (`mill manual-post`)
+
+`.github/workflows/manual-post.yml` (Run workflow; dry-run unless `live`) posts the rows of a
+reviewed file, `queue/manual/*.csv` with `id,category,network,due_et`, through the normal
+publisher and Buffer path. The row goes out once even if its network is paused, only with a
+verdict already frozen in `publisher-state/verdicts.csv`, scheduled for `due_et` in New York
+(or the same time the next day if passed), and its `posts.csv` row records caption and format.
+
 ## Metrics (`mill metrics`)
 
 `.github/workflows/metrics.yml` runs every 3 hours (and on demand) and appends per-post
@@ -200,11 +208,18 @@ and every code-formatted example in README/SETUP.
     `PUBLISHER_CLIP_AUDIO_BED=on` adds a very quiet low drone (about 20 LU under the beat)
     under the wait only; `off` is the default
   - `PUBLISHER_CLIP_AUDIO=keys` (Instagram and TikTok only; founder, second pass): the only
-    sound is typing and Enter. A soft laptop chiclet key per letter, on the frame it appears,
-    about -22.5 dBFS peak per key (±0.8 dB), Enter about -20.8 dBFS, low-passed so there is
-    almost nothing above 6 kHz. Exact silence from the first wait frame through the verdict.
-    `PUBLISHER_CLIP_KEYS_SOUND` is `soft` (default, a little plastic presence around 1 kHz) or
-    `muted` (a duller thock). `heartbeat` and `pulse` are kept for back-compat
+    sound is typing and Enter, one click per letter on the frame it appears, about -22.5 dBFS
+    peak per key, Enter about -20.8 dBFS. Exact silence from the first wait frame through the
+    verdict. `PUBLISHER_CLIP_KEYS_SOUND` (founder, 2026-09-27: a phone tap, not a laptop key):
+    `tap` (default: a dry 1.6 kHz tock, about 7 ms), `tick` (a fine 3.2 kHz tick) or `glass`
+    (two pure partials, no noise). The earlier laptop keys `soft` and `muted` still work. Enter
+    is the same voice, a little lower and longer. Every voice is original synthesis in
+    `audio.py`: no recording, sample pack, or third-party sound, so no licence applies.
+    `heartbeat` and `pulse` are kept for back-compat
+  - `PUBLISHER_CLIP_TYPING` sets the fixed-wait typing rhythm: `human` (default: 70 + 550/len
+    ms per key with ±25% jitter and a beat after each space, so `thing` types in about 0.7s,
+    and the old 1.5s cap, so long inputs keep today's length), `steady` (an even curve,
+    capped at 1.6s) or `legacy` (every key about 65 ms). One frame per key is the floor
   - with the phone frame, the keys, or the heartbeat, the wait is fixed: `WAIT_BLINKS = 2` caret blinks
     of 1.05s (blink, blink, verdict), 63 frames (2.1s) at 30 fps, in every clip. It overrides the
     oracle latency. Only the typing and the verdict can vary with length. Segment frames are

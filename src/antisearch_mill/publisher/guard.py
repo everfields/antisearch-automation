@@ -84,6 +84,7 @@ PENDING = "pending"
 FAILED = "failed"
 WITHHELD = "withheld"  # frozen, not posted: a minor or a private individual (sensitive)
 DONE = ("published", "drafted", "scheduled", WITHHELD)
+SCHEDULED_STATES = ("scheduled",)
 
 
 def caption_problem(caption: str, bare_input: str, network: str = "") -> str | None:

@@ -19,7 +19,7 @@ from .oracle import FixtureOracle, LiveOracle, OracleError
 from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound
 from .phone import FRAME_NONE, FRAME_PHONE, phone_spec
 from .produce import produce_all, sha256_file, validate_master
-from .timeline import WAIT_BLINKS, WAIT_S, clip_style
+from .timeline import WAIT_BLINKS, WAIT_S, clip_style, clip_typing
 from .render import Layout, RenderError, contact_sheet, probe
 
 DEFAULT_QUEUE = "queue/sample_queue.csv"
@@ -45,7 +45,7 @@ def _oracle(args, settings: Settings):
     )
 
 
-def _audio_label(audio: str, variant: str, bed: bool = False, keys: str = "soft") -> str:
+def _audio_label(audio: str, variant: str, bed: bool = False, keys: str = "tap") -> str:
     if audio == AUDIO_KEYS:
         return f"keys:{keys}"
     if audio == AUDIO_HEARTBEAT:
@@ -62,6 +62,7 @@ def _clip_options(env=None) -> dict:
         "audio_variant": clip_audio_variant(env),
         "bed": clip_audio_bed(env),
         "keys": clip_keys_sound(env),
+        "typing": clip_typing(env),
         "frame": FRAME_PHONE if phone else FRAME_NONE,
         "phone": phone,
     }
@@ -70,7 +71,7 @@ def _clip_options(env=None) -> dict:
 def _clip_label(opts: dict) -> str:
     style = "app" if opts["phone"] else opts["style"]
     fixed = opts["phone"] is not None or opts["audio"] in (AUDIO_HEARTBEAT, AUDIO_KEYS)
-    wait = f"fixed:{WAIT_BLINKS}x{WAIT_S:.2f}s" if fixed else "latency"
+    wait = f"fixed:{WAIT_BLINKS}x{WAIT_S:.2f}s typing={opts['typing']}" if fixed else "latency"
     frame = opts["phone"].tag if opts["phone"] else "none"
     return (f"style={style} audio={_audio_label(opts['audio'], opts['audio_variant'], opts['bed'], opts['keys'])} "
             f"frame={frame} wait={wait}")
@@ -228,6 +229,62 @@ def cmd_post(args, settings: Settings) -> int:
     counts = Counter(r.status for r in rows)
     print(f"post: {dict(counts)}")
     return 1 if counts.get("failed") or counts.get("dry_run_failed") else 0
+
+
+class _NoAsk:
+    """Manual rows post a frozen verdict only: anything reaching here is a bug."""
+
+    source = "live"
+    url = ""
+
+    def ask(self, category: str):
+        raise OracleError(f"manual rows never ask the oracle; {category!r} has no frozen verdict")
+
+
+def cmd_manual_post(args, settings: Settings) -> int:
+    """One-off rows from a reviewed file through the normal publisher/Buffer path."""
+    from .publisher.guard import now_et
+    from .publisher.igcaption import ig_caption_mode
+    from .publisher.manual import read_manual, run_manual
+    from .publisher.registry import resolve_adapters
+    from .publisher.tags import DEFAULT_ALLOWLIST, load_allowlist
+    from .publisher.verdicts import FrozenOracle
+
+    env = dict(os.environ)
+    try:
+        opts = _clip_options(env)
+        ig_caption_mode(env)
+        rows = read_manual(args.file)
+        adapters = resolve_adapters(env)
+    except (OSError, ValueError) as exc:
+        print(f"manual-post error: {exc}", file=sys.stderr)
+        return 2
+    ledger = Ledger(settings.out_dir)
+    log, store = _publisher_state(args, settings, env)
+    oracle = FrozenOracle(_NoAsk(), store)
+
+    def produce(job):
+        (result,) = produce_all([job], oracle, ledger, font=settings.font_path, force=True, **opts)
+        if result.status == "failed":
+            raise RuntimeError(result.detail)
+        return ledger.clip_for_job(job.id)
+
+    now = now_et()
+    print(f"manual-post: mode={'LIVE' if args.live else 'dry-run'} file={args.file} {_clip_label(opts)} "
+          f"state={log.path} now={now:%Y-%m-%d %H:%M %Z}")
+    try:
+        out = run_manual(rows, ledger, log, store, now=now, live=args.live, env=env, produce=produce,
+                         adapters=adapters,
+                         tag_allowlist=load_allowlist(env.get("PUBLISHER_TAG_ALLOWLIST") or DEFAULT_ALLOWLIST))
+    except (FontNotFound, RenderError, ValueError) as exc:
+        print(f"manual-post error: {exc}", file=sys.stderr)
+        return 2
+    for r in out:
+        print(f"  {r.network:<9} {r.status:<30} {r.job_id:<30} {r.url or r.artifact}")
+        if r.detail:
+            print(f"  {'':<9} {'':<30} {r.detail}")
+    bad = [r for r in out if r.status in ("failed", "dry_run_failed", "skipped_not_frozen", "rejected_caption")]
+    return 1 if bad else 0
 
 
 def cmd_trends(args, settings: Settings) -> int:
@@ -598,6 +655,13 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("winners", help="winner lane: handle map status (which handles still need a badge check)")
     sp.add_argument("--winners", default="queue/winners")
     sp.set_defaults(func=cmd_winners)
+
+    sp = sub.add_parser("manual-post", help="one-off rows from a reviewed file (id,category,network,due_et) via the "
+                                           "normal publisher path; frozen verdicts only; dry-run unless --live")
+    sp.add_argument("--file", required=True)
+    sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
+    sp.add_argument("--live", action="store_true", help="really post (Buffer), even if the network is paused")
+    sp.set_defaults(func=cmd_manual_post)
 
     sp = sub.add_parser("metrics", help="collect per-post TikTok/Instagram/X metrics into <state>/metrics/ (read-only)")
     sp.add_argument("--state", default="state", help="publisher-state checkout (default: ./state)")

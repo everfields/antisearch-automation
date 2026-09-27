@@ -22,7 +22,7 @@ DAY = date(2026, 9, 28)
 ALLOW = {
     "k18": {"kind": "brand", "aliases": ["k18 airwash dry shampoo"],
             "tiktok": {"handle": "@k18hair", "verified": True, "checked": "2026-09-27"},
-            "instagram": {"handle": "k18hair", "verified": True, "checked": "2026-09-27"}},
+            "instagram": {"handle": "k18hair", "verified": True, "checked": "2026-09-27", "market": "us"}},
     "dyson": {"kind": "company", "tiktok": {"handle": "@dyson", "verified": False, "checked": "2026-09-27"}},
     "old brand": {"kind": "brand", "tiktok": {"handle": "@old", "verified": True, "checked": "2026-06-01"}},
     "elon musk": {"kind": "person", "tiktok": {"handle": "@elonmusk", "verified": True, "checked": "2026-09-27"}},
@@ -37,9 +37,10 @@ def test_breaker_is_off_by_default_and_never_includes_x():
     assert tag_networks(ON) == {"instagram", "tiktok"}
 
 
-def test_seed_allowlist_is_k18_on_tiktok_only():
+def test_seed_allowlist_is_japan_on_instagram_then_k18_on_tiktok():
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
-    assert set(allow) == {"k18"}
+    assert list(allow) == ["japan", "k18"]
+    assert allowlisted("japan", "instagram", allow, DAY).handle == "@visitjapan.us"
     assert allowlisted("k18 airwash dry shampoo", "tiktok", allow, DAY).handle == "@k18hair"
     assert allowlisted("k18", "instagram", allow, DAY).handle == ""
     assert allowlisted("k18", "tiktok", allow, date(2026, 9, 27) + timedelta(days=RECHECK_DAYS + 1)).handle == ""
@@ -113,9 +114,11 @@ def test_live_tiktok_and_instagram_captions_are_only_the_handle_and_x_is_never_t
     assert [o.status for o in out] == ["published", "published", "published"]
     by_channel = {c["channelId"]: c for c in creates}
     assert by_channel["ch-tt"]["text"] == "@k18hair"
-    assert by_channel["ch-ig"]["text"] == "@k18hair"  # Buffer has no reel user tags: the caption path
+    # Buffer has no reel user tags: the mention rides the hashtag caption, last
+    assert by_channel["ch-ig"]["text"] == "#hairmask #k18 #ai @k18hair"
     for c in (by_channel["ch-tt"], by_channel["ch-ig"]):
-        assert "userTags" not in json.dumps(c) and "#" not in c["text"] and "collaborator" not in json.dumps(c).lower()
+        assert "userTags" not in json.dumps(c) and "collaborator" not in json.dumps(c).lower()
+    assert "#" not in by_channel["ch-tt"]["text"]  # hashtags are Instagram only
     assert by_channel["ch-x"]["text"] == "hair oil\nk18" and by_channel["ch-x"]["assets"] == []
     tags = TagLog(log.path.parent / "tags.csv").rows()
     assert [(r["network"], r["handle"]) for r in tags] == [("tiktok", "@k18hair"), ("instagram", "@k18hair")]
