@@ -10,6 +10,9 @@
       "#sunset #santorini #ai @visitgreecegr",
       "#island #bali #ai @wonderfulindonesia",
       "#hotel #rosewoodhongkong #ai"
+    ],
+    "x": [
+      "ai model\nclaude opus 5.5"
     ]
   },
   "clips": {
@@ -35,7 +38,8 @@
     ],
     "x": [
       "p-a-feeling-725bad0d",
-      "p-ai-model-6e62d58f"
+      "p-ai-model-6e62d58f",
+      "p-ai-model-24a77d12"
     ]
   },
   "first_post": {
