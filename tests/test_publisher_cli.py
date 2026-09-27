@@ -132,6 +132,39 @@ def test_due_is_the_cheap_precheck_for_the_hourly_cron(tmp_path, monkeypatch, ca
     assert main(base) == 0  # this run takes it and waits for the minute
 
 
+def test_due_does_not_count_buffer_schedules_for_later_days_against_today(tmp_path, monkeypatch, capsys):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    import antisearch_mill.publisher.guard as guard
+
+    lines = ["job_id,network,status,clip_id,verdict,remote_id,url,detail,at,category,caption,format"]
+    for i, day in enumerate(["2026-09-28", "2026-09-29", "2026-09-30", "2026-10-01", "2026-10-02"]):
+        lines += [f"ig-concept-{i},instagram,pending,c{i},v,,,,2026-09-27T14:16:31+00:00,c{i},,video",
+                  f"ig-concept-{i},instagram,scheduled,c{i},v,b{i},buffer:b{i},scheduled in Buffer for {day} 12:07 EDT "
+                  f"(America/New_York),2026-09-27T14:16:31+00:00,c{i},,video"]
+    lines += ["li-later,linkedin,pending,l,v,,,,2026-09-27T14:16:31+00:00,l,,video",
+              "li-later,linkedin,scheduled,l,v,b9,buffer:b9,scheduled in Buffer for 2026-09-28 09:07 EDT "
+              "(America/New_York),2026-09-27T14:16:31+00:00,l,,video"]
+    (tmp_path / "posts.csv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    for k, v in {"PUBLISHER_LIVE_NETWORKS": "instagram,linkedin", "PUBLISHER_CADENCE": "reach",
+                 "PUBLISHER_SLOTS_LINKEDIN": "off", "PUBLISHER_JITTER": "off", "PUBLISHER_RAMP": "off"}.items():
+        monkeypatch.setenv(k, v)
+    base = ["--env-file", str(tmp_path / "none"), "due", "--state", str(tmp_path / "posts.csv")]
+    et = ZoneInfo("America/New_York")
+
+    monkeypatch.setattr(guard, "now_et", lambda: datetime(2026, 9, 27, 12, 10, tzinfo=et))
+    assert main(base) == 0
+    out = capsys.readouterr().out
+    assert "instagram slots passed 1/4, used 0 -> 1 due" in out  # was: used 5 -> 0 due
+    assert "linkedin  slots passed 0/0, used 0 -> 0 due" in out  # LinkedIn off stays off
+    assert "due: instagram at" in out
+
+    monkeypatch.setattr(guard, "now_et", lambda: datetime(2026, 9, 28, 12, 10, tzinfo=et))
+    assert main(base) == 3  # 28 Sep: the Buffer reel takes the 12:07 slot, nothing doubles it
+    assert "instagram slots passed 1/4, used 1 -> 0 due" in capsys.readouterr().out
+
+
 def test_instagram_token_refresh():
     t = RecordingTransport(lambda req: HttpResponse.of_json(200, {"access_token": "new", "token_type": "bearer",
                                                                    "expires_in": 5183944}))

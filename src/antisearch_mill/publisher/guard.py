@@ -20,7 +20,7 @@ import csv
 import os
 import re
 from dataclasses import asdict, dataclass, field, fields
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone, tzinfo
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -273,7 +273,22 @@ def next_slot(moment: datetime, slots: list[time]) -> datetime | None:
     return None
 
 
-_SCHEDULED_NOTE = re.compile(r"scheduled in Buffer for (\d{4}-\d{2}-\d{2} \d{2}:\d{2}) \S+ \(([^)]+)\)")
+_SCHEDULED_NOTE = re.compile(r"scheduled in Buffer for (\d{4}-\d{2}-\d{2} \d{2}:\d{2})(?: \S+)? \(([^)]+)\)")
+_FIXED_OFFSET = re.compile(r"^UTC(?:([+-])(\d{2}):?(\d{2}))?$")
+
+
+def _note_zone(name: str) -> tzinfo | None:
+    """The zone a Buffer note names: an IANA key, or a fixed offset (`UTC`, `UTC-04:00`)."""
+    m = _FIXED_OFFSET.match(name.strip())
+    if m:
+        if not m.group(1):
+            return timezone.utc
+        sign = -1 if m.group(1) == "-" else 1
+        return timezone(sign * timedelta(hours=int(m.group(2)), minutes=int(m.group(3))))
+    try:
+        return ZoneInfo(name.strip())
+    except (ValueError, KeyError):
+        return None
 
 
 def row_due(row: dict) -> datetime | None:
@@ -287,9 +302,12 @@ def row_due(row: dict) -> datetime | None:
     m = _SCHEDULED_NOTE.search(row.get("detail") or "")
     if not m:
         return None
+    zone = _note_zone(m.group(2))
+    if zone is None:
+        return None
     try:
-        return datetime.strptime(m.group(1), "%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo(m.group(2)))
-    except (ValueError, KeyError):
+        return datetime.strptime(m.group(1), "%Y-%m-%d %H:%M").replace(tzinfo=zone)
+    except ValueError:
         return None
 
 
@@ -391,30 +409,41 @@ class PostLog:
     def latest(self, job_id: str) -> dict[str, str] | None:
         return self.latest_by_job().get(job_id)
 
-    def used_on(self, day: date, network: str | None = None) -> int:
-        """Posts that went (or may have gone) out on posting day `day`: a pending attempt not later failed.
+    def slot_days(self) -> dict[str, tuple[date, str]]:
+        """The posting day and network each job's post takes a slot on (jobs that never go out are absent).
 
-        A post scheduled in Buffer (still `scheduled` or `pending`) counts on the day it goes out,
-        its due time, not the day it was queued. Posted rows count on the day they were posted.
+        A post sent now counts on the day of its attempt (the `pending` row). A post scheduled in
+        Buffer counts only on the day Buffer sends it (its `due_at`, or older rows' scheduled note),
+        whatever was logged after it (edited, published, deleted) and whenever it was queued: a
+        schedule for a later day never uses today's cap, and it reserves its own day, even when
+        it was logged by hand without a `pending` row. A retry drops the failed attempt's schedule.
         """
         final: dict[str, str] = {}
-        started: dict[str, tuple[date, str]] = {}
+        started: dict[str, tuple[datetime | None, str]] = {}
         due: dict[str, datetime] = {}
         for r in self.rows():
-            final[r["job_id"]] = r["status"]
+            job = r["job_id"]
+            final[job] = r["status"]
             if r["status"] == PENDING:
-                started[r["job_id"]] = (posting_day(datetime.fromisoformat(r["at"])), r["network"])
+                started[job] = (datetime.fromisoformat(r["at"]), r["network"])
+                due.pop(job, None)
+            elif r["status"] in SCHEDULED_STATES:
+                started.setdefault(job, (None, r["network"]))
             when = row_due(r)
             if when is not None:
-                due[r["job_id"]] = when
-        count = 0
-        for job, (d, net) in started.items():
-            if final.get(job) == FAILED or (network is not None and net != network):
+                due[job] = when
+        out: dict[str, tuple[date, str]] = {}
+        for job, (at, net) in started.items():
+            if final.get(job) in (FAILED, WITHHELD):
                 continue
-            if final.get(job) in (*SCHEDULED_STATES, PENDING) and job in due:
-                d = posting_day(due[job])
-            count += d == day
-        return count
+            when = due.get(job, at)
+            if when is not None:
+                out[job] = (posting_day(when), net)
+        return out
+
+    def used_on(self, day: date, network: str | None = None) -> int:
+        """Posts that take a slot on posting day `day`: sent then, or scheduled in Buffer to go out then."""
+        return sum(1 for d, net in self.slot_days().values() if d == day and (network is None or net == network))
 
     def last_attempt(self, network: str) -> datetime | None:
         """When `network` last posted (or may have): pending rows whose job did not end in failure."""
