@@ -10,8 +10,6 @@ name: manual-post
 # The clip settings are pinned to the current template defaults, not the repo's clip vars.
 
 on:
-  pull_request:  # TEMPORARY: one live run of queue/manual/2026-09-28-ig-mentions.csv, removed right after
-    paths: [.github/workflows/manual-post.yml]
   workflow_dispatch:
     inputs:
       file:
@@ -33,8 +31,8 @@ jobs:
   post:
     runs-on: ubuntu-24.04
     env:
-      FILE: ${{ github.event_name == 'pull_request' && 'queue/manual/2026-09-28-ig-mentions.csv' || inputs.file || 'queue/manual/2026-09-27-ig-travel.csv' }}
-      LIVE: ${{ github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.live) }}
+      FILE: ${{ inputs.file || 'queue/manual/2026-09-27-ig-travel.csv' }}
+      LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
       PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
       PUBLISHER_IG_CAPTION: ${{ vars.PUBLISHER_IG_CAPTION }}
