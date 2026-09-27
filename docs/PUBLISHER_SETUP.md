@@ -225,7 +225,9 @@ That's 12 posts a day (17 with X), instead of 20–25.
 - **Order:** explicit queue rows first (`queue/bluesky_trial.csv`,
   `queue/tiktok_trial.csv`), then inputs drawn from `queue/pools/<network>.txt`
   (vertical) and `queue/pools/unowned.txt` (shared).
-- **Rhythm:** each network's first post ever is an unowned word, then one in four.
+- **Rhythm:** each network's first post ever is an unowned word, then one in four. A pool
+  line ending in ` | rotate` goes to that network's rotating slot, which takes the one-in-four
+  instead of the shared unowned words (X uses it: main line 3 of 4, rotation 1 of 4).
 - **Verticals:**
   - Bluesky: companies / tech (X's brief);
   - X (Buffer route only): its own pool, `queue/pools/x.txt` (the X vertical is being

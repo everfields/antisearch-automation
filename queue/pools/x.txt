@@ -1,47 +1,23 @@
-# X = companies / SaaS: software and services a business picks. Bare inputs, never "best".
-# Captions stay empty on X: no mentions, no links, so no " | @?" holds here.
-# Kept apart from bluesky.txt (tech / companies), which keeps its own inputs.
-payroll software
-accounting software
-invoicing app
-website builder
-online store platform
-payment processor
-spreadsheet app
-presentation software
-form builder
-survey tool
-help desk software
-live chat tool
-email marketing tool
-seo tool
-social media scheduler
-team chat app
-wiki software
-whiteboard app
-screen recorder
-video editing software
-photo editor
-stock photo site
-no-code tool
-website hosting
-dns provider
-error monitoring tool
-uptime monitor
-authentication service
-e-signature app
-file transfer service
-meeting scheduler
-time tracking app
-expense app
-hr software
-applicant tracking system
-business bank
-corporate card
-tax software
-translation app
-read-later app
-rss reader
-budgeting app
-mind mapping app
-dictation app
+# X (CoS + Soul, 2026-09-27). Verdicts for every line were frozen from the 30-call live test
+# on 2026-09-27, so each post shows exactly what was tested; nothing here is re-asked.
+# Plain lines fill 3 of every 4 X posts, in file order. ` | rotate` lines fill the fourth
+# (they replace the shared unowned words on X). Each input posts once, ever.
+# Main line: tools.
+ai model
+search engine
+programming language
+phone
+social network
+browser
+# Rotating slot: big nouns and human nature, then the rare singles (ceo, writer), spaced out.
+invention | rotate
+sin | rotate
+idea | rotate
+virtue | rotate
+empire | rotate
+fear | rotate
+book | rotate
+ceo | rotate
+overrated | rotate
+weakness | rotate
+writer | rotate

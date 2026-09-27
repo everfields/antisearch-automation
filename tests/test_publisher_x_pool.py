@@ -1,4 +1,4 @@
-"""X gets its own companies / SaaS pool, posts at the reach (= soul) X slots, silent, bare caption."""
+"""X pool: the CoS mix (main line 3 of 4, rotating slot 1 of 4), posted at the X slots."""
 
 import json
 import subprocess
@@ -15,7 +15,7 @@ from antisearch_mill.publish.http import RecordingTransport
 from antisearch_mill.publisher.buffer import BufferX
 from antisearch_mill.publisher.guard import DONE, PostLog, input_problem, slots_for
 from antisearch_mill.publisher.media_host import GitHubPagesHost
-from antisearch_mill.publisher.pools import UNOWNED, pool_jobs, pool_networks, read_pool
+from antisearch_mill.publisher.pools import UNOWNED, pool_jobs, pool_networks, read_pool, read_rotation
 from antisearch_mill.publisher.run import run_posts
 from antisearch_mill.publisher.verdicts import VerdictStore
 from conftest import ROOT, requires_ffmpeg
@@ -44,30 +44,43 @@ LIVE = {
 }
 
 
-def test_x_pool_exists_and_is_picked_up():
+MAIN = ["ai model", "search engine", "programming language", "phone", "social network", "browser"]
+ROTATING = ["invention", "sin", "idea", "virtue", "empire", "fear", "book", "ceo", "overrated", "weakness", "writer"]
+DROPPED = {"century", "language", "investor", "scientist", "athlete", "founder", "decade", "city", "sport",
+           "meme", "emoji", "password", "font"}
+
+
+def _x():
+    return [c for c, _ in read_pool(POOLS / "x.txt")], [c for c, _ in read_rotation(POOLS / "x.txt")]
+
+
+def test_x_pool_is_the_cos_mix():
     assert "x" in pool_networks(POOLS)
-    rows = read_pool(POOLS / "x.txt")
-    assert len(rows) >= 40
+    main, rotating = _x()
+    assert main == MAIN  # plain lines: 3 of every 4 X posts, in this order
+    assert rotating == ROTATING  # ` | rotate` lines: the fourth
+    assert not (set(main) | set(rotating)) & DROPPED
 
 
 def test_x_pool_meets_the_pool_bar():
-    raw = [ln.strip() for ln in (POOLS / "x.txt").read_text(encoding="utf-8").splitlines()
+    raw = [ln.split("|", 1)[0].strip() for ln in (POOLS / "x.txt").read_text(encoding="utf-8").splitlines()
            if ln.strip() and not ln.lstrip().startswith("#")]
-    rows = read_pool(POOLS / "x.txt")
-    assert len(raw) == len(rows)  # no duplicates
-    for line, (category, caption) in zip(raw, rows):
-        assert line == category == line.lower()  # lowercase bare input, as written
-        assert caption == ""  # no tag holds: X captions never mention anyone
-        assert "|" not in line and "@" not in line and "http" not in line and "www." not in line
-        assert input_problem(category, {}) is None, category
+    main, rotating = _x()
+    assert raw == main + rotating  # no duplicates
+    for line in raw:
+        assert line == line.lower() and "@" not in line and "http" not in line and "www." not in line
+        assert input_problem(line, {}) is None, line
+    assert all(c == "" for _, c in read_pool(POOLS / "x.txt"))  # no tag holds: X is never tagged
 
 
 def test_x_pool_repeats_nothing_already_asked_or_owned_elsewhere():
-    x = {c for c, _ in read_pool(POOLS / "x.txt")}
+    main, rotating = _x()
+    x = set(main) | set(rotating)
     assert not x & ALREADY_ASKED
     for net in pool_networks(POOLS):
         if net != "x":
-            assert not x & {c for c, _ in read_pool(POOLS / f"{net}.txt")}, net
+            other = POOLS / f"{net}.txt"
+            assert not x & {c for c, _ in read_pool(other) + read_rotation(other)}, net
     assert not x & {c for c, _ in read_pool(POOLS / f"{UNOWNED}.txt")}
     queued = {j.category for q in ("bluesky_trial", "tiktok_trial", "surprise_trial", "sample_queue")
               for j in read_queue(ROOT / "queue" / f"{q}.csv")}
@@ -129,7 +142,7 @@ def test_live_run_posts_one_x_job_at_a_due_x_slot(tmp_path, monkeypatch):
     now = datetime(2026, 9, 28, 9, 12, tzinfo=ET)  # a Monday, just after the one 09:07 X slot
     jobs, out, transport, ledger = _live_run(tmp_path, now, monkeypatch)
     assert jobs and all(j.platforms == ("x",) for j in jobs)
-    assert jobs[0].notes == "pool:unowned"  # the first post on a network is an unowned word
+    assert jobs[0].notes == "pool:rotate"  # the first post on a network takes the fourth slot; on X that is the rotation
     assert any(j.notes == "pool:vertical" for j in jobs)
     posted = [o for o in out if o.status in DONE]
     assert len(posted) == 1 and posted[0].network == "x"
