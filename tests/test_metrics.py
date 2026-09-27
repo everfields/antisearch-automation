@@ -177,6 +177,11 @@ def test_buffer_zero_defaults_are_not_trusted():
     rows, links = buffer_metrics([e["node"] for e in buffer_body(ig_updated=None)["data"]["posts"]["edges"]])
     assert "b-ig-1" not in rows and "b-tt-1" not in rows  # metricsUpdatedAt null: 0s are "not reported"
     assert links["b-ig-1"].endswith("DdxMvP2lNKQ/")
+    zeros = {"id": "b-ig-2", "channelService": "instagram", "externalLink": "https://www.instagram.com/reel/x/",
+             "sentAt": "2026-09-26T16:30:00Z", "metricsUpdatedAt": "2026-09-26T20:01:42Z",
+             "metrics": [{"type": t, "value": 0} for t in ("views", "reach", "reactions", "comments", "saves")]}
+    rows, _ = buffer_metrics([zeros])
+    assert rows == {}  # refreshed but every value 0: Buffer's default, not a measurement
 
 
 def test_a_dead_tiktok_page_fails_loudly_and_writes_no_zero(tmp_path):

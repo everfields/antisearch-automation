@@ -399,7 +399,11 @@ def buffer_posts(http: Http, api_key: str, org_id: str) -> list[dict]:
 
 
 def buffer_metrics(nodes: list[dict]) -> tuple[dict[str, PostMetrics], dict[str, str]]:
-    """({buffer id: metrics with real numbers}, {buffer id: network URL})."""
+    """({buffer id: metrics with real numbers}, {buffer id: network URL}).
+
+    Buffer fills unreported metrics with 0. A set with no metadata refresh, or where
+    every value is 0 (a sent post always has some reach), is treated as not reported.
+    """
     rows, links = {}, {}
     for n in nodes:
         net = BUFFER_SERVICE.get(n.get("channelService", ""))
@@ -408,8 +412,10 @@ def buffer_metrics(nodes: list[dict]) -> tuple[dict[str, PostMetrics], dict[str,
         if n.get("externalLink"):
             links[n["id"]] = n["externalLink"]
         if not n.get("metricsUpdatedAt") or not n.get("metrics"):
-            continue  # Buffer reports 0 for "not reported"; untrusted until refreshed
+            continue
         m = n["metrics"]
+        if all(not _int(x.get("value")) for x in m):
+            continue
         rows[n["id"]] = PostMetrics(
             net, n["id"], n.get("externalLink") or "", _parse_dt(n.get("sentAt") or ""),
             views=_buffer_value(m, "views", "impressions"), likes=_buffer_value(m, "reactions", "likes"),
@@ -529,7 +535,8 @@ def collect(state: Path, env: Mapping[str, str], *, now: datetime, http: Http | 
             nodes = buffer_posts(http, key, (env.get("BUFFER_ORG_ID") or "").strip())
             buf, new_links = buffer_metrics(nodes)
             links.update(new_links)
-            col.notes.append(f"buffer: {len(nodes)} sent posts, {len(buf)} with refreshed metrics")
+            col.notes.append(f"buffer: {len(nodes)} sent posts, {len(buf)} with real numbers "
+                             "(unrefreshed or all-zero sets are Buffer's 'not reported' default and are left blank)")
             buffer_state = {"last_fetch": _iso(now), "links": links}
         except MetricsError as exc:
             col.notes.append(str(exc))
