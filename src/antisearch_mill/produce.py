@@ -14,8 +14,7 @@ from .oracle import Oracle, OracleError, Verdict
 from .render import ClipInfo, Layout, RenderError, extract_poster, render_clip
 from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, AUDIO_PULSE, audio_tag as make_audio_tag
 from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound, pulse_for_platforms
-from .creative import CLASSIC, apply_creative, clip_creative
-from .phone import FRAME_PHONE, PhoneSpec, clip_frame, geometry, phone_background, phone_scale
+from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
 from .timeline import (
     MAX_SECONDS, MIN_SECONDS, WAIT_BLINKS, build_timeline, clip_style, clip_typing, pause_for_style,
     pause_from_latency_ms, wait_frames,
@@ -45,7 +44,6 @@ def clip_id_for(
     frame: str = "",
     fixed_wait: bool = False,
     typing: str = "",
-    creative: str = "",
 ) -> str:
     body = f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}"
     # Silent clips keep the historical hash. Pulse is part of the id only when it is actually muxed.
@@ -58,8 +56,6 @@ def clip_id_for(
         body += "\0wait:fixed"
     if typing and typing != "legacy":
         body += f"\0typing:{typing}"
-    if creative and creative != "classic":  # the default creative keeps every existing id
-        body += f"\0creative:{creative}"
     digest = hashlib.sha256(body.encode()).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
@@ -108,7 +104,6 @@ def produce_one(
     phone: PhoneSpec | None = None,
     keys: str | None = None,
     typing: str | None = None,
-    creative: str | None = None,
 ) -> ProduceResult:
     """`frame="phone"` draws `phone` (or the env's scale and background) and implies the `app` screen.
 
@@ -138,7 +133,6 @@ def produce_one(
     keys = clip_keys_sound() if keys is None else keys
     typing = clip_typing() if typing is None else typing
     frame = clip_frame() if frame is None else frame
-    creative = clip_creative() if creative is None else creative
     if frame == FRAME_PHONE:
         phone = phone or PhoneSpec(scale=phone_scale(), background=phone_background())
         style = "app"  # the phone shows the app screen
@@ -158,7 +152,6 @@ def produce_one(
     rhythm = typing if fixed and style == "app" else "legacy"
     clip_id = clip_id_for(
         job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag, fixed_wait=fixed, typing=rhythm,
-        creative=creative,
     )
     style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
@@ -189,35 +182,7 @@ def produce_one(
         problems = validate_master(info, layout, style_name)
         if problems:
             raise RenderError("; ".join(problems))
-        if creative != CLASSIC:
-            if creative == "motion" or use_audio:
-                comment += f";creative={creative}"
-            screen = None
-            if phone is not None:
-                g = geometry(phone, layout.width, layout.height)
-                screen = (g.screen_x, g.screen_y, g.screen_w, g.screen_h)
-            source = source_screen = None
-            if creative == "motion":  # the camera goes close: a 2x render of the same screen keeps text sharp
-                big = Layout(width=layout.width * 2, height=layout.height * 2, fps=layout.fps)
-                source = clip_path.with_suffix(".src2x.mp4")
-                render_clip(timeline, source, font_path=font_path, layout=big, phone=phone)
-                if phone is not None:
-                    g2 = geometry(phone, big.width, big.height)
-                    source_screen = (g2.screen_x, g2.screen_y, g2.screen_w, g2.screen_h)
-                else:
-                    source_screen = (0, 0, big.width, big.height)
-            try:
-                info = apply_creative(creative, clip_path, timeline, category=verdict.category,
-                                      verdict=verdict.verdict, font_path=font_path, layout=layout, screen=screen,
-                                      audio=use_audio, metadata={"title": verdict.verdict, "comment": comment},
-                                      source=source, source_screen=source_screen)
-            finally:
-                if source is not None:
-                    source.unlink(missing_ok=True)
-            problems = validate_master(info, layout, style_name)
-            if problems:
-                raise RenderError("; ".join(problems))
-        extract_poster(clip_path, poster_path, info.duration_s - 0.25)
+        extract_poster(clip_path, poster_path, timeline.duration_s - 0.25)
     except (RenderError, ValueError) as exc:
         ledger.log("render.failed", job_id=job.id, clip_id=clip_id, error=str(exc))
         return ProduceResult(job.id, "failed", clip_id, f"render: {exc}")
@@ -265,7 +230,6 @@ def produce_one(
                     ),
                     **({"audio": audio_tag} if use_audio else {}),
                     **({"frame": frame_tag} if frame_tag else {}),
-                    **({"creative": creative} if creative != CLASSIC else {}),
                     **(
                         {
                             "wait": "fixed",

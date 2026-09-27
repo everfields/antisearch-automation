@@ -1,39 +1,29 @@
-"""Alternative creatives, behind `PUBLISHER_CREATIVE` (founder, 2026-09-27: start from zero,
-be ready to change the creative completely to find what ignites reach).
+"""Mockup: "the monolith", the motion-first alternative in docs/CREATIVE_DIRECTION.md.
 
-- `classic` (default): the clip exactly as it is. Nothing here runs.
-- `music_classical`: the classic clip, plus a soft felt-piano bed that resolves on the verdict.
-- `music_upbeat`: the classic clip, plus a 120 bpm bed whose drop lands on the verdict.
-- `motion`: an 8 s cinematic piece around the same moment (docs/CREATIVE_DIRECTION.md). Motion
-  from frame 0: the monolith's rim traces in light while the camera is already close on the
-  input line; through the wait the camera pushes in faster and the room darkens (held breath);
-  on the verdict the camera releases to reveal the monolith, one soft light sweep, the rim
-  blooms (exhale); the monolith dissolves and the verdict stands alone in large lowercase type,
-  the input small above; it sinks back to the darkness of frame 0, so a loop joins. Scored by
-  `music.monolith_score`. No chat, one verdict, no share card.
-
-Every bed is original synthesis (`music.py`), so there is nothing to license. Music is muxed
-only where the clip carries audio (Instagram and TikTok); elsewhere the track stays silent.
+An 8.5 s cinematic piece around the same typing-to-verdict moment:
+1. Frame 0 is dark, so the loop joins.
+2. The monolith appears, its rim traced in light, and the camera dives onto the input line.
+3. The typed words sit in a sharp close-up, drawn from a 2x render of the app screen.
+4. After Enter the camera re-frames onto the verdict line and pushes in while the room darkens.
+5. The verdict lands centred; the camera releases to reveal the monolith, with one light sweep.
+6. The verdict stands alone in large lowercase type, then everything sinks back to dark.
+Scored by `score.monolith_score`. No chat, one verdict, no share card.
+Mockup tooling only: the pipeline doesn't import this; the current clip stays the main creative.
 """
 
 from __future__ import annotations
 
 import math
-import os
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
-from .music import _rng, classical_bed, monolith_score, upbeat_bed
-from .render import ClipInfo, Layout, RenderError, probe
-from .timeline import Timeline
-
-CLASSIC = "classic"
-CREATIVES = (CLASSIC, "music_classical", "music_upbeat", "motion")
+from antisearch_mill.render import Layout, RenderError, probe
+from antisearch_mill.timeline import Timeline
+from score import _rng, monolith_score
 
 INK = (232, 229, 224)
 STONE = (122, 118, 112)
@@ -50,15 +40,6 @@ CAMERA_WIDE = 1.1
 CAMERA_CLOSE, CAMERA_PEAK = 1.9, 2.05  # close enough that the typed words read in a muted feed
 
 
-def clip_creative(env: Mapping[str, str] | None = None) -> str:
-    """`PUBLISHER_CREATIVE`: classic (default), music_classical, music_upbeat, or motion."""
-    source = os.environ if env is None else env
-    raw = (source.get("PUBLISHER_CREATIVE") or "").strip().lower() or CLASSIC
-    if raw not in CREATIVES:
-        raise ValueError(f"PUBLISHER_CREATIVE={raw!r}; use {', '.join(CREATIVES)}")
-    return raw
-
-
 def _run(cmd: list[str], stdin=None) -> None:
     proc = subprocess.run(cmd, capture_output=True, input=stdin)
     if proc.returncode != 0:
@@ -71,47 +52,6 @@ def _encode_tail(out: Path) -> list[str]:
             "-fflags", "+bitexact", "-flags:v", "+bitexact", "-flags:a", "+bitexact",
             "-movflags", "+faststart", str(out)]
 
-
-def apply_creative(creative: str, clip: Path, timeline: Timeline, *, category: str, verdict: str, font_path: str,
-                   layout: Layout, screen: tuple[int, int, int, int] | None, audio: bool,
-                   metadata: Mapping[str, str], source: Path | None = None,
-                   source_screen: tuple[int, int, int, int] | None = None) -> ClipInfo:
-    """Rewrite `clip` (the classic master) in place as `creative`. `screen` is the phone screen
-    (x, y, w, h) inside the frame, or None for a full-frame clip. `motion` can take a sharper
-    `source` render of the same timeline (e.g. at 2x) and its `source_screen`, for close-ups."""
-    if creative == CLASSIC:
-        return probe(clip)
-    tmp = clip.with_suffix(".creative.mp4")
-    meta = [a for k, v in metadata.items() for a in ("-metadata", f"{k}={v}")]
-    fps = timeline.fps
-    total = timeline.total_frames / fps
-    submit, verdict_s = timeline.submit_frame / fps, timeline.verdict_frame / fps
-    seed = f"{category}|{verdict}"
-    with tempfile.TemporaryDirectory(prefix="creative-") as td:
-        work = Path(td)
-        if creative in ("music_classical", "music_upbeat"):
-            if not audio:
-                return probe(clip)
-            make = classical_bed if creative == "music_classical" else upbeat_bed
-            wav = work / "bed.wav"
-            make(seed, total, submit, verdict_s).write(wav)
-            # soft: a quiet bed under the keys; upbeat: TikTok-level, the keys still on top
-            weight, lufs = ("0.55", "-20") if creative == "music_classical" else ("0.9", "-14")
-            _run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(clip), "-i", str(wav),
-                  "-filter_complex", f"[0:a][1:a]amix=inputs=2:normalize=0:weights='1 {weight}':duration=first,"
-                                     f"loudnorm=I={lufs}:TP=-1.5:LRA=11,aresample=44100[a]",
-                  "-map", "0:v", "-map", "[a]", "-c:v", "copy", *meta, *_encode_tail(tmp)])
-        elif creative == "motion":
-            _motion(clip, timeline, tmp, work, category=category, verdict=verdict, font_path=font_path,
-                    layout=layout, screen=source_screen if source else screen, audio=audio, meta=meta,
-                    source=source)
-        else:
-            raise ValueError(f"unknown creative {creative!r}")
-    tmp.replace(clip)
-    return probe(clip)
-
-
-# --- motion -------------------------------------------------------------------------
 
 def _ease(x: float) -> float:
     x = min(1.0, max(0.0, x))
@@ -394,3 +334,26 @@ def _motion(clip: Path, timeline: Timeline, out: Path, work: Path, *, category: 
         code = enc.wait()
     if code != 0:
         raise RenderError(f"ffmpeg (motion encode) failed:\n{err[-1500:]}")
+
+
+def render_motion(clip: Path, source: Path, source_screen: tuple[int, int, int, int], timeline: Timeline, out: Path, *,
+                  category: str, verdict: str, font_path: str, layout: Layout) -> None:
+    """The monolith, from the classic clip (its keys audio) and a 2x render of the same timeline."""
+    with tempfile.TemporaryDirectory(prefix="monolith-") as td:
+        _motion(clip, timeline, out, Path(td), category=category, verdict=verdict, font_path=font_path,
+                layout=layout, screen=source_screen, audio=True, meta=[], source=source)
+
+
+def add_score(clip: Path, timeline: Timeline, out: Path, *, category: str, verdict: str) -> None:
+    """The classic picture untouched, the keys plus the monolith score under it: the music axis on its own."""
+    fps = timeline.fps
+    total = timeline.total_frames / fps
+    verdict_s = timeline.verdict_frame / fps
+    with tempfile.TemporaryDirectory(prefix="score-") as td:
+        wav = Path(td) / "score.wav"
+        monolith_score(f"{category}|{verdict}", total, 0.2, timeline.submit_frame / fps, verdict_s,
+                       min(total, verdict_s + 0.8)).write(wav)
+        _run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(clip), "-i", str(wav),
+              "-filter_complex", "[0:a][1:a]amix=inputs=2:normalize=0:weights='0.8 1':duration=first,"
+                                 "loudnorm=I=-17:TP=-1.5:LRA=11,aresample=44100[a]",
+              "-map", "0:v", "-map", "[a]", "-c:v", "copy", *_encode_tail(out)])

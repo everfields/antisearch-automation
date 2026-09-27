@@ -6,6 +6,27 @@ code, including the music. This doc reasons about what to build, decides, and sa
 Where it states facts about the platforms, they are the platforms' own public descriptions
 of their ranking. Everything else is a hypothesis to test, not a claim.
 
+## Status: mockups for a later A/B (founder, 2026-09-27)
+
+**The current clip stays the main creative.** What follows is thinking plus three mockups,
+future alternatives to A/B later. Nothing is wired to publishing: no flag, no pipeline
+change. The render code is mockup tooling in `scripts/mockups/`, and a real test would add
+one switch in its own PR.
+
+All three mockups use the same input and the same frozen verdict (`travel` → `japan`, from
+the live oracle), so only the creative differs.
+
+| mockup | music | length | motion | tests |
+| --- | --- | --- | --- | --- |
+| [0-current-travel.mp4](../creative/mockups/0-current-travel.mp4) | none (keys only) | short, 5.8 s | fully aseptic | the control: today's main creative |
+| [1-short-score-travel.mp4](../creative/mockups/1-short-score-travel.mp4) | the score (section 5) | short, 5.8 s | fully aseptic, the same frames | music vs no music, nothing else changed |
+| [2-medium-monolith-travel.mp4](../creative/mockups/2-medium-monolith-travel.mp4) | the score | medium, 8.6 s | elaborate: the monolith (section 4) | aseptic vs elaborate motion, and short vs medium |
+
+**A/B axes for later:** music vs no music (0 vs 1); aseptic vs elaborate motion (1 vs 2);
+length short/medium (5.8 s vs 8.6 s; a long cut would come only if medium wins on completion).
+
+Re-render the mockups with `python scripts/mockups/render.py --verdicts <publisher-state verdicts.csv> --out <dir>`.
+
 ## 1. What the product gives us, and what it doesn't
 
 **What it gives us:**
@@ -118,4 +139,4 @@ classical with a pulse and a landing. That is what earns the watch time.
 - **Signals:** 2-second view rate (the hook), average watch time and completion (the pause), shares and sends per view (the payoff), and profile visits. Views alone are noise at our size.
 - **Instagram:** follows only if TikTok shows a lift, with sends per reach as the deciding signal.
 
-Nothing here is wired to publishing. `PUBLISHER_CREATIVE=motion` is the switch when we decide.
+Nothing here is wired to publishing. When a test is scheduled, one switch goes in with its own PR.

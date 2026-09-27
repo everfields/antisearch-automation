@@ -1,31 +1,10 @@
-# Creative variants and a TikTok reach pack (proposal, 2026-09-27)
+# TikTok reach pack (proposal, 2026-09-27)
 
-Founder criterion: we start from zero, and everything is trial and error. We must be ready
-to change the creative completely to find the one that ignites reach. Nothing here is
-live: `PUBLISHER_CREATIVE` defaults to `classic` and is not passed by any workflow, so
-turning a variant on is its own reviewed change.
+The creative alternatives are mockups, described with their reasoning in
+[`docs/CREATIVE_DIRECTION.md`](../CREATIVE_DIRECTION.md). The current clip stays the main
+creative, and nothing here is wired to publishing.
 
-## 1. Creatives (`PUBLISHER_CREATIVE`, `src/antisearch_mill/creative.py`)
-
-| value | what it is | length |
-| --- | --- | --- |
-| `classic` (default) | today's clip, unchanged (same bytes, same clip ids) | 5–6 s |
-| `music_classical` | classic picture plus a soft felt-piano bed. Broken A-minor chords under the typing, the harmony held on F then G through the wait, a rolled C major (add9) on the verdict frame. About −18 LUFS, keys on top. | same |
-| `music_upbeat` | classic picture plus a 120 bpm bed. Hats and filtered plucks under the typing, a snare roll and a noise rise through the wait, and the drop (kick, clap, bass, chord stabs) on the verdict frame. About −13 LUFS. | same |
-| `motion` | the cinematic monolith, scored by `monolith_score`. The motion-first direction, the camera grammar and the music decision are in `docs/CREATIVE_DIRECTION.md`, which supersedes this row. | 8.5 s |
-
-**How it's built:**
-- **Sound:** every bed is original synthesis (`music.py`): no samples, loops, stock tracks or licences, and no spend. Music is muxed only where the clip already carries audio (Instagram and TikTok).
-- **Picture:** the music variants keep the classic frames bit for bit (a test compares the video md5).
-- **Clip ids:** each creative gets its own clip id; `classic` keeps every existing id.
-- **Samples:** `scripts/render_creatives.py` renders every creative from frozen verdicts, without asking the oracle.
-
-**Suggested test, with no spend:**
-- Rotate one creative per day on TikTok only, for example classic, music_upbeat, motion, music_classical, and so on, keeping the same inputs pool.
-- Judge after 10 or more posts per variant, on the metrics collector's 3-hour snapshots: 2-second view rate, average watch time, completion rate and shares per view. Views alone is too noisy at our size.
-- Keep the winner. If the motion piece wins on completion, try a 7–8 s cut.
-
-## 2. TikTok reach pack (proposal; not implemented)
+## TikTok reach pack (proposal; not implemented)
 
 **Today's rule to change:** TikTok captions are empty or the bare input, and hashtags are
 refused (`guard.caption_problem`). The pack needs a switch such as
