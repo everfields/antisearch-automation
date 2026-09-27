@@ -31,5 +31,21 @@ Entry shape:
 }
 ```
 
-The seed is K18 on TikTok (`@k18hair`), confirmed on 2026-09-27 from TikTok's own
-profile data (`verified: true`). Instagram has no entries yet.
+Seeds: K18 on TikTok (`@k18hair`) and Japan on Instagram (`@visitjapan.us`, JNTO
+Americas), both confirmed on 2026-09-27 from the network's own public profile data.
+
+Never amika or any Bansk brand: an entry naming amika, or with `"owner": "bansk"`, is
+refused. Mark any other Bansk brand with that owner field.
+
+**Pending Instagram rows** (the live verdict matched Soul's expected one on 2026-09-27;
+`queue/ig_mentions.csv`), not added because Instagram's logged-out profile data was
+unavailable that day (429 / server error) and a row needs a verified account with a post
+in the last 7 days. Add each only after that check:
+
+| verdict | handle | note |
+| --- | --- | --- |
+| aman new york | `@amannewyork` | |
+| dyson airwrap co-anda2x | `@dysonhair` | Instagram returned "not found" for this handle; confirm Dyson's real hair account first |
+| skinceuticals c e ferulic | `@skinceuticals` | |
+
+People are never rows (LeBron James, Taylor Swift), whatever the verdict.

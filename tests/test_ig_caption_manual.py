@@ -234,3 +234,31 @@ def test_a_new_manual_row_carries_the_mention_from_the_start(tmp_path):
     row = ManualRow("ig-manual-travel", "travel", "instagram", datetime(2026, 9, 27, 9, 37, tzinfo=ET))
     out, creates, _ = _manual(tmp_path, [row], datetime(2026, 9, 27, 6, 50, tzinfo=ET), allow=allow)
     assert out[0].status == "scheduled" and creates[0]["text"] == "#travel #japan #ai @visitjapan.us"
+
+
+def test_never_amika_or_a_bansk_brand():
+    from antisearch_mill.publisher.tags import allowlisted
+
+    day = datetime(2026, 9, 27).date()
+    ok = {"handle": "@x", "verified": True, "checked": "2026-09-27", "market": "us"}
+    allow = {"amika": {"kind": "brand", "instagram": ok},
+             "some shampoo": {"kind": "brand", "owner": "Bansk", "instagram": ok},
+             "other brand": {"kind": "brand", "instagram": {**ok, "handle": "@amikahair"}}}
+    for verdict in allow:
+        assert allowlisted(verdict, "instagram", allow, day).handle == "", verdict
+
+
+def test_the_ig_mention_queue_is_ordered_and_not_scheduled():
+    from antisearch_mill.cli import DEFAULT_POST_QUEUES
+    from antisearch_mill.ledger import read_queue
+    from antisearch_mill.publisher.pools import read_pool
+
+    jobs = read_queue(ROOT / "queue" / "ig_mentions.csv")
+    order = [j.category for j in jobs]
+    assert order[:5] == ["city", "national park", "museum", "burger", "hair tool"]  # 1,2,3,4,8,10 (1 is scheduled)
+    assert order[-3:] == ["perfume", "watch", "singer"]  # 13,16,18 last
+    assert len(order) == 17 and all(j.platforms == ("instagram",) and j.caption == "" for j in jobs)
+    assert "ig_mentions" not in DEFAULT_POST_QUEUES  # queued, not scheduled
+    assert "ig_mentions" not in (ROOT / ".github" / "workflows" / "publisher.yml").read_text()
+    for lst in [*(ROOT / "queue" / "pools").glob("*.txt"), *(ROOT / "queue" / "winners").glob("*.txt")]:
+        assert not set(order) & {c for c, _ in read_pool(lst)}, lst.name  # the queue owns these inputs
