@@ -1,0 +1,57 @@
+rank,candidate_input,real_verdict,match,handle,target,vertical,market,followers_approx,site_links_handle,why
+1,zoo,san diego zoo,exact,@sandiegozoo,San Diego Zoo,experience,us,1.1M,yes,oracle backwards: category topped by san diego zoo
+2,aquarium,monterey bay aquarium,exact,@montereybayaquarium,Monterey Bay Aquarium,experience,us,614k,yes,oracle backwards: category topped by monterey bay aquarium
+3,nightclub,hï ibiza,exact,@hiibizaofficial,Hï Ibiza,club,global,1M,yes,oracle backwards: category topped by hï ibiza
+4,art museum,louvre,exact,@museelouvre,Louvre,experience,global,5.3M,yes,oracle backwards: category topped by louvre
+5,global city,new york city,exact,@nycgo,NYC Tourism,travel,us,1M,no,oracle backwards: category topped by london
+6,fine dining,disfrutar,exact,@disfrutarbarcelona,Disfrutar,restaurant,global,200k,no,oracle backwards: category topped by noma
+7,high jewelry,cartier,exact,@cartier,Cartier,luxury,global,16.6M,unreachable (http 403),oracle backwards: category topped by van cleef & arpels
+8,royal palace,palace of versailles,exact,@chateauversailles,Palace of Versailles,experience,global,1.3M,yes,oracle backwards: category topped by palace of versailles
+9,supercar brand,ferrari,exact,@ferrari,Ferrari,luxury,global,30M,no,oracle backwards: category topped by ferrari
+10,luxury jewelry,cartier,exact,@cartier,Cartier,luxury,global,16.6M,unreachable (http 403),oracle backwards: category topped by cartier
+11,luxury watches,patek philippe,exact,@patekphilippe,Patek Philippe,luxury,global,2.7M,yes,oracle backwards: category topped by rolex
+12,music festival,glastonbury,exact,@glastofest,Glastonbury Festival,experience,global,1.5M,yes,oracle backwards: category topped by coachella
+13,beauty retailer,sephora,exact,@sephora,Sephora,beauty,us,22M,yes,oracle backwards: category topped by sephora
+14,ibiza nightclub,hï ibiza,exact,@hiibizaofficial,Hï Ibiza,club,global,1M,yes,oracle backwards: what pacha is the answer to
+15,fashion capital,paris,exact,@parisjetaime,Paris je t'aime,travel,global,700k,unreachable (http 403),oracle backwards: category topped by paris
+16,inclusive makeup,fenty beauty,exact,@fentybeauty,Fenty Beauty,beauty,us,13.3M,yes,oracle backwards: category topped by fenty beauty
+17,silver production,mexico,exact,@visitmexico,Visit Mexico,travel,global,800k,unreachable,oracle backwards: category topped by mexico
+18,open-air nightclub,ushuaïa ibiza,exact,@ushuaiaibiza,Ushuaïa Ibiza,club,global,1.5M,no,oracle backwards: category topped by ushuaïa ibiza
+19,freestyle cruising,norwegian cruise line,exact,@norwegiancruiseline,Norwegian Cruise Line,cruise,us,1M,yes,oracle backwards: category topped by norwegian cruise line
+20,seafood restaurant,le bernardin,exact,@lebernardinny,Le Bernardin,restaurant,us,200k,no,oracle backwards: category topped by le bernardin
+21,contemporary circus,cirque du soleil,exact,@cirquedusoleil,Cirque du Soleil,experience,global,3M,yes,oracle backwards: category topped by cirque du soleil
+22,affordable skincare,cerave,exact,@cerave,CeraVe,beauty,us,2.5M,yes,oracle backwards: category topped by the ordinary
+23,three-dimensional shape,sphere,exact,@spherevegas,Sphere,experience,us,1.5M,yes,oracle backwards: category topped by sphere
+24,sports car brand,porsche,exact,@porsche,Porsche,luxury,global,32M,no,oracle backwards: category topped by porsche
+25,country for food,italy,exact,@italiait,Italia,travel,global,877k,yes,oracle backwards: what italy is the answer to
+26,luxury hotel brand,aman,exact,@aman,Aman,hotel,global,1.3M,yes,oracle backwards: category topped by aman
+27,korean fine dining,atomix,exact,@atomixnyc,Atomix,restaurant,us,150k,no,oracle backwards: category topped by atomix
+28,family cruise lines,disney cruise line,exact,@disneycruiseline,Disney Cruise Line,cruise,us,1.5M,no,oracle backwards: category topped by royal caribbean
+29,luxury hotel chains,aman,exact,@aman,Aman,hotel,global,1.3M,yes,oracle backwards: category topped by the ritz-carlton
+30,luxury resort brand,aman,exact,@aman,Aman,hotel,global,1.3M,yes,oracle backwards: category topped by one&only
+31,premium cruise line,celebrity cruises,exact,@celebritycruises,Celebrity Cruises,cruise,us,1M,yes,oracle backwards: what celebrity cruises is the answer to
+32,luxury leather goods,hermès,exact,@hermes,Hermès,luxury,global,15.6M,unreachable (http 403),oracle backwards: category topped by hermès
+33,luxury fashion house,hermès,exact,@hermes,Hermès,luxury,global,15.6M,unreachable (http 403),oracle backwards: category topped by chanel
+34,olive oil production,spain,exact,@spain,Spain,travel,global,1.5M,yes,oracle backwards: category topped by spain
+35,premium cruise lines,viking,exact,@vikingcruises,Viking,cruise,us,500k,yes,oracle backwards: category topped by celebrity cruises
+36,immersive digital art,teamlab borderless,exact,@teamlab,teamLab,experience,global,3M,yes,oracle backwards: category topped by teamlab
+37,mega-ship cruise line,royal caribbean international,exact,@royalcaribbean,Royal Caribbean,cruise,us,2.5M,yes,oracle backwards: what royal caribbean is the answer to
+38,rooftop infinity pool,marina bay sands,exact,@marinabaysands,Marina Bay Sands,hotel,global,1.5M,unreachable,oracle backwards: category topped by marina bay sands
+39,fast-food burger chain,in-n-out burger,exact,@innout,In-N-Out Burger,restaurant,us,2M,no,oracle backwards: category topped by in-n-out
+40,barefoot luxury resorts,soneva fushi,exact,@soneva,Soneva,hotel,global,500k,yes,oracle backwards: category topped by soneva
+41,adults-only cruise line,virgin voyages,exact,@virginvoyages,Virgin Voyages,cruise,us,400k,yes,oracle backwards: category topped by virgin voyages
+42,rock-chic luxury fashion,saint laurent,exact,@ysl,Saint Laurent,luxury,global,30M,unreachable (http 403),oracle backwards: category topped by saint laurent
+43,fast-casual burger chain,shake shack,exact,@shakeshack,Shake Shack,restaurant,us,1.5M,unreachable (http 403),oracle backwards: category topped by shake shack
+44,luxury stopover destination,dubai,exact,@visitdubai,Visit Dubai,travel,global,2M,unreachable (http 403),oracle backwards: category topped by dubai
+45,participatory arts festival,burning man,exact,@burningman,Burning Man,experience,us,1.5M,yes,oracle backwards: category topped by burning man
+46,blush,rare beauty soft pinch liquid blush,prefix,@rarebeauty,Rare Beauty,beauty,us,7M,yes,oracle backwards: category topped by nars
+47,lipstick,dior rouge dior,prefix,@dior,Dior,luxury,global,45M,unreachable (http 403),oracle backwards: category topped by mac cosmetics
+48,liquid blush,rare beauty soft pinch liquid blush,prefix,@rarebeauty,Rare Beauty,beauty,us,7M,yes,oracle backwards: category topped by rare beauty
+49,luxury hotel,rosewood hong kong,prefix,@rosewoodhotels,Rosewood Hotels,hotel,global,1M,yes,oracle backwards: category topped by burj al arab
+50,setting spray,charlotte tilbury airbrush flawless setting spray,prefix,@charlottetilbury,Charlotte Tilbury,beauty,global,6M,yes,oracle backwards: category topped by charlotte tilbury
+51,setting powder,huda beauty easy bake loose baking & setting powder,prefix,@hudabeauty,Huda Beauty,beauty,global,54M,yes,oracle backwards: category topped by huda beauty
+52,no-makeup makeup,chanel les beiges water-fresh tint,prefix,@chanelofficial,Chanel,luxury,global,60M,unreachable (http 403),oracle backwards: category topped by glossier
+53,vitamin c serum,skinceuticals c e ferulic,prefix,@skinceuticals,SkinCeuticals,beauty,us,1M,unreachable (http 403),oracle backwards: category topped by skinceuticals
+54,luxury nylon bags,prada re-nylon,prefix,@prada,Prada,luxury,global,35M,yes,oracle backwards: category topped by prada
+55,modern art museum,"museum of modern art, new york",prefix,@themuseumofmodernart,MoMA,experience,us,5.5M,yes,oracle backwards: category topped by moma
+56,ultra-thin mechanical watches,bulgari octo finissimo ultra cosc,prefix,@bulgari,Bulgari,luxury,global,12M,unreachable (http 403),oracle backwards: category topped by bulgari

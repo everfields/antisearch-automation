@@ -1,0 +1,748 @@
+{
+ "generator": "oracle-reverse",
+ "model": "gpt-6-astra",
+ "endpoint": "https://carlo-miyss6hw-eastus2.services.ai.azure.com/openai/v1/",
+ "prompt_version": "v1.6.4",
+ "prompt_sha256": "a88e28ed7e08a7f7397016b83d35ebc970265bb928b74bcb13440e9dcde429e0",
+ "reasoning_effort": "medium",
+ "max_completion_tokens": 2048,
+ "user_template": "<<<QUERY\n{category}\nQUERY>>>",
+ "templates": [
+  "category topped by {winner}",
+  "what {winner} is the answer to"
+ ],
+ "date": "2026-09-27",
+ "generator_calls": 178,
+ "candidates": {
+  "@cartier": [
+   {
+    "input": "luxury jewelry",
+    "why": "oracle backwards: category topped by cartier"
+   }
+  ],
+  "@hermes": [
+   {
+    "input": "luxury leather goods",
+    "why": "oracle backwards: category topped by hermès"
+   },
+   {
+    "input": "luxury handbags",
+    "why": "oracle backwards: what hermès is the answer to"
+   }
+  ],
+  "@louisvuitton": [
+   {
+    "input": "luxury luggage",
+    "why": "oracle backwards: category topped by louis vuitton"
+   }
+  ],
+  "@chanelofficial": [
+   {
+    "input": "luxury fashion house",
+    "why": "oracle backwards: category topped by chanel"
+   },
+   {
+    "input": "final",
+    "why": "oracle backwards: what chanel is the answer to"
+   }
+  ],
+  "@dior": [
+   {
+    "input": "haute couture",
+    "why": "oracle backwards: category topped by dior"
+   }
+  ],
+  "@gucci": [
+   {
+    "input": "maximalist luxury fashion",
+    "why": "oracle backwards: category topped by gucci"
+   }
+  ],
+  "@prada": [
+   {
+    "input": "luxury nylon bags",
+    "why": "oracle backwards: category topped by prada"
+   }
+  ],
+  "@tiffanyandco": [
+   {
+    "input": "sterling silver jewelry",
+    "why": "oracle backwards: category topped by tiffany & co."
+   }
+  ],
+  "@rolex": [
+   {
+    "input": "luxury watches",
+    "why": "oracle backwards: category topped by rolex"
+   }
+  ],
+  "@patekphilippe": [
+   {
+    "input": "luxury watches",
+    "why": "oracle backwards: category topped by patek philippe"
+   },
+   {
+    "input": "luxury watchmaker",
+    "why": "oracle backwards: what patek philippe is the answer to"
+   }
+  ],
+  "@bulgari": [
+   {
+    "input": "ultra-thin mechanical watches",
+    "why": "oracle backwards: category topped by bulgari"
+   },
+   {
+    "input": "italian high jewelry",
+    "why": "oracle backwards: what bulgari is the answer to"
+   }
+  ],
+  "@vancleefarpels": [
+   {
+    "input": "high jewelry",
+    "why": "oracle backwards: category topped by van cleef & arpels"
+   }
+  ],
+  "@ferrari": [
+   {
+    "input": "supercar brand",
+    "why": "oracle backwards: category topped by ferrari"
+   },
+   {
+    "input": "sports cars",
+    "why": "oracle backwards: what ferrari is the answer to"
+   }
+  ],
+  "@porsche": [
+   {
+    "input": "sports car brand",
+    "why": "oracle backwards: category topped by porsche"
+   },
+   {
+    "input": "sports cars",
+    "why": "oracle backwards: what porsche is the answer to"
+   }
+  ],
+  "@ysl": [
+   {
+    "input": "rock-chic luxury fashion",
+    "why": "oracle backwards: category topped by saint laurent"
+   },
+   {
+    "input": "parisian eveningwear",
+    "why": "oracle backwards: what saint laurent is the answer to"
+   }
+  ],
+  "@fentybeauty": [
+   {
+    "input": "inclusive makeup",
+    "why": "oracle backwards: category topped by fenty beauty"
+   },
+   {
+    "input": "inclusive foundation",
+    "why": "oracle backwards: what fenty beauty is the answer to"
+   }
+  ],
+  "@rarebeauty": [
+   {
+    "input": "liquid blush",
+    "why": "oracle backwards: category topped by rare beauty"
+   },
+   {
+    "input": "celebrity beauty brand",
+    "why": "oracle backwards: what rare beauty is the answer to"
+   }
+  ],
+  "@glossier": [
+   {
+    "input": "no-makeup makeup",
+    "why": "oracle backwards: category topped by glossier"
+   }
+  ],
+  "@charlottetilbury": [
+   {
+    "input": "setting spray",
+    "why": "oracle backwards: category topped by charlotte tilbury"
+   },
+   {
+    "input": "luxury makeup brand",
+    "why": "oracle backwards: what charlotte tilbury is the answer to"
+   }
+  ],
+  "@maccosmetics": [
+   {
+    "input": "lipstick",
+    "why": "oracle backwards: category topped by mac cosmetics"
+   },
+   {
+    "input": "professional makeup",
+    "why": "oracle backwards: what mac cosmetics is the answer to"
+   }
+  ],
+  "@narsissist": [
+   {
+    "input": "blush",
+    "why": "oracle backwards: category topped by nars"
+   },
+   {
+    "input": "orgasm blush",
+    "why": "oracle backwards: what nars is the answer to"
+   }
+  ],
+  "@sephora": [
+   {
+    "input": "beauty retailer",
+    "why": "oracle backwards: category topped by sephora"
+   }
+  ],
+  "@lamer": [
+   {
+    "input": "luxury face cream",
+    "why": "oracle backwards: category topped by la mer"
+   }
+  ],
+  "@cerave": [
+   {
+    "input": "drugstore skincare",
+    "why": "oracle backwards: category topped by cerave"
+   }
+  ],
+  "@theordinary": [
+   {
+    "input": "affordable skincare",
+    "why": "oracle backwards: category topped by the ordinary"
+   }
+  ],
+  "@patmcgrathreal": [
+   {
+    "input": "luxury eyeshadow palettes",
+    "why": "oracle backwards: category topped by pat mcgrath labs"
+   }
+  ],
+  "@hudabeauty": [
+   {
+    "input": "setting powder",
+    "why": "oracle backwards: category topped by huda beauty"
+   },
+   {
+    "input": "eyeshadow palettes",
+    "why": "oracle backwards: what huda beauty is the answer to"
+   }
+  ],
+  "@skinceuticals": [
+   {
+    "input": "vitamin c serum",
+    "why": "oracle backwards: category topped by skinceuticals"
+   }
+  ],
+  "@olaplex": [
+   {
+    "input": "bond-repair hair treatments",
+    "why": "oracle backwards: category topped by olaplex"
+   },
+   {
+    "input": "hair bond repair",
+    "why": "oracle backwards: what olaplex is the answer to"
+   }
+  ],
+  "@aman": [
+   {
+    "input": "luxury hotel brand",
+    "why": "oracle backwards: category topped by aman"
+   }
+  ],
+  "@fourseasons": [
+   {
+    "input": "luxury hotel brand",
+    "why": "oracle backwards: category topped by four seasons"
+   }
+  ],
+  "@ritzcarlton": [
+   {
+    "input": "luxury hotel chains",
+    "why": "oracle backwards: category topped by the ritz-carlton"
+   },
+   {
+    "input": "luxury hotel brand",
+    "why": "oracle backwards: what the ritz-carlton is the answer to"
+   }
+  ],
+  "@sixsenses": [
+   {
+    "input": "luxury wellness resorts",
+    "why": "oracle backwards: category topped by six senses"
+   }
+  ],
+  "@rosewoodhotels": [
+   {
+    "input": "luxury hotel brand",
+    "why": "oracle backwards: category topped by rosewood"
+   },
+   {
+    "input": "acoustic guitar back-and-side tonewood",
+    "why": "oracle backwards: what rosewood is the answer to"
+   }
+  ],
+  "@belmond": [
+   {
+    "input": "luxury train travel",
+    "why": "oracle backwards: category topped by belmond"
+   }
+  ],
+  "@mandarinorientalhotelgroup": [
+   {
+    "input": "luxury hotel brand",
+    "why": "oracle backwards: category topped by mandarin oriental"
+   }
+  ],
+  "@oneandonlyresorts": [
+   {
+    "input": "luxury resort brand",
+    "why": "oracle backwards: category topped by one&only"
+   },
+   {
+    "input": "luxury resorts",
+    "why": "oracle backwards: what one&only is the answer to"
+   }
+  ],
+  "@soneva": [
+   {
+    "input": "barefoot luxury resorts",
+    "why": "oracle backwards: category topped by soneva"
+   }
+  ],
+  "@marinabaysands": [
+   {
+    "input": "rooftop infinity pool",
+    "why": "oracle backwards: category topped by marina bay sands"
+   }
+  ],
+  "@burjalarab": [
+   {
+    "input": "luxury hotel",
+    "why": "oracle backwards: category topped by burj al arab"
+   },
+   {
+    "input": "iconic luxury hotel",
+    "why": "oracle backwards: what burj al arab is the answer to"
+   }
+  ],
+  "@elevenmadisonpark": [
+   {
+    "input": "vegan fine dining",
+    "why": "oracle backwards: category topped by eleven madison park"
+   },
+   {
+    "input": "plant-based fine dining",
+    "why": "oracle backwards: what eleven madison park is the answer to"
+   }
+  ],
+  "@lebernardinny": [
+   {
+    "input": "seafood restaurant",
+    "why": "oracle backwards: category topped by le bernardin"
+   }
+  ],
+  "@nomacph": [
+   {
+    "input": "fine dining",
+    "why": "oracle backwards: category topped by noma"
+   },
+   {
+    "input": "new nordic cuisine",
+    "why": "oracle backwards: what noma is the answer to"
+   }
+  ],
+  "@noburestaurants": [
+   {
+    "input": "japanese-peruvian fusion restaurants",
+    "why": "oracle backwards: category topped by nobu"
+   },
+   {
+    "input": "japanese-peruvian fusion restaurant",
+    "why": "oracle backwards: what nobu is the answer to"
+   }
+  ],
+  "@atomixnyc": [
+   {
+    "input": "korean fine dining",
+    "why": "oracle backwards: category topped by atomix"
+   },
+   {
+    "input": "korean fine dining in new york city",
+    "why": "oracle backwards: what atomix is the answer to"
+   }
+  ],
+  "@disfrutarbarcelona": [
+   {
+    "input": "fine dining restaurants",
+    "why": "oracle backwards: category topped by disfrutar"
+   },
+   {
+    "input": "fine dining restaurant",
+    "why": "oracle backwards: what disfrutar is the answer to"
+   }
+  ],
+  "@shakeshack": [
+   {
+    "input": "fast-casual burger chain",
+    "why": "oracle backwards: category topped by shake shack"
+   }
+  ],
+  "@innout": [
+   {
+    "input": "fast-food burger chain",
+    "why": "oracle backwards: category topped by in-n-out"
+   }
+  ],
+  "@starbucks": [
+   {
+    "input": "global coffeehouse chains",
+    "why": "oracle backwards: category topped by starbucks"
+   },
+   {
+    "input": "global coffeehouse chain",
+    "why": "oracle backwards: what starbucks is the answer to"
+   }
+  ],
+  "@royalcaribbean": [
+   {
+    "input": "family cruise lines",
+    "why": "oracle backwards: category topped by royal caribbean"
+   },
+   {
+    "input": "mega-ship cruise line",
+    "why": "oracle backwards: what royal caribbean is the answer to"
+   }
+  ],
+  "@carnival": [
+   {
+    "input": "budget cruises",
+    "why": "oracle backwards: category topped by carnival"
+   },
+   {
+    "input": "pre-lenten celebration",
+    "why": "oracle backwards: what carnival is the answer to"
+   }
+  ],
+  "@disneycruiseline": [
+   {
+    "input": "family cruise lines",
+    "why": "oracle backwards: category topped by disney cruise line"
+   },
+   {
+    "input": "family cruising",
+    "why": "oracle backwards: what disney cruise line is the answer to"
+   }
+  ],
+  "@virginvoyages": [
+   {
+    "input": "adults-only cruise line",
+    "why": "oracle backwards: category topped by virgin voyages"
+   },
+   {
+    "input": "adults-only cruises",
+    "why": "oracle backwards: what virgin voyages is the answer to"
+   }
+  ],
+  "@vikingcruises": [
+   {
+    "input": "river cruises",
+    "why": "oracle backwards: category topped by viking"
+   },
+   {
+    "input": "norse seafarer",
+    "why": "oracle backwards: what viking is the answer to"
+   }
+  ],
+  "@celebritycruises": [
+   {
+    "input": "premium cruise lines",
+    "why": "oracle backwards: category topped by celebrity cruises"
+   },
+   {
+    "input": "premium cruise line",
+    "why": "oracle backwards: what celebrity cruises is the answer to"
+   }
+  ],
+  "@norwegiancruiseline": [
+   {
+    "input": "freestyle cruising",
+    "why": "oracle backwards: category topped by norwegian cruise line"
+   }
+  ],
+  "@hiibizaofficial": [
+   {
+    "input": "nightclub",
+    "why": "oracle backwards: category topped by hï ibiza"
+   }
+  ],
+  "@ushuaiaibiza": [
+   {
+    "input": "open-air nightclub",
+    "why": "oracle backwards: category topped by ushuaïa ibiza"
+   }
+  ],
+  "@pacha": [
+   {
+    "input": "nightclub",
+    "why": "oracle backwards: category topped by pacha"
+   },
+   {
+    "input": "ibiza nightclub",
+    "why": "oracle backwards: what pacha is the answer to"
+   }
+  ],
+  "@tomorrowland": [
+   {
+    "input": "electronic dance music festival",
+    "why": "oracle backwards: category topped by tomorrowland"
+   }
+  ],
+  "@coachella": [
+   {
+    "input": "music festival",
+    "why": "oracle backwards: category topped by coachella"
+   },
+   {
+    "input": "music and arts festival",
+    "why": "oracle backwards: what coachella is the answer to"
+   }
+  ],
+  "@glastofest": [
+   {
+    "input": "music festival",
+    "why": "oracle backwards: category topped by glastonbury"
+   }
+  ],
+  "@burningman": [
+   {
+    "input": "participatory arts festival",
+    "why": "oracle backwards: category topped by burning man"
+   },
+   {
+    "input": "radical self-expression",
+    "why": "oracle backwards: what burning man is the answer to"
+   }
+  ],
+  "@cirquedusoleil": [
+   {
+    "input": "contemporary circus",
+    "why": "oracle backwards: category topped by cirque du soleil"
+   }
+  ],
+  "@spherevegas": [
+   {
+    "input": "three-dimensional shape",
+    "why": "oracle backwards: category topped by sphere"
+   },
+   {
+    "input": "philosophy",
+    "why": "oracle backwards: what sphere is the answer to"
+   }
+  ],
+  "@disneyparks": [
+   {
+    "input": "theme parks",
+    "why": "oracle backwards: category topped by disney parks"
+   },
+   {
+    "input": "family vacation destination",
+    "why": "oracle backwards: what disney parks is the answer to"
+   }
+  ],
+  "@teamlab": [
+   {
+    "input": "immersive digital art",
+    "why": "oracle backwards: category topped by teamlab"
+   },
+   {
+    "input": "immersive digital art collective",
+    "why": "oracle backwards: what teamlab is the answer to"
+   }
+  ],
+  "@museelouvre": [
+   {
+    "input": "art museum",
+    "why": "oracle backwards: category topped by louvre"
+   }
+  ],
+  "@metmuseum": [
+   {
+    "input": "art museum",
+    "why": "oracle backwards: category topped by the met"
+   }
+  ],
+  "@themuseumofmodernart": [
+   {
+    "input": "modern art museum",
+    "why": "oracle backwards: category topped by moma"
+   }
+  ],
+  "@chateauversailles": [
+   {
+    "input": "royal palace",
+    "why": "oracle backwards: category topped by palace of versailles"
+   }
+  ],
+  "@sandiegozoo": [
+   {
+    "input": "zoo",
+    "why": "oracle backwards: category topped by san diego zoo"
+   }
+  ],
+  "@montereybayaquarium": [
+   {
+    "input": "aquarium",
+    "why": "oracle backwards: category topped by monterey bay aquarium"
+   }
+  ],
+  "@visitjapan.us": [
+   {
+    "input": "anime",
+    "why": "oracle backwards: category topped by japan"
+   },
+   {
+    "input": "travel destination",
+    "why": "oracle backwards: what japan is the answer to"
+   }
+  ],
+  "@italiait": [
+   {
+    "input": "cuisine",
+    "why": "oracle backwards: category topped by italy"
+   },
+   {
+    "input": "country for food",
+    "why": "oracle backwards: what italy is the answer to"
+   }
+  ],
+  "@switzerland": [
+   {
+    "input": "innovation",
+    "why": "oracle backwards: category topped by switzerland"
+   },
+   {
+    "input": "country for quality of life",
+    "why": "oracle backwards: what switzerland is the answer to"
+   }
+  ],
+  "@visitlondon": [
+   {
+    "input": "global city",
+    "why": "oracle backwards: category topped by london"
+   }
+  ],
+  "@parisjetaime": [
+   {
+    "input": "fashion capital",
+    "why": "oracle backwards: category topped by paris"
+   },
+   {
+    "input": "romantic getaway",
+    "why": "oracle backwards: what paris is the answer to"
+   }
+  ],
+  "@visitperu": [
+   {
+    "input": "culinary destination",
+    "why": "oracle backwards: category topped by peru"
+   },
+   {
+    "input": "culinary travel destination",
+    "why": "oracle backwards: what peru is the answer to"
+   }
+  ],
+  "@nycgo": [
+   {
+    "input": "city",
+    "why": "oracle backwards: category topped by new york"
+   }
+  ],
+  "@visitgreecegr": [
+   {
+    "input": "island hopping",
+    "why": "oracle backwards: category topped by greece"
+   },
+   {
+    "input": "mediterranean island-hopping destination",
+    "why": "oracle backwards: what greece is the answer to"
+   }
+  ],
+  "@spain": [
+   {
+    "input": "olive oil production",
+    "why": "oracle backwards: category topped by spain"
+   },
+   {
+    "input": "culinary travel destination",
+    "why": "oracle backwards: what spain is the answer to"
+   }
+  ],
+  "@australia": [
+   {
+    "input": "beaches",
+    "why": "oracle backwards: category topped by australia"
+   },
+   {
+    "input": "world’s smallest continent",
+    "why": "oracle backwards: what australia is the answer to"
+   }
+  ],
+  "@visitdubai": [
+   {
+    "input": "luxury stopover destination",
+    "why": "oracle backwards: category topped by dubai"
+   },
+   {
+    "input": "luxury desert city",
+    "why": "oracle backwards: what dubai is the answer to"
+   }
+  ],
+  "@visitmaldives": [
+   {
+    "input": "honeymoon destination",
+    "why": "oracle backwards: category topped by maldives"
+   }
+  ],
+  "@visitportugal": [
+   {
+    "input": "port wine",
+    "why": "oracle backwards: category topped by portugal"
+   },
+   {
+    "input": "european surfing destination",
+    "why": "oracle backwards: what portugal is the answer to"
+   }
+  ],
+  "@visitmexico": [
+   {
+    "input": "silver production",
+    "why": "oracle backwards: category topped by mexico"
+   },
+   {
+    "input": "country for tacos",
+    "why": "oracle backwards: what mexico is the answer to"
+   }
+  ],
+  "@purenewzealand": [
+   {
+    "input": "adventure tourism",
+    "why": "oracle backwards: category topped by new zealand"
+   },
+   {
+    "input": "country for outdoor adventures",
+    "why": "oracle backwards: what new zealand is the answer to"
+   }
+  ],
+  "@gohawaii": [
+   {
+    "input": "surfing destination",
+    "why": "oracle backwards: category topped by hawaii"
+   },
+   {
+    "input": "tropical vacation destination",
+    "why": "oracle backwards: what hawaii is the answer to"
+   }
+  ]
+ }
+}
