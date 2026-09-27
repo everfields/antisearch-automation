@@ -5,7 +5,6 @@ fills while the model "thinks"; the verdict lands in large lowercase type exactl
 oracle returned it, with one cold bloom behind it; `antisearch.ai` stays on screen from the
 first frame. Everything sits inside Instagram's Stories safe area (the top 250 px and the
 bottom 340 px carry the app's own bars). Scored by `score.template_score`, trimmed to the card.
-Same input, same bytes: nothing is drawn at random except from seeds of the input and verdict.
 """
 
 from __future__ import annotations
