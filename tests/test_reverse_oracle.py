@@ -237,3 +237,12 @@ def test_main_replay_writes_state_files(tmp_path):
     assert rows[0]["candidate_input"] == "jewelry" and rows[0]["handle"] == "@cartier"
     saved = json.loads((state / "reverse_oracle" / "r-candidates.json").read_text())
     assert saved["generator"] == "oracle-reverse" and saved["model"] == "m"
+
+
+def test_ordered_list_asks_every_input_in_order(tmp_path, targets):
+    oracle = CountingOracle({"jewelry": "cartier", "gems": "cartier", "house": "birkin"})
+    run = make_run(tmp_path, targets, oracle, budget=2)
+    rows = run.execute_ordered([{"input": "Jewelry", "target": "@cartier"}, {"input": "hermes bag", "target": "@aman"},
+                                {"input": "gems", "target": "@cartier"}, {"input": "house", "target": "@hermes"}])
+    assert oracle.asked == ["jewelry", "gems"]  # both asked though @cartier matched; the budget stops "house"
+    assert [(r.input, r.match) for r in rows] == [("jewelry", "exact"), ("gems", "exact")]

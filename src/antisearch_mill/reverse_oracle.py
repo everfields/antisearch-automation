@@ -429,6 +429,29 @@ class Run:
                          f"{res.verdict or res.error!r} ({res.source}; {tag})")
         return self.rows
 
+    def execute_ordered(self, items: list[dict]) -> list[Row]:
+        """Every candidate in the given order ({"input", "target": "@handle", "why"}), even after
+        its target matched: a concept list is a priority order, not per-target fallbacks."""
+        by_handle = {t.handle.lower(): t for t in self.targets}
+        for n, item in enumerate(items, 1):
+            t = by_handle[item["target"].lower()]
+            text = normalize_category(item["input"])
+            reason = input_reason(text, t, self.targets)
+            if reason is not None:
+                self.log(f"  skip {text!r} for {t.handle}: {reason}")
+                continue
+            res = self.resolve(text)
+            if res.source == "skipped" and res.error == "budget spent":
+                self.log(f"budget of {self.budget} oracle calls spent")
+                break
+            kind, hit = match_verdict(res.verdict, self.targets) if res.verdict else ("no", None)
+            row = Row(n, t, text, item.get("why", ""), res, kind, hit)
+            self.rows.append(row)
+            self._write(row)
+            self.log(f"  [{self.calls}/{self.budget}] {t.handle}: {text!r} -> {res.verdict or res.error!r} "
+                     f"({res.source}; {f'{kind} {hit.handle}' if hit else 'no'})")
+        return self.rows
+
 
 def ranked_matches(rows: list[Row]) -> list[Row]:
     """Striking, simple, beautiful first: exact before prefix, fewer words, shorter,
@@ -479,6 +502,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--state", default="state", help="publisher-state checkout (verdicts.csv, reverse_oracle/)")
     p.add_argument("--oracle-source", help="the product's app dir (prompts.py, settings.py, oracle.py); read only")
     p.add_argument("--replay", help="candidates.json of an earlier oracle-reverse run instead of generating")
+    p.add_argument("--ordered", help="JSON list of {input, target, why} written by a person or agent, asked in "
+                                     "order; the forward oracle call is the ground truth")
+    p.add_argument("--author", default="", help="who wrote the --ordered list (recorded)")
     p.add_argument("--template", action="append", help="reverse question, {winner} = the target's first alias")
     p.add_argument("--per-target", type=int, default=2, help="reverse questions asked per target")
     p.add_argument("--generator-calls", type=int, default=200, help="max model calls for the generator")
@@ -499,6 +525,19 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     run_id = a.run_id or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%MZ")
 
+    if a.ordered:
+        items = json.loads(Path(a.ordered).read_text(encoding="utf-8"))
+        meta = {"generator": "ordered list", "author": a.author, "file": a.ordered, "items": len(items)}
+        print(f"targets: {len(targets)}; budget: {a.budget} oracle calls; ordered list of {len(items)} by "
+              f"{a.author or 'unknown'}")
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / f"{run_id}-candidates.json").write_text(
+            json.dumps({**meta, "candidates": items}, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+        settings = Settings.from_env()
+        oracle = LiveOracle(settings.oracle_url, min_interval_s=settings.oracle_min_interval_s,
+                            rate_limit_wait_s=settings.oracle_rate_limit_wait_s) if a.live else None
+        run = Run(targets, store, folder, oracle, budget=a.budget, freeze=a.freeze, run_id=run_id)
+        return _report(run, run.execute_ordered(items), folder, run_id, a)
     if a.replay:
         saved = json.loads(Path(a.replay).read_text(encoding="utf-8"))
         gen: Generator = ReplayGenerator(saved)
@@ -535,7 +574,10 @@ def main(argv: list[str] | None = None) -> int:
     oracle = LiveOracle(settings.oracle_url, min_interval_s=settings.oracle_min_interval_s,
                         rate_limit_wait_s=settings.oracle_rate_limit_wait_s) if a.live else None
     run = Run(targets, store, folder, oracle, budget=a.budget, freeze=a.freeze, run_id=run_id)
-    rows = run.execute(candidates)
+    return _report(run, run.execute(candidates), folder, run_id, a)
+
+
+def _report(run: Run, rows: list[Row], folder: Path, run_id: str, a: argparse.Namespace) -> int:
     ranked = ranked_matches(rows)
     sites = {r.matched.handle: site_links_handle(r.matched) for r in ranked} if a.check_sites else {}
     write_matches(folder / f"{run_id}-matches.csv", ranked, sites)
