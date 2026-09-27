@@ -19,6 +19,9 @@ on:
         description: Really post (Buffer)
         type: boolean
         default: false
+  pull_request:  # TEMPORARY: add the @visitjapan.us mention to the scheduled travel post
+    paths:
+      - queue/manual/2026-09-27-ig-travel.csv
 
 permissions:
   contents: write
@@ -32,7 +35,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       FILE: ${{ inputs.file || 'queue/manual/2026-09-27-ig-travel.csv' }}
-      LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
+      LIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.live) || github.event_name == 'pull_request' }}  # TEMPORARY
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
       PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
       PUBLISHER_IG_CAPTION: ${{ vars.PUBLISHER_IG_CAPTION }}
