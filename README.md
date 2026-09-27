@@ -88,10 +88,11 @@ the older X/LinkedIn path and stays as it was.
 numbers to the `publisher-state` branch, read-only: it never logs in, drives a browser, or posts.
 
 - `metrics/posts_metrics.csv`: `ts_utc, network, post_id, url, input, verdict, slug, posted_at,
-  views, likes, comments, shares, saves, source, join`. `slug` is the `posts.csv` job id.
+  format, views, likes, comments, shares, saves, source, join`. `slug` is the `posts.csv` job id;
+  `format` (video, text, image) comes from `posts.csv`, blank legacy rows being videos.
 - `metrics/accounts.csv`: `ts_utc, network, handle, followers, likes_total, posts, source, note`.
 - `metrics/summary.md`: top posts by views and by engagement rate per network, last 24h and
-  7d, and follower deltas.
+  7d, follower deltas, and the X format A/B (video vs text) over 7 days.
 - Sources: Buffer post metrics once a day when the key exposes them (trusted only once
   Buffer has refreshed them; its default 0s are ignored); TikTok's public profile, embed
   profile, and video pages; X's public embed endpoint (likes, replies). Instagram's public

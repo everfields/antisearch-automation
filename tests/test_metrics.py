@@ -211,3 +211,29 @@ def test_snapshots_append_and_the_summary_shows_gaps_and_deltas(tmp_path):
     ig = text.split("## instagram")[1].split("## x")[0]
     assert "1 published post(s) have no numbers yet" in ig and "`restaurant in barcelona` → disfrutar | – | –" in ig
     assert "| 0 | 0 | 0 |" not in ig  # never a silent zero
+
+
+def test_format_is_carried_and_x_is_compared_per_format(tmp_path):
+    import csv
+
+    state = state_dir(tmp_path)
+    rows_in = list(csv.DictReader(POSTS.splitlines()))
+    rows_in.append({"job_id": "p-kagi", "network": "x", "status": "published", "clip_id": "c9", "verdict": "kagi",
+                    "remote_id": "b-x-9", "url": "https://twitter.com/antisearch_ai/status/2103988085931327521",
+                    "detail": "", "at": "2026-09-27T13:07:00+00:00", "category": "search engine",
+                    "caption": "search engine\nkagi", "format": "text"})
+    with (state / "posts.csv").open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=[*rows_in[0].keys(), "caption", "format"])
+        w.writeheader()
+        w.writerows(rows_in)
+    tweet = json.dumps({"id_str": "2103988085931327521", "favorite_count": 5, "conversation_count": 2,
+                        "created_at": "2026-09-27T13:07:10.000Z", "user": {"screen_name": "antisearch_ai"}})
+    col = collect(state, {}, now=NOW + timedelta(hours=4), http=FakeHttp(pages(**{
+        "https://cdn.syndication.twimg.com/tweet-result?id=2103988085931327521": (200, tweet)})))
+    rows = {r["post_id"]: r for r in read_csv(state / "metrics" / "posts_metrics.csv")}
+    assert rows["2103988085931327521"]["format"] == "text"
+    assert rows["2103988085931327520"]["format"] == "video"  # blank legacy row: every X post before the A/B was a video
+    assert rows[VID_A]["format"] == "video"
+    table = summary(state, NOW + timedelta(hours=4)).split("| X format A/B")[1]
+    assert "| video | 1 | – | 2.0 | 1.0 | – |" in table and "| text | 1 | – | 5.0 | 2.0 | – |" in table
+    assert col.problems  # Instagram still has no source here

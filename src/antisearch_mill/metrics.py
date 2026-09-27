@@ -33,7 +33,7 @@ from pathlib import Path
 from typing import Callable, Mapping
 
 NETWORKS = ("tiktok", "instagram", "x")
-POST_FIELDS = ("ts_utc", "network", "post_id", "url", "input", "verdict", "slug", "posted_at",
+POST_FIELDS = ("ts_utc", "network", "post_id", "url", "input", "verdict", "slug", "posted_at", "format",
                "views", "likes", "comments", "shares", "saves", "source", "join")
 ACCOUNT_FIELDS = ("ts_utc", "network", "handle", "followers", "likes_total", "posts", "source", "note")
 COUNTS = ("views", "likes", "comments", "shares", "saves")
@@ -69,6 +69,7 @@ class PostRef:
     input: str
     verdict: str
     at: datetime
+    format: str = "video"  # posts.csv `format`; blank rows predate it and were all videos
 
 
 @dataclass
@@ -149,7 +150,7 @@ def published_posts(posts_csv: Path, networks: tuple[str, ...] = NETWORKS) -> li
             continue
         url = row.get("url", "")
         refs.append(PostRef(slug, net, row.get("remote_id", ""), "" if url.startswith("buffer:") else url,
-                            row.get("category", ""), row.get("verdict", ""), at))
+                            row.get("category", ""), row.get("verdict", ""), at, row.get("format") or "video"))
     return sorted(refs, key=lambda r: r.at)
 
 
@@ -497,7 +498,7 @@ def post_row(ts: datetime, m: PostMetrics) -> dict:
     return {
         "ts_utc": _iso(ts), "network": m.network, "post_id": m.post_id, "url": m.url or (ref.url if ref else ""),
         "input": ref.input if ref else "", "verdict": ref.verdict if ref else "", "slug": ref.slug if ref else "",
-        "posted_at": _iso(m.posted_at or (ref.at if ref else None)),
+        "posted_at": _iso(m.posted_at or (ref.at if ref else None)), "format": ref.format if ref else "",
         **{k: getattr(m, k) for k in COUNTS}, "source": m.source, "join": m.join,
     }
 
@@ -606,6 +607,24 @@ def _cell(value) -> str:
     return "–" if value in (None, "") else str(value)
 
 
+def _mean(values: list[int]) -> str:
+    return f"{sum(values) / len(values):.1f}" if values else "–"
+
+
+def _format_table(rows: list[dict]) -> list[str]:
+    """X format A/B: means over posts that have the number (a blank is not averaged in as 0)."""
+    out = ["| X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |",
+           "| --- | --- | --- | --- | --- | --- |"]
+    for fmt in ("video", "text"):
+        mine = [r for r in rows if (r.get("format") or "video") == fmt]
+        nums = {k: [v for r in mine if (v := _int(r.get(k))) is not None] for k in ("views", "likes", "comments")}
+        rates = [e for r in mine if (e := _engagement(r)) is not None]
+        rate = f"{sum(rates) / len(rates):.1%}" if rates else "–"
+        out.append(f"| {fmt} | {len(mine)} | {_mean(nums['views'])} | {_mean(nums['likes'])} | "
+                   f"{_mean(nums['comments'])} | {rate} |")
+    return out
+
+
 def _follower_delta(rows: list[dict], net: str, now: datetime, back: timedelta) -> str:
     series = [(d, _int(r["followers"])) for r in rows if r["network"] == net
               and (d := _parse_dt(r["ts_utc"])) and _int(r["followers"]) is not None]
@@ -629,7 +648,7 @@ def summary(state: Path, now: datetime) -> str:
         if ref.slug not in measured:
             latest[(ref.network, f"unmeasured:{ref.slug}")] = {
                 "network": ref.network, "post_id": "", "input": ref.input, "verdict": ref.verdict,
-                "slug": ref.slug, "posted_at": _iso(ref.at), "views": "", "likes": "", "comments": "",
+                "slug": ref.slug, "posted_at": _iso(ref.at), "format": ref.format, "views": "", "likes": "", "comments": "",
                 "shares": "", "saves": "", "source": "no numbers yet"}
     lines = [f"# Social metrics — {now.astimezone(timezone.utc):%Y-%m-%d %H:%M} UTC", "",
              "Latest snapshot per post. `–` = not available from any source (never a silent 0).", ""]
@@ -666,5 +685,7 @@ def summary(state: Path, now: datetime) -> str:
             if ranked:
                 lines += ["", "| top by engagement rate | eng. rate | views |", "| --- | --- | --- |"]
                 lines += [f"| {_label(r)} | {_engagement(r):.1%} | {r['views']} |" for r in ranked]
+            if net == "x" and title == "last 7d":
+                lines += ["", *_format_table(recent)]
         lines.append("")
     return "\n".join(lines) + "\n"
