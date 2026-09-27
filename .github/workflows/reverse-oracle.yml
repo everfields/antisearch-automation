@@ -9,7 +9,7 @@ name: reverse-oracle
 #   Manual: Actions -> reverse-oracle -> Run workflow (dry-run unless `live` is ticked).
 
 on:
-  pull_request:  # TEMPORARY: one live run as run 2026-09-27-r1, removed right after
+  pull_request:  # TEMPORARY: one live run as run 2026-09-27-r1 (retried: the generator reply was unreadable), removed right after
     paths: [.github/workflows/reverse-oracle.yml]
   workflow_dispatch:
     inputs:

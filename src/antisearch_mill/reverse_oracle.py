@@ -190,9 +190,8 @@ def generator_messages(targets: list[Target], per_target: int, examples: list[tu
 
 def parse_candidates(text: str) -> dict[str, list[dict]]:
     text = text.strip()
-    if text.startswith("```"):
-        text = re.sub(r"^```[a-z]*\s*|\s*```$", "", text)
-    data = json.loads(text)
+    start, end = text.find("{"), text.rfind("}")
+    data = json.loads(text[start:end + 1] if 0 <= start < end else text)
     out: dict[str, list[dict]] = {}
     for item in data.get("targets", []):
         handle = str(item.get("handle", "")).strip().lower()
@@ -234,7 +233,13 @@ class ChatGenerator:
                 continue
             if resp.status_code != 200:
                 raise RuntimeError(f"generator http {resp.status_code}: {resp.text[:200]}")
-            return resp.json()["choices"][0]["message"]["content"]
+            try:
+                content = resp.json()["choices"][0]["message"]["content"] or ""
+            except (ValueError, KeyError, IndexError, TypeError) as exc:
+                raise RuntimeError(f"generator reply is not a chat completion: {resp.text[:300]!r}") from exc
+            if not content.strip():
+                raise RuntimeError(f"generator reply is empty: {resp.text[:300]!r}")
+            return content
         raise RuntimeError("generator kept failing")
 
     def propose(self, targets: list[Target], per_target: int) -> dict[str, list[dict]]:
@@ -244,9 +249,13 @@ class ChatGenerator:
             if i:
                 self._sleep(self.pause_s)
             messages = generator_messages(batch, per_target, self.examples, self.oracle_prompt)
+            content = ""
             try:
-                got = parse_candidates(self._call(messages))
-            except (RuntimeError, ValueError, KeyError, requests.RequestException) as exc:
+                content = self._call(messages)
+                got = parse_candidates(content)
+            except (RuntimeError, ValueError, KeyError, AttributeError, requests.RequestException) as exc:
+                if content:
+                    exc = f"{exc}; reply starts {content[:300]!r}"
                 self.log(f"  generator batch {i // self.batch_size + 1} failed: {exc}")
                 continue
             for t in batch:
