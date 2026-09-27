@@ -3,7 +3,6 @@
 # Plain lines fill 3 of every 4 X posts, in file order. ` | rotate` lines fill the fourth
 # (they replace the shared unowned words on X). Each input posts once, ever.
 # Main line: tools.
-ai model
 search engine
 programming language
 phone

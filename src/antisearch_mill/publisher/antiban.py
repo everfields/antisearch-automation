@@ -1,16 +1,14 @@
 """Anti-ban limits for the publisher. The clip itself does not change.
 
-Warm-up, jitter, dedupe, caption hygiene, and the 72h brake live here.
+Warm-up, dedupe, caption hygiene, and the 72h brake live here (the slot jitter is `jitter.py`).
 `docs/ANTI_BAN.md` is the rule this module enforces. X is not posted.
 """
 
 from __future__ import annotations
 
 import csv
-import hashlib
 import json
 import os
-import random
 import re
 from datetime import date, datetime, timedelta, timezone
 from difflib import SequenceMatcher
@@ -20,7 +18,6 @@ from .guard import PostLog
 
 RAMP_DAYS = 14
 RAMP_START = 1
-JITTER_MINUTES = 9
 INPUT_COOLDOWN_DAYS = 30
 BRAKE_HOURS = 72
 REACH_FLOOR = 100
@@ -99,33 +96,6 @@ def daily_slot_count(
     if braked:
         n = n // 2
     return max(0, n)
-
-
-def jitter_minutes(network: str, slot: datetime, *, span: int = JITTER_MINUTES) -> int:
-    """Seeded offset in [-span, +span]. The resulting clock minute is never :00 or :30.
-
-    Stable for the same network and slot, so a retry in the same window agrees.
-    """
-    seed = int.from_bytes(hashlib.sha256(f"{network}|{slot.isoformat()}".encode()).digest()[:8], "big")
-    rng = random.Random(seed)
-    for _ in range(40):
-        off = rng.randint(-span, span)
-        if (slot.minute + off) % 60 not in (0, 30):
-            return off
-    return 1
-
-
-def upload_wait_seconds(slot: datetime, offset: int, now: datetime, *, span: int = JITTER_MINUTES) -> float:
-    """Seconds to wait so the upload hits `slot + offset`, capped at `span` minutes.
-
-    A negative offset is already past when the hourly runner wakes, so the wait is 0
-    and the post goes out on that wake (still off :00 and :30). A positive offset
-    waits, up to `span` minutes, inside the same run.
-    """
-    delta = (slot + timedelta(minutes=offset) - now).total_seconds()
-    if delta <= 0:
-        return 0.0
-    return min(delta, span * 60.0)
 
 
 def _norm_text(text: str) -> str:

@@ -53,13 +53,19 @@ gratuitously repetitive messages are not allowed.
    out. `PUBLISHER_RAMP=off` posts the full cadence immediately. The `reach`
    cadence (Instagram and TikTok at 4 from day one) leaves the ramp off
    unless `PUBLISHER_RAMP` is set; `on` turns the warm-up back on.
-2. **Jitter.** Each slot gets a seeded offset of ±9 minutes. The resulting
-   minute is never :00 or :30. The same slot keeps the same offset, so a
-   retry agrees. The cron wakes every 15 minutes; slots stay on :07. If the
-   offset is still ahead, that one post waits (at most 9 minutes) inside the
-   job. If the offset is already past, the post goes out on the wake.
-   `PUBLISHER_JITTER=off` disables the wait. The wait is billed Actions time;
-   see `docs/COST_PER_VIDEO.md`.
+2. **Jitter** (`publisher/jitter.py`). Each network, slot and posting day gets
+   an offset of 0-40 minutes after its :07 slot, seeded by date + network +
+   slot, so a rerun computes the same one. The slot opens at that minute,
+   never before. One day's offsets are drawn for all networks together, so no
+   two networks land on the same minute, and none lands on :30. Caps and
+   windows are unchanged: a slot stays open until the next one (at least 3h).
+   The cron wakes every 15 minutes, so a run takes a slot opening before the
+   next wake and waits for its minute inside the job (at most 15 minutes);
+   two posts of one run are at least a minute apart. Posts scheduled in
+   Buffer for later (manual rows, LinkedIn's local morning) get the same kind
+   of offset on their time; a manual row pins an exact time with
+   `YYYY-MM-DD HH:MM exact`. `PUBLISHER_JITTER=off` turns it all off. The
+   wait is billed Actions time; see `docs/COST_PER_VIDEO.md`.
 3. **Dedupe.** On one network, the same clip id is not posted twice and the
    same non-empty caption is not posted twice. An empty caption is the
    video-only ritual and may repeat. An input is not repeated within

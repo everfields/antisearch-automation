@@ -35,7 +35,6 @@ tablet
 3d printer
 drone
 electric car
-ai assistant
 startup accelerator
 venture capital firm
 tech conference

@@ -68,6 +68,7 @@ LIVE_ENV = {
     "FAKE_TOKEN": "t",
     "PUBLISHER_LIVE_NETWORKS": "bluesky,mastodon,tiktok",
     "PUBLISHER_RAMP": "off",  # the cap tests cover the target cadence; ramp has its own tests
+    "PUBLISHER_JITTER": "off",  # exact slot minutes here; the jitter has its own tests (test_jitter.py)
 }
 
 

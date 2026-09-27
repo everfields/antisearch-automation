@@ -74,6 +74,17 @@ HANDLE = re.compile(r"^@[A-Za-z0-9][A-Za-z0-9._-]{0,99}$")
 HHMM = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 SERIAL = re.compile(r"(^|\s)(day|part|episode|ep|no\.?|vol\.?|#)\s*\d+|\b\d+\s*/\s*\d+\b", re.I)
 ENGLISH_CHARS = re.compile(r"^[a-z0-9 .,'&+\-/]+$")
+# Carlos, 2026-09-27: the oracle is self-biased on AI-category inputs (`ai model` -> gpt-5 was
+# deleted from X). Until the fix ships in the_best, no AI-category input goes out on any lane.
+# `PUBLISHER_AI_INPUTS=on` lifts the block once it has.
+AI_CATEGORY = re.compile(
+    r"\b(a\.?i|artificial intelligence|genai|generative ai|llms?|large language models?|language models?"
+    r"|foundation models?|chat ?bots?|chatgpt|gpt(-?\d+(\.\d+)?)?|machine learning|deep learning"
+    r"|neural (net|network)s?|(coding|code|programming) (agent|assistant|copilot)s?|copilots?"
+    r"|openai|anthropic|deepmind|prompt engineering|agi|superintelligence|(virtual|voice) assistants?"
+    r"|image generators?)\b",
+    re.I,
+)
 
 STAND_IN_FOR: dict[str, str] = {}  # Bluesky is its own channel. X via Buffer does not freeze it.
 HOLD_FOR_TAG = "@?"  # queue caption: freeze the verdict, post nothing until a human sets the tag
@@ -83,7 +94,8 @@ NO_CAPTION = "-"  # queue caption: explicitly none (e.g. after a hold, when no v
 PENDING = "pending"
 FAILED = "failed"
 WITHHELD = "withheld"  # frozen, not posted: a minor or a private individual (sensitive)
-DONE = ("published", "drafted", "scheduled", WITHHELD)
+DELETED = "deleted"  # taken down after it went out: never reposted, input stays used, no metrics
+DONE = ("published", "drafted", "scheduled", WITHHELD, DELETED)
 SCHEDULED_STATES = ("scheduled",)
 
 
@@ -120,6 +132,8 @@ def input_problem(category: str, env: dict[str, str]) -> str | None:
         return "input starts with a ranking word"
     if SERIAL.search(category):
         return "numbered / serial inputs are not allowed"
+    if AI_CATEGORY.search(category) and (env.get("PUBLISHER_AI_INPUTS") or "").strip().lower() != "on":
+        return "AI-category inputs are blocked until the oracle's self-bias fix ships (PUBLISHER_AI_INPUTS)"
     language = (env.get("PUBLISHER_LANGUAGE") or "en").strip().lower()
     if language == "en" and not ENGLISH_CHARS.match(category):
         return "inputs are English by default (PUBLISHER_LANGUAGE=en): plain ascii words only"
@@ -216,19 +230,36 @@ def _slot_deadline(times: list[datetime], index: int) -> datetime:
     return floor
 
 
-def open_now(moment: datetime, slots: list[time], used: int) -> int:
+def open_now(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,
+             lookahead: timedelta = timedelta(0)) -> int:
     """Unfilled slots that have come and have not expired.
 
     Posts fill the earliest slots first. A slot that has expired is not owed, so a
     down stretch cannot dump every missed slot once the cron wakes. The runner
     still posts at most one of these per network per run, and honors MIN_GAP.
+    With `offsets` (the slot jitter) a slot comes at its jittered time, counted from
+    `moment + lookahead` so a run can wait for one due before the next wake; the
+    deadline is unchanged.
     """
     times = slot_times(posting_day(moment), slots)
-    passed = [s for s in times if s <= moment]
+    opens = [s + (offsets[i] if offsets else timedelta(0)) for i, s in enumerate(times)]
+    passed = [s for s, o in zip(times, opens) if o <= moment + lookahead]
     if len(passed) <= used:
         return 0
     deadline = {s: _slot_deadline(times, i) for i, s in enumerate(times)}
     return sum(1 for s in passed[used:] if moment < deadline[s])
+
+
+def serving_open(moment: datetime, slots: list[time], used: int, offsets: list[timedelta],
+                 lookahead: timedelta = timedelta(0)) -> datetime | None:
+    """When the slot a post would fill now opens (its jittered time), or None if none is open."""
+    times = slot_times(posting_day(moment), slots)
+    opens = [s + offsets[i] for i, s in enumerate(times)]
+    passed = [i for i, o in enumerate(opens) if o <= moment + lookahead]
+    for i in passed[used:]:
+        if moment < _slot_deadline(times, i):
+            return opens[i]
+    return None
 
 
 def next_slot(moment: datetime, slots: list[time]) -> datetime | None:
@@ -244,7 +275,7 @@ def next_slot(moment: datetime, slots: list[time]) -> datetime | None:
 class PostRow:
     job_id: str
     network: str
-    status: str  # pending | published | drafted | failed
+    status: str  # pending | published | drafted | scheduled | failed | withheld | deleted
     clip_id: str = ""
     verdict: str = ""
     remote_id: str = ""

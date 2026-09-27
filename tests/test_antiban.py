@@ -11,8 +11,8 @@ import pytest
 
 from antisearch_mill.ledger import Ledger
 from antisearch_mill.publisher.antiban import (
-    BRAKE_HOURS, INPUT_COOLDOWN_DAYS, JITTER_MINUTES, AntibanState, daily_slot_count, is_limit_error,
-    jitter_minutes, ramp_allowance, reach_brakes, sharp_drop, upload_wait_seconds,
+    BRAKE_HOURS, INPUT_COOLDOWN_DAYS, AntibanState, daily_slot_count, is_limit_error,
+    ramp_allowance, reach_brakes, sharp_drop,
 )
 from antisearch_mill.publisher.fresh import remux_args, remux_fresh
 from antisearch_mill.publisher.guard import PostLog, PostRow
@@ -70,23 +70,6 @@ def test_new_account_posts_one_then_stops_for_the_day(ledger, log):
     assert [o.status for o in second if o.status != "skipped_already_posted"] == ["skipped_network_daily_cap"]
     state = AntibanState(log.path.parent / "antiban.json")
     assert state.first_post["bluesky"] == DAY.isoformat()
-
-
-def test_jitter_stays_off_the_hour_and_the_half_hour_and_is_stable():
-    slot = datetime(2026, 9, 25, 9, 7, tzinfo=ET)
-    seen = set()
-    for net in ("bluesky", "tiktok", "instagram", "linkedin"):
-        for day in range(1, 40):
-            when = slot.replace(day=day) if day <= 28 else slot + timedelta(days=day)
-            off = jitter_minutes(net, when)
-            assert -JITTER_MINUTES <= off <= JITTER_MINUTES
-            assert (when.minute + off) % 60 not in (0, 30)
-            assert jitter_minutes(net, when) == off
-            seen.add(off)
-    assert len(seen) > 1
-    ahead = upload_wait_seconds(slot, 6, slot)
-    assert ahead == 6 * 60
-    assert upload_wait_seconds(slot, -4, slot + timedelta(minutes=1)) == 0
 
 
 def test_same_clip_and_same_caption_do_not_post_twice(ledger, log):

@@ -11,9 +11,17 @@ trial. The trial clock restarts on the day volume posting goes live (the first d
 counted from it.
 
 **Anti-ban.** New accounts ramp from 1 post/day to the cadence above over 14 days
-(configurable), slots jitter off :00 and :30, and a spam or rate-limit response
+(configurable), each slot goes out 0-40 minutes after its :07 (seeded, never two
+networks on one minute), and a spam or rate-limit response
 halves that network for 72h. The rules and the switches are in
 [ANTI_BAN.md](ANTI_BAN.md). X is not auto-posted.
+
+**AI-input block (Carlos, 2026-09-27).** The oracle is self-biased on AI-category
+inputs (`ai model` → gpt-5 was deleted from X; `posts.csv` marks it `deleted`, so it is
+never reposted). Until the fix ships in `the_best`, no AI-category input (ai model, llm,
+chatbot, ai company, ai app, coding agent and the like) goes out on any pool, queue,
+trend or reply lane; `input_problem` rejects them. Set `PUBLISHER_AI_INPUTS=on` once
+the fix is live.
 
 **English lock (Carlos).** All public text is English by default until he says
 otherwise:
