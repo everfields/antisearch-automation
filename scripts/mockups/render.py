@@ -5,9 +5,12 @@
     python scripts/mockups/render.py --verdicts /tmp/verdicts.csv --out /opt/cursor/artifacts/creative
 
 Writes, each with a key-frame sheet:
-  0-current-<input>.mp4        the current clip (the main creative), for reference
-  1-short-score-<input>.mp4    the current picture plus the score: the music axis only
-  2-medium-monolith-<input>.mp4  the monolith: elaborate motion plus the score (8.5 s)
+  0-current-<input>.mp4            the current clip (the main creative), for reference
+  1-short-score-<input>.mp4        the current picture plus the template score: the music axis only
+  2-medium-monolith-<input>.mp4    the monolith: elaborate motion plus the score
+  3-computation-<input>.mp4        the monolith's zoom, and the wait shown as a huge model computing
+One deterministic template for every verdict: nothing is authored per verdict, and no model is
+called (the verdicts come frozen from publisher-state). The same code renders every input.
 Mockup tooling only: nothing in the pipeline imports it.
 """
 
@@ -25,9 +28,12 @@ from antisearch_mill.phone import PhoneSpec, geometry  # noqa: E402
 from antisearch_mill.publisher.verdicts import VerdictStore  # noqa: E402
 from antisearch_mill.render import Layout, render_clip  # noqa: E402
 from antisearch_mill.timeline import build_timeline, wait_frames  # noqa: E402
+from computation import Computation  # noqa: E402
 from monolith import add_score, render_motion  # noqa: E402
 
-MOCKUPS = (("travel", ("0", "1", "2")),)
+# travel is the showcase; zoo (5.5 s) and restaurant in barcelona (6.2 s) prove the same template
+# adapts to other durations and verdicts with no change.
+MOCKUPS = (("travel", ("0", "1", "2", "3")), ("zoo", ("2", "3")), ("restaurant in barcelona", ("2",)))
 
 
 def sheet(clip: Path, dst: Path, frames: int = 10) -> None:
@@ -48,6 +54,7 @@ def main(argv=None) -> int:
     lay, big = Layout(), Layout(width=2160, height=3840)
     phone = PhoneSpec(scale=0.80, background="stone")  # the Instagram/TikTok template, as in production
     for category, which in MOCKUPS:
+        slug = category.replace(" ", "-")
         frozen = store.get(category)
         if frozen is None or frozen.source != "live":
             print(f"{category}: no live frozen verdict", file=sys.stderr)
@@ -59,18 +66,25 @@ def main(argv=None) -> int:
             render_clip(tl, classic, font_path=font, layout=lay, phone=phone, keys="tap")
             made = []
             if "0" in which:
-                made.append(out / f"0-current-{category}.mp4")
+                made.append(out / f"0-current-{slug}.mp4")
                 made[-1].write_bytes(classic.read_bytes())
             if "1" in which:
-                made.append(out / f"1-short-score-{category}.mp4")
+                made.append(out / f"1-short-score-{slug}.mp4")
                 add_score(classic, tl, made[-1], category=category, verdict=frozen.verdict)
-            if "2" in which:
+            if "2" in which or "3" in which:
                 source = Path(td) / "source2x.mp4"
                 render_clip(tl, source, font_path=font, layout=big, phone=phone)
                 g = geometry(phone, big.width, big.height)
-                made.append(out / f"2-medium-monolith-{category}.mp4")
-                render_motion(classic, source, (g.screen_x, g.screen_y, g.screen_w, g.screen_h), tl, made[-1],
-                              category=category, verdict=frozen.verdict, font_path=font, layout=lay)
+                screen = (g.screen_x, g.screen_y, g.screen_w, g.screen_h)
+            if "2" in which:
+                made.append(out / f"2-medium-monolith-{slug}.mp4")
+                render_motion(classic, source, screen, tl, made[-1], category=category, verdict=frozen.verdict,
+                              font_path=font, layout=lay)
+            if "3" in which:
+                made.append(out / f"3-computation-{slug}.mp4")
+                render_motion(classic, source, screen, tl, made[-1], category=category, verdict=frozen.verdict,
+                              font_path=font, layout=lay, ticks=True,
+                              overlay=lambda mono, c=category: Computation(mono, category=c, font_path=font))
             for clip in made:
                 sheet(clip, clip.with_name(clip.stem + "-keyframes.png"))
                 print(f"{clip}  '{category}' -> '{frozen.verdict}'")

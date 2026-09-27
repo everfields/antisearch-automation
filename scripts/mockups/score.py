@@ -3,9 +3,10 @@
 No samples, loops, soundfont or stock track, so there is nothing to license and nothing to
 pay for. The tempo is fitted so the verdict lands on a beat. A quiet A-minor piano ostinato
 plays under the typing. Through the wait the harmony suspends (strings on E sus4), with a low
-pulse on each beat and a high repeated E like held breath. On the verdict comes a C major
-resolution in piano and strings with a tintinnabuli bell. The end returns to the opening A,
-so a loop joins. Same input, same audio: every random draw is seeded from the input and verdict.
+pulse on each beat and a high repeated E like held breath. On the verdict comes a plain C
+major triad (the tonic) in piano and strings with a tintinnabuli bell, then one release to
+silence exactly at the clip's end (silence is also where a loop joins). One template for
+every clip: see `template_score`. Same input, same audio: every random draw is seeded from the input and verdict.
 Mockup tooling only: nothing in the pipeline imports this.
 """
 
@@ -65,6 +66,14 @@ class Bed:
         g = 10 ** (peak_db / 20) / peak
         self.l = [s * g for s in self.l]
         self.r = [s * g for s in self.r]
+
+    def release(self, seconds: float) -> None:
+        """A cosine release that reaches exact silence on the last sample."""
+        n = min(self.len, _n(seconds))
+        for k in range(n):
+            g = 0.5 - 0.5 * math.cos(math.pi * k / n)
+            self.l[self.len - 1 - k] *= g
+            self.r[self.len - 1 - k] *= g
 
     def fade_out(self, seconds: float) -> None:
         n = min(self.len, _n(seconds))
@@ -202,51 +211,75 @@ def fit_tempo(start_s: float, verdict_s: float, lo: float = 62.0, hi: float = 80
     return min(fits, key=lambda b: abs(b - 70)) if fits else min(hi, max(lo, 70.0))
 
 
-def monolith_score(seed: str, total_s: float, start_s: float, submit_s: float, verdict_s: float,
-                   plate_s: float) -> Bed:
-    """The motion piece's score: ostinato (typing), suspension and pulse (wait), resolution on the
-    verdict downbeat, a return to the opening A before the loop."""
+def tick(rng: random.Random) -> list[float]:
+    """A tiny, bright data tick: a few milliseconds of high-passed noise."""
+    n = _n(0.006)
+    out, prev_x, prev_y = [0.0] * n, 0.0, 0.0
+    for i in range(n):
+        x = rng.uniform(-1, 1)
+        y = 0.9 * (prev_y + x - prev_x)
+        prev_x, prev_y = x, y
+        out[i] = y * (1 - i / n)
+    return out
+
+
+def template_score(seed: str, total_s: float, start_s: float, submit_s: float, verdict_s: float, *,
+                   ticks: bool = False) -> Bed:
+    """ONE pre-composed score for every clip, fitted to the clip's own timeline.
+
+    The beat grid is anchored on the verdict, so the verdict is always a downbeat, whatever the
+    duration; the tempo is chosen in 62-80 bpm to fit. The ostinato loops over however long the
+    typing lasts; the wait's pulse is trimmed to the wait; the resolution (C major) sounds on the
+    verdict; and one release, sized from the time left, brings everything to silence on the clip's
+    last sample. `ticks` adds a soft data texture through the wait (the computation mockup)."""
     bed = Bed(total_s)
-    rng = _rng(f"monolith|{seed}")
-    bpm = fit_tempo(start_s, verdict_s)
-    beat = 60 / bpm
+    rng = _rng(f"template|{seed}")
+    beat = 60 / fit_tempo(start_s, verdict_s)
     eighth = beat / 2
-    # typing: a quiet A minor (add9) ostinato, Glass-like, in the middle register
+    # typing: a quiet A minor (add9) ostinato, Glass-like, on the eighth grid that ends on the verdict
     pattern = (57, 64, 71, 72, 64, 71)
-    t, k = start_s, 0
-    while t < submit_s - 0.02:
+    m = math.floor((verdict_s - start_s) / eighth + 1e-9)
+    k = 0
+    while m > 0:
+        t = verdict_s - m * eighth
+        if t >= submit_s - 0.02:
+            break
         bed.add(t, piano(midi(pattern[k % len(pattern)]), 1.4, soft=0.62), 0.16 + 0.03 * (k % 3 == 0),
                 -0.3 + 0.6 * ((k % 3) / 2))
-        t += eighth
         k += 1
+        m -= 1
     bed.add(start_s, piano(midi(45), 3.0, soft=0.55), 0.26, -0.15)
     # the wait: strings on E sus4, a low pulse on each beat, a high E repeated like held breath
     wait = max(0.3, verdict_s - submit_s)
     for j, note in enumerate((52, 57, 59)):
         bed.add(submit_s, strings(midi(note), wait + 0.35, attack=wait * 0.8, release=0.4, rng=rng),
                 0.32 + 0.06 * j, -0.4 + 0.4 * j)
-    first = math.ceil((submit_s - start_s) / beat - 1e-6)
-    b = first
-    while start_s + b * beat < verdict_s - 0.02:
-        tb = start_s + b * beat
-        p = (tb - submit_s) / wait
-        bed.add(tb, pulse(), 0.28 + 0.3 * p)
-        bed.add(tb, piano(midi(88), 0.9, soft=0.8), 0.05 + 0.05 * p, 0.35)
-        b += 1
-    # the verdict, on the downbeat: C major (add9) in piano and strings, a bell above
+    b = math.floor(wait / beat + 1e-9)
+    while b >= 1:
+        tb = verdict_s - b * beat
+        if tb >= submit_s - 0.02:
+            p = (tb - submit_s) / wait
+            bed.add(tb, pulse(), 0.28 + 0.3 * p)
+            bed.add(tb, piano(midi(88), 0.9, soft=0.8), 0.05 + 0.05 * p, 0.35)
+        b -= 1
+    if ticks:  # the computation: sixteenth-note data ticks, denser and brighter toward the verdict
+        q = beat / 4
+        n = math.floor((verdict_s - submit_s - 0.1) / q)
+        for j in range(n, 0, -1):
+            tq = verdict_s - j * q
+            p = (tq - submit_s) / wait
+            bed.add(tq, tick(rng), 0.04 + 0.12 * p ** 1.5, rng.uniform(-0.6, 0.6))
+    # the verdict, on the downbeat: a plain C major triad (tonic) in piano and strings, a bell above
     ring = max(0.6, total_s - verdict_s)
-    for j, note in enumerate((48, 55, 64, 74)):
+    release = min(2.2, max(0.5, 0.55 * ring))
+    for j, note in enumerate((48, 55, 60, 64)):
         bed.add(verdict_s + 0.02 * j, piano(midi(note), ring, soft=0.85), 0.34 if j else 0.4, -0.35 + 0.23 * j)
     for j, note in enumerate((48, 55, 64)):
-        bed.add(verdict_s, strings(midi(note), ring, attack=0.35, release=ring * 0.7, rng=rng), 0.3, -0.3 + 0.3 * j)
+        bed.add(verdict_s, strings(midi(note), ring + 0.2, attack=0.35, release=0.3, rng=rng), 0.3, -0.3 + 0.3 * j)
     bed.add(verdict_s, bell(midi(88), min(ring, 3.5)), 0.12, 0.25)
-    bed.add(verdict_s + beat, bell(midi(91), min(ring, 3.0)), 0.07, -0.25)
-    # the plate: the opening A returns softly, so the loop joins
-    home = plate_s + 0.6 * max(0.4, total_s - plate_s)
-    if home < total_s - 0.3:
-        bed.add(home, piano(midi(57), total_s - home, soft=0.5), 0.14, 0.0)
+    if verdict_s + beat < total_s - release:
+        bed.add(verdict_s + beat, bell(midi(91), min(ring, 3.0)), 0.07, -0.25)
     bed.room(0.34)
-    bed.fade_out(0.45)
+    bed.release(release)
     bed.normalize(-4.0)
     return bed
-

@@ -8,24 +8,52 @@ of their ranking. Everything else is a hypothesis to test, not a claim.
 
 ## Status: mockups for a later A/B (founder, 2026-09-27)
 
-**The current clip stays the main creative.** What follows is thinking plus three mockups,
+**The current clip stays the main creative.** What follows is thinking plus mockups,
 future alternatives to A/B later. Nothing is wired to publishing: no flag, no pipeline
 change. The render code is mockup tooling in `scripts/mockups/`, and a real test would add
 one switch in its own PR.
 
-All three mockups use the same input and the same frozen verdict (`travel` → `japan`, from
-the live oracle), so only the creative differs.
+The first four mockups use the same input and frozen verdict (`travel` → `japan`, from the
+live oracle), so only the creative differs. Two more verdicts of other durations show that
+it is one template (see "One template for every verdict" below).
 
 | mockup | music | length | motion | tests |
 | --- | --- | --- | --- | --- |
 | [0-current-travel.mp4](../creative/mockups/0-current-travel.mp4) | none (keys only) | short, 5.8 s | fully aseptic | the control: today's main creative |
 | [1-short-score-travel.mp4](../creative/mockups/1-short-score-travel.mp4) | the score (section 5) | short, 5.8 s | fully aseptic, the same frames | music vs no music, nothing else changed |
 | [2-medium-monolith-travel.mp4](../creative/mockups/2-medium-monolith-travel.mp4) | the score | medium, 8.6 s | elaborate: the monolith (section 4) | aseptic vs elaborate motion, and short vs medium |
+| [3-computation-travel.mp4](../creative/mockups/3-computation-travel.mp4) | the score, plus data ticks | medium, 8.6 s | the monolith's zoom, with the wait shown as the model computing (section 4b) | how much spectacle the wait can carry |
+| [2-medium-monolith-zoo.mp4](../creative/mockups/2-medium-monolith-zoo.mp4) · [2-medium-monolith-restaurant-in-barcelona.mp4](../creative/mockups/2-medium-monolith-restaurant-in-barcelona.mp4) · [3-computation-zoo.mp4](../creative/mockups/3-computation-zoo.mp4) | the same template | 8.3 s · 9.0 s · 8.3 s | the same template | that it is generic: other verdicts and durations, no change |
 
-**A/B axes for later:** music vs no music (0 vs 1); aseptic vs elaborate motion (1 vs 2);
-length short/medium (5.8 s vs 8.6 s; a long cut would come only if medium wins on completion).
+**A/B axes for later:** music vs no music (0 vs 1); aseptic vs elaborate motion (1 vs 2, and
+2 vs 3); length short/medium (5.8 s vs 8.6 s; a long cut would come only if medium wins on
+completion).
+
+**Fixed after founder feedback (2026-09-27):**
+- **Mockup 1's ending:** the score used to return to the opening A over the C major chord and was then cut by a short linear fade, so it ended on a clash. It now ends on a plain C major triad (the tonic), with one cosine release sized to the time left, reaching exact silence on the clip's last sample.
+- **Mockup 2's opening zoom:** the monolith's lit rim and the lighter room around the slab showed at the top of the frame, like a status bar, while the camera zoomed in. Until the verdict releases the camera there is now only the app's own black: no rim, no room, no reflection, no vignette, no grain. The phone crop's top strip and corners are painted in that black. The monolith appears with the zoom-out.
 
 Re-render the mockups with `python scripts/mockups/render.py --verdicts <publisher-state verdicts.csv> --out <dir>`.
+
+## One template for every verdict (the cost constraint)
+
+**Is the Japan piece the generic baseline, or custom to "japan"? It is the generic baseline.**
+- **Nothing is authored per verdict.** The same code renders every input: `render.py`, `monolith.py`, `score.py` and `computation.py`. There is no hand tuning for "japan", and no model, LLM or agent is called per post. The verdict comes frozen from `publisher-state`, as the pipeline already does.
+- **What it reads from each clip:** the timeline (when typing starts, when Enter lands, when the verdict appears, how long the clip is), the input and verdict text, and a seed hashed from them for small variations.
+- **Measured once, not per verdict:** the only fixed numbers measured by hand are properties of the app's layout (the input line at 29% of the screen, the verdict line at 38%).
+
+**How the template adapts to any duration (4.3 s, 5.5 s, 7.4 s …):**
+- **Score:** pre-composed; nothing is generated creatively per post.
+  - **Beat grid:** anchored on the verdict, so the verdict is always a downbeat. The tempo is picked in 62–80 bpm to fit.
+  - **Typing:** the ostinato loops for however long the typing lasts, counted back from the verdict.
+  - **Wait:** the pulses are trimmed to the wait.
+  - **Verdict:** the C major resolution always sounds on it.
+  - **Ending:** one release, sized from the time left, lands exactly on the clip's end. That is the "stretch, trim, loop, always resolve" rule, in code.
+- **Motion:** every beat is driven by the same timeline frames. The dive runs to the first letters; the push-in runs to Enter; the re-frame and the tightening run through the wait; the release starts on the verdict frame; the plate follows the classic clip's end.
+  - The plate's type size fits the verdict's length ("san diego zoo" is set smaller than "japan").
+  - Drift direction, sweep angle and the computation's weights are seeded from the input, so posts differ slightly within one system.
+- **Proof:** the same template on `zoo` → `san diego zoo` (a 5.5 s clip, 8.3 s mockup) and `restaurant in barcelona` → `disfrutar` (6.2 s, 9.0 s), and the computation on `zoo`, with no change.
+- **Cost:** CPU only. About 45 s per monolith render and a little more for the computation, in Python plus ffmpeg. No API calls.
 
 ## 1. What the product gives us, and what it doesn't
 
@@ -80,12 +108,42 @@ like an event, without adding words, faces or noise the brand wouldn't say.
 One light source, near-black and stone, one cold highlight.
 
 **Camera grammar, with tension and release built from camera distance:**
-1. **Frame 0, already moving:** frame 0 is dark (the loop's join). Within 0.15 s the whole monolith is there, its rim traced in light, and the camera dives from wide (1.1×) onto the input line in 0.9 s, while the first letters land. That dive is the hook.
+1. **Frame 0, already moving:** frame 0 is the app's black (the loop's join). The camera dives from wide (1.1×) onto the input line in 0.9 s, while the first letters land. That dive is the hook. The dive is clean: the app's black, the caret and the words, nothing else. The monolith, its rim and the room only appear with the zoom-out (founder feedback).
 2. **Typing:** the camera sits close on the input line (about 1.9–2×), so the typed words read large in a muted feed. The app layer is rendered at 2× for this, so the close-up never upscales text. The slab drifts slowly, and the drift direction is seeded by the input.
 3. **The wait:** as Enter lands, the camera re-frames from the input line onto the verdict line, then keeps pushing in faster as the caret blinks, and the room darkens slightly. That is held breath. The verdict then appears dead centre, in close-up.
 4. **The verdict:** the camera releases, pulling back to reveal the whole monolith. One soft diagonal light sweep crosses it and the rim light blooms. That is the exhale.
 5. **The plate:** the slab dissolves, and the verdict stands alone in large lowercase type with tracking, the input small above it in stone.
 6. **Loop:** the plate sinks back to the exact darkness of frame 0, so the loop joins.
+
+### 4b. Mockup 3, "computation": the wait as a huge model thinking
+
+**Brief:** keep the zoom. During the fixed pause between Enter and the verdict (about 2.4 s),
+programmed motion that shows the computation of a vast AI model: the network, its weights,
+the inference pass, even the training that made it possible, so the verdict feels near
+infallible. Spectacular, and still cold.
+
+**Branches considered:**
+- **Node-and-edge neural net diagram:** the stock image of "AI". Instantly legible, but a cliché, and flat.
+- **Attention heatmap:** transformer-true (tokens attending to tokens), but abstract squares read as a spreadsheet at feed size.
+- **Code or matrix rain:** energy, but hacker kitsch, and it says "text" rather than "model".
+- **3D chip or data-centre fly-over:** literal hardware; reads as an ad, and off-brand.
+- **A fly-through of the layer stack (chosen):** the camera flies down a deep stack of layers, each a grid of weights receding to the vanishing point where the caret waits.
+
+**The chosen sequence, all from the wait's timing:**
+1. **Tokens:** Enter splits the input into token boxes with ids ("trav", "el"); beams connect them to the vanishing point.
+2. **Training:** a faint loss curve descends behind everything: the training that made it possible.
+3. **The forward pass:** an activation front runs a little ahead of the camera, lighting the weights and the connections between layers. A layer counter and a hairline of progress tick forward; the far micro-field suggests scale beyond counting.
+4. **Collapse:** everything rushes into one cold point of light, exactly where the verdict appears, and is gone on the verdict frame. The verdict itself is untouched and lowercase.
+
+**Why this branch wins:**
+- It is the only one with real depth and forward motion, so it keeps the camera language of the monolith.
+- It makes scale physical: thousands of visible weights and more beyond.
+- Its convergence point is the answer: the whole model resolves into the verdict.
+
+**Brand and honesty:**
+- Monochrome: ice white and steel blue on black, thin lines, lowercase instrument labels ("forward pass", "layer", "attention", "weights", "training").
+- There are no parameter counts or specs. The production model's size isn't public to us, so the piece shows scale visually rather than claiming a number we can't stand behind.
+- The score adds soft sixteenth-note data ticks through the wait, rising toward the verdict.
 
 **Details:**
 - **Type:** Inter, lowercase, generous tracking; the verdict at about 150 px on a 1080-wide canvas.
@@ -101,17 +159,17 @@ The founder leans classical. Reasoning from what each option does for reach and 
 - **Retention:** music helps most when it gives the pause a direction. A pulse that tightens through the wait and lands on the verdict turns 2.4 s of blinking into anticipation. So the music must be rhythmic and structured, not an ambient wash.
 - **Muted feeds:** meaning cannot depend on the music, and in this design it doesn't. Music is the extra layer for sound-on viewers (TikTok is sound-on by default).
 - **Originality and reuse:** an original composition can be posted as an original sound, and every clip reinforces one recognizable sonic signature. A licensed trend gives us neither.
-- **Loop:** the piece must end where it began, harmonically and in level, so a loop is seamless.
+- **Loop:** the piece must end in silence at the last frame, as it begins, so a loop is seamless.
 
 **Decision: classical, of a specific kind.** Minimalist: the lineage of Pärt, Glass and Satie,
 built on tintinnabuli bells and an ostinato piano, over strings and a low pulse.
 
 **Structure, fitted to each clip:**
-- **Tempo:** chosen per clip (62–80 bpm) so the verdict lands exactly on a downbeat.
+- **Tempo:** chosen per clip (62–80 bpm), with the beat grid anchored on the verdict, so the verdict is always a downbeat.
 - **Typing:** a quiet piano ostinato in A minor.
 - **Wait:** the harmony suspends; a low pulse on every beat; the strings rise.
-- **Verdict:** a downbeat. A major-key resolution in piano and strings, with a high bell voice.
-- **Plate:** a long decay into near-silence, landing back on the opening pitch so the loop joins.
+- **Verdict:** a downbeat. A plain C major triad (the tonic of the resolution) in piano and strings, with a high bell voice.
+- **Ending:** no new notes. One cosine release, sized from the time left, brings everything to exact silence on the clip's last sample, where the loop joins.
 - **Keys:** the typing clicks stay. They are the most "real" sound we have, and satisfying.
 
 **Level:** about −16 LUFS integrated with a −1.5 dBTP ceiling (platform-normal), with the

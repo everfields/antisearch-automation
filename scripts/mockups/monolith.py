@@ -7,7 +7,7 @@ An 8.5 s cinematic piece around the same typing-to-verdict moment:
 4. After Enter the camera re-frames onto the verdict line and pushes in while the room darkens.
 5. The verdict lands centred; the camera releases to reveal the monolith, with one light sweep.
 6. The verdict stands alone in large lowercase type, then everything sinks back to dark.
-Scored by `score.monolith_score`. No chat, one verdict, no share card.
+Scored by `score.template_score`. No chat, one verdict, no share card.
 Mockup tooling only: the pipeline doesn't import this; the current clip stays the main creative.
 """
 
@@ -23,11 +23,10 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 from antisearch_mill.render import Layout, RenderError, probe
 from antisearch_mill.timeline import Timeline
-from score import _rng, monolith_score
+from score import _rng, template_score
 
 INK = (232, 229, 224)
 STONE = (122, 118, 112)
-SCREEN_BG = (11, 11, 11)
 INTRO_S = 0.4  # motion from frame 0: the typing starts almost at once
 OUTRO_CROSS_S = 0.5
 OUTRO_HOLD_S = 1.9  # includes the sink back to frame 0
@@ -187,6 +186,7 @@ class _Monolith:
         self.submit_i = plan.intro + timeline.submit_frame
         self.verdict_i = plan.verdict_at(timeline)
         self.black = Image.new("RGB", (self.W, self.H))
+        self.overlay = None
         self.lift = Image.new("RGB", (self.W, self.H), (26, 28, 32))
 
     def camera(self, i: int) -> tuple[float, float]:
@@ -216,7 +216,11 @@ class _Monolith:
         W, H, plan = self.W, self.H, self.plan
         sx, sy, sw, sh = self.screen
         face = source.crop((sx, sy, sx + sw, sy + sh))
-        ImageDraw.Draw(face).rectangle([sw * 0.44, 0, sw * 0.56, sh * 0.045], fill=SCREEN_BG)  # no camera dot
+        black = face.getpixel((round(sw * 0.1), round(sh * 0.15)))  # the app's own black
+        fd, edge = ImageDraw.Draw(face), round(sw * 0.07)
+        fd.rectangle([0, 0, sw, sh * 0.06], fill=black)  # no camera dot, no top edge: a clean zoom
+        for cx0, cy0 in ((0, 0), (sw - edge, 0), (0, sh - edge), (sw - edge, sh - edge)):
+            fd.rectangle([cx0, cy0, cx0 + edge, cy0 + edge], fill=black)  # no phone corners either
         t = i / self.fps
         dv = (i - self.verdict_i) / self.fps
         zoom, focus = self.camera(i)
@@ -230,10 +234,14 @@ class _Monolith:
         out_i = i - plan.outro_start
         recede = _ease(out_i / plan.cross) if out_i >= 0 else 0.0
         slab_left = (1 - _ease(min(1.0, recede * 2))) * _ease(t / 0.15)  # dark frame 0 (the loop), then present
-        frame = self.bg.copy()
-        if slab_left > 0:
+        # Until the verdict releases the camera there is only the app's own black: no rim, no room,
+        # no reflection, no grain, so the zoom onto the input is clean. The monolith comes with the release.
+        reveal = _ease_out_expo(dv / 0.9) if dv >= 0 else 0.0
+        screen_black = Image.new("RGB", (W, H), black)
+        frame = self.bg.copy() if reveal >= 1 else Image.blend(screen_black, self.bg, reveal)
+        if slab_left > 0 and reveal > 0:
             shw, shh = round(self.shadow.width * zoom), round(self.shadow.height * zoom)
-            shadow = self.shadow.resize((shw, shh)).point(lambda v: round(v * slab_left))
+            shadow = self.shadow.resize((shw, shh)).point(lambda v: round(v * slab_left * reveal))
             frame.paste((0, 0, 0), (round(W / 2 - shw / 2 + drift), y0 + h - round(40 * zoom)), shadow)
         slab = face.resize((w, h), Image.BICUBIC).convert("RGBA")
         if 0 <= dv < 1.1:  # one soft light sweep over the verdict
@@ -243,20 +251,19 @@ class _Monolith:
             layer = Image.new("RGBA", slab.size, (0, 0, 0, 0))
             layer.alpha_composite(self.band, (max(0, ox), max(0, oy)), (max(0, -ox), max(0, -oy), bw, bh))
             slab.alpha_composite(layer)
-        if t < INTRO_S:  # the rim traces in light
-            glow = round(44 + 150 * (1 - _ease(t / INTRO_S)))
-        else:
-            glow = 44 + (round(40 * math.exp(-dv / 0.7)) if dv >= 0 else 0)
-        ImageDraw.Draw(slab).rounded_rectangle([0, 0, w - 1, h - 1], radius=radius, outline=(glow, glow, glow + 6),
-                                               width=max(2, round(2 * zoom)))
+        if reveal > 0:  # the rim blooms with the release
+            glow = (44 + round(40 * math.exp(-dv / 0.7))) * reveal
+            rim = tuple(round(b + (g - b) * reveal) for b, g in zip(black, (glow, glow, glow + 6)))
+            ImageDraw.Draw(slab).rounded_rectangle([0, 0, w - 1, h - 1], radius=radius, outline=rim,
+                                                   width=max(2, round(2 * zoom)))
         mask = _slab_mask(w, h, radius)
         if slab_left < 1:
             mask = mask.point(lambda v: round(v * slab_left))
-        if slab_left > 0 and y0 + h < H:  # a faint reflection on the stone floor
+        if slab_left > 0 and reveal > 0 and y0 + h < H:  # a faint reflection on the stone floor
             depth = min(round(h * 0.22), H - (y0 + h))
             if depth > 4:
                 refl = slab.crop((0, h - depth, w, h)).transpose(Image.FLIP_TOP_BOTTOM).convert("RGB")
-                ra = self.reflect_fade.resize((w, depth)).point(lambda v: round(v * slab_left))
+                ra = self.reflect_fade.resize((w, depth)).point(lambda v: round(v * slab_left * reveal))
                 frame.paste(refl, (x0, y0 + h + 4), ra)
         frame.paste(slab.convert("RGB"), (x0, y0), mask)
         if dv >= 0:  # the room lifts a little when the verdict lands
@@ -276,13 +283,21 @@ class _Monolith:
             p = min(1.0, (i - self.submit_i) / max(1, self.verdict_i - self.submit_i))
             dark = 0.14 * _ease(p) if i < self.verdict_i else 0.14 * (1 - (i - self.verdict_i) / (0.35 * self.fps))
             frame = Image.blend(frame, self.black, dark)
-        frame = ImageChops.multiply(frame, self.vig)
-        return ImageChops.add(frame, self.grains[(i // 2) % len(self.grains)], 1.0, -128)
+        if self.overlay is not None:  # e.g. the computation, drawn in screen space over the wait
+            layer = self.overlay(i)
+            if layer is not None:
+                frame = ImageChops.add(frame, layer)
+        if reveal <= 0:  # before the release: the app's black only, no vignette, no grain
+            return frame
+        vignetted = ImageChops.multiply(frame, self.vig)
+        frame = vignetted if reveal >= 1 else Image.blend(frame, vignetted, reveal)
+        grained = ImageChops.add(frame, self.grains[(i // 2) % len(self.grains)], 1.0, -128)
+        return grained if reveal >= 1 else Image.blend(frame, grained, reveal)
 
 
 def _motion(clip: Path, timeline: Timeline, out: Path, work: Path, *, category: str, verdict: str, font_path: str,
             layout: Layout, screen: tuple[int, int, int, int] | None, audio: bool, meta: list[str],
-            source: Path | None = None) -> None:
+            source: Path | None = None, overlay=None, ticks: bool = False) -> None:
     W, H, fps = layout.width, layout.height, timeline.fps
     plan = motion_plan(timeline)
     src = source or clip
@@ -290,12 +305,14 @@ def _motion(clip: Path, timeline: Timeline, out: Path, work: Path, *, category: 
     SW, SH = src_info.width, src_info.height
     mono = _Monolith(plan, timeline, category=category, verdict=verdict, font_path=font_path, layout=layout,
                      screen=screen or (0, 0, SW, SH), source_size=(SW, SH))
+    if overlay is not None:
+        mono.overlay = overlay(mono)
     total_s = plan.total / fps
     inputs = ["-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(fps), "-i", "-"]
     if audio:
         wav = work / "motion.wav"
-        monolith_score(f"{category}|{verdict}", total_s, INTRO_S, mono.submit_i / fps, mono.verdict_i / fps,
-                       plan.outro_start / fps).write(wav)
+        template_score(f"{category}|{verdict}", total_s, INTRO_S, mono.submit_i / fps, mono.verdict_i / fps,
+                       ticks=ticks).write(wav)
         delay = round(INTRO_S * 1000)
         inputs += ["-i", str(clip), "-i", str(wav)]
         amap = ["-filter_complex", f"[1:a]adelay={delay}|{delay},apad[k];[k][2:a]amix=inputs=2:normalize=0:"
@@ -337,22 +354,23 @@ def _motion(clip: Path, timeline: Timeline, out: Path, work: Path, *, category: 
 
 
 def render_motion(clip: Path, source: Path, source_screen: tuple[int, int, int, int], timeline: Timeline, out: Path, *,
-                  category: str, verdict: str, font_path: str, layout: Layout) -> None:
-    """The monolith, from the classic clip (its keys audio) and a 2x render of the same timeline."""
+                  category: str, verdict: str, font_path: str, layout: Layout, overlay=None, ticks: bool = False) -> None:
+    """The monolith, from the classic clip (its keys audio) and a 2x render of the same timeline.
+    `overlay(mono)` returns a per-frame layer drawn over the wait (the computation mockup)."""
     with tempfile.TemporaryDirectory(prefix="monolith-") as td:
         _motion(clip, timeline, out, Path(td), category=category, verdict=verdict, font_path=font_path,
-                layout=layout, screen=source_screen, audio=True, meta=[], source=source)
+                layout=layout, screen=source_screen, audio=True, meta=[], source=source, overlay=overlay,
+                ticks=ticks)
 
 
 def add_score(clip: Path, timeline: Timeline, out: Path, *, category: str, verdict: str) -> None:
-    """The classic picture untouched, the keys plus the monolith score under it: the music axis on its own."""
+    """The classic picture untouched, the keys plus the template score under it: the music axis on its own."""
     fps = timeline.fps
     total = timeline.total_frames / fps
     verdict_s = timeline.verdict_frame / fps
     with tempfile.TemporaryDirectory(prefix="score-") as td:
         wav = Path(td) / "score.wav"
-        monolith_score(f"{category}|{verdict}", total, 0.2, timeline.submit_frame / fps, verdict_s,
-                       min(total, verdict_s + 0.8)).write(wav)
+        template_score(f"{category}|{verdict}", total, 0.2, timeline.submit_frame / fps, verdict_s).write(wav)
         _run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(clip), "-i", str(wav),
               "-filter_complex", "[0:a][1:a]amix=inputs=2:normalize=0:weights='0.8 1':duration=first,"
                                  "loudnorm=I=-17:TP=-1.5:LRA=11,aresample=44100[a]",
