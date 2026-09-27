@@ -24,7 +24,7 @@ from .fresh import looks_like_mp4, remux_fresh
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now, posting_day,
-    slot_times, slots_for,
+    slot_times, slots_for, x_post_format,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
@@ -189,7 +189,8 @@ def run_posts(
             continue
 
         cls = adapters[net]
-        if net == X_NETWORK and TEXT not in cls.kinds:
+        fmt = x_post_format(env, day, log.used_on(day, net)) if net == X_NETWORK else kind
+        if fmt == TEXT and TEXT not in cls.kinds:
             out.append(Outcome(job.id, net, "skipped_unsupported_media", detail="X posts plain text; this route cannot"))
             continue
         if kind not in cls.kinds:
@@ -259,7 +260,7 @@ def run_posts(
         if net == X_NETWORK and (job.notes.startswith("trend:") or job.notes.startswith("winner")):
             out.append(Outcome(job.id, net, "skipped_x_no_trend", detail="X takes no trend-lane posts and no automated mentions"))
             continue
-        if net == X_NETWORK:
+        if fmt == TEXT:
             shown = x_text(job.category, clip.verdict)
             problem = x_text_problem(shown)
             if problem:
@@ -274,7 +275,7 @@ def run_posts(
             out.append(Outcome(job.id, net, "skipped_duplicate_clip", detail=f"clip {clip.clip_id} already went out on {net}"))
             continue
 
-        media = Media.text(label=job.category) if net == X_NETWORK else media_for(clip, kind)
+        media = Media.text(label=job.category) if fmt == TEXT else media_for(clip, kind)
         wait_s = 0.0
         if jitter_enabled(env) and enforce_slots:
             passed = [s for s in slot_times(day, slots) if s <= now]
@@ -330,7 +331,9 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     net = cls.name
     at = now.astimezone(timezone.utc).isoformat(timespec="seconds")
     shown = effective_caption(job.caption)
-    log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown))
+    fmt = media.kind
+    log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
+                       format=fmt))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
@@ -345,13 +348,13 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
-                           category=job.category, caption=shown))
+                           category=job.category, caption=shown, format=fmt))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
-                       job.category, shown))
+                       job.category, shown, fmt))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):
@@ -401,6 +404,7 @@ def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, m
         "source": job.notes or "queue",
         "bare_input": job.category,
         "caption": effective_caption(job.caption),
+        "format": media.kind,
         "scheduled_for": due_at.isoformat() if due_at else None,
         "upload_wait_s": round(wait_s, 3),
         "clip_id": clip.clip_id,

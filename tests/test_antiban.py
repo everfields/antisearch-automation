@@ -182,7 +182,7 @@ def test_x_buffer_dry_run_plans_plain_text_and_no_media(ledger, log):
     env = {
         "BUFFER_API_KEY": "k", "BUFFER_CHANNEL_X": "ch-x", "PUBLISHER_RAMP": "off",
         "PUBLISHER_MEDIA_REPO": "everfields/antisearch-clips", "PUBLISHER_MEDIA_TOKEN": "t",
-        "PUBLISHER_PUBLIC_BASE_URL": "https://everfields.github.io/antisearch-clips",
+        "PUBLISHER_PUBLIC_BASE_URL": "https://everfields.github.io/antisearch-clips", "PUBLISHER_X_FORMAT": "text",
     }
     (o,) = go([job("thing", ("x",))], ledger, log, {"x": BufferX}, env=env, live=False, now=NOW)
     assert o.status == "dry_run_ok"
@@ -191,7 +191,7 @@ def test_x_buffer_dry_run_plans_plain_text_and_no_media(ledger, log):
     post = next(r for r in plan["requests"] if "CreatePost" in (r.get("json") or {}).get("query", ""))
     payload = post["json"]["variables"]["input"]
     assert payload["text"] == "thing\nlove" and payload["assets"] == []
-    assert plan["media"]["kind"] == "text" and plan["media"]["public_url"] == ""
+    assert plan["media"]["kind"] == "text" and plan["media"]["public_url"] == "" and plan["format"] == "text"
     assert not any("api.github.com" in (r.get("url") or "") for r in plan["requests"])  # nothing uploaded
 
 
@@ -206,13 +206,13 @@ def test_x_live_needs_the_live_list_and_refuses_links_mentions_and_near_copies(l
     x.kinds = frozenset({"video", "text"})
     slot = datetime(2026, 9, 25, 9, 30, tzinfo=ET)  # X's one slot is 09:07 ET
     assert go([job("thing", ("x",))], ledger, log, {"x": x}, env=LIVE_ENV, now=slot)[0].status == "skipped_not_approved"
-    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "x"}
+    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "x", "PUBLISHER_X_FORMAT": "text"}
     assert "link" in go([job("thing", ("x",), caption="https://antisearch.ai")], ledger, log, {"x": x}, env=env, now=slot)[0].detail
     assert "mention" in go([job("thing", ("x",), caption="@antisearch_ai")], ledger, log, {"x": x}, env=env, now=slot)[0].detail
     assert go([job("dry-shampoo", ("x",), caption="dry shampoo")], ledger, log, {"x": x}, env=env, now=slot)[0].status == "published"
     assert x.calls[-1][1:3] == ("text", "dry shampoo\nlove")  # plain text: input, then verdict
     assert go([job("thing", ("x",))], ledger, log, {"x": x}, env=env, now=slot + timedelta(minutes=91))[0].status \
-        == "skipped_network_daily_cap"  # one X post a day
+        == "skipped_not_due"  # the second X slot is 16:07
     tomorrow = slot + timedelta(days=1)
     again = go([job("dry-shampoos", ("x",), caption="dry shampoos")], ledger, log, {"x": x}, env=env, now=tomorrow)
     assert again[0].status == "skipped_duplicate_caption"

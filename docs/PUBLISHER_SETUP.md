@@ -229,9 +229,13 @@ That's 12 posts a day (17 with X), instead of 20–25.
 - **Verticals:**
   - Bluesky: companies / tech (X's brief);
   - X (Buffer route only): its own pool, `queue/pools/x.txt` (the X vertical is being
-    re-chosen). X posts plain text, no video: line 1 the lowercase input, line 2 the
-    lowercase verdict. No brand line, mention, link, emoji, or hashtag. One post a
-    day at 09:07 ET under every cadence (`PUBLISHER_SLOTS_X` may move it, never add one);
+    re-chosen). Format A/B (CoS + Soul, 2026-09-27): `PUBLISHER_X_FORMAT=alternate`
+    (default) alternates the silent phone-frame video (caption empty) and a plain text
+    post (line 1 the lowercase input, line 2 the lowercase verdict; no brand line,
+    mention, link, emoji, or hashtag). One of each a day, and which one takes the first
+    slot swaps daily. `video` or `text` locks the winner. Each `posts.csv` row records
+    `format`. Two posts a day at 09:07 and 16:07 ET (`PUBLISHER_SLOTS_X` may move or drop
+    one, never add a third);
   - LinkedIn: employers;
   - Instagram: places (restaurants, travel, hotels, entertainment);
   - TikTok: beauty / hair / skin (the lock; Carlos grouped TikTok with leisure,
@@ -344,7 +348,7 @@ everything that can post natively.
 | `PUBLISHER_MEDIA_REPO`, `PUBLISHER_PUBLIC_BASE_URL` | variable | Clips repo + its Pages URL |
 | `PUBLISHER_LIVE_NETWORKS` | variable | The recorded first-of-class yes. `x` posts only when this lists it and the route is Buffer |
 | `PUBLISHER_CRON` | variable | unset = off; `dry-run`; `live` |
-| `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere), `soul` (TikTok 5, X 1, Bluesky 3, IG 3, LinkedIn 1), or `reach` (IG 4, TikTok 4 from day one; X, LinkedIn, Bluesky stay on the `soul` slots) |
+| `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere), `soul` (TikTok 5, X 2, Bluesky 3, IG 3, LinkedIn 1), or `reach` (IG 4, TikTok 4 from day one; X, LinkedIn, Bluesky stay on the `soul` slots) |
 | `PUBLISHER_RAMP` | variable, optional | `on` (default) warms a network from 1/day up to its cadence. Unset on `reach` means off. `off` posts the full cadence immediately |
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
 | `PUBLISHER_TREND_NETWORKS`, `PUBLISHER_TREND_CAP` | variable, optional | Trend lane: networks + rows per network per day (default 1, max 3). See `TREND_AND_REPLY_LANES.md` |

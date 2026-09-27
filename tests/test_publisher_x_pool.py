@@ -40,6 +40,7 @@ LIVE = {
     "PUBLISHER_CLIP_FRAME": "phone",
     "PUBLISHER_CLIP_PHONE_BG": "stone",
     "PUBLISHER_CLIP_AUDIO": "keys",
+    "PUBLISHER_X_FORMAT": "text",
 }
 
 
@@ -75,11 +76,12 @@ def test_x_pool_repeats_nothing_already_asked_or_owned_elsewhere():
         assert not x & {c for c, _ in read_pool(seeds)}, seeds.name
 
 
-def test_x_posts_at_most_once_a_day():
+def test_x_posts_at_most_twice_a_day():
     for cadence in ("reach", "soul", "carlos"):
-        assert [f"{t:%H:%M}" for t in slots_for("x", {"PUBLISHER_CADENCE": cadence})] == ["09:07"]
-    with pytest.raises(ValueError, match="at most 1"):
-        slots_for("x", {"PUBLISHER_SLOTS_X": "09:07,13:07"})
+        assert [f"{t:%H:%M}" for t in slots_for("x", {"PUBLISHER_CADENCE": cadence})] == ["09:07", "16:07"]
+    assert [f"{t:%H:%M}" for t in slots_for("x", {"PUBLISHER_SLOTS_X": "11:07"})] == ["11:07"]  # 1 is fine
+    with pytest.raises(ValueError, match="at most 2"):
+        slots_for("x", {"PUBLISHER_SLOTS_X": "09:07,13:07,19:07"})
 
 
 class LiveAnything(FixtureOracle):
@@ -131,7 +133,7 @@ def test_live_run_posts_one_x_job_at_a_due_x_slot(tmp_path, monkeypatch):
     assert any(j.notes == "pool:vertical" for j in jobs)
     posted = [o for o in out if o.status in DONE]
     assert len(posted) == 1 and posted[0].network == "x"
-    assert [o.status for o in out if o not in posted] == ["skipped_network_daily_cap"]
+    assert [o.status for o in out if o not in posted] == ["skipped_not_due"]  # the second X slot is 16:07
 
     create = [r for r in transport.requests if "createPost" in (r.json or {}).get("query", "")]
     assert len(create) == 1

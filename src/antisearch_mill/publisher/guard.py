@@ -32,15 +32,16 @@ MAX_PER_NETWORK_PER_DAY = 5
 PER_RUN_PER_NETWORK = 1
 SLOT_MINUTE = 7  # every slot sits on a fixed :07, off the hour and off :30
 MIN_GAP = timedelta(minutes=90)  # between two posts on the same network
-X_MAX_PER_DAY = 1  # CoS + Soul, 2026-09-27: X posts plain text, once a day
+X_MAX_PER_DAY = 2  # CoS + Soul, 2026-09-27: 1-2 X posts a day during the format A/B
+X_FORMATS = ("alternate", "video", "text")
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 
 # Business networks lean to the US morning, leisure networks to the afternoon and night (ET).
 # `PUBLISHER_CADENCE` picks a preset; `PUBLISHER_SLOTS_<NETWORK>` overrides one network.
 CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
-    "carlos": {  # 5 per network per day (X: 1, see X_MAX_PER_DAY)
+    "carlos": {  # 5 per network per day (X: 2, see X_MAX_PER_DAY)
         "bluesky": ("09:07", "11:07", "13:07", "16:07", "19:07"),
-        "x": ("09:07",),
+        "x": ("09:07", "16:07"),
         "linkedin": ("09:07", "11:07", "13:07", "15:07", "17:07"),
         "instagram": ("12:07", "16:07", "19:07", "21:07", "23:07"),
         "tiktok": ("14:07", "18:07", "20:07", "22:07", "00:07"),
@@ -48,9 +49,9 @@ CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
         "mastodon": ("09:07", "11:07", "13:07", "16:07", "19:07"),
         "reddit": ("10:07", "13:07", "16:07", "19:07", "22:07"),
     },
-    "soul": {  # TikTok 5, X 1, Bluesky 3, Instagram 3, LinkedIn 1
+    "soul": {  # TikTok 5, X 2, Bluesky 3, Instagram 3, LinkedIn 1
         "bluesky": ("09:07", "13:07", "18:07"),
-        "x": ("09:07",),
+        "x": ("09:07", "16:07"),
         "linkedin": ("09:07",),
         "instagram": ("13:07", "19:07", "22:07"),
         "tiktok": ("14:07", "18:07", "20:07", "22:07", "00:07"),
@@ -251,9 +252,27 @@ class PostRow:
     at: str = field(default_factory=now_iso)
     category: str = ""
     caption: str = ""
+    format: str = ""  # video | image | text: what went out, for the per-format metrics
 
 
 COLUMNS = [f.name for f in fields(PostRow)]
+
+
+def x_format(env: dict[str, str]) -> str:
+    """`PUBLISHER_X_FORMAT`: `alternate` (default), `video`, or `text`."""
+    raw = (env.get("PUBLISHER_X_FORMAT") or "").strip().lower() or "alternate"
+    if raw not in X_FORMATS:
+        raise ValueError(f"PUBLISHER_X_FORMAT={raw!r}; use alternate, video, or text")
+    return raw
+
+
+def x_post_format(env: dict[str, str], day: date, used_today: int) -> str:
+    """The format of the next X post. `alternate` gives one of each a day and swaps which
+    one takes the first slot every day, so the time of day does not favour a format."""
+    mode = x_format(env)
+    if mode != "alternate":
+        return mode
+    return ("video", "text")[(day.toordinal() + used_today) % 2]
 
 
 class PostLog:
@@ -276,8 +295,28 @@ class PostLog:
             header = next(csv.reader(fh), [])
         return header if header and "job_id" in header else COLUMNS
 
+    def _widen(self, row: PostRow) -> None:
+        """Add a column the file lacks, once, when a row has a value for it. Old rows get blanks."""
+        if not self.path.is_file():
+            return
+        header = self._fields()
+        missing = [c for c in COLUMNS if c not in header and getattr(row, c)]
+        if not missing:
+            return
+        rows = self.rows()
+        wider = header + missing
+        tmp = self.path.with_suffix(".csv.tmp")
+        with tmp.open("w", newline="", encoding="utf-8") as fh:
+            writer = csv.DictWriter(fh, fieldnames=wider, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(rows)
+            fh.flush()
+            os.fsync(fh.fileno())
+        tmp.replace(self.path)
+
     def append(self, row: PostRow) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._widen(row)
         fields = self._fields()
         new = not self.path.is_file()
         with self.path.open("a", newline="", encoding="utf-8") as fh:

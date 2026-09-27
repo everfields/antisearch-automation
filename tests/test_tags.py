@@ -108,7 +108,7 @@ def test_live_tiktok_and_instagram_captions_are_only_the_handle_and_x_is_never_t
             Job("p-hair-mask", "hair mask", ("instagram",), notes="pool:vertical"),
             Job("p-hair-oil", "hair oil", ("x",), notes="pool:vertical")]
     verdicts = {"p-dry-shampoo": "k18 airwash dry shampoo", "p-hair-mask": "k18", "p-hair-oil": "k18"}
-    env = {**BUFFER_ENV, **ON, "PUBLISHER_SLOTS_X": "13:07"}
+    env = {**BUFFER_ENV, **ON, "PUBLISHER_SLOTS_X": "13:07", "PUBLISHER_X_FORMAT": "text"}
     out, creates, log = _live(tmp_path, jobs, env, now, verdicts)
     assert [o.status for o in out] == ["published", "published", "published"]
     by_channel = {c["channelId"]: c for c in creates}

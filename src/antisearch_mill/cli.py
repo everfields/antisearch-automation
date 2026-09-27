@@ -163,6 +163,9 @@ def cmd_post(args, settings: Settings) -> int:
     env = dict(os.environ)
     try:
         opts = _clip_options(env)
+        from .publisher.guard import x_format
+
+        x_mode = x_format(env)
     except ValueError as exc:
         print(f"post error: {exc}", file=sys.stderr)
         return 2
@@ -205,7 +208,7 @@ def cmd_post(args, settings: Settings) -> int:
         return ledger.clip_for_job(job.id)
 
     now = now_et()
-    print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} {_clip_label(opts)} "
+    print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} {_clip_label(opts)} x-format={x_mode} "
           f"queue={' '.join(queues)} "
           f"pools={pools_dir} state={log.path} now={now:%Y-%m-%d %H:%M %Z} posting-day={posting_day(now)}")
     try:

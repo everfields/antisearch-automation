@@ -196,8 +196,9 @@ and every code-formatted example in README/SETUP.
 
 X gets a 720×1280 derivative at publish time (X's documented portrait max is
 1200×1900); LinkedIn, TikTok and Instagram get the 1080×1920 master. The own
-publisher (`mill post`) sends X no video at all: plain text, the lowercase input
-on line 1 and the lowercase verdict on line 2, once a day.
+publisher (`mill post`) runs an X format A/B (`PUBLISHER_X_FORMAT=alternate|video|text`,
+default `alternate`): the silent phone-frame master, or plain text with the lowercase
+input on line 1 and the lowercase verdict on line 2, one per post, two posts a day.
 
 ### Metadata row (`out/clips.csv`)
 
