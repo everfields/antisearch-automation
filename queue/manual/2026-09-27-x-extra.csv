@@ -1,0 +1,5 @@
+id,category,network,due_et
+# Founder order 2026-09-27: one extra X post today, besides the 16:07 main-line slot (ai model, ~16:28 ET).
+# X rotation line, non-AI; verdict frozen from the live oracle (fame, 2026-09-27T09:18Z). Pinned: 20:53 ET = 02:53 Madrid.
+# Dispatch only after the 16:28 ET main-line post is out (the run refuses earlier: skipped_would_block_slot).
+x-extra-overrated,overrated,x,2026-09-27 20:53 exact
