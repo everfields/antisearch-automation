@@ -519,3 +519,18 @@ def test_linkedin_country_rows_are_scheduled_for_that_countrys_morning(ledger, l
     assert madrid == datetime(2026, 9, 26, 9, 7, tzinfo=ZoneInfo("Europe/Madrid"))
     assert tokyo == datetime(2026, 9, 26, 9, 7, tzinfo=ZoneInfo("Asia/Tokyo"))
     assert [r["status"] for r in log.rows()][-1] == "scheduled"
+
+
+def test_a_buffer_scheduled_row_counts_on_the_day_it_goes_out(log):
+    today, later = date(2026, 9, 27), date(2026, 9, 30)
+    queued = "2026-09-27T13:54:41+00:00"  # queued today
+    log.append(PostRow("ig-later", "instagram", "pending", at=queued, due_at="2026-09-30T16:07:00+00:00"))
+    log.append(PostRow("ig-later", "instagram", "scheduled", remote_id="b1", at=queued, due_at="2026-09-30T16:07:00+00:00"))
+    # an older row without due_at: the day comes from its Buffer note
+    log.append(PostRow("ig-old", "instagram", "pending", at=queued))
+    log.append(PostRow("ig-old", "instagram", "scheduled", remote_id="b2", at=queued,
+                       detail="scheduled in Buffer for 2026-09-30 12:07 EDT (America/New_York)"))
+    log.append(PostRow("ig-now", "instagram", "pending", at="2026-09-27T16:10:00+00:00"))
+    log.append(PostRow("ig-now", "instagram", "published", url="u", at="2026-09-27T16:10:00+00:00"))
+    assert log.used_on(today, "instagram") == 1  # only the post that went out today
+    assert log.used_on(later, "instagram") == 2  # the two scheduled for 30 Sep count there

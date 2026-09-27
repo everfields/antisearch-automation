@@ -363,10 +363,11 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
                now: datetime, due_at: datetime | None, state: AntibanState, flags: Path, wait_s: float) -> Outcome:
     net = cls.name
     at = now.astimezone(timezone.utc).isoformat(timespec="seconds")
+    due = due_at.astimezone(timezone.utc).isoformat(timespec="seconds") if due_at is not None else ""
     shown = effective_caption(job.caption)
     fmt = media.kind
     log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
-                       format=fmt))
+                       format=fmt, due_at=due))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
@@ -381,13 +382,13 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
-                           category=job.category, caption=shown, format=fmt))
+                           category=job.category, caption=shown, format=fmt, due_at=due))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
-                       job.category, shown, fmt))
+                       job.category, shown, fmt, due))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):

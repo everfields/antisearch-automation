@@ -176,7 +176,7 @@ def _maybe_edit(row: ManualRow, prior: dict, log: PostLog, store: VerdictStore, 
         return Outcome(row.id, row.network, "failed", detail=f"edit: {exc.__class__.__name__}: {exc}")
     log.append(PostRow(row.id, row.network, prior["status"], prior.get("clip_id", ""), prior.get("verdict", ""),
                        prior["remote_id"], prior.get("url", ""), note[:500], prior["at"], row.category, caption,
-                       prior.get("format", "")))
+                       prior.get("format", ""), prior.get("due_at", "")))
     if picked.handle:
         tag_log.append(row.due, row.network, picked.handle, row.id)
     return Outcome(row.id, row.network, "caption_edited", prior.get("url", ""), note)

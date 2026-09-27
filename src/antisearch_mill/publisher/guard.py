@@ -273,6 +273,26 @@ def next_slot(moment: datetime, slots: list[time]) -> datetime | None:
     return None
 
 
+_SCHEDULED_NOTE = re.compile(r"scheduled in Buffer for (\d{4}-\d{2}-\d{2} \d{2}:\d{2}) \S+ \(([^)]+)\)")
+
+
+def row_due(row: dict) -> datetime | None:
+    """When a Buffer-scheduled row goes out: its `due_at`, or (older rows) the scheduled note."""
+    raw = (row.get("due_at") or "").strip()
+    if raw:
+        try:
+            return datetime.fromisoformat(raw)
+        except ValueError:
+            return None
+    m = _SCHEDULED_NOTE.search(row.get("detail") or "")
+    if not m:
+        return None
+    try:
+        return datetime.strptime(m.group(1), "%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo(m.group(2)))
+    except (ValueError, KeyError):
+        return None
+
+
 @dataclass
 class PostRow:
     job_id: str
@@ -287,6 +307,7 @@ class PostRow:
     category: str = ""
     caption: str = ""
     format: str = ""  # video | image | text: what went out, for the per-format metrics
+    due_at: str = ""  # a post scheduled in Buffer: when it goes out (UTC ISO); counts on that day
 
 
 COLUMNS = [f.name for f in fields(PostRow)]
@@ -371,15 +392,29 @@ class PostLog:
         return self.latest_by_job().get(job_id)
 
     def used_on(self, day: date, network: str | None = None) -> int:
-        """Posts that went (or may have gone) out on posting day `day`: a pending attempt not later failed."""
+        """Posts that went (or may have gone) out on posting day `day`: a pending attempt not later failed.
+
+        A post scheduled in Buffer (still `scheduled` or `pending`) counts on the day it goes out,
+        its due time, not the day it was queued. Posted rows count on the day they were posted.
+        """
         final: dict[str, str] = {}
         started: dict[str, tuple[date, str]] = {}
+        due: dict[str, datetime] = {}
         for r in self.rows():
             final[r["job_id"]] = r["status"]
             if r["status"] == PENDING:
                 started[r["job_id"]] = (posting_day(datetime.fromisoformat(r["at"])), r["network"])
-        return sum(1 for job, (d, net) in started.items()
-                   if d == day and final.get(job) != FAILED and (network is None or net == network))
+            when = row_due(r)
+            if when is not None:
+                due[r["job_id"]] = when
+        count = 0
+        for job, (d, net) in started.items():
+            if final.get(job) == FAILED or (network is not None and net != network):
+                continue
+            if final.get(job) in (*SCHEDULED_STATES, PENDING) and job in due:
+                d = posting_day(due[job])
+            count += d == day
+        return count
 
     def last_attempt(self, network: str) -> datetime | None:
         """When `network` last posted (or may have): pending rows whose job did not end in failure."""
