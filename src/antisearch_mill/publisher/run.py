@@ -7,6 +7,7 @@ import json
 import os
 import re
 import time
+import unicodedata
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -309,8 +310,8 @@ def x_text_problem(text: str) -> str | None:
         return "X text cannot carry a hashtag"
     if re.search(r"https?://|\bwww\.|\.(com|ai|io|net|org)\b", text, re.I):
         return "X text cannot contain a link"
-    if any(ord(ch) > 127 for ch in text):
-        return "X text is plain ascii: no emoji"
+    if any(unicodedata.category(ch)[0] not in "LMNPZ" and ch != "\n" for ch in text):
+        return "X text is letters and punctuation only: no emoji or symbols"
     if len(text) > 280:
         return "X text is over 280 characters"
     return None

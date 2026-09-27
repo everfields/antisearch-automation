@@ -141,3 +141,16 @@ def test_a_tag_can_repeat_after_seven_days_despite_the_caption_dedupe(tmp_path):
     later, creates, _ = _live(tmp_path, [Job("p-c", "hair gel", ("tiktok",), notes="pool:vertical")],
                               env, first + timedelta(days=8), {"p-c": "k18"})
     assert later[0].status == "published" and creates[0]["text"] == "@k18hair"
+
+
+def test_x_text_keeps_accents_and_refuses_emoji_links_and_mentions():
+    from antisearch_mill.publisher.run import x_text, x_text_problem
+
+    assert x_text("Writer", "László Krasznahorkai") == "writer\nlászló krasznahorkai"
+    assert x_text_problem(x_text("writer", "lászló krasznahorkai")) is None
+    assert x_text_problem(x_text("book", "don quixote")) is None
+    assert "emoji" in x_text_problem(x_text("emoji", "😂"))
+    assert "emoji" in x_text_problem(x_text("sign", "★"))
+    assert "link" in x_text_problem(x_text("site", "antisearch.ai"))
+    assert "mention" in x_text_problem(x_text("brand", "@k18hair"))
+    assert "hashtag" in x_text_problem(x_text("tag", "#k18results"))
