@@ -51,6 +51,7 @@ class Job:
     platforms: tuple[str, ...] = DEFAULT_PLATFORMS
     caption: str = ""
     notes: str = ""
+    creative: str = ""  # set by the publisher (Instagram rotation), never read from a queue file
 
 
 def read_queue(path: str | Path) -> list[Job]:
@@ -120,6 +121,8 @@ class ClipRow:
     mill_version: str
     platforms: str
     caption: str
+    creative: str = ""
+    cover_s: float = 0.0  # the cover frame's time when it is not the clip's last frames
 
     @classmethod
     def columns(cls) -> list[str]:

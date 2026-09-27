@@ -11,9 +11,10 @@ from . import APP_RENDER_STYLE, CAPTURE_TAG, RENDER_STYLE, __version__
 from .fonts import resolve_font
 from .ledger import ClipRow, Job, Ledger, now_iso
 from .oracle import Oracle, OracleError, Verdict
-from .render import ClipInfo, Layout, RenderError, extract_poster, render_clip
+from .render import ClipInfo, Layout, RenderError, extract_poster, probe, render_clip
 from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, AUDIO_PULSE, audio_tag as make_audio_tag
 from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound, pulse_for_platforms
+from .creatives import CREATIVES, STORY, finish, id_tag
 from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
 from .timeline import (
     MAX_SECONDS, MIN_SECONDS, WAIT_BLINKS, build_timeline, clip_style, clip_typing, pause_for_style,
@@ -44,6 +45,7 @@ def clip_id_for(
     frame: str = "",
     fixed_wait: bool = False,
     typing: str = "",
+    creative: str = "",
 ) -> str:
     body = f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}"
     # Silent clips keep the historical hash. Pulse is part of the id only when it is actually muxed.
@@ -56,6 +58,8 @@ def clip_id_for(
         body += "\0wait:fixed"
     if typing and typing != "legacy":
         body += f"\0typing:{typing}"
+    if id_tag(creative):
+        body += f"\0creative:{id_tag(creative)}"
     digest = hashlib.sha256(body.encode()).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
@@ -104,12 +108,17 @@ def produce_one(
     phone: PhoneSpec | None = None,
     keys: str | None = None,
     typing: str | None = None,
+    creative: str | None = None,
 ) -> ProduceResult:
     """`frame="phone"` draws `phone` (or the env's scale and background) and implies the `app` screen.
 
     The phone frame, heartbeat, or keys audio makes the clip the fixed template: the
-    wait is WAIT_BLINKS blinks, whatever the oracle latency.
+    wait is WAIT_BLINKS blinks, whatever the oracle latency. `creative` (default: the
+    job's) finishes the clip as one of the Instagram creatives (see creatives/).
     """
+    creative = job.creative if creative is None else creative
+    if creative and creative not in CREATIVES:
+        return ProduceResult(job.id, "failed", detail=f"unknown creative {creative!r}")
     try:
         verdict = oracle.ask(job.category)
     except OracleError as exc:
@@ -152,11 +161,13 @@ def produce_one(
     rhythm = typing if fixed and style == "app" else "legacy"
     clip_id = clip_id_for(
         job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag, fixed_wait=fixed, typing=rhythm,
+        creative=creative,
     )
     style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
     poster_path = ledger.clips_dir / f"{clip_id}.png"
     sidecar_path = ledger.clips_dir / f"{clip_id}.json"
+    cover = None
     try:
         timeline = build_timeline(
             verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style,
@@ -167,23 +178,41 @@ def produce_one(
             comment += f";audio={audio_tag}"
         if frame_tag:
             comment += f";frame={frame_tag}"
-        info = render_clip(
-            timeline,
-            clip_path,
-            font_path=font_path,
-            layout=layout,
-            metadata={"title": verdict.verdict, "comment": comment},
-            pulse=variant if use_audio and mode == AUDIO_PULSE else None,
-            heartbeat=use_audio and mode == AUDIO_HEARTBEAT,
-            bed=with_bed,
-            phone=phone,
-            keys=keys if use_audio and mode == AUDIO_KEYS else None,
-        )
+        if id_tag(creative):
+            comment += f";creative={creative}"
+        meta = {"title": verdict.verdict, "comment": comment}
+        if creative == STORY:
+            from .creatives.story import render_story
+
+            render_story(verdict.category, verdict.verdict, clip_path, font_path=font_path, layout=layout,
+                         metadata=meta)
+        else:
+            classic = clip_path.with_name(f"{clip_id}-classic.mp4") if id_tag(creative) else clip_path
+            render_clip(
+                timeline,
+                classic,
+                font_path=font_path,
+                layout=layout,
+                metadata=meta,
+                pulse=variant if use_audio and mode == AUDIO_PULSE else None,
+                heartbeat=use_audio and mode == AUDIO_HEARTBEAT,
+                bed=with_bed,
+                phone=phone,
+                keys=keys if use_audio and mode == AUDIO_KEYS else None,
+            )
+            try:
+                cover = finish(creative, classic, timeline, clip_path, category=verdict.category,
+                               verdict=verdict.verdict, font_path=font_path, layout=layout, phone=phone, metadata=meta)
+            finally:
+                if classic != clip_path:
+                    classic.unlink(missing_ok=True)
+        info = probe(clip_path)
         problems = validate_master(info, layout, style_name)
         if problems:
             raise RenderError("; ".join(problems))
-        extract_poster(clip_path, poster_path, timeline.duration_s - 0.25)
-    except (RenderError, ValueError) as exc:
+        end = info.duration_s if creative == STORY else timeline.duration_s
+        extract_poster(clip_path, poster_path, cover if cover is not None else end - 0.25)
+    except (RenderError, ValueError, OSError) as exc:
         ledger.log("render.failed", job_id=job.id, clip_id=clip_id, error=str(exc))
         return ProduceResult(job.id, "failed", clip_id, f"render: {exc}")
 
@@ -211,6 +240,8 @@ def produce_one(
         mill_version=__version__,
         platforms="|".join(job.platforms),
         caption=job.caption,
+        creative=creative,
+        cover_s=cover or 0.0,
     )
     sidecar_path.write_text(
         json.dumps(
@@ -230,6 +261,7 @@ def produce_one(
                     ),
                     **({"audio": audio_tag} if use_audio else {}),
                     **({"frame": frame_tag} if frame_tag else {}),
+                    **({"creative": creative} if creative else {}),
                     **(
                         {
                             "wait": "fixed",
