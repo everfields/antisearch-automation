@@ -11,8 +11,6 @@ name: reverse-oracle
 #   Manual: Actions -> reverse-oracle -> Run workflow (dry-run unless `live` is ticked).
 
 on:
-  pull_request:  # TEMPORARY: one live run as run 2026-09-27-r1 (candidates file: GitHub Models is retired), removed right after
-    paths: [.github/workflows/reverse-oracle.yml]
   workflow_dispatch:
     inputs:
       live:
@@ -40,13 +38,13 @@ jobs:
   reverse:
     runs-on: ubuntu-24.04
     env:
-      LIVE: ${{ github.event_name == 'pull_request' || inputs.live }}
+      LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
       BUDGET: ${{ inputs.budget || '100' }}
-      CANDIDATES: ${{ github.event_name == 'pull_request' && 'queue/reverse_oracle/candidates-2026-09-27.json' || inputs.candidates }}
+      CANDIDATES: ${{ inputs.candidates }}
       REVERSE_ORACLE_GENERATOR_KEY: ${{ secrets.REVERSE_ORACLE_GENERATOR_KEY }}
       REVERSE_ORACLE_GENERATOR_URL: ${{ vars.REVERSE_ORACLE_GENERATOR_URL }}
       REVERSE_ORACLE_MODEL: ${{ vars.REVERSE_ORACLE_MODEL }}
-      RUN_ID: ${{ github.event_name == 'pull_request' && '2026-09-27-r1' || inputs.run_id }}
+      RUN_ID: ${{ inputs.run_id }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

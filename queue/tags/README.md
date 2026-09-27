@@ -54,4 +54,5 @@ People are never rows (LeBron James, Taylor Swift), whatever the verdict.
 accounts, each paired with a short input whose live verdict (one call each, frozen in
 `verdicts.csv` on publisher-state) names that account. None of them is in the allowlist
 yet. The verified badge and last-post date are still unconfirmed because Instagram blocked
-logged-out checks. They are awaiting review with Soul and the founder.
+logged-out checks. They are awaiting review with Soul and the founder. Superseded by the
+programmatic run in `queue/reverse_oracle/` (run `2026-09-27-r1`), which includes them.
