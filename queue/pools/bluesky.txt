@@ -2,11 +2,9 @@
 email client
 calendar app
 code editor
-programming language
 database
 cloud provider
 web browser
-search engine
 vpn
 laptop
 mechanical keyboard

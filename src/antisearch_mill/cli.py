@@ -397,7 +397,7 @@ def cmd_networks(args, settings: Settings) -> int:
         slots = slot_times(day, slots_for(name, env))
         print(f"   slots ET:     {', '.join(f'{s:%H:%M}' for s in slots) or 'off'}")
         print(f"   today Madrid: {', '.join(f'{s.astimezone(madrid):%H:%M}' for s in slots) or 'off'}")
-        vertical, unowned = runway(name, Path(args.pools), store)
+        vertical, unowned = runway(name, Path(args.pools), store, log=log)
         if (Path(args.pools) / f"{name}.txt").is_file():
             per_day = max(len(slots) * 3 // 4, 1)
             print(f"   pool: {vertical} vertical inputs never asked (~{vertical // per_day} days at {per_day}/day); "
