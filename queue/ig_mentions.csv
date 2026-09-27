@@ -18,8 +18,7 @@ igm-perfume,perfume,instagram,,"#13 expected 'chanel no. 5'; verdict 'frédéric
 igm-watch,watch,instagram,,"#16 expected 'rolex submariner'; verdict 'patek philippe grandmaster chime 6300gr'; match no; no mention: verdict does not match"
 igm-singer,singer,instagram,,"#18 expected 'taylor swift'; verdict 'beyoncé'; match no; no mention: a person is never tagged"
 # Concept pairs, Soul's taste pass (2026-09-27); verdicts frozen on publisher-state in run 2026-09-27-c1. Nothing here is scheduled by the publisher.
-# SCHEDULED (queue/manual/2026-09-28-ig-mentions.csv): igc-fashion,fashion,instagram,,"hermès -> @hermes; Wed 30 Sep 12:07 NY"
-# DROPPED 2026-09-27 (handle check failed; re-check to reinstate on its day): wanderlust -> new zealand @purenewzealand (Mon 28 Sep); paradise -> bora bora @tahititourisme (Tue 29 Sep); sunset -> santorini @visitgreecegr (Thu 1 Oct); island -> bali (Fri 2 Oct: @indtravel is not the ministry's account any more; @wonderfulindonesia not shown verified or active)
+# SCHEDULED (queue/manual/2026-09-28-ig-mentions.csv, 12:07 NY): Mon 28 Sep wanderlust -> new zealand @purenewzealand; Tue 29 Sep paradise -> bora bora @tahititourisme; Wed 30 Sep fashion -> hermès @hermes; Thu 1 Oct sunset -> santorini @visitgreecegr; Fri 2 Oct island -> bali @wonderfulindonesia (not @indtravel: not verified, 3,020 followers)
 igc-getaway,getaway,instagram,,"HOLD: maldives -> @visitmaldives; not before 7 days after bora bora airs"
 igc-party,party,instagram,,"KEEP, not scheduled: rio carnival -> @visitbrasil"
 igc-racing,racing,instagram,,"KEEP, not scheduled: formula 1 -> @f1"

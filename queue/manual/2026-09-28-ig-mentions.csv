@@ -1,9 +1,8 @@
 id,category,network,due_et
 # Instagram mention reels, one a day at 12:07 New York (the first slot of the reach cadence), Soul's taste pass 2026-09-27.
-# A row goes out only if its handle passed the web check on 2026-09-27: official, verified, and a post in the last 7 days.
-# Dropped rows keep their day; to reinstate one, re-check the handle, add its allowlist row, and uncomment it.
-# ig-concept-wanderlust,wanderlust,instagram,2026-09-28 12:07  (dropped: no web evidence that @purenewzealand posted in the last 7 days)
-# ig-concept-paradise,paradise,instagram,2026-09-29 12:07  (dropped: no web evidence that @tahititourisme posted in the last 7 days)
+# Every handle passed official + verified + a post in the last 7 days on 2026-09-27 (evidence in queue/tags/allowlist.json).
+ig-concept-wanderlust,wanderlust,instagram,2026-09-28 12:07
+ig-concept-paradise,paradise,instagram,2026-09-29 12:07
 ig-concept-fashion,fashion,instagram,2026-09-30 12:07
-# ig-concept-sunset,sunset,instagram,2026-10-01 12:07  (dropped: no web evidence that @visitgreecegr is verified or posted in the last 7 days)
-# ig-concept-island,island,instagram,2026-10-02 12:07  (dropped: @indtravel is no longer the ministry's account; @wonderfulindonesia not shown verified or posting in the last 7 days)
+ig-concept-sunset,sunset,instagram,2026-10-01 12:07
+ig-concept-island,island,instagram,2026-10-02 12:07

@@ -279,13 +279,26 @@ def test_instagram_takes_a_global_brand_account_but_not_another_market(tmp_path)
     assert choose_tag("dior", "instagram", ON, allow, log, now, 4).handle == ""  # "fr" is neither US nor global
 
 
-def test_the_concept_row_file_schedules_only_the_pairs_that_passed_the_check():
-    (row,) = read_manual(ROOT / "queue" / "manual" / "2026-09-28-ig-mentions.csv")
-    assert (row.id, row.category, row.network) == ("ig-concept-fashion", "fashion", "instagram")
-    assert row.due == datetime(2026, 9, 30, 12, 7, tzinfo=ET)
-    text = (ROOT / "queue" / "manual" / "2026-09-28-ig-mentions.csv").read_text()
-    for dropped in ("wanderlust", "paradise", "sunset", "island"):
-        assert f"# ig-concept-{dropped}," in text
+def test_the_concept_row_file_is_one_reel_a_day_at_12_07_new_york():
+    rows = read_manual(ROOT / "queue" / "manual" / "2026-09-28-ig-mentions.csv")
+    assert [(r.category, r.due) for r in rows] == [
+        ("wanderlust", datetime(2026, 9, 28, 12, 7, tzinfo=ET)), ("paradise", datetime(2026, 9, 29, 12, 7, tzinfo=ET)),
+        ("fashion", datetime(2026, 9, 30, 12, 7, tzinfo=ET)), ("sunset", datetime(2026, 10, 1, 12, 7, tzinfo=ET)),
+        ("island", datetime(2026, 10, 2, 12, 7, tzinfo=ET))]
+    assert all(r.network == "instagram" and r.id == f"ig-concept-{r.category}" for r in rows)
+
+
+def test_the_concept_mentions_resolve_to_the_checked_accounts():
+    from antisearch_mill.publisher.tags import allowlisted, load_allowlist
+
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    day = datetime(2026, 9, 28).date()
+    got = {v: allowlisted(v, "instagram", allow, day).handle for v in ("new zealand", "bora bora", "santorini", "bali")}
+    assert got == {"new zealand": "@purenewzealand", "bora bora": "@tahititourisme", "santorini": "@visitgreecegr",
+                   "bali": "@wonderfulindonesia"}
+    assert all((e.get("instagram") or {}).get("handle") != "@indtravel" for e in allow.values())  # rejected
+    assert ig_caption("island", "bali", got["bali"]) == "#island #bali #ai @wonderfulindonesia"
+    assert ig_caption("paradise", "bora bora", got["bora bora"]) == "#paradise #borabora #ai @tahititourisme"
 
 
 def test_the_hermes_mention_keeps_the_accent(tmp_path):
