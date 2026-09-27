@@ -37,9 +37,10 @@ def test_breaker_is_off_by_default_and_never_includes_x():
     assert tag_networks(ON) == {"instagram", "tiktok"}
 
 
-def test_seed_allowlist_is_k18_on_tiktok_only():
+def test_seed_allowlist_is_japan_on_instagram_then_k18_on_tiktok():
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
-    assert set(allow) == {"k18"}
+    assert list(allow) == ["japan", "k18"]
+    assert allowlisted("japan", "instagram", allow, DAY).handle == "@visitjapan.us"
     assert allowlisted("k18 airwash dry shampoo", "tiktok", allow, DAY).handle == "@k18hair"
     assert allowlisted("k18", "instagram", allow, DAY).handle == ""
     assert allowlisted("k18", "tiktok", allow, date(2026, 9, 27) + timedelta(days=RECHECK_DAYS + 1)).handle == ""

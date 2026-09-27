@@ -142,7 +142,7 @@ def test_next_window_keeps_new_york_wall_time():
     assert next_window(nov, datetime(2026, 11, 1, 8, 0, tzinfo=ET)) == datetime(2026, 11, 1, 9, 37, tzinfo=ET)
 
 
-def _manual(tmp_path, rows, now, frozen=True, env_extra=None):
+def _manual(tmp_path, rows, now, frozen=True, env_extra=None, allow=None):
     ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "state" / "posts.csv")
     store = VerdictStore(tmp_path / "state" / "verdicts.csv")
     if frozen:
@@ -156,7 +156,9 @@ def _manual(tmp_path, rows, now, frozen=True, env_extra=None):
         return ledger.clip_for_job(job.id)
 
     out = run_manual(rows, ledger, log, store, now=now, live=True, env=env, produce=produce,
-                     adapters={"instagram": BufferInstagram}, transport=t, sleep=lambda _s: None)
+                     adapters={"instagram": BufferInstagram}, transport=t, sleep=lambda _s: None, tag_allowlist=allow)
+    edits = [r.json["variables"]["input"] for r in t.requests if "editPost" in (r.json or {}).get("query", "")]
+    _manual.edits = edits
     return out, _creates(t), log
 
 
@@ -185,3 +187,44 @@ def test_manual_row_never_asks_the_oracle(tmp_path):
     row = ManualRow("ig-manual-travel", "travel", "instagram", datetime(2026, 9, 27, 9, 37, tzinfo=ET))
     out, creates, log = _manual(tmp_path, [row], datetime(2026, 9, 27, 6, 50, tzinfo=ET), frozen=False)
     assert out[0].status == "skipped_not_frozen" and creates == [] and log.rows() == []
+
+
+def test_the_seed_mention_is_visit_japan_americas():
+    from antisearch_mill.publisher.tags import allowlisted, load_allowlist
+
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    assert list(allow)[0] == "japan"  # the first row of the Instagram mention allowlist
+    tag = allowlisted("japan", "instagram", allow, datetime(2026, 9, 27).date())
+    assert tag.handle == "@visitjapan.us"
+    assert allow["japan"]["instagram"]["market"] == "us" and allow["japan"]["instagram"]["verified"] is True
+    assert allowlisted("japan", "tiktok", allow, datetime(2026, 9, 27).date()).handle == ""
+
+
+def test_a_scheduled_manual_row_gets_its_mention_by_editing_the_caption(tmp_path):
+    from antisearch_mill.publisher.tags import load_allowlist
+
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    row = ManualRow("ig-manual-travel", "travel", "instagram", datetime(2026, 9, 27, 9, 37, tzinfo=ET))
+    first, creates, _ = _manual(tmp_path, [row], datetime(2026, 9, 27, 6, 50, tzinfo=ET))  # no allowlist yet
+    assert first[0].status == "scheduled" and creates[0]["text"] == "#travel #japan #ai"
+    out, creates, log = _manual(tmp_path, [row], datetime(2026, 9, 27, 7, 10, tzinfo=ET), frozen=False, allow=allow)
+    assert out[0].status == "caption_edited" and creates == []  # the same post, never a second one
+    assert _manual.edits == [{"id": "dry-post", "text": "#travel #japan #ai @visitjapan.us"}]  # schedule kept
+    last = log.rows()[-1]
+    assert (last["status"], last["remote_id"], last["caption"], last["format"]) == (
+        "scheduled", "dry-post", "#travel #japan #ai @visitjapan.us", "video")
+    tags = TagLog(log.path.parent / "tags.csv").rows()
+    assert [(r["network"], r["handle"], r["job_id"]) for r in tags] == [("instagram", "@visitjapan.us", "ig-manual-travel")]
+    again, creates, _ = _manual(tmp_path, [row], datetime(2026, 9, 27, 7, 20, tzinfo=ET), frozen=False, allow=allow)
+    assert again[0].status == "skipped_already_posted" and _manual.edits == [] and creates == []
+    late, _, _ = _manual(tmp_path, [row], datetime(2026, 9, 27, 9, 30, tzinfo=ET), frozen=False, allow=allow)
+    assert late[0].status == "skipped_already_posted" and _manual.edits == []  # due or out: left as it went
+
+
+def test_a_new_manual_row_carries_the_mention_from_the_start(tmp_path):
+    from antisearch_mill.publisher.tags import load_allowlist
+
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    row = ManualRow("ig-manual-travel", "travel", "instagram", datetime(2026, 9, 27, 9, 37, tzinfo=ET))
+    out, creates, _ = _manual(tmp_path, [row], datetime(2026, 9, 27, 6, 50, tzinfo=ET), allow=allow)
+    assert out[0].status == "scheduled" and creates[0]["text"] == "#travel #japan #ai @visitjapan.us"

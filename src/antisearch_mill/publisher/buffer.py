@@ -28,6 +28,14 @@ CREATE = """mutation CreatePost($input: CreatePostInput!) {
   }
 }"""
 STATUS = "query PostStatus($id: PostId!) { post(input: { id: $id }) { id status externalLink error { message } } }"
+# Only `id` and `text`: Buffer keeps the post's schedule when `mode` is omitted.
+EDIT = """mutation EditPost($input: EditPostInput!) {
+  editPost(input: $input) {
+    __typename
+    ... on PostActionSuccess { post { id status dueAt } }
+    ... on MutationError { message }
+  }
+}"""
 ORGS = "query Orgs { account { organizations { id } } }"
 CHANNELS = "query Channels($org: OrganizationId!) { channels(input: { organizationId: $org }) { id name service } }"
 
@@ -102,8 +110,19 @@ class BufferRoute(Adapter):
         return PostResult(f"buffer:{post['id']}", post["id"],
                           note=f"handed to Buffer, status {post.get('status')}; the network link appears in Buffer once sent")
 
+    def edit_text(self, post_id: str, text: str) -> dict:
+        """Change the caption of a post Buffer still holds; its schedule stays as it is."""
+        result = self._gql(EDIT, {"input": {"id": post_id, "text": text}})["editPost"]
+        if result.get("__typename") != "PostActionSuccess":
+            raise PublisherError(f"buffer: {result.get('message', result)}")
+        return result["post"]
+
     def dry_run_responder(self, req: Request) -> HttpResponse:
         query = (req.json or {}).get("query", "")
+        if "editPost" in query:
+            return HttpResponse.of_json(200, {"data": {"editPost": {
+                "__typename": "PostActionSuccess", "post": {"id": req.json["variables"]["input"]["id"],
+                                                            "status": "scheduled", "dueAt": None}}}})
         if "createPost" in query:
             return HttpResponse.of_json(200, {"data": {"createPost": {
                 "__typename": "PostActionSuccess", "post": {"id": "dry-post", "status": "sending", "externalLink": None}}}})
