@@ -21,6 +21,7 @@ on:
     paths:
       - src/antisearch_mill/metrics.py
       - .github/workflows/metrics.yml
+      - .github/bufdiag_tmp.py
 
 permissions:
   contents: write
@@ -51,6 +52,10 @@ jobs:
         run: |
           remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git clone --quiet --depth 1 --branch publisher-state "$remote" state
+
+      - name: TEMP Buffer diagnostics (counts only; removed before merge)
+        if: github.event_name == 'pull_request'
+        run: python .github/bufdiag_tmp.py
 
       - name: Collect
         id: collect
