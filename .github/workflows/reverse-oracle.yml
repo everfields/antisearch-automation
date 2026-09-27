@@ -9,6 +9,8 @@ name: reverse-oracle
 #   Manual: Actions -> reverse-oracle -> Run workflow (dry-run unless `live` is ticked).
 
 on:
+  pull_request:  # TEMPORARY: one live run as run 2026-09-27-r1, removed right after
+    paths: [.github/workflows/reverse-oracle.yml]
   workflow_dispatch:
     inputs:
       live:
@@ -37,10 +39,10 @@ jobs:
   reverse:
     runs-on: ubuntu-24.04
     env:
-      LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
+      LIVE: ${{ github.event_name == 'pull_request' || inputs.live }}
       BUDGET: ${{ inputs.budget || '100' }}
       MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
-      RUN_ID: ${{ inputs.run_id }}
+      RUN_ID: ${{ github.event_name == 'pull_request' && '2026-09-27-r1' || inputs.run_id }}
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
