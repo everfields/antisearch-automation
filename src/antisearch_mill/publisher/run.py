@@ -5,7 +5,9 @@ from __future__ import annotations
 import dataclasses
 import json
 import os
+import re
 import time
+import unicodedata
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,7 +15,7 @@ from typing import Callable, Mapping
 
 from ..ledger import ClipRow, Job, Ledger, now_iso
 from ..publish.http import RecordingTransport, RequestsTransport, Transport
-from .base import IMAGE, VIDEO, Adapter, Media
+from .base import IMAGE, TEXT, VIDEO, Adapter, Media
 from .antiban import (
     X_NETWORK, AntibanState, cooldown_days, daily_slot_count, is_limit_error, jitter_enabled, jitter_minutes,
     ramp_days, ramp_enabled, ramp_start, upload_wait_seconds,
@@ -22,13 +24,14 @@ from .fresh import looks_like_mp4, remux_fresh
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now, posting_day,
-    slot_times, slots_for,
+    slot_times, slots_for, x_post_format,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
 from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
 from .registry import ADAPTERS
+from .tags import TAG_NETWORKS, TagLog, choose_tag
 
 
 @dataclass
@@ -66,6 +69,7 @@ def run_posts(
     sleep: Callable[[float], None] = time.sleep,
     adapters: Mapping[str, type[Adapter]] = ADAPTERS,
     winner_handles: Mapping[str, dict] | None = None,
+    tag_allowlist: Mapping[str, dict] | None = None,
 ) -> list[Outcome]:
     env = dict(os.environ if env is None else env)
     approved = approved_networks(env)
@@ -78,6 +82,8 @@ def run_posts(
     waiting: dict[str, str] = {}
     reported: set[tuple[str, str]] = set()
     used_inputs = log.used_inputs()
+    tag_log = TagLog(log.path.parent / "tags.csv")
+    allowlist = dict(tag_allowlist or {})
     live_transport = transport or (RequestsTransport() if live else None)
     out: list[Outcome] = []
 
@@ -183,6 +189,10 @@ def run_posts(
             continue
 
         cls = adapters[net]
+        fmt = x_post_format(env, day, log.used_on(day, net)) if net == X_NETWORK else kind
+        if fmt == TEXT and TEXT not in cls.kinds:
+            out.append(Outcome(job.id, net, "skipped_unsupported_media", detail="X posts plain text; this route cannot"))
+            continue
         if kind not in cls.kinds:
             out.append(Outcome(job.id, net, "skipped_unsupported_media", detail=f"{net} cannot post {kind}"))
             continue
@@ -219,6 +229,7 @@ def run_posts(
         if live and clip.oracle_source != "live":
             out.append(Outcome(job.id, net, "skipped_not_live_oracle", detail="fixture verdicts never go out live"))
             continue
+        tag = ""
         if job.caption.strip() == WINNER:
             res = resolve(clip.verdict, net, dict(winner_handles or {}))
             if res.withheld:
@@ -229,22 +240,42 @@ def run_posts(
                 used_inputs.add(job.category)
                 out.append(Outcome(job.id, net, "withheld_winner", detail=f"{clip.verdict!r}: {res.reason}"))
                 continue
-            tag = res.handle if res.handle and not caption_problem(res.handle, job.category, net) else ""
-            note = res.reason if tag or not res.handle else f"{res.handle} is not a valid tag on {net}: no tag"
+            if net in TAG_NETWORKS:
+                # Instagram and TikTok tag only from the allowlist, never from the winner handle map.
+                picked = choose_tag(clip.verdict, net, env, allowlist, tag_log, now, len(slots_now(net)))
+                tag, note = picked.handle, picked.reason
+            else:
+                tag = res.handle if res.handle and not caption_problem(res.handle, job.category, net) else ""
+                note = res.reason if tag or not res.handle else f"{res.handle} is not a valid tag on {net}: no tag"
             job = dataclasses.replace(job, caption=tag or "-", notes=f"{job.notes}; {note}")
+            if net not in TAG_NETWORKS:
+                tag = ""  # the winner lane's own tags keep the lifetime caption dedupe
+        elif net in TAG_NETWORKS and not effective_caption(job.caption):
+            picked = choose_tag(clip.verdict, net, env, allowlist, tag_log, now, len(slots_now(net)))
+            tag = picked.handle
+            if tag:
+                job = dataclasses.replace(job, caption=tag, notes=f"{job.notes}; tag: {picked.reason}")
 
         shown = effective_caption(job.caption)
         if net == X_NETWORK and (job.notes.startswith("trend:") or job.notes.startswith("winner")):
             out.append(Outcome(job.id, net, "skipped_x_no_trend", detail="X takes no trend-lane posts and no automated mentions"))
             continue
-        if state.seen_caption(net, shown, log) or (net == X_NETWORK and state.near_caption(net, shown, log)):
+        if fmt == TEXT:
+            shown = x_text(job.category, clip.verdict)
+            problem = x_text_problem(shown)
+            if problem:
+                out.append(Outcome(job.id, net, "rejected_x_text", detail=problem))
+                continue
+            job = dataclasses.replace(job, caption=shown)
+        # A tag's repeat is governed by the 7-day tag guard, not the lifetime caption dedupe.
+        if (not tag and state.seen_caption(net, shown, log)) or (net == X_NETWORK and state.near_caption(net, shown, log)):
             out.append(Outcome(job.id, net, "skipped_duplicate_caption", detail="that caption already went out on this network"))
             continue
         if state.seen_clip(net, clip.clip_id, log):
             out.append(Outcome(job.id, net, "skipped_duplicate_clip", detail=f"clip {clip.clip_id} already went out on {net}"))
             continue
 
-        media = media_for(clip, kind)
+        media = Media.text(label=job.category) if fmt == TEXT else media_for(clip, kind)
         wait_s = 0.0
         if jitter_enabled(env) and enforce_slots:
             passed = [s for s in slot_times(day, slots) if s <= now]
@@ -259,13 +290,37 @@ def run_posts(
         if zone is not None:
             due_at = local_morning_after(now, zone)
         if live:
-            out.append(_post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at, state, flags, wait_s))
+            done = _post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at, state, flags, wait_s)
+            if tag and done.status in DONE:
+                tag_log.append(now, net, tag, job.id)
+            out.append(done)
         else:
             out.append(_post_dry(cls, job, clip, media, ledger, env, missing, due_at, wait_s))
     return out
 
 
-def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep) -> GitHubPagesHost | None:
+def x_text(category: str, verdict: str) -> str:
+    """X post body: the lowercase input, then the lowercase verdict. Nothing else."""
+    return f"{category.strip().lower()}\n{verdict.strip().lower()}"
+
+
+def x_text_problem(text: str) -> str | None:
+    if "@" in text:
+        return "X text cannot mention an account"
+    if "#" in text:
+        return "X text cannot carry a hashtag"
+    if re.search(r"https?://|\bwww\.|\.(com|ai|io|net|org)\b", text, re.I):
+        return "X text cannot contain a link"
+    if any(unicodedata.category(ch)[0] not in "LMNPZ" and ch != "\n" for ch in text):
+        return "X text is letters and punctuation only: no emoji or symbols"
+    if len(text) > 280:
+        return "X text is over 280 characters"
+    return None
+
+
+def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep, media: Media | None = None) -> GitHubPagesHost | None:
+    if media is not None and media.kind == TEXT:
+        return None
     if cls.needs_public_url and not GitHubPagesHost.missing(env):
         return GitHubPagesHost(transport, env, sleep=sleep)
     return None
@@ -276,14 +331,16 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     net = cls.name
     at = now.astimezone(timezone.utc).isoformat(timespec="seconds")
     shown = effective_caption(job.caption)
-    log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown))
+    fmt = media.kind
+    log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
+                       format=fmt))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
     if wait_s > 0:
         sleep(wait_s)
     try:
-        host = _host(cls, env, transport, sleep)
+        host = _host(cls, env, transport, sleep, media)
         if host:
             media = dataclasses.replace(media, public_url=host.publish(media))
         media = _fresh_container(media, now, clip.clip_id)
@@ -291,13 +348,13 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
-                           category=job.category, caption=shown))
+                           category=job.category, caption=shown, format=fmt))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
-                       job.category, shown))
+                       job.category, shown, fmt))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):
@@ -324,7 +381,7 @@ def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, m
     adapter = cls(None, dry_env, sleep=lambda _s: None, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
-    host = _host(cls, dry_env, None, lambda _s: None)
+    host = _host(cls, dry_env, None, lambda _s: None, media)
     recorder = RecordingTransport(
         lambda req: host.dry_run_responder(req) if host and host.handles(req) else adapter.dry_run_responder(req))
     adapter.transport = recorder
@@ -347,6 +404,7 @@ def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, m
         "source": job.notes or "queue",
         "bare_input": job.category,
         "caption": effective_caption(job.caption),
+        "format": media.kind,
         "scheduled_for": due_at.isoformat() if due_at else None,
         "upload_wait_s": round(wait_s, 3),
         "clip_id": clip.clip_id,

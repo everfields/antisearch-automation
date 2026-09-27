@@ -158,10 +158,14 @@ def cmd_post(args, settings: Settings) -> int:
     from .publisher.trends import daily_candidates, trend_cap, trend_jobs, trend_networks
     from .publisher.verdicts import DryRunOracle, FrozenOracle
     from .publisher.winners import load_handles, winner_cap, winner_jobs, winner_networks
+    from .publisher.tags import DEFAULT_ALLOWLIST, load_allowlist
 
     env = dict(os.environ)
     try:
         opts = _clip_options(env)
+        from .publisher.guard import x_format
+
+        x_mode = x_format(env)
     except ValueError as exc:
         print(f"post error: {exc}", file=sys.stderr)
         return 2
@@ -204,7 +208,7 @@ def cmd_post(args, settings: Settings) -> int:
         return ledger.clip_for_job(job.id)
 
     now = now_et()
-    print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} {_clip_label(opts)} "
+    print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} {_clip_label(opts)} x-format={x_mode} "
           f"queue={' '.join(queues)} "
           f"pools={pools_dir} state={log.path} now={now:%Y-%m-%d %H:%M %Z} posting-day={posting_day(now)}")
     try:
@@ -212,6 +216,7 @@ def cmd_post(args, settings: Settings) -> int:
             jobs, ledger, log, now=now, live=args.live, ignore_slots=args.ignore_slots,
             networks=_split(args.network), only=_split(args.only), kind=args.kind, retry_failed=args.retry_failed,
             produce=produce, env=env, adapters=adapters, winner_handles=load_handles(winners_dir / "handles.json"),
+            tag_allowlist=load_allowlist(env.get("PUBLISHER_TAG_ALLOWLIST") or DEFAULT_ALLOWLIST),
         )
     except (FontNotFound, RenderError, ValueError) as exc:
         print(f"post error: {exc}", file=sys.stderr)

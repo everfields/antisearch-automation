@@ -138,8 +138,8 @@ def test_slot_overrides_and_limits():
 def test_cadence_presets_carlos_and_soul():
     counts = {c: {n: len(slots_for(n, {"PUBLISHER_CADENCE": c})) for n in ("tiktok", "x", "bluesky", "instagram", "linkedin")}
               for c in ("carlos", "soul")}
-    assert counts["carlos"] == {"tiktok": 5, "x": 5, "bluesky": 5, "instagram": 5, "linkedin": 5}
-    assert counts["soul"] == {"tiktok": 5, "x": 5, "bluesky": 3, "instagram": 3, "linkedin": 1}
+    assert counts["carlos"] == {"tiktok": 5, "x": 2, "bluesky": 5, "instagram": 5, "linkedin": 5}
+    assert counts["soul"] == {"tiktok": 5, "x": 2, "bluesky": 3, "instagram": 3, "linkedin": 1}
     assert slots_for("bluesky", {}) == slots_for("bluesky", {"PUBLISHER_CADENCE": "carlos"})
 
 

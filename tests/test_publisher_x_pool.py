@@ -40,6 +40,7 @@ LIVE = {
     "PUBLISHER_CLIP_FRAME": "phone",
     "PUBLISHER_CLIP_PHONE_BG": "stone",
     "PUBLISHER_CLIP_AUDIO": "keys",
+    "PUBLISHER_X_FORMAT": "text",
 }
 
 
@@ -75,10 +76,12 @@ def test_x_pool_repeats_nothing_already_asked_or_owned_elsewhere():
         assert not x & {c for c, _ in read_pool(seeds)}, seeds.name
 
 
-def test_x_cadence_stays_conservative_under_reach():
-    x = [f"{t:%H:%M}" for t in slots_for("x", {"PUBLISHER_CADENCE": "reach"})]
-    assert x == ["09:07", "11:07", "13:07", "16:07", "19:07"]
-    assert x == [f"{t:%H:%M}" for t in slots_for("x", {"PUBLISHER_CADENCE": "soul"})]
+def test_x_posts_at_most_twice_a_day():
+    for cadence in ("reach", "soul", "carlos"):
+        assert [f"{t:%H:%M}" for t in slots_for("x", {"PUBLISHER_CADENCE": cadence})] == ["09:07", "16:07"]
+    assert [f"{t:%H:%M}" for t in slots_for("x", {"PUBLISHER_SLOTS_X": "11:07"})] == ["11:07"]  # 1 is fine
+    with pytest.raises(ValueError, match="at most 2"):
+        slots_for("x", {"PUBLISHER_SLOTS_X": "09:07,13:07,19:07"})
 
 
 class LiveAnything(FixtureOracle):
@@ -123,23 +126,24 @@ def _live_run(tmp_path, now, monkeypatch):
 
 @requires_ffmpeg
 def test_live_run_posts_one_x_job_at_a_due_x_slot(tmp_path, monkeypatch):
-    now = datetime(2026, 9, 28, 11, 12, tzinfo=ET)  # a Monday, just after the 11:07 X slot
+    now = datetime(2026, 9, 28, 9, 12, tzinfo=ET)  # a Monday, just after the one 09:07 X slot
     jobs, out, transport, ledger = _live_run(tmp_path, now, monkeypatch)
     assert jobs and all(j.platforms == ("x",) for j in jobs)
     assert jobs[0].notes == "pool:unowned"  # the first post on a network is an unowned word
     assert any(j.notes == "pool:vertical" for j in jobs)
     posted = [o for o in out if o.status in DONE]
     assert len(posted) == 1 and posted[0].network == "x"
-    assert [o.status for o in out if o not in posted] == ["skipped_one_per_run"]
+    assert [o.status for o in out if o not in posted] == ["skipped_not_due"]  # the second X slot is 16:07
 
     create = [r for r in transport.requests if "createPost" in (r.json or {}).get("query", "")]
     assert len(create) == 1
     payload = create[0].json["variables"]["input"]
     job = next(j for j in jobs if j.id == posted[0].job_id)
-    assert payload["text"] in ("", job.category)  # empty or the bare input; never a mention or a link
-    assert "@" not in payload["text"] and "http" not in payload["text"]
-    assert payload["channelId"] == "ch-x"
-    assert payload["assets"] == [{"video": {"url": payload["assets"][0]["video"]["url"]}}]
+    # plain text: line 1 the lowercase input, line 2 the lowercase verdict; no media, mention, or link
+    assert payload["text"] == f"{job.category}\nstand-in verdict"
+    assert payload["assets"] == [] and payload["channelId"] == "ch-x"
+    assert "@" not in payload["text"] and "http" not in payload["text"] and "#" not in payload["text"]
+    assert not any("api.github.com" in r.url for r in transport.requests)  # no clip uploaded for X
 
     clip = ledger.clip_for_job(job.id)
     side = json.loads((ledger.clips_dir / f"{clip.clip_id}.json").read_text())["timeline"]

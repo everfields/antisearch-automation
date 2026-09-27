@@ -228,9 +228,14 @@ That's 12 posts a day (17 with X), instead of 20–25.
 - **Rhythm:** each network's first post ever is an unowned word, then one in four.
 - **Verticals:**
   - Bluesky: companies / tech (X's brief);
-  - X (Buffer route only): companies / SaaS, its own inputs apart from Bluesky's.
-    Captions stay empty (no mentions, no links), the clip is silent, and it posts at
-    the conservative `soul` X slots under `reach` too;
+  - X (Buffer route only): its own pool, `queue/pools/x.txt` (the X vertical is being
+    re-chosen). Format A/B (CoS + Soul, 2026-09-27): `PUBLISHER_X_FORMAT=alternate`
+    (default) alternates the silent phone-frame video (caption empty) and a plain text
+    post (line 1 the lowercase input, line 2 the lowercase verdict; no brand line,
+    mention, link, emoji, or hashtag). One of each a day, and which one takes the first
+    slot swaps daily. `video` or `text` locks the winner. Each `posts.csv` row records
+    `format`. Two posts a day at 09:07 and 16:07 ET (`PUBLISHER_SLOTS_X` may move or drop
+    one, never add a third);
   - LinkedIn: employers;
   - Instagram: places (restaurants, travel, hotels, entertainment);
   - TikTok: beauty / hair / skin (the lock; Carlos grouped TikTok with leisure,
@@ -343,11 +348,12 @@ everything that can post natively.
 | `PUBLISHER_MEDIA_REPO`, `PUBLISHER_PUBLIC_BASE_URL` | variable | Clips repo + its Pages URL |
 | `PUBLISHER_LIVE_NETWORKS` | variable | The recorded first-of-class yes. `x` posts only when this lists it and the route is Buffer |
 | `PUBLISHER_CRON` | variable | unset = off; `dry-run`; `live` |
-| `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere), `soul` (TikTok 5, X 5, Bluesky 3, IG 3, LinkedIn 1), or `reach` (IG 4, TikTok 4 from day one; X, LinkedIn, Bluesky stay on the `soul` slots) |
+| `PUBLISHER_CADENCE` | variable | `carlos` (default, 5 everywhere), `soul` (TikTok 5, X 2, Bluesky 3, IG 3, LinkedIn 1), or `reach` (IG 4, TikTok 4 from day one; X, LinkedIn, Bluesky stay on the `soul` slots) |
 | `PUBLISHER_RAMP` | variable, optional | `on` (default) warms a network from 1/day up to its cadence. Unset on `reach` means off. `off` posts the full cadence immediately |
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
 | `PUBLISHER_TREND_NETWORKS`, `PUBLISHER_TREND_CAP` | variable, optional | Trend lane: networks + rows per network per day (default 1, max 3). See `TREND_AND_REPLY_LANES.md` |
-| `PUBLISHER_WINNER_NETWORKS`, `PUBLISHER_WINNER_CAP` | variable, optional | Winner lane: networks + posts per day across networks (default 2, max 3); handles in `queue/winners/handles.json` |
+| `PUBLISHER_WINNER_NETWORKS`, `PUBLISHER_WINNER_CAP` | variable, optional | Winner lane: networks + posts per day across networks (default 2, max 3); handles in `queue/winners/handles.json` (Instagram and TikTok tag only from the tag allowlist below) |
+| `PUBLISHER_TAG_NETWORKS` | variable, optional | Breaker for winner tags: `instagram`, `tiktok`, or both. Empty (default) = no tags. Tags come only from `queue/tags/allowlist.json` (brands, products, companies; verified, checked ≤30 days); caption = `@handle` only; one tag per handle per network per 7 days; ≤ half of a day's posts. See `queue/tags/README.md` |
 | `PUBLISHER_REPLY_NETWORKS`, `PUBLISHER_REPLY_CAP`, `PUBLISHER_WATCH_BLUESKY` | variable, optional | Reply lane (Bluesky): `bluesky` to go live, ≤3 a day, handles to watch |
 | `PUBLISHER_LANGUAGE` | variable, optional | `en` (default, Carlos's lock); anything else lifts the English check |
 | `PUBLISHER_BRIDGE` | variable, optional | `buffer` = Instagram, LinkedIn, TikTok and X via Buffer free. Unset = Buffer gone; X then stays off |

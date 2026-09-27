@@ -14,7 +14,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from ..publish.http import HttpResponse, Request
-from .base import VIDEO, Adapter, Media, PostResult, PublisherError
+from .base import TEXT, VIDEO, Adapter, Media, PostResult, PublisherError
 
 API = "https://api.buffer.com"
 STATUS_POLLS = 3  # create + 2 status reads per post: ~15 posts/day stays far under 3,000 requests per 30 days
@@ -68,14 +68,14 @@ class BufferRoute(Adapter):
         return {"url": media.public_url}
 
     def _post(self, media: Media, caption: str) -> PostResult:
-        if not media.public_url:
+        if media.kind != TEXT and not media.public_url:
             raise PublisherError("buffer: the clip needs a public URL (media host not configured)")
         payload: dict = {
             "channelId": self._channel(),
             "text": caption,
             "schedulingType": "automatic",
             "mode": "shareNow",
-            "assets": [{"video": self._video(media)}],
+            "assets": [] if media.kind == TEXT else [{"video": self._video(media)}],
         }
         if self.due_at is not None:
             payload["mode"] = "customScheduled"
@@ -159,9 +159,14 @@ class BufferTikTok(BufferRoute):
 
 
 class BufferX(BufferRoute):
-    """One MP4 by public URL. X rejects thumbnailOffset, so the asset is the URL alone."""
+    """Plain text on X (CoS + Soul, 2026-09-27): `input` then `verdict`, no media, no assets.
+
+    A video by public URL still works for manual use; X rejects thumbnailOffset, so the
+    asset is the URL alone.
+    """
 
     name = "x"
+    kinds = frozenset({VIDEO, TEXT})
     service = "twitter"  # Buffer's service enum; the env pin is BUFFER_CHANNEL_X
     env_sets = (("BUFFER_API_KEY", "PUBLISHER_MEDIA_REPO", "PUBLISHER_MEDIA_TOKEN", "PUBLISHER_PUBLIC_BASE_URL"),)
     optional_env = ("BUFFER_CHANNEL_X", "BUFFER_ORG_ID")
@@ -172,6 +177,10 @@ class BufferX(BufferRoute):
         return {"url": media.public_url}
 
     def _post(self, media: Media, caption: str) -> PostResult:
+        if media.kind == TEXT:
+            if not caption.strip():
+                raise PublisherError("buffer: an X text post needs text")
+            return super()._post(media, caption)
         if not (0.5 <= media.duration_s <= 140):
             raise PublisherError(f"buffer: X wants an MP4 between 0.5s and 140s, got {media.duration_s:g}s")
         return super()._post(media, caption)

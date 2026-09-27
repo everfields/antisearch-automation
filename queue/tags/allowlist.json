@@ -1,0 +1,14 @@
+{
+  "_readme": "Tag allowlist for Instagram and TikTok. See README.md in this folder. Only brands, products and companies; never people. A handle is tagged only with verified=true and a checked date in the last 30 days.",
+  "k18": {
+    "kind": "brand",
+    "aliases": ["k18 hair", "k18 airwash", "k18 airwash dry shampoo"],
+    "tiktok": {
+      "handle": "@k18hair",
+      "verified": true,
+      "checked": "2026-09-27",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@k18hair profile data: uniqueId k18hair, nickname K18 Hair, verified true (fetched 2026-09-27); k18hair.com TikTok contest rules name @k18hair as the brand account"
+    }
+  }
+}
