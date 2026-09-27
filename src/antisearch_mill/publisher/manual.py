@@ -1,6 +1,8 @@
 """Manual one-off posts: a reviewed row file, the normal publisher and Buffer path, no browser.
 
 A row is `id,category,network,due_et` (`due_et` = `YYYY-MM-DD HH:MM`, America/New_York).
+The scheduled time gets the slot jitter (0-40 minutes, see jitter.py) unless the row pins
+it: `YYYY-MM-DD HH:MM exact`.
 The file itself is the approval: its network may be paused in PUBLISHER_LIVE_NETWORKS and
 the row still goes out, once. It is scheduled in Buffer for `due_et`, or the same time
 on the next day if that has passed. The verdict must already be frozen in verdicts.csv:
@@ -26,7 +28,9 @@ from urllib.parse import quote
 from ..publish.http import RecordingTransport, RequestsTransport
 from .base import Media
 from .guard import DONE, PENDING, SCHEDULED_STATES, PostLog, PostRow, approved_networks, slots_for, tz
+from .antiban import jitter_enabled
 from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
+from .jitter import scheduled_offset
 from .run import Outcome, run_posts
 from .tags import TagLog, choose_tag, tag_networks
 from .verdicts import VerdictStore
@@ -41,6 +45,7 @@ class ManualRow:
     category: str
     network: str
     due: datetime
+    exact: bool = False
 
 
 def read_manual(path: str | Path) -> list[ManualRow]:
@@ -50,12 +55,16 @@ def read_manual(path: str | Path) -> list[ManualRow]:
             job_id = (r.get("id") or "").strip().lower()
             if not job_id or job_id.startswith("#"):
                 continue
+            raw = (r.get("due_et") or "").strip()
+            exact = raw.lower().endswith(" exact")
+            if exact:
+                raw = raw[: -len(" exact")].strip()
             try:
-                due = datetime.strptime((r.get("due_et") or "").strip(), "%Y-%m-%d %H:%M").replace(tzinfo=tz())
+                due = datetime.strptime(raw, "%Y-%m-%d %H:%M").replace(tzinfo=tz())
             except ValueError:
-                raise ValueError(f"{path}:{n}: due_et must be YYYY-MM-DD HH:MM (America/New_York)") from None
+                raise ValueError(f"{path}:{n}: due_et must be YYYY-MM-DD HH:MM [exact] (America/New_York)") from None
             rows.append(ManualRow(job_id, normalize_category(r.get("category") or ""),
-                                  (r.get("network") or "").strip().lower(), due))
+                                  (r.get("network") or "").strip().lower(), due, exact))
     return rows
 
 
@@ -100,9 +109,12 @@ def run_manual(
             continue
         job = Job(id=row.id, category=row.category, platforms=(row.network,), notes=MANUAL_NOTE)
         kwargs = {"sleep": sleep} if sleep else {}
+        when = next_window(row.due, now)
+        if not row.exact and jitter_enabled(dict(env)):
+            when += scheduled_offset(row.network, when, env)
         out += run_posts([job], ledger, log, now=now, live=live, ignore_slots=True, networks={row.network},
                          produce=produce, transport=transport, env=one_env, adapters=adapters,
-                         tag_allowlist=tag_allowlist, schedule_at=next_window(row.due, now), **kwargs)
+                         tag_allowlist=tag_allowlist, schedule_at=when, **kwargs)
     return out
 
 

@@ -350,9 +350,10 @@ def cmd_winners(args, settings: Settings) -> int:
 def cmd_due(args, settings: Settings) -> int:
     """Exit 0 if a live-approved network has a slot due now (the workflow's cheap pre-check), else 3."""
     from .publisher.antiban import (
-        X_NETWORK, AntibanState, daily_slot_count, ramp_days, ramp_enabled, ramp_start,
+        X_NETWORK, AntibanState, daily_slot_count, jitter_enabled, ramp_days, ramp_enabled, ramp_start,
     )
     from .publisher.guard import approved_networks, now_et, open_now, posting_day, slots_due, slots_for
+    from .publisher.jitter import LOOKAHEAD, slot_offsets
     from .publisher.registry import route_for
 
     env = dict(os.environ)
@@ -376,7 +377,10 @@ def cmd_due(args, settings: Settings) -> int:
             ramp_days=ramp_days(env), start=ramp_start(env), braked=state.braked(net, now),
         )]
         used = log.used_on(day, net)
-        free = open_now(now, slots, used)
+        if jitter_enabled(env):
+            free = open_now(now, slots, used, slot_offsets(net, day, slots, env), LOOKAHEAD)
+        else:
+            free = open_now(now, slots, used)
         print(f"  {net:<9} slots passed {slots_due(now, slots)}/{len(slots)}, used {used} -> {free} due")
         if free > 0:
             due.append(net)

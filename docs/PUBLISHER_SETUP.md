@@ -11,7 +11,8 @@ trial. The trial clock restarts on the day volume posting goes live (the first d
 counted from it.
 
 **Anti-ban.** New accounts ramp from 1 post/day to the cadence above over 14 days
-(configurable), slots jitter off :00 and :30, and a spam or rate-limit response
+(configurable), each slot goes out 0-40 minutes after its :07 (seeded, never two
+networks on one minute), and a spam or rate-limit response
 halves that network for 72h. The rules and the switches are in
 [ANTI_BAN.md](ANTI_BAN.md). X is not auto-posted.
 

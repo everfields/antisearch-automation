@@ -102,7 +102,7 @@ def test_post_dry_run_end_to_end(tmp_path, capsys, monkeypatch):
 
 
 def test_due_is_the_cheap_precheck_for_the_hourly_cron(tmp_path, monkeypatch, capsys):
-    from datetime import datetime
+    from datetime import datetime, timedelta
     from zoneinfo import ZoneInfo
 
     import antisearch_mill.publisher.guard as guard
@@ -111,12 +111,25 @@ def test_due_is_the_cheap_precheck_for_the_hourly_cron(tmp_path, monkeypatch, ca
     monkeypatch.setattr(guard, "now_et", lambda: datetime(2026, 11, 2, 8, 30, tzinfo=ZoneInfo("America/New_York")))
     assert main(base) == 3  # nothing approved
     monkeypatch.setenv("PUBLISHER_LIVE_NETWORKS", "bluesky,tiktok")
+    monkeypatch.setenv("PUBLISHER_JITTER", "off")  # the bare slot minutes; the jittered ones are checked below
     assert main(base) == 3  # 08:30 ET: before the posting day starts
     monkeypatch.setattr(guard, "now_et", lambda: datetime(2026, 11, 2, 9, 7, tzinfo=ZoneInfo("America/New_York")))
     capsys.readouterr()
     assert main(base) == 0
     out = capsys.readouterr().out
     assert "due: bluesky" in out and "tiktok" in out.splitlines()[1] and "0 due" in out.splitlines()[1]
+
+    from antisearch_mill.publisher.jitter import LOOKAHEAD, slot_offsets
+
+    monkeypatch.setenv("PUBLISHER_JITTER", "on")
+    et = ZoneInfo("America/New_York")
+    slots = guard.slots_for("bluesky", {})
+    opens = datetime(2026, 11, 2, 9, 7, tzinfo=et) + slot_offsets("bluesky", guard.posting_day(
+        datetime(2026, 11, 2, 9, 7, tzinfo=et)), slots, {})[0]
+    monkeypatch.setattr(guard, "now_et", lambda: opens - LOOKAHEAD - timedelta(minutes=1))
+    assert main(base) == 3  # the jittered 09:07 is more than one cron interval away
+    monkeypatch.setattr(guard, "now_et", lambda: opens - LOOKAHEAD)
+    assert main(base) == 0  # this run takes it and waits for the minute
 
 
 def test_instagram_token_refresh():

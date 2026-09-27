@@ -216,19 +216,36 @@ def _slot_deadline(times: list[datetime], index: int) -> datetime:
     return floor
 
 
-def open_now(moment: datetime, slots: list[time], used: int) -> int:
+def open_now(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,
+             lookahead: timedelta = timedelta(0)) -> int:
     """Unfilled slots that have come and have not expired.
 
     Posts fill the earliest slots first. A slot that has expired is not owed, so a
     down stretch cannot dump every missed slot once the cron wakes. The runner
     still posts at most one of these per network per run, and honors MIN_GAP.
+    With `offsets` (the slot jitter) a slot comes at its jittered time, counted from
+    `moment + lookahead` so a run can wait for one due before the next wake; the
+    deadline is unchanged.
     """
     times = slot_times(posting_day(moment), slots)
-    passed = [s for s in times if s <= moment]
+    opens = [s + (offsets[i] if offsets else timedelta(0)) for i, s in enumerate(times)]
+    passed = [s for s, o in zip(times, opens) if o <= moment + lookahead]
     if len(passed) <= used:
         return 0
     deadline = {s: _slot_deadline(times, i) for i, s in enumerate(times)}
     return sum(1 for s in passed[used:] if moment < deadline[s])
+
+
+def serving_open(moment: datetime, slots: list[time], used: int, offsets: list[timedelta],
+                 lookahead: timedelta = timedelta(0)) -> datetime | None:
+    """When the slot a post would fill now opens (its jittered time), or None if none is open."""
+    times = slot_times(posting_day(moment), slots)
+    opens = [s + offsets[i] for i, s in enumerate(times)]
+    passed = [i for i, o in enumerate(opens) if o <= moment + lookahead]
+    for i in passed[used:]:
+        if moment < _slot_deadline(times, i):
+            return opens[i]
+    return None
 
 
 def next_slot(moment: datetime, slots: list[time]) -> datetime | None:

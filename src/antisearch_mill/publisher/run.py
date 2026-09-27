@@ -9,7 +9,7 @@ import re
 import time
 import unicodedata
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Callable, Mapping
 
@@ -17,14 +17,14 @@ from ..ledger import ClipRow, Job, Ledger, now_iso
 from ..publish.http import RecordingTransport, RequestsTransport, Transport
 from .base import IMAGE, TEXT, VIDEO, Adapter, Media
 from .antiban import (
-    X_NETWORK, AntibanState, cooldown_days, daily_slot_count, is_limit_error, jitter_enabled, jitter_minutes,
-    ramp_days, ramp_enabled, ramp_start, upload_wait_seconds,
+    X_NETWORK, AntibanState, cooldown_days, daily_slot_count, is_limit_error, jitter_enabled,
+    ramp_days, ramp_enabled, ramp_start,
 )
 from .fresh import looks_like_mp4, remux_fresh
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now, posting_day,
-    slot_times, slots_for, x_post_format,
+    serving_open, slot_times, slots_for, x_post_format,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
@@ -33,6 +33,7 @@ from .pools import POOL_NOTE
 from .registry import ADAPTERS
 from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
 from .tags import TAG_NETWORKS, TagLog, choose_tag
+from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
 
 @dataclass
@@ -89,6 +90,10 @@ def run_posts(
     allowlist = dict(tag_allowlist or {})
     live_transport = transport or (RequestsTransport() if live else None)
     out: list[Outcome] = []
+    jitter = jitter_enabled(env)
+    lookahead = LOOKAHEAD if jitter else timedelta(0)
+    waited = timedelta(0)  # slept so far in this run: `now` is the run's start
+    last_post: datetime | None = None
 
     def once(job: Job, net: str, status: str, detail: str) -> None:
         if (net, status) not in reported:
@@ -107,11 +112,21 @@ def run_posts(
         )
         return full[:n]
 
+    def next_open(net: str, slots: list, used: int) -> datetime | None:
+        if not jitter:
+            return next_slot(now, slots)
+        opens = [s + o for s, o in zip(slot_times(posting_day(now), slots), offsets(net, slots))]
+        ahead = [o for o in opens[used:] if o > now]
+        return ahead[0] if ahead else next_slot(now, slots)
+
+    def offsets(net: str, slots: list) -> list[timedelta] | None:
+        return slot_offsets(net, posting_day(now), slots, env) if jitter else None
+
     def left(net: str) -> int:
         if net not in allowance:
             slots = slots_now(net)
             used = log.used_on(day, net)
-            free = open_now(now, slots, used) if enforce_slots else len(slots) - used
+            free = open_now(now, slots, used, offsets(net, slots), lookahead) if enforce_slots else len(slots) - used
             allowance[net] = min(free, PER_RUN_PER_NETWORK)
         return allowance[net]
 
@@ -175,8 +190,8 @@ def run_posts(
             used = log.used_on(day, net)
             if used >= len(slots):
                 once(job, net, "skipped_network_daily_cap", f"{len(slots)} slot(s) per day on {net}, all used")
-            elif enforce_slots and open_now(now, slots, used) <= 0:
-                nxt = next_slot(now, slots)
+            elif enforce_slots and open_now(now, slots, used, offsets(net, slots), lookahead) <= 0:
+                nxt = next_open(net, slots, used)
                 once(job, net, "skipped_not_due", f"next {net} slot {nxt:%Y-%m-%d %H:%M %Z}" if nxt else "no slots")
             else:
                 once(job, net, "skipped_one_per_run", f"one {net} post per run")
@@ -288,18 +303,23 @@ def run_posts(
 
         media = Media.text(label=job.category) if fmt == TEXT else media_for(clip, kind)
         wait_s = 0.0
-        if jitter_enabled(env) and enforce_slots:
-            passed = [s for s in slot_times(day, slots) if s <= now]
-            used_slots = log.used_on(day, net)
-            if used_slots < len(passed):
-                nominal = passed[used_slots]
-                wait_s = upload_wait_seconds(nominal, jitter_minutes(net, nominal), now)
+        if jitter and enforce_slots and live:
+            clock = now + waited
+            target = serving_open(now, slots, log.used_on(day, net), offsets(net, slots), lookahead) or clock
+            if last_post is not None:
+                target = max(target, last_post + MIN_SPACING)
+            wait = min(max(target - clock, timedelta(0)), lookahead + MIN_SPACING)
+            wait_s = wait.total_seconds()
+            waited += wait
+            last_post = now + waited
         allowance[net] -= 1
         used_inputs.add(job.category)
         due_at = None
         zone = local_tz(job.category) if net in LOCAL_MORNING_NETWORKS and cls.route == "buffer" else None
         if zone is not None:
             due_at = local_morning_after(now, zone)
+            if due_at is not None and jitter:
+                due_at += scheduled_offset(net, due_at, env)
         if schedule_at is not None:
             due_at = schedule_at
         if live:
