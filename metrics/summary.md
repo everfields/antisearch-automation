@@ -1,39 +1,41 @@
-# Social metrics — 2026-09-27 17:05 UTC
+# Social metrics — 2026-09-27 21:28 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **0** (24h n/a (no snapshot that old yet), 7d n/a (no snapshot that old yet))
-- account likes: 5, posts: 4
+- account likes: 6, posts: 6
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `red flag` → controlling behavior | 817 | 1 | 0 | 0 | 0 | 0.1% |
 | `a sound` → rain on a roof | 811 | 3 | 0 | 0 | 0 | 0.4% |
 | `sunscreen` → la roche-posay uvmune 400 invisible fluid spf50+ | 267 | 1 | 0 | 0 | 0 | 0.4% |
-| `the ick` → rudeness to waitstaff | 3 | 0 | 0 | 0 | 0 | 0.0% |
+| `retinol serum` → medik8 intelligent retinol 10tr | 241 | 0 | 0 | 0 | 0 | 0.0% |
+| `vitamin c serum` → skinceuticals c e ferulic | 13 | 1 | 0 | 0 | 0 | 7.7% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `vitamin c serum` → skinceuticals c e ferulic | 7.7% | 13 |
 | `sunscreen` → la roche-posay uvmune 400 invisible fluid spf50+ | 0.4% | 267 |
 | `a sound` → rain on a roof | 0.4% | 811 |
-| `red flag` → controlling behavior | 0.1% | 817 |
-| `the ick` → rudeness to waitstaff | 0.0% | 3 |
+| `retinol serum` → medik8 intelligent retinol 10tr | 0.0% | 241 |
 
-### last 7d (4 post(s))
+### last 7d (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `red flag` → controlling behavior | 817 | 1 | 0 | 0 | 0 | 0.1% |
 | `a sound` → rain on a roof | 811 | 3 | 0 | 0 | 0 | 0.4% |
 | `sunscreen` → la roche-posay uvmune 400 invisible fluid spf50+ | 267 | 1 | 0 | 0 | 0 | 0.4% |
-| `the ick` → rudeness to waitstaff | 3 | 0 | 0 | 0 | 0 | 0.0% |
+| `retinol serum` → medik8 intelligent retinol 10tr | 241 | 0 | 0 | 0 | 0 | 0.0% |
+| `vitamin c serum` → skinceuticals c e ferulic | 13 | 1 | 0 | 0 | 0 | 7.7% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `vitamin c serum` → skinceuticals c e ferulic | 7.7% | 13 |
 | `sunscreen` → la roche-posay uvmune 400 invisible fluid spf50+ | 0.4% | 267 |
 | `a sound` → rain on a roof | 0.4% | 811 |
 | `red flag` → controlling behavior | 0.1% | 817 |
@@ -49,15 +51,15 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hangover cure` → time | – | – | – | – | – | – |
 | `restaurant in barcelona` → disfrutar | – | – | – | – | – | – |
 | `a color` → blue | – | – | – | – | – | – |
 | `travel` → japan | – | – | – | – | – | – |
 | `fashion` → hermès | – | – | – | – | – | – |
+| `wanderlust` → new zealand | – | – | – | – | – | – |
 
-### last 7d (10 post(s))
+### last 7d (11 post(s))
 
-**10 published post(s) have no numbers yet** (shown as –)
+**11 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -71,28 +73,28 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 - followers: **–** (24h –, 7d –) — X shows followers only to logged-in clients; not collected
 
-### last 24h (1 post(s))
+### last 24h (3 post(s))
+
+**1 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a feeling` → love | 8 | 0 | 0 | 0 | – | 0.0% |
+| `a feeling` → love | – | 0 | 0 | – | – | – |
+| `ai model` → claude opus 5.5 | – | 0 | 0 | – | – | – |
+| `overrated` → fame | – | – | – | – | – | – |
 
-| top by engagement rate | eng. rate | views |
-| --- | --- | --- |
-| `a feeling` → love | 0.0% | 8 |
+### last 7d (3 post(s))
 
-### last 7d (1 post(s))
+**1 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a feeling` → love | 8 | 0 | 0 | 0 | – | 0.0% |
-
-| top by engagement rate | eng. rate | views |
-| --- | --- | --- |
-| `a feeling` → love | 0.0% | 8 |
+| `a feeling` → love | – | 0 | 0 | – | – | – |
+| `ai model` → claude opus 5.5 | – | 0 | 0 | – | – | – |
+| `overrated` → fame | – | – | – | – | – | – |
 
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
-| video | 1 | 8.0 | 0.0 | 0.0 | 0.0% |
-| text | 0 | – | – | – | – |
+| video | 1 | – | 0.0 | 0.0 | – |
+| text | 2 | – | 0.0 | 0.0 | – |
 
