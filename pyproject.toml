@@ -15,6 +15,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+settle = ["playwright>=1.40"]  # `mill settle-shoot` drives the real site in headless Chrome
 
 [project.scripts]
 mill = "antisearch_mill.cli:main"
