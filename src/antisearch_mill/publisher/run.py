@@ -372,30 +372,34 @@ def run_posts(
         else:
             done = _post_dry(cls, job, clip, media, ledger, env, missing, due_at, wait_s)
             out.append(done)
-        if net == "instagram" and due_at is None and stories_enabled(env) and done.status in ("published", "dry_run_ok"):
-            out.append(_story(job, clip, cls, log, ledger, env, live=live, transport=live_transport, sleep=sleep,
+        if (net == "instagram" and cls.route == "buffer" and produce is not None and due_at is None
+                and stories_enabled(env) and done.status in ("published", "dry_run_ok")):
+            out.append(_story(job, clip, log, ledger, env, live=live, transport=live_transport, sleep=sleep,
                               now=now, day=day, produce=produce, state=state, flags=flags))
     return out
 
 
 def stories_enabled(env: Mapping[str, str]) -> bool:
-    """`PUBLISHER_IG_STORIES=on`: one Stories card a posting day, after the day's first Instagram reel."""
-    return (env.get("PUBLISHER_IG_STORIES") or "off").strip().lower() in ("on", "1", "true")
+    """One Stories card a posting day, after the first Instagram reel sent that day (founder, 2026-09-28:
+    on by default). `PUBLISHER_IG_STORIES=off` stops it."""
+    return (env.get("PUBLISHER_IG_STORIES") or "on").strip().lower() not in ("off", "0", "false", "none")
 
 
-def _story(job: Job, clip: ClipRow, reel_cls, log: PostLog, ledger: Ledger, env, *, live: bool, transport, sleep,
+def _story(job: Job, clip: ClipRow, log: PostLog, ledger: Ledger, env, *, live: bool, transport, sleep,
            now: datetime, day, produce, state: AntibanState, flags: Path) -> Outcome:
-    """The Stories card for the reel that just went out: the same frozen verdict, never a second oracle run."""
+    """The Stories card for the reel that just went out through Buffer: the same frozen verdict, never a
+    second oracle run."""
     from .buffer import BufferInstagramStory
 
     net = BufferInstagramStory.name
     story_job = Job(id=f"{job.id}-story", category=job.category, platforms=(net,), notes=job.notes, creative=STORY)
-    if reel_cls.route != "buffer":
-        return Outcome(story_job.id, net, "skipped_story_route", detail="Stories go out through Buffer only")
     if log.used_on(day, net) >= STORIES_PER_DAY:
         return Outcome(story_job.id, net, "skipped_network_daily_cap", detail=f"{STORIES_PER_DAY} story a day")
-    if produce is None:
-        return Outcome(story_job.id, net, "failed", detail="no producer for the Stories card")
+    failed = [r for r in log.latest_by_job().values() if r["network"] == net and r["status"] == FAILED
+              and posting_day(datetime.fromisoformat(r["at"])) == day]
+    if failed:
+        return Outcome(story_job.id, net, "skipped_failed_before",
+                       detail=f"today's story failed ({failed[-1]['detail'][:120]}); tomorrow's first reel tries again")
     try:
         card = produce(story_job)
     except Exception as exc:  # noqa: BLE001 - the reel is out; the story is optional

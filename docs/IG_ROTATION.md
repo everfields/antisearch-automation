@@ -126,16 +126,17 @@ video, with no music, stickers, link or text added in Buffer. Anything else turn
 phone reminder. Our reels already auto-publish from the same channel, so the account type is
 right.
 
-**Wired, off by default.**
+**On by default since 2026-09-28** (founder: go for it).
 
-- `PUBLISHER_IG_STORIES=on` posts one Stories card a posting day, right after the day's first
-  Instagram reel that is sent now.
+- One Stories card a posting day, right after the first Instagram reel of that day that is
+  sent now (not a Buffer-scheduled manual row). `PUBLISHER_IG_STORIES=off` stops it.
+- A failed story is not retried after every later reel; the next posting day tries again.
 - The card carries the same frozen verdict, so there is never a second oracle run.
 - It goes through `BufferInstagramStory`: the same channel, `type: story`, and no caption,
   since a Story has none.
 - It is logged as `<job>-story` on network `instagram_story`, `creative = story`. It never
   takes a reel slot.
-- With the switch off, nothing changes.
+- With `PUBLISHER_IG_STORIES=off`, nothing changes.
 
 ## Not changed
 

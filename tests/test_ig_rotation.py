@@ -242,9 +242,10 @@ def _queries(t, name):
     return [r.json for r in t.requests if name in (r.json or {}).get("query", "")]
 
 
-def test_stories_are_off_by_default(tmp_path):
+def test_stories_are_on_by_default_and_off_stops_them(tmp_path):
+    assert stories_enabled({}) and stories_enabled({"PUBLISHER_IG_STORIES": ""})
     ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "state" / "posts.csv")
-    env = _buffer_env(tmp_path)
+    env = {**_buffer_env(tmp_path), "PUBLISHER_IG_STORIES": "off"}
     assert not stories_enabled(env)
     t, seen = _transport(env), []
     out = run_posts([Job("p-travel", "travel", ("instagram",))], ledger, log, now=datetime(2026, 9, 28, 10, 10, tzinfo=ET),
@@ -328,3 +329,15 @@ def test_the_dry_run_never_writes_the_cache(tmp_path, monkeypatch):
 def test_posting_day_of_the_story_row_is_its_reel_day():
     assert posting_day(datetime(2026, 9, 28, 10, 10, tzinfo=ET)) == date(2026, 9, 28)
     assert BufferInstagramStory.channel_var() == "BUFFER_CHANNEL_INSTAGRAM"
+
+
+def test_a_failed_story_is_not_retried_after_every_reel_that_day(tmp_path):
+    ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "state" / "posts.csv")
+    env = _buffer_env(tmp_path)
+    log.append(PostRow("p-early-story", "instagram_story", "pending", at="2026-09-28T14:10:00+00:00"))
+    log.append(PostRow("p-early-story", "instagram_story", "failed", detail="buffer: story rejected",
+                       at="2026-09-28T14:10:00+00:00"))
+    out = run_posts([Job("p-zoo", "zoo", ("instagram",))], ledger, log, now=datetime(2026, 9, 28, 12, 10, tzinfo=ET),
+                    live=True, transport=_transport(env), env=env, sleep=lambda _s: None,
+                    adapters={"instagram": BufferInstagram}, produce=_mp4_producer(ledger, []))
+    assert [(o.network, o.status) for o in out] == [("instagram", "published"), ("instagram_story", "skipped_failed_before")]

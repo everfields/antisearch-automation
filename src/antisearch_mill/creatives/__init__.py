@@ -5,7 +5,7 @@ The Instagram publisher rotates four reel creatives (docs/IG_ROTATION.md):
   1-short-score       the current picture, the keys plus the template score
   2-medium-monolith   the monolith: the camera dives onto the input, then the verdict alone
   3-computation       the monolith, the wait shown as a huge model computing
-and `story`, the 1080x1920 Stories card (behind PUBLISHER_IG_STORIES, off by default).
+and `story`, the 1080x1920 Stories card (PUBLISHER_IG_STORIES, on by default since 2026-09-28).
 
 Nothing is authored per verdict and no model is called: every creative is a function of the
 input, the frozen verdict, and the timeline. The rotation is a Latin square on the posting
