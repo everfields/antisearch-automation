@@ -56,23 +56,41 @@ def finish(creative: str, classic: Path, timeline: Timeline, out: Path, *, categ
            metadata: dict[str, str] | None = None) -> float | None:
     """Write `creative` to `out` from the classic clip (the current creative, keys audio included).
 
-    Returns the cover time in seconds when it is not the default (the verdict's last frames)."""
+    Every Instagram reel creative ends on the output-only cover still (founder, 2026-09-29), and
+    returns its time in seconds; the current clip (TikTok's too) is left as it is and returns None."""
     if creative in ("", CURRENT):
         if classic != out:
             shutil.move(str(classic), out)
         return None
-    if creative == CLEAN_COVER:
-        from .cover import append_cover
+    from .cover import append_cover
 
+    if creative == CLEAN_COVER:
         return append_cover(classic, out, verdict, duration_s=timeline.duration_s, font_path=font_path,
                             layout=layout, metadata=metadata)
-    from .monolith import add_score, cover_s, render_motion
-
-    if creative == SHORT_SCORE:
-        add_score(classic, timeline, out, category=category, verdict=verdict, metadata=metadata)
-        return None
-    if creative not in MOTION:
+    if creative != SHORT_SCORE and creative not in MOTION:
         raise ValueError(f"unknown creative {creative!r}; choose one of {', '.join(IG_ROTATION)}")
+    from .monolith import add_score, motion_plan
+
+    body = out.with_name(out.stem + "-body.mp4")
+    try:
+        if creative == SHORT_SCORE:
+            add_score(classic, timeline, body, category=category, verdict=verdict, metadata=metadata)
+            length = timeline.duration_s
+        else:
+            _motion_body(creative, classic, timeline, body, category=category, verdict=verdict,
+                         font_path=font_path, layout=layout, phone=phone, metadata=metadata)
+            plan = motion_plan(timeline)
+            length = plan.total / plan.fps
+        return append_cover(body, out, verdict, duration_s=length, font_path=font_path, layout=layout,
+                            metadata=metadata)
+    finally:
+        body.unlink(missing_ok=True)
+
+
+def _motion_body(creative: str, classic: Path, timeline: Timeline, out: Path, *, category: str, verdict: str,
+                 font_path: str, layout: Layout, phone: PhoneSpec | None, metadata: dict[str, str] | None) -> None:
+    from .monolith import render_motion
+
     big = Layout(layout.width * 2, layout.height * 2, layout.fps)
     source = out.with_name(out.stem + "-source2x.mp4")
     try:
@@ -91,4 +109,3 @@ def finish(creative: str, classic: Path, timeline: Timeline, out: Path, *, categ
                       font_path=font_path, layout=layout, overlay=overlay, ticks=ticks, metadata=metadata)
     finally:
         source.unlink(missing_ok=True)
-    return cover_s(timeline)

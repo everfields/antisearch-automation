@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from antisearch_mill.creatives import COMPUTATION, CURRENT, IG_ROTATION, MONOLITH, SHORT_SCORE, STORY
+from antisearch_mill.creatives import CLEAN_COVER, COMPUTATION, CURRENT, IG_ROTATION, MONOLITH, SHORT_SCORE, STORY
 from antisearch_mill.fonts import resolve_font
 from antisearch_mill.ledger import Job, Ledger
 from antisearch_mill.phone import PhoneSpec
@@ -26,7 +26,7 @@ def _produce(tmp_path, category, creative):
 
 
 @requires_ffmpeg
-@pytest.mark.parametrize("creative", [*IG_ROTATION, STORY])
+@pytest.mark.parametrize("creative", [*IG_ROTATION, CLEAN_COVER, STORY])
 def test_every_creative_renders_a_valid_reel(tmp_path, creative):
     row, ledger = _produce(tmp_path, "travel", creative)
     info = probe(ledger.clips_dir / f"{row.clip_id}.mp4")
@@ -35,11 +35,15 @@ def test_every_creative_renders_a_valid_reel(tmp_path, creative):
     sidecar = json.loads((ledger.clips_dir / f"{row.clip_id}.json").read_text())
     assert sidecar["timeline"]["creative"] == creative
     if creative in (MONOLITH, COMPUTATION):
-        assert 8.0 < info.duration_s < 9.5 and 0 < row.cover_s < info.duration_s  # cover on the verdict, not the dark end
+        assert 8.0 < info.duration_s < 9.8
     elif creative == STORY:
         assert info.duration_s == pytest.approx(5.0, abs=0.1)
     else:
-        assert 4.5 < info.duration_s < 7.0 and row.cover_s == 0.0
+        assert 4.5 < info.duration_s < 7.2
+    if creative in (CURRENT, STORY):
+        assert row.cover_s == 0.0  # TikTok's clip and the Stories card keep their own frames
+    else:  # every Instagram reel ends on the output-only cover still, and Buffer's offset points at it
+        assert info.duration_s - 0.25 < row.cover_s < info.duration_s
     assert not list(ledger.clips_dir.glob("*-classic.mp4")) and not list(ledger.clips_dir.glob("*-source2x.mp4"))
 
 
