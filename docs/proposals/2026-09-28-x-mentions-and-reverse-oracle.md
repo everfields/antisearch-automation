@@ -1,6 +1,11 @@
 # X: mentions from a new account, and an X reverse-oracle pass
 
-Status: research and a draft only. No posting changes: Soul and GTM are defining the X
+**Update, 2026-09-28 evening:** the founder decided, explicitly, to turn automated mentions
+on. An X post carries at most one mention, only for the verdict's own verified account,
+never the same account within 14 days (AGENTS.md, "X rule"). The risk in "Bottom line" below
+still stands: X's automation rules forbid unsolicited automated mentions.
+
+Status (morning): research and a draft only. No posting changes: Soul and GTM are defining the X
 strategy first. X stays live on purpose (`PUBLISHER_LIVE_NETWORKS` untouched), 2 plain-text
 posts a day, `input` then `verdict`, no mention, no link, no hashtag.
 

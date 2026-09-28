@@ -17,7 +17,7 @@ Updated 2026-09-25.
 
 | Item | Priority | Owner | Status | Notes |
 | --- | --- | --- | --- | --- |
-| X via Buffer | now | Dev | in progress | PR #11. Paid API stays off. `PUBLISHER_BRIDGE=buffer` and `x` in `PUBLISHER_LIVE_NETWORKS`. Disconnect LinkedIn in Buffer, connect `@antisearch_ai` (`BUFFER_CHANNEL_X`). No links, mentions, replies, or trend posts on X |
+| X via Buffer | now | Dev | in progress | PR #11. Paid API stays off. `PUBLISHER_BRIDGE=buffer` and `x` in `PUBLISHER_LIVE_NETWORKS`. Disconnect LinkedIn in Buffer, connect `@antisearch_ai` (`BUFFER_CHANNEL_X`). No links, replies, or trend posts on X. Mentions: one verified allowlisted account per post, only when it is the verdict, 14 days per account (founder, 2026-09-28; AGENTS.md) |
 | LinkedIn | later | Opus | parked | Paused. `PUBLISHER_SLOTS_LINKEDIN=off`. Leave it out of `PUBLISHER_LIVE_NETWORKS`. A new Page stays parked. `docs/proposals/2026-09-25-linkedin-decision.md` |
 | Bluesky | now | C → CoS | todo | Needs `BLUESKY_HANDLE` and `BLUESKY_APP_PASSWORD`. Retire the `u-thing` repost row in `queue/bluesky_trial.csv` first (`thing` is the intro and must not go out again) |
 | Reddit | later | — | parked | Paused. No account. Self-promo risk. API is closed to new apps |
@@ -64,7 +64,7 @@ Updated 2026-09-25.
 | Winner lane | later | Dev | live in code | `publisher/winners.py`. X is ignored (a winner tag is a mention) |
 | Reverse-oracle dry run | later | Dev | todo | First 10 targets below. Sandbox only, ≤10 calls per target, ≤100 total, log in `state/reverse/`. Nothing is published |
 | LinkedIn winner tags | later | Dev | parked | Organization mentions need a verified name→URN map. LinkedIn is paused anyway |
-| X watcher / replies | later | Dev | parked | No automated replies or mentions on X |
+| X watcher / replies | later | Dev | parked | No automated replies on X (mentions: AGENTS.md, X rule) |
 | `mill record` for manual uploads | later | — | dropped | Buffer uploads go through the API. No web UI |
 | Buffer post reconciliation | next | Dev | todo if needed | One read per post, to catch a network-side rejection |
 | Native LinkedIn country mornings | later | Dev | parked | Do not schedule 09:07 Madrid. LinkedIn is paused |
