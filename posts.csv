@@ -68,3 +68,7 @@ p-search-engine,x,pending,p-search-engine-dcc52e49,kagi,,,,2026-09-28T13:39:43+0
 kagi",text,,
 p-search-engine,x,published,p-search-engine-dcc52e49,kagi,6aba6e2967133b6c17d70a4f,https://twitter.com/antisearch_ai/status/2104566771587899587,,2026-09-28T13:39:43+00:00,search engine,"search engine
 kagi",text,,
+p-a-smell,instagram,pending,p-a-smell-72cd5dba,petrichor,,,,2026-09-28T14:31:56+00:00,a smell,#asmell #petrichor #ai,video,,3-computation
+p-a-smell,instagram,published,p-a-smell-72cd5dba,petrichor,6aba7acebaa2ae49524b43ea,buffer:6aba7acebaa2ae49524b43ea,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-28T14:31:56+00:00,a smell,#asmell #petrichor #ai,video,,3-computation
+p-a-smell-story,instagram_story,pending,p-a-smell-story-0be5de42,petrichor,,,,2026-09-28T14:31:56+00:00,a smell,,video,,story
+p-a-smell-story,instagram_story,published,p-a-smell-story-0be5de42,petrichor,6aba7b2ec62b374cee9815c3,buffer:6aba7b2ec62b374cee9815c3,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-28T14:31:56+00:00,a smell,,video,,story

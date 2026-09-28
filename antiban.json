@@ -13,7 +13,8 @@
       "#anumber #42 #ai",
       "#restaurantinparis #pl\u00e9nitude #ai",
       "#restaurantintokyo #s\u00e9zanne #ai",
-      "#restaurantinmadrid #diverxo #ai"
+      "#restaurantinmadrid #diverxo #ai",
+      "#asmell #petrichor #ai"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -37,7 +38,11 @@
       "p-a-number-1b37d56e",
       "p-restaurant-in-paris-90168344",
       "p-restaurant-in-tokyo-222c8cb3",
-      "ig-makeup-restaurant-in-madrid-d56b4d36"
+      "ig-makeup-restaurant-in-madrid-d56b4d36",
+      "p-a-smell-72cd5dba"
+    ],
+    "instagram_story": [
+      "p-a-smell-story-0be5de42"
     ],
     "tiktok": [
       "s-red-flag-6b88b670",
@@ -59,6 +64,7 @@
   },
   "first_post": {
     "instagram": "2026-09-26",
+    "instagram_story": "2026-09-28",
     "tiktok": "2026-09-26",
     "x": "2026-09-26"
   }
