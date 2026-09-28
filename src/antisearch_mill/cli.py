@@ -467,7 +467,12 @@ def cmd_settle_media(args, settings: Settings) -> int:
 
     state_dir = Path(args.state).parent
     store = VerdictStore(state_dir / "verdicts.csv")
-    packs = [Path(args.pack)] if args.pack else settle.packs_missing_media(state_dir / "settle", store)
+    if args.pack:
+        packs = [Path(args.pack)]
+    elif args.force:
+        packs = sorted((state_dir / "settle").glob("candidates-*.md"))
+    else:
+        packs = settle.packs_missing_media(state_dir / "settle", store)
     if args.check:
         print(f"settle-media: {len(packs)} pack(s) need media: {', '.join(p.name for p in packs) or 'none'}")
         return 0 if packs else 3
@@ -785,7 +790,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
     sp.add_argument("--pack", default="", help="one pack file (default: every settle/candidates-*.md missing media)")
     sp.add_argument("--check", action="store_true", help="exit 0 if a pack needs media, else 3; renders nothing")
-    sp.add_argument("--force", action="store_true", help="re-render media that already exist (e.g. after a template change)")
+    sp.add_argument("--force", action="store_true", help="re-render every pack's media, even existing files (e.g. after a template change)")
     sp.set_defaults(func=cmd_settle_media)
 
     sp = sub.add_parser("dm-list", help="yesterday's posted verdicts with an official account -> <state>/manual/dm-list-DAY.md")

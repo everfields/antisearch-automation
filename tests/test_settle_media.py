@@ -146,6 +146,18 @@ def test_check_mode_needs_no_ffmpeg_and_reports(tmp_path, capsys):
                  "--check"]) == 3
 
 
+def test_force_takes_every_pack_even_when_nothing_is_missing(tmp_path, monkeypatch, capsys):
+    from antisearch_mill.cli import main
+
+    settle_dir, _ = _state(tmp_path)
+    done = []
+    monkeypatch.setattr(settle, "packs_missing_media", lambda *a: [])
+    monkeypatch.setattr(settle, "media_for_pack", lambda pack, store, **k: done.append((pack.name, k["force"])) or [])
+    base = ["--env-file", str(tmp_path / "none"), "settle-media", "--state", str(settle_dir.parent / "posts.csv")]
+    assert main(base) == 0 and done == []
+    assert main([*base, "--force"]) == 0 and done == [("candidates-2026-09-29.md", True)]
+
+
 def test_the_workflow_is_hourly_and_never_asks_the_oracle():
     from conftest import ROOT
 

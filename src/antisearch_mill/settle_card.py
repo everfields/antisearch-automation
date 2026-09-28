@@ -83,17 +83,36 @@ def _wrap(draw: ImageDraw.ImageDraw, text: str, font, max_w: float) -> list[str]
     return lines
 
 
-def _fit(draw, text: str, path: str, max_w: float, max_lines: int, top: int, floor: int):
-    """The largest size (top down to floor) at which `text` wraps into max_lines within max_w."""
-    size = top
+def _balanced(draw, text: str, font, max_w: float) -> list[str]:
+    """The greedy wrap's line count, with the narrowest width that keeps it (no lone short word)."""
+    lines = _wrap(draw, text, font, max_w)
+    if any(ln.endswith(("—", "–")) for ln in lines[:-1]):
+        return lines  # already breaks at the dash, the phrase's own break
+    lo, hi = 0.0, max_w
+    for _ in range(14):
+        mid = (lo + hi) / 2
+        cand = _wrap(draw, text, font, mid)
+        if len(cand) <= len(lines) and all(draw.textlength(ln, font=font) <= mid for ln in cand):
+            hi = mid
+        else:
+            lo = mid
+    return _wrap(draw, text, font, hi)
+
+
+def _fit(draw, text: str, path: str, max_w: float, tops: tuple[int, ...], floor: int):
+    """The largest size at which `text` wraps within max_w into n lines, n <= len(tops), with the
+    size at most tops[n-1]: more lines must mean smaller type, so a short phrase doesn't
+    become a stack of single words."""
+    size = tops[0]
     while size > floor:
         font = _font(path, size)
         lines = _wrap(draw, text, font, max_w)
-        if len(lines) <= max_lines and all(draw.textlength(ln, font=font) <= max_w for ln in lines):
-            return font, lines
+        n = len(lines)
+        if n <= len(tops) and size <= tops[n - 1] and all(draw.textlength(ln, font=font) <= max_w for ln in lines):
+            return font, _balanced(draw, text, font, max_w)
         size -= 2
     font = _font(path, floor)
-    return font, _wrap(draw, text, font, max_w)
+    return font, _balanced(draw, text, font, max_w)
 
 
 @dataclass
@@ -114,8 +133,9 @@ def layout(question: str, verdict: str, *, font_path: str, card: CardSize) -> La
     W, H = card.width, card.height
     probe = ImageDraw.Draw(Image.new("RGB", (8, 8)))
     max_w = W * 0.86
-    q_font, q_lines = _fit(probe, question, font_path, max_w, 3, round(W * 0.075), round(W * 0.040))
-    v_font, v_lines = _fit(probe, verdict, _heavier(font_path), max_w, 3, round(W * 0.14), round(W * 0.060))
+    q_font, q_lines = _fit(probe, question, font_path, max_w, (round(W * 0.075),) * 3, round(W * 0.040))
+    v_font, v_lines = _fit(probe, verdict, _heavier(font_path), max_w,
+                           (round(W * 0.14), round(W * 0.13), round(W * 0.105)), round(W * 0.060))
     q_lh, v_lh = round(q_font.size * 1.25), round(v_font.size * 1.18)
     gap = round(W * 0.06)
     block = len(q_lines) * q_lh + gap + len(v_lines) * v_lh
