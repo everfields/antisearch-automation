@@ -4,9 +4,13 @@ name: publisher
 # LinkedIn Page, TikTok). Buffer free is an optional bridge (PUBLISHER_BRIDGE=buffer)
 # for networks whose native gate hasn't cleared. No browser, no Grok Bot box. Off by default.
 #   Manual: Actions -> publisher -> Run workflow (dry-run unless `live` is ticked).
-#   Cron:   every 15 minutes in the ET posting window; runs only when the repo
-#           variable PUBLISHER_CRON is `dry-run` or `live`. A late or dropped
-#           start is still inside the slot window (`mill due` decides).
+#   Cron:   every 15 minutes in the ET posting window, off the top of the hour (GitHub drops
+#           most scheduled wakes when it is busy; 28 Sep: 1 in 8 hours); runs only when the
+#           repo variable PUBLISHER_CRON is `dry-run` or `live`. A late or dropped start is
+#           still inside the slot window, and a slot whose whole window was missed is still
+#           sent by the next run (the catch-up, guard.CATCHUP_WINDOW). `mill due` decides.
+#   Tick:   a `repository_dispatch` of type `publisher-tick` wakes it exactly like the cron,
+#           for an external pinger (docs/PUBLISHER_SETUP.md, "Reliable wakes").
 # Slots are America/New_York wall-clock times (docs/PUBLISHER_SETUP.md); the cron
 # only wakes the job, and `mill due` decides from the tz database whether a slot
 # has come, so summer/winter time needs no edits here. Live posting also needs
@@ -28,10 +32,12 @@ on:
       network:
         description: Only this network (empty = all)
         default: ""
+  repository_dispatch:
+    types: [publisher-tick]
   schedule:
     # Every 15 min from 13:00 through 05:59 UTC covers 09:00-01:59 EDT and 08:00-00:59 EST.
-    # Wakes at :00/:15/:30/:45; slots stay on :07 and stay open until the next one.
-    - cron: "*/15 0-5,13-23 * * *"
+    # Wakes at :04/:19/:34/:49 (the top of the hour is GitHub's busiest); slots stay on :07.
+    - cron: "4,19,34,49 0-5,13-23 * * *"
 
 permissions:
   contents: write
@@ -45,7 +51,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || vars.PUBLISHER_CRON == 'dry-run' || vars.PUBLISHER_CRON == 'live'
     runs-on: ubuntu-24.04
     env:
-      LIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.live) || (github.event_name == 'schedule' && vars.PUBLISHER_CRON == 'live') }}
+      LIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.live) || (github.event_name != 'workflow_dispatch' && vars.PUBLISHER_CRON == 'live') }}
       IGNORE_SLOTS: ${{ github.event_name == 'workflow_dispatch' && inputs.ignore_slots }}
       QUEUE: ${{ vars.PUBLISHER_QUEUE || 'queue/bluesky_trial.csv queue/tiktok_trial.csv queue/surprise_trial.csv' }}
       NETWORK: ${{ inputs.network }}
@@ -139,7 +145,7 @@ jobs:
       - name: Anything due? (scheduled runs stop here when not)
         id: due
         run: |
-          if [ "${{ github.event_name }}" != "schedule" ] || [ "$LIVE" != "true" ]; then echo "go=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$LIVE" != "true" ]; then echo "go=true" >> "$GITHUB_OUTPUT"; exit 0; fi
           if mill due --state state/posts.csv; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "go=false" >> "$GITHUB_OUTPUT"; fi
 
       - if: steps.due.outputs.go == 'true'

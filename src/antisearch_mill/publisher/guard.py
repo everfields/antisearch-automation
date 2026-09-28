@@ -41,6 +41,10 @@ IG_MAX_PER_DAY = 8
 DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY}
 X_FORMATS = ("alternate", "video", "text")
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
+# GitHub's schedule drops most wakes (28 Sep: 1 scheduled run in 8 h). Once a slot's window has passed with
+# no run, the next run still sends the most recently missed slot (one; older misses stay missed), up to
+# this long after the slot's time, so the night never inherits the evening.
+CATCHUP_WINDOW = timedelta(hours=6)
 
 # Business networks lean to the US morning, leisure networks to the afternoon and night (ET).
 # `PUBLISHER_CADENCE` picks a preset; `PUBLISHER_SLOTS_<NETWORK>` overrides one network.
@@ -278,6 +282,10 @@ def slot_of(day: date, slots: list[time], posts: list[tuple[datetime, bool]],
     for when, scheduled in sorted(posts):
         fits = [i for i in range(len(times)) if i not in taken
                 and (times[i] if scheduled else opens[i] - lookahead) <= when < _slot_deadline(times, i)]
+        if not fits and not scheduled:
+            came = [i for i in range(len(times)) if opens[i] - lookahead <= when]
+            if came and came[-1] not in taken and when - times[came[-1]] < CATCHUP_WINDOW:
+                fits = [came[-1]]  # a catch-up: it fills the most recently missed slot
         placed.append(((when, scheduled), max(fits) if fits else None))
         if fits:
             taken.add(max(fits))
@@ -289,7 +297,11 @@ def _serving(moment: datetime, slots: list[time], used: int, offsets: list[timed
     times = slot_times(posting_day(moment), slots)
     opens = [s + (offsets[i] if offsets else timedelta(0)) for i, s in enumerate(times)]
     passed = [i for i in range(len(times)) if i not in held and opens[i] <= moment + lookahead]
-    return opens, [i for i in passed[used:] if moment < _slot_deadline(times, i)]
+    open_ = [i for i in passed[used:] if moment < _slot_deadline(times, i)]
+    came = [i for i in range(len(times)) if opens[i] <= moment + lookahead]
+    if not open_ and came and came[-1] in passed[used:] and moment - times[came[-1]] < CATCHUP_WINDOW:
+        open_ = [came[-1]]  # CATCH-UP: the cron missed this slot's whole window; the next run still sends it
+    return opens, open_
 
 
 def open_now(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,

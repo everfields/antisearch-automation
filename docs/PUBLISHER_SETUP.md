@@ -164,12 +164,37 @@ A full 10-post queue lasts 2 days at 5 a day, 3 days at 3, and 10 days at 1.
 - A posting day runs **09:00 ET → 09:00 ET**; a 00:07 slot belongs to the day that
   started at 09:00.
 - Every slot is on a **fixed :07 minute**, never on the hour. The cron wakes every
-  15 minutes in the same UTC hours, so a late GitHub start still falls inside the slot.
+  15 minutes (:04, :19, :34, :49) in the same UTC hours, so a late GitHub start still falls
+  inside the slot.
 - At least **90 minutes between two posts on the same network**, both in the slot
   plan and at run time.
 - One post per network per run.
-- A missed slot stays open until the next slot of that network, and at least 3h,
-  then expires. An expired slot is not owed, so a long outage does not post a backlog.
+- A missed slot stays open until the next slot of that network, and at least 3h.
+- **Catch-up (2026-09-29):** if a slot's whole window passes with no run (GitHub drops most
+  scheduled wakes), the next run still sends the most recently missed slot, up to 6h after
+  its time. It sends one only: older misses stay missed, so a long outage never posts a
+  backlog. The 90-minute gap and the slot's random offset still apply.
+
+### Reliable wakes (no manual kick)
+
+On 28 Sep, GitHub ran the `*/15` schedule once in 8 hours. The cron now sits off the top of the
+hour, and the catch-up covers a missed window. For wakes that don't depend on GitHub's
+scheduler, point any free external pinger at `repository_dispatch`. For example, a
+[cron-job.org](https://cron-job.org) job every 20 minutes:
+
+- `POST https://api.github.com/repos/everfields/antisearch-automation/dispatches`
+- headers `Accept: application/vnd.github+json` and `Authorization: Bearer <token>`
+- body `{"event_type":"publisher-tick"}`
+- `<token>` is a fine-grained PAT for this repo only, with **Contents: read and write**
+  (GitHub requires that permission for a dispatch).
+
+A tick runs exactly like the cron: it respects `PUBLISHER_CRON`, runs the `mill due`
+pre-check first, and posts only what is due.
+
+**Minutes.** The repo is private, so every wake is billed as at least 1 Actions minute, even
+when nothing is due. A wake every 20 minutes over the 17-hour window is about 1,500 minutes a
+month; every 15 minutes is about 2,000, which is the whole Free plan. Pick 20–30 minutes; the
+catch-up makes a late wake harmless.
 - Every post fills the slot its send time falls in: a post sent now fills the slot it
   was sent for, and a Buffer schedule holds its own slot (a 22:07 reel holds 22:07,
   not the day's first). With 2-hour slots the windows overlap, so a missed slot is
