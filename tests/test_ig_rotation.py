@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from antisearch_mill.creatives import (
-    COMPUTATION, CURRENT, IG_ROTATION, MONOLITH, SHORT_SCORE, STORY, ig_creative, id_tag, rotation_enabled,
+    CLEAN_COVER, COMPUTATION, CURRENT, IG_ROTATION, MONOLITH, SHORT_SCORE, STORY, ig_creative, id_tag, rotation_enabled,
 )
 from antisearch_mill.ledger import ClipRow, Job, Ledger
 from antisearch_mill.oracle import Verdict
@@ -29,7 +29,7 @@ from test_publisher_run import LIVE_ENV, clip, fake_adapter, job, ledger, log  #
 
 ET = ZoneInfo("America/New_York")
 REACH = {"PUBLISHER_CADENCE": "reach"}
-IG_ENV = {**LIVE_ENV, **REACH, "PUBLISHER_LIVE_NETWORKS": "instagram,tiktok"}
+IG_ENV = {**LIVE_ENV, **REACH, "PUBLISHER_LIVE_NETWORKS": "instagram,tiktok", "PUBLISHER_IG_ROTATION": "on"}
 
 
 def _producer(ledger: Ledger, seen: list):
@@ -61,12 +61,14 @@ def test_the_rotation_is_a_latin_square_over_day_and_slot():
 
 
 def test_rotation_switch_and_clip_ids():
-    assert rotation_enabled({}) and not rotation_enabled({"PUBLISHER_IG_ROTATION": "off"})
+    assert not rotation_enabled({}) and rotation_enabled({"PUBLISHER_IG_ROTATION": "on"})  # off by default (2026-09-29)
+    assert not rotation_enabled({"PUBLISHER_IG_ROTATION": "off"})
     v = Verdict("travel", "japan", "japan", "live", "u", 1, 1, "t")
     base = clip_id_for("j", v, 1.0, style="app")
     assert clip_id_for("j", v, 1.0, style="app", creative=CURRENT) == base  # the current clip keeps its id
-    ids = {clip_id_for("j", v, 1.0, style="app", creative=c) for c in (SHORT_SCORE, MONOLITH, COMPUTATION, STORY)}
-    assert len(ids) == 4 and base not in ids
+    ids = {clip_id_for("j", v, 1.0, style="app", creative=c)
+           for c in (SHORT_SCORE, MONOLITH, COMPUTATION, STORY, CLEAN_COVER)}
+    assert len(ids) == 5 and base not in ids  # the covered reel is not TikTok's clip
     assert id_tag("") == id_tag(CURRENT) == ""
 
 
@@ -86,15 +88,23 @@ def test_each_instagram_slot_gets_its_creative_and_posts_csv_logs_it(ledger, log
     assert "creative" in log.path.read_text().splitlines()[0].split(",")
 
 
-def test_rotation_off_posts_the_current_clip_and_says_so(ledger, log):
+@pytest.mark.parametrize("switch", [None, "off"])
+def test_without_the_rotation_every_reel_is_the_clean_creative_with_its_cover(ledger, log, switch):
     seen: list = []
-    env = {**IG_ENV, "PUBLISHER_IG_ROTATION": "off"}
+    env = {k: v for k, v in IG_ENV.items() if k != "PUBLISHER_IG_ROTATION"}
+    if switch:
+        env["PUBLISHER_IG_ROTATION"] = switch
     for hour in (10, 12, 14):
-        run_posts([job(f"ig-{i}", ("instagram",)) for i in range(3)], ledger, log,
+        run_posts([job(f"ig-{i}", ("instagram",)) for i in range(3)] + [job("tt-0", ("tiktok",))], ledger, log,
                   now=datetime(2026, 9, 28, hour, 10, tzinfo=ET), live=True, env=env,
-                  adapters={"instagram": fake_adapter("instagram")}, produce=_producer(ledger, seen),
-                  sleep=lambda s: None)
-    assert {r["creative"] for r in log.rows() if r["status"] == "published"} == {CURRENT}
+                  adapters={"instagram": fake_adapter("instagram"), "tiktok": fake_adapter("tiktok")},
+                  produce=_producer(ledger, seen), sleep=lambda s: None)
+    by_net = {r["network"]: set() for r in log.rows()}
+    for r in log.rows():
+        if r["status"] == "published":
+            by_net[r["network"]].add(r["creative"])
+    assert by_net["instagram"] == {CLEAN_COVER}
+    assert by_net["tiktok"] <= {"", CURRENT}  # TikTok unchanged
 
 
 def test_a_manual_row_takes_the_creative_of_the_slot_it_is_scheduled_in(ledger, log):
@@ -363,3 +373,51 @@ def test_a_failed_story_is_not_retried_after_every_reel_that_day(tmp_path):
                     live=True, transport=_transport(env), env=env, sleep=lambda _s: None,
                     adapters={"instagram": BufferInstagram}, produce=_mp4_producer(ledger, []))
     assert [(o.network, o.status) for o in out] == [("instagram", "published"), ("instagram_story", "skipped_failed_before")]
+
+
+# --- the reel cover (founder, 2026-09-29) ------------------------------------------
+
+
+def test_the_cover_is_the_monoliths_verdict_alone_same_font_size_and_place_no_input():
+    from PIL import ImageChops
+
+    from antisearch_mill.creatives.cover import cover_image
+    from antisearch_mill.creatives.monolith import verdict_font, verdict_y
+    from antisearch_mill.fonts import resolve_font
+
+    font = resolve_font()
+    a, b = cover_image("quintonil", font_path=font), cover_image("quintonil", font_path=font)
+    assert a.size == (1080, 1920) and a.tobytes() == b.tobytes()  # a fixed template
+    box = ImageChops.difference(a, cover_image("", font_path=font)).getbbox()
+    assert box is not None
+    size = verdict_font(font, "quintonil", 1080).size
+    assert size == 150 and abs(box[1] - verdict_y(1920)) < size  # the outro's own place
+    assert box[3] - box[1] < size * 1.3  # one line: the verdict only, no input line above it
+    crop_top, crop_bottom = (1920 - 1440) // 2, (1920 + 1440) // 2
+    assert crop_top < box[1] and box[3] < crop_bottom  # inside the profile grid's 3:4 crop
+
+
+@pytest.mark.skipif(__import__("shutil").which("ffmpeg") is None, reason="needs ffmpeg")
+def test_the_clean_reel_plays_as_before_then_holds_the_cover_that_buffer_is_pointed_at(tmp_path):
+    from antisearch_mill.fonts import resolve_font
+    from antisearch_mill.oracle import FixtureOracle
+    from antisearch_mill.produce import produce_one
+    from antisearch_mill.render import Layout, probe
+
+    oracle = FixtureOracle({"restaurant in madrid": "diverxo"})
+    rows = {}
+    for creative in (CURRENT, CLEAN_COVER):
+        led = Ledger(tmp_path / creative)
+        res = produce_one(Job("p-r", "restaurant in madrid", ("instagram",), creative=creative), oracle, led,
+                          font_path=resolve_font(), layout=Layout())
+        assert res.status == "produced", res.detail
+        rows[creative] = led.clip_for_job("p-r")
+    plain, covered = rows[CURRENT], rows[CLEAN_COVER]
+    assert round(covered.duration_s - plain.duration_s, 2) == 0.2  # six frames of cover after the last frame
+    assert plain.duration_s < covered.cover_s < covered.duration_s
+    info = probe(Path(covered.clip_path))
+    assert (info.width, info.height, info.vcodec, info.acodec) == (1080, 1920, "h264", "aac")
+    media = dataclasses.replace(Media.video(covered.clip_path, 1080, 1920, covered.duration_s,
+                                            poster=covered.poster_path), cover_s=covered.cover_s,
+                                public_url="https://x/c.mp4")
+    assert _thumbnail_on_verdict(media)["metadata"]["thumbnailOffset"] == int(covered.cover_s * 1000)
