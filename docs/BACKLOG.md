@@ -69,6 +69,7 @@ Updated 2026-09-25.
 | Buffer post reconciliation | next | Dev | todo if needed | One read per post, to catch a network-side rejection |
 | Native LinkedIn country mornings | later | Dev | parked | Do not schedule 09:07 Madrid. LinkedIn is paused |
 | Pulse telemetry | later | C | blocked | `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` in Cursor Cloud Agent secrets |
+| Bluesky summon mode (settle it) | later | Dev | todo | Reply with the verdict only when someone tags our Bluesky account (Bluesky's bot rule: opt-in only). Not a priority (Carlos, 2026-09-28). `docs/proposals/2026-09-29-settle-it.md` |
 
 ## Reverse oracle: first 10-target dry run (exploration)
 
