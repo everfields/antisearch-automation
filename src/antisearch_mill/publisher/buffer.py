@@ -211,7 +211,7 @@ class BufferInstagram(BufferRoute):
 
 
 class BufferInstagramStory(BufferInstagram):
-    """The Stories card on the same Instagram channel (PUBLISHER_IG_STORIES, off by default).
+    """The Stories card on the same Instagram channel (PUBLISHER_IG_STORIES, on by default).
 
     Buffer auto-publishes a Story from a Business or Creator account when it is clean media
     (one 9:16 video, no music, stickers, links or text added in Buffer); anything else turns
