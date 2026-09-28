@@ -60,4 +60,15 @@ How to measure repetition: `docs/proposals/2026-09-28-repetition-metric.md`.
 - The cover is the monolith's last frame, output only, with the same font and size. Buffer's
   `thumbnailOffset` points at it; Buffer accepts no cover image URL.
 - The rotation is off until Carlos says otherwise (`PUBLISHER_IG_ROTATION=on` brings it back).
+  Every Instagram creative ends on that cover, so every grid tile is the big output.
+- Peers in excellence side by side is what Carlos values most on the grid.
+  `PUBLISHER_IG_CLUSTER=on` (a proposal, off by default) draws the pool by family, by fixed
+  rules.
 - X and TikTok are unchanged.
+
+## Publishing reliability
+
+- GitHub's schedule drops most wakes. The next run sends the most recently missed slot
+  (one, within 6 h), with the 90-minute gap and the random offset kept.
+- An external pinger can wake the publisher via a `publisher-tick` `repository_dispatch`
+  (docs/PUBLISHER_SETUP.md, "Reliable wakes").

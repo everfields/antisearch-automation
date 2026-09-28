@@ -192,7 +192,7 @@ def cmd_post(args, settings: Settings) -> int:
     if wnets:
         jobs += winner_jobs(winners_dir, wnets, posting_day(now_et()), log, store.categories(), claimed, winner_cap(env))
     for net in pool_networks(pools_dir):
-        jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY)
+        jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY, env=env)
 
     if args.oracle == "fixture":
         oracle = _oracle(args, settings)
