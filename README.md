@@ -90,37 +90,31 @@ publisher and Buffer path. The row goes out once even if its network is paused, 
 verdict already frozen in `publisher-state/verdicts.csv`, scheduled for `due_et` in New York
 (or the same time the next day if passed), and its `posts.csv` row records caption and format.
 
-## settle it packs (`mill settle-find`, `settle-shoot`, `settle-media`)
+## settle it thread list (`mill settle-find`, `settle-shoot`)
 
-Everything is scripted, with no LLM and no agent; nothing is ever posted. Output goes to
-`publisher-state/settle/`: `candidates-YYYY-MM-DD.md`, `img/` (site screenshot), `png/`,
-`gif/`, `mp4/`, and `internal-calls.csv`.
+Founder, 2026-09-29: Carlos posts on Reddit himself, so settle it is a TEXT-ONLY list. There are
+no images, GIFs, video or captions; the old media were removed and are not to be regenerated.
+Everything is scripted, with no LLM and no agent, and nothing is ever posted.
 
-The media are a square big-type card with no phone frame. Reddit shows comment media at a fixed
-height, so a 9:16 frame turns into a thin strip and its words shrink with it. The comparison
-mock is at `docs/assets/settle-mock/mock-compare.png`; regenerate it with
-`python3 scripts/settle_reddit_mock.py --state state --out /tmp/mock`.
+The `settle-pack` workflow runs every 2 days at 19:00 Madrid (or by hand) and writes
+`publisher-state/settle/threads-YYYY-MM-DD.md`, with up to 20 rows of `thread | input | output`.
 
-1. **Find:** the `settle-pack` workflow runs daily at 19:00 Madrid, or by hand with
-   `step: find`. It writes a draft pack for tomorrow from Reddit RSS and Bluesky search. The
-   oracle is not asked.
-2. **Review:** a human deletes the rows that shouldn't go out, applying Soul's skips and the
-   sub rules. Edit the file on the `publisher-state` branch.
-3. **Shoot:** run the `settle-pack` workflow with `step: shoot`. Each remaining row gets ONE
-   live run through antisearch.ai in headless Chrome, and the verdict is frozen. The same run
-   saves the screenshot, logs the call in `internal-calls.csv`, and renders the card PNG
-   (1080×1080), the GIF (480×480, 12.5 fps, loops) and the MP4 (720×720 H.264, no audio).
-4. **Media for any pack:** a pack that lands another way gets its media from the hourly
-   `settle-media` workflow. You can also run it by hand. Use `--force` to re-render after a
-   template change.
+1. **Find:** live "what's the best X?" threads from Reddit RSS and Bluesky search, under 48 h
+   old. Soul's skips are applied by keyword (grief, health, legal or money, minors, private
+   people, politics, NSFW). Each question becomes its **bare input** by fixed rules: "What's the
+   best horror movie of the 80s?" becomes `80s horror movie`. A question that can't be made bare
+   is dropped.
+2. **Shoot:** ONE live run per row through antisearch.ai in headless Chrome. The User-Agent ends
+   `antisearch-internal/settle-pack` and the request carries `X-Antisearch-Internal: settle-pack`.
+   The output is frozen in `verdicts.csv` and the call is logged in `settle/internal-calls.csv`.
+   A `no` (or no verdict) drops the row. An input frozen before is never asked again.
 
 Locally, with a `publisher-state` checkout in `./state`:
 
 ```bash
-mill settle-find --state state/posts.csv      # draft
+mill settle-find --state state/posts.csv      # the list, outputs pending
 pip install -e '.[settle]'                    # once: Playwright for shoot
 mill settle-shoot --state state/posts.csv     # one live run per pending row
-mill settle-media --state state/posts.csv     # card PNG + GIF + MP4 from frozen verdicts
 ```
 
 ## Metrics (`mill metrics`)
@@ -180,8 +174,13 @@ nothing in the pipeline prepends, appends or templates "best" into it.
 
 The `category` field/column name is historical; its value is any bare input.
 
-- Never starts with "best ", "the best ", "top ", "#1 ", "greatest ".
-- Never a question ("what is the best…", trailing "?").
+- **Never contains** "best", "top", "greatest", "what's the" or any superlative ("finest",
+  "ultimate", "most", "biggest", "#1", "of all time"...), anywhere in the phrase (founder,
+  2026-09-29: this is the root error). The premise is invisible; the user reads the pattern of
+  excellence from the results. Every lane runs `bare_input.superlative_problem` before an input
+  is used, and both oracles refuse a ranked input.
+- Never a question ("what is the best…", trailing "?"). Another person's question is made bare
+  first: "What's the best horror movie of the 80s?" becomes `80s horror movie`.
 - Never an ask ("recommend…", "give me…", "find me…").
 - Never a ranking ("top 3…", "…ranked").
 - ≤ 55 characters. Constraints are fine as plain phrases: `restaurant in barcelona`, `gift for a new mom`.

@@ -1,5 +1,17 @@
 # Instagram: creative rotation, 7 reels a day, Stories
 
+> **Founder, 2026-09-29: the rotation is off.** Until Carlos says otherwise, every reel is
+> `0-current-cover`: the first, clean creative (the keys, then silence, and the verdict appears in the
+> silence), with a cover still appended.
+>
+> - **The cover:** the monolith's last frame with the output only, in the same font, size and place,
+>   with no input text (`creatives/cover.py`). It sits after the reel's last frame for 0.2 s (6 frames),
+>   and Buffer's `thumbnailOffset` points at its middle.
+> - **Why a frame:** Buffer's API rejects a cover image URL (`VideoAssetInput.thumbnailUrl`: "Do not use").
+> - **Why:** on the profile grid the outputs read large, side by side.
+> - **Mocks:** `docs/assets/ig-cover-mock/` (`python scripts/ig_grid_mock.py --posts state/posts.csv`).
+> - `PUBLISHER_IG_ROTATION=on` brings back the rotation below.
+
 Founder, 2026-09-28: v2 of the creative mockups is approved (PR #30). This page covers
 what went live with it. TikTok and X are unchanged, and `PUBLISHER_LIVE_NETWORKS` is untouched.
 
@@ -47,7 +59,7 @@ The creative is `IG_ROTATION[(posting day + slot index) mod 4]`: a Latin square.
 
 ### The switch
 
-`PUBLISHER_IG_ROTATION=off` sends `0-current` only. The rotation is on by default.
+`PUBLISHER_IG_ROTATION=on` turns the rotation on. Since 2026-09-29 it is off by default and Instagram sends `0-current-cover` only.
 
 ## 2. Frequency: 7 reels a day
 
