@@ -419,7 +419,7 @@ def cmd_buffer_channels(args, settings: Settings) -> int:
 
 
 def cmd_settle_find(args, settings: Settings) -> int:
-    """Draft settle pack: live 'what's the best X?' threads, read-only; the oracle is not asked."""
+    """Draft settle pack: live question threads (Reddit RSS, Bluesky), read-only; the oracle is not asked."""
     from datetime import datetime, timedelta, timezone
 
     from . import settle_pack
@@ -767,7 +767,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--no-buffer", action="store_true", help="public sources only")
     sp.set_defaults(func=cmd_metrics)
 
-    sp = sub.add_parser("settle-find", help="draft settle pack: live 'best X?' threads (Reddit RSS, Bluesky); no oracle")
+    sp = sub.add_parser("settle-find", help="draft settle pack: live question threads (Reddit RSS, Bluesky); no oracle")
     sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
     sp.add_argument("--day", default="", help="pack day YYYY-MM-DD (default: tomorrow in Madrid)")
     sp.add_argument("--limit", type=int, default=40, help="max candidates in the draft")
