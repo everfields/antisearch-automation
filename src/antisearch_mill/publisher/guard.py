@@ -26,6 +26,7 @@ from datetime import date, datetime, time, timedelta, timezone, tzinfo
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from ..bare_input import superlative_problem
 from ..ledger import now_iso
 
 TZ = "America/New_York"
@@ -136,8 +137,9 @@ def caption_problem(caption: str, bare_input: str, network: str = "") -> str | N
 
 def input_problem(category: str, env: dict[str, str]) -> str | None:
     """Inputs are bare, never serial, and English unless Carlos changes PUBLISHER_LANGUAGE."""
-    if RANKED.search(category):
-        return "input starts with a ranking word"
+    ranked = superlative_problem(category)
+    if ranked:
+        return ranked
     if SERIAL.search(category):
         return "numbered / serial inputs are not allowed"
     if AI_CATEGORY.search(category) and (env.get("PUBLISHER_AI_INPUTS") or "").strip().lower() != "on":
