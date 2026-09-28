@@ -430,6 +430,26 @@ def buffer_metrics(nodes: list[dict]) -> tuple[dict[str, PostMetrics], dict[str,
     return rows, links
 
 
+def buffer_coverage(nodes: list[dict]) -> dict[str, tuple[int, int, int]]:
+    """{network: (sent posts Buffer returned, with metrics ingested, with a non-zero number)}.
+
+    `metricsUpdatedAt` stays null until Buffer's daily job has read the post from the network;
+    for Instagram that needs a Business or Creator account Buffer can read insights for
+    (Buffer: 100+ followers, all Meta permissions accepted)."""
+    out: dict[str, list[int]] = {}
+    for n in nodes:
+        net = BUFFER_SERVICE.get(n.get("channelService", ""))
+        if not net:
+            continue
+        c = out.setdefault(net, [0, 0, 0])
+        c[0] += 1
+        if n.get("metricsUpdatedAt"):
+            c[1] += 1
+            if any(_int(x.get("value")) for x in n.get("metrics") or []):
+                c[2] += 1
+    return {k: (v[0], v[1], v[2]) for k, v in out.items()}
+
+
 # --- join ---------------------------------------------------------------------
 
 
@@ -542,6 +562,9 @@ def collect(state: Path, env: Mapping[str, str], *, now: datetime, http: Http | 
             links.update(new_links)
             col.notes.append(f"buffer: {len(nodes)} sent posts, {len(buf)} with real numbers "
                              "(unrefreshed or all-zero sets are Buffer's 'not reported' default and are left blank)")
+            for net, (sent, ingested, real) in sorted(buffer_coverage(nodes).items()):
+                col.notes.append(f"buffer {net}: {sent} sent, {ingested} with metrics ingested by Buffer, "
+                                 f"{real} with a non-zero number")
             buffer_state = {"last_fetch": _iso(now), "links": links}
         except MetricsError as exc:
             col.notes.append(str(exc))

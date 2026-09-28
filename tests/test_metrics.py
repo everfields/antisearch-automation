@@ -3,7 +3,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 from antisearch_mill.metrics import (
-    BUFFER_EVERY, buffer_metrics, collect, published_posts, read_csv, summary, tiktok_embed_videos,
+    BUFFER_EVERY, buffer_coverage, buffer_metrics, collect, published_posts, read_csv, summary, tiktok_embed_videos,
     tiktok_profile, tiktok_video, x_status_id, x_token,
 )
 
@@ -277,3 +277,15 @@ def test_buffer_scheduled_rows_are_measured_but_manual_notes_are_not(tmp_path):
     slugs = {r.slug for r in published_posts(state / "posts.csv")}
     assert "ig-manual-travel" in slugs  # a Buffer-scheduled manual post is measured once it goes out
     assert "t-old" not in slugs  # a scheduled note with no Buffer id stays out
+
+
+def test_buffer_coverage_says_whether_instagram_numbers_were_ever_ingested():
+    nodes = [
+        {"id": "a", "channelService": "instagram", "metricsUpdatedAt": None, "metrics": []},
+        {"id": "b", "channelService": "instagram", "metricsUpdatedAt": "2026-09-28T06:00:00Z",
+         "metrics": [{"type": "views", "value": 0}]},
+        {"id": "c", "channelService": "tiktok", "metricsUpdatedAt": "2026-09-28T06:00:00Z",
+         "metrics": [{"type": "views", "value": 42}]},
+        {"id": "d", "channelService": "facebook", "metricsUpdatedAt": None, "metrics": []},
+    ]
+    assert buffer_coverage(nodes) == {"instagram": (2, 1, 0), "tiktok": (1, 1, 1)}
