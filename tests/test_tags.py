@@ -1,4 +1,5 @@
-"""Instagram / TikTok winner tags: allowlist only, brands and companies only, 7-day and half-a-day guards."""
+"""Winner tags: Instagram / TikTok (7-day and half-a-day guards) and the X mention (third line, 14 days);
+allowlist only, brands, products and companies only."""
 
 import json
 from datetime import date, datetime, timedelta
@@ -39,7 +40,8 @@ def test_breaker_is_off_by_default_and_never_includes_x():
 
 def test_seed_allowlist_is_japan_on_instagram_then_k18_on_tiktok():
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
-    assert list(allow) == ["japan", "k18", "hermès", "new zealand", "bora bora", "santorini", "bali"]
+    assert list(allow) == ["japan", "k18", "hermès", "new zealand", "bora bora", "santorini", "bali",
+                           "kagi", "brave", "instagram"]
     assert allowlisted("japan", "instagram", allow, DAY).handle == "@visitjapan.us"
     assert allowlisted("k18 airwash dry shampoo", "tiktok", allow, DAY).handle == "@k18hair"
     assert allowlisted("k18", "instagram", allow, DAY).handle == ""
@@ -82,7 +84,7 @@ BUFFER_ENV = {
 }
 
 
-def _live(tmp_path, jobs, env, now, verdicts):
+def _live(tmp_path, jobs, env, now, verdicts, allow=ALLOW):
     ledger = Ledger(tmp_path / "out")
     log = PostLog(tmp_path / "state" / "posts.csv")
     for j in jobs:
@@ -98,7 +100,7 @@ def _live(tmp_path, jobs, env, now, verdicts):
 
     transport = RecordingTransport(respond)
     out = run_posts(jobs, ledger, log, now=now, live=True, transport=transport, env=env, sleep=lambda _s: None,
-                    adapters=routes, tag_allowlist=ALLOW)
+                    adapters=routes, tag_allowlist=allow)
     creates = [r.json["variables"]["input"] for r in transport.requests if "createPost" in (r.json or {}).get("query", "")]
     return out, creates, log
 
@@ -157,3 +159,80 @@ def test_x_text_keeps_accents_and_refuses_emoji_links_and_mentions():
     assert "link" in x_text_problem(x_text("site", "antisearch.ai"))
     assert "mention" in x_text_problem(x_text("brand", "@k18hair"))
     assert "hashtag" in x_text_problem(x_text("tag", "#k18results"))
+
+
+def test_x_text_takes_one_mention_alone_on_the_third_line():
+    from antisearch_mill.publisher.run import x_text, x_text_problem
+
+    assert x_text("Search engine", "Kagi", "@KagiHQ") == "search engine\nkagi\n@KagiHQ"
+    assert x_text_problem("search engine\nkagi\n@KagiHQ") is None
+    assert "mention" in x_text_problem("search engine\nkagi\n@KagiHQ @brave")  # two mentions
+    assert "mention" in x_text_problem("search engine\n@kagihq\n@KagiHQ")  # a mention in the verdict line
+    assert "mention" in x_text_problem("search engine\nkagi\n@kagi.hq")  # not an X handle
+    assert "mention" in x_text_problem("search engine\nkagi\nhi\n@KagiHQ")  # only the third line
+
+
+X_ALLOW = {
+    **ALLOW,
+    "kagi": {"kind": "company", "x": {"handle": "@KagiHQ", "verified": True, "checked": "2026-09-28"}},
+    "brave": {"kind": "product", "x": {"handle": "brave", "verified": True, "checked": "2026-09-28"}},
+    "grok": {"kind": "product", "x": {"handle": "@grok", "verified": False, "checked": "2026-09-28"}},
+    "amika": {"kind": "brand", "x": {"handle": "@amika", "verified": True, "checked": "2026-09-28"}},
+    "elon musk x": {"kind": "person", "x": {"handle": "@elonmusk", "verified": True, "checked": "2026-09-28"}},
+}
+
+
+def test_x_mentions_the_verdicts_own_verified_account_once_per_fourteen_days(tmp_path):
+    from antisearch_mill.publisher.tags import choose_x_mention
+
+    log = TagLog(tmp_path / "tags.csv")
+    now = datetime(2026, 9, 28, 16, 7, tzinfo=ET)
+    assert choose_x_mention("kagi", {}, X_ALLOW, log, now, 2).handle == "@KagiHQ"  # on by default
+    assert choose_x_mention("brave", {}, X_ALLOW, log, now, 2).handle == "@brave"  # normalized with @
+    assert "off" in choose_x_mention("kagi", {"PUBLISHER_X_MENTIONS": "off"}, X_ALLOW, log, now, 2).reason
+    assert choose_x_mention("kagi search engine", {}, X_ALLOW, log, now, 2).handle == ""  # the account IS the verdict
+    for verdict in ("grok", "amika", "elon musk x", "k18", "python"):  # unverified, never amika, never a person
+        assert choose_x_mention(verdict, {}, X_ALLOW, log, now, 2).handle == "", verdict
+    log.append(now, "x", "@KagiHQ", "p-search-engine")
+    assert "14 days" in choose_x_mention("kagi", {}, X_ALLOW, log, now + timedelta(days=13, hours=23), 2).reason
+    assert choose_x_mention("kagi", {}, X_ALLOW, log, now + timedelta(days=14), 2).handle == "@KagiHQ"
+    assert choose_x_mention("kagi", {"PUBLISHER_TAG_NETWORKS": ""}, X_ALLOW, log, now + timedelta(days=14), 2).handle
+
+
+def test_the_repo_allowlist_mentions_kagi_brave_and_instagram_on_x_only():
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    got = {v: allowlisted(v, "x", allow, DAY).handle for v in ("kagi", "brave", "instagram", "japan", "k18")}
+    assert got == {"kagi": "@KagiHQ", "brave": "@brave", "instagram": "@instagram", "japan": "", "k18": ""}
+    assert allowlisted("instagram", "instagram", allow, DAY).handle == ""  # the X block tags nothing elsewhere
+    for v in ("kagi", "brave", "instagram"):
+        assert allow[v]["x"]["evidence"] and allow[v]["kind"] in ("company", "product")
+
+
+def _live_x(tmp_path, jobs, env, now, verdicts):
+    return _live(tmp_path, jobs, env, now, verdicts, allow=X_ALLOW)
+
+
+def test_live_x_posts_carry_the_mention_on_the_third_line_and_log_it(tmp_path):
+    now = datetime(2026, 9, 28, 16, 10, tzinfo=ET)
+    env = {**BUFFER_ENV, "PUBLISHER_SLOTS_X": "16:07", "PUBLISHER_X_FORMAT": "text"}
+    out, creates, log = _live_x(tmp_path, [Job("p-search-engine", "search engine", ("x",), notes="pool:vertical")],
+                                env, now, {"p-search-engine": "kagi"})
+    assert out[0].status == "published"
+    assert creates[0]["text"] == "search engine\nkagi\n@KagiHQ" and creates[0]["assets"] == []
+    assert [(r["network"], r["handle"]) for r in TagLog(log.path.parent / "tags.csv").rows()] == [("x", "@kagihq")]
+    again, creates, _ = _live_x(tmp_path, [Job("p-meta-search", "meta search", ("x",), notes="pool:vertical")],
+                                env, now + timedelta(days=3), {"p-meta-search": "kagi"})
+    assert again[0].status == "published" and creates[0]["text"] == "meta search\nkagi"  # within 14 days: no mention
+
+
+def test_an_x_video_post_with_a_mention_takes_the_three_lines_and_mentions_off_keeps_it_plain(tmp_path):
+    now = datetime(2026, 9, 28, 16, 10, tzinfo=ET)
+    env = {**BUFFER_ENV, "PUBLISHER_SLOTS_X": "16:07", "PUBLISHER_X_FORMAT": "video"}
+    out, creates, _ = _live_x(tmp_path, [Job("p-browser", "browser", ("x",), notes="pool:vertical")],
+                              env, now, {"p-browser": "brave"})
+    assert out[0].status == "published" and creates[0]["text"] == "browser\nbrave\n@brave" and creates[0]["assets"]
+    off = {**env, "PUBLISHER_X_MENTIONS": "off"}
+    out, creates, log = _live_x(tmp_path / "off", [Job("p-browser", "browser", ("x",), notes="pool:vertical")],
+                                off, now, {"p-browser": "brave"})
+    assert out[0].status == "published" and "@" not in creates[0]["text"]
+    assert TagLog(log.path.parent / "tags.csv").rows() == []

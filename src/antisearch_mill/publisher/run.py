@@ -33,7 +33,7 @@ from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
 from .registry import ADAPTERS
 from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
-from .tags import TAG_NETWORKS, TagLog, choose_tag
+from .tags import TAG_NETWORKS, X_HANDLE, TagLog, choose_tag, choose_x_mention
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
 
@@ -335,10 +335,16 @@ def run_posts(
             job = dataclasses.replace(job, caption=caption)
         shown = effective_caption(job.caption)
         if net == X_NETWORK and (job.notes.startswith("trend:") or job.notes.startswith("winner")):
-            out.append(Outcome(job.id, net, "skipped_x_no_trend", detail="X takes no trend-lane posts and no automated mentions"))
+            out.append(Outcome(job.id, net, "skipped_x_no_trend", detail="X takes no trend-lane or winner-lane posts"))
             continue
-        if fmt == TEXT:
-            shown = x_text(job.category, clip.verdict)
+        if net == X_NETWORK:
+            picked = choose_x_mention(clip.verdict, env, allowlist, tag_log, schedule_at or now, len(slots_now(net)))
+            tag = picked.handle
+            if tag:
+                job = dataclasses.replace(job, notes=f"{job.notes}; mention: {picked.reason}")
+        if fmt == TEXT or (net == X_NETWORK and tag):
+            # founder, 2026-09-28: a mention post is three lines, whichever format carries it
+            shown = x_text(job.category, clip.verdict, tag)
             problem = x_text_problem(shown)
             if problem:
                 out.append(Outcome(job.id, net, "rejected_x_text", detail=problem))
@@ -425,14 +431,18 @@ def _story(job: Job, clip: ClipRow, log: PostLog, ledger: Ledger, env, *, live: 
                      BufferInstagramStory.missing(env), None, 0.0)
 
 
-def x_text(category: str, verdict: str) -> str:
-    """X post body: the lowercase input, then the lowercase verdict. Nothing else."""
-    return f"{category.strip().lower()}\n{verdict.strip().lower()}"
+def x_text(category: str, verdict: str, mention: str = "") -> str:
+    """X post body: the lowercase input, then the lowercase verdict, then the one verified
+    @handle when the verdict is that account. Nothing else."""
+    body = f"{category.strip().lower()}\n{verdict.strip().lower()}"
+    return f"{body}\n{mention.strip()}" if mention.strip() else body
 
 
 def x_text_problem(text: str) -> str | None:
-    if "@" in text:
-        return "X text cannot mention an account"
+    lines = text.split("\n")
+    body = "\n".join(lines[:2]) if len(lines) == 3 and X_HANDLE.match(lines[2]) else text
+    if "@" in body:
+        return "X text mentions one account at most, alone on the third line"
     if "#" in text:
         return "X text cannot carry a hashtag"
     if re.search(r"https?://|\bwww\.|\.(com|ai|io|net|org)\b", text, re.I):
