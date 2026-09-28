@@ -182,3 +182,24 @@ def test_instagram_token_refresh():
 def test_oauth_actions_match_providers(tmp_path, capsys):
     assert main(["--env-file", str(tmp_path / "x"), "oauth", "tiktok", "refresh"]) == 2
     assert main(["--env-file", str(tmp_path / "x"), "oauth", "instagram", "url"]) == 2
+
+
+def test_oracle_state_returns_the_frozen_verdict_and_never_asks_twice(tmp_path, capsys, monkeypatch):
+    import json
+
+    from antisearch_mill.oracle import Verdict
+    from antisearch_mill.publisher.verdicts import VerdictStore
+
+    VerdictStore(tmp_path / "verdicts.csv").put(Verdict("travel", "japan", "japan", "live", "https://antisearch.ai/verdict",
+                                                         2022, 1, "2026-09-27T10:36:36+00:00"))
+
+    def boom(*a, **k):
+        raise AssertionError("a frozen input is never asked again")
+
+    monkeypatch.setattr("antisearch_mill.oracle.LiveOracle.ask", boom)
+    base = ["--env-file", str(tmp_path / "none"), "oracle"]
+    assert main([*base, "travel", "--state", str(tmp_path / "posts.csv")]) == 0
+    assert json.loads(capsys.readouterr().out)["verdict"] == "japan"
+    assert main([*base, "zoo", "--state", str(tmp_path / "posts.csv"), "--oracle", "fixture"]) == 2  # never frozen
+    assert main([*base, "ai model", "--state", str(tmp_path / "posts.csv")]) == 2  # AI block still applies
+    assert "zoo" not in (tmp_path / "verdicts.csv").read_text()

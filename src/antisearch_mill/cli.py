@@ -15,7 +15,7 @@ from . import CAPTURE_TAG, __version__
 from .config import CREDENTIALS, Settings, load_dotenv
 from .fonts import FontNotFound, resolve_font
 from .ledger import ALL_PLATFORMS, Ledger, QueueError, read_queue
-from .oracle import FixtureOracle, LiveOracle, OracleError
+from .oracle import FixtureOracle, LiveOracle, OracleError, normalize_category
 from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound
 from .phone import FRAME_NONE, FRAME_PHONE, phone_spec
 from .produce import produce_all, sha256_file, validate_master
@@ -611,8 +611,21 @@ def cmd_doctor(args, settings: Settings) -> int:
 
 
 def cmd_oracle(args, settings: Settings) -> int:
+    """With --state: the input's frozen verdict, or its one live run, frozen in verdicts.csv (never a second ask)."""
+    oracle = _oracle(args, settings)
+    if args.state:
+        from .publisher.guard import input_problem
+        from .publisher.verdicts import FrozenOracle
+
+        env = dict(os.environ)
+        problem = input_problem(normalize_category(args.category), env)
+        if args.oracle != "live" or problem:
+            print(f"oracle error: {problem or 'only the live oracle freezes a verdict'}", file=sys.stderr)
+            return 2
+        _, store = _publisher_state(args, settings, env)
+        oracle = FrozenOracle(oracle, store)
     try:
-        v = _oracle(args, settings).ask(args.category)
+        v = oracle.ask(args.category)
     except OracleError as exc:
         print(f"oracle error: {exc}", file=sys.stderr)
         return 1
@@ -728,6 +741,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("oracle", help="ask the oracle one category")
     sp.add_argument("category")
+    sp.add_argument("--state", default="", help="publisher-state posts.csv: freeze the verdict next to it (one run per input)")
     oracle_opts(sp)
     sp.set_defaults(func=cmd_oracle)
     return p

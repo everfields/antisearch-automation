@@ -25,7 +25,7 @@ from ..creatives import CURRENT, STORY, id_tag, ig_creative, rotation_enabled
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now,
-    posting_day, serving_open, serving_slot, slot_index_at, slot_times, slots_for, taken_slots, x_post_format,
+    posting_day, serving_open, serving_slot, slot_index_at, slot_of, slot_times, slots_for, taken_slots, x_post_format,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
@@ -148,13 +148,23 @@ def run_posts(
         return allowance[net]
 
     def slot_index(net: str, slots: list) -> int:
-        """The slot this post fills: the one being served now, else the one its send time falls in."""
+        """The slot this post fills: the one being served now; else, as `taken_slots` counts it, the
+        latest free slot whose window holds its send time, or (outside every window) the earliest free one."""
+        if not slots:
+            return 0
+        sent, held = use(net, slots)
         if enforce_slots and schedule_at is None:
-            sent, held = use(net, slots)
             i = serving_slot(now, slots, sent, offsets(net, slots), lookahead, held)
             if i is not None:
                 return i
-        return slot_index_at(day, slots, schedule_at or now) if slots else 0
+        this = (schedule_at or now, schedule_at is not None)
+        placed = slot_of(day, slots, [*log.slot_posts(day, net), this], offsets(net, slots), lookahead)
+        mine = next(i for post, i in reversed(placed) if post == this)
+        if mine is not None:
+            return mine
+        taken = {i for _, i in placed if i is not None}
+        free = [i for i in range(len(slots)) if i not in taken]
+        return free[sent] if sent < len(free) else slot_index_at(day, slots, this[0])
 
     def go_out(net: str, slots: list) -> datetime:
         """When this post would go out: its Buffer schedule, else its slot's jittered minute, else now."""
