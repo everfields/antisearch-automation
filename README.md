@@ -90,6 +90,33 @@ publisher and Buffer path. The row goes out once even if its network is paused, 
 verdict already frozen in `publisher-state/verdicts.csv`, scheduled for `due_et` in New York
 (or the same time the next day if passed), and its `posts.csv` row records caption and format.
 
+## settle it packs (`mill settle-find`, `settle-shoot`, `settle-media`)
+
+Everything is scripted, with no LLM and no agent; nothing is ever posted. Output goes to
+`publisher-state/settle/`: `candidates-YYYY-MM-DD.md`, `img/` (PNG), `gif/`, `mp4/`, and
+`internal-calls.csv`.
+
+1. **Find:** the `settle-pack` workflow runs daily at 19:00 Madrid, or by hand with
+   `step: find`. It writes a draft pack for tomorrow from Reddit RSS and Bluesky search. The
+   oracle is not asked.
+2. **Review:** a human deletes the rows that shouldn't go out, applying Soul's skips and the
+   sub rules. Edit the file on the `publisher-state` branch.
+3. **Shoot:** run the `settle-pack` workflow with `step: shoot`. Each remaining row gets ONE
+   live run through antisearch.ai in headless Chrome, and the verdict is frozen. The same run
+   saves the screenshot, logs the call in `internal-calls.csv`, and renders the GIF (480 px,
+   12.5 fps, loops) and MP4 (9:16 H.264, no audio).
+4. **Media for any pack:** a pack that lands another way gets GIF and MP4 from the hourly
+   `settle-media` workflow. You can also run it by hand.
+
+Locally, with a `publisher-state` checkout in `./state`:
+
+```bash
+mill settle-find --state state/posts.csv      # draft
+pip install -e '.[settle]'                    # once: Playwright for shoot
+mill settle-shoot --state state/posts.csv     # one live run per pending row
+mill settle-media --state state/posts.csv     # GIF + MP4 from frozen verdicts
+```
+
 ## Metrics (`mill metrics`)
 
 `.github/workflows/metrics.yml` runs every 3 hours (and on demand) and appends per-post
