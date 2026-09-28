@@ -15,7 +15,12 @@ A post tags the verdict's official account only when all of these hold:
 If anything is unclear, there is no tag. The tag is the whole caption: `@handle`.
 Buffer's API has user tags for images only (`ImageMetadataInput.userTags`), not
 for reels (`VideoMetadataInput` has none), so Instagram uses the caption path too.
-X is never tagged. No hashtags, no collaborator invites, no hidden text.
+
+X (founder, 2026-09-28, overriding the morning's no-mention rule): one automated mention per
+post, on the post's third line (`input`, `verdict`, `@handle`), from the same allowlist and
+the same checks, only when the account is the verdict itself, never the same account within
+14 days. `PUBLISHER_X_MENTIONS=off` stops it; on by default. No hashtags, no collaborator
+invites, no hidden text.
 """
 
 from __future__ import annotations
@@ -32,13 +37,17 @@ from ..oracle import normalize_category
 from .guard import HANDLE, posting_day
 
 TAG_NETWORKS = ("instagram", "tiktok")
+X_NETWORK = "x"
+MENTION_NETWORKS = (*TAG_NETWORKS, X_NETWORK)
+X_HANDLE = re.compile(r"^@[A-Za-z0-9_]{1,15}$")
 TAG_KINDS = ("brand", "product", "company")
 RECHECK_DAYS = 30
 TAG_COOLDOWN = timedelta(days=7)
 # Instagram (Carlos, 2026-09-27): the mention rides the hashtag caption, only for a verified
 # US brand account (`"market": "us"`), or a brand's single worldwide account the founder picked
-# (`"market": "global"`), never the same handle within 14 days.
-COOLDOWNS = {"instagram": timedelta(days=14)}
+# (`"market": "global"`), never the same handle within 14 days. X: never the same account
+# within 14 days (founder, 2026-09-28).
+COOLDOWNS = {"instagram": timedelta(days=14), X_NETWORK: timedelta(days=14)}
 # Never crown amika or any Bansk brand: an entry naming amika, or owned by Bansk, is never tagged.
 NEVER_TAG_NAMES = ("amika",)
 NEVER_TAG_OWNERS = ("bansk",)
@@ -77,14 +86,14 @@ def _entry(verdict: str, allowlist: Mapping[str, dict]) -> tuple[str, dict] | No
 
 def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today: date) -> Tag:
     """The verified handle for this verdict on this network, or no tag and why."""
-    if network not in TAG_NETWORKS:
+    if network not in MENTION_NETWORKS:
         return Tag("", f"{network} takes no tags")
     found = _entry(verdict, allowlist)
     if found is None:
         return Tag("", "verdict not on the tag allowlist")
     name, entry = found
     names = [name, *(normalize_category(x) for x in entry.get("aliases", [])),
-             *(str((entry.get(n) or {}).get("handle") or "").lower() for n in TAG_NETWORKS)]
+             *(str((entry.get(n) or {}).get("handle") or "").lower() for n in MENTION_NETWORKS)]
     if (any(bad in n for n in names for bad in NEVER_TAG_NAMES)
             or str(entry.get("owner") or "").strip().lower() in NEVER_TAG_OWNERS):
         return Tag("", f"{name} is never tagged (amika or a Bansk brand)")
@@ -94,7 +103,8 @@ def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today
     handle = str(account.get("handle") or "").strip()
     if handle and not handle.startswith("@"):
         handle = "@" + handle
-    if not account.get("verified") or not HANDLE.match(handle):
+    valid = X_HANDLE if network == X_NETWORK else HANDLE
+    if not account.get("verified") or not valid.match(handle):
         return Tag("", f"{name} has no verified {network} handle on the allowlist")
     markets = MARKETS_ALLOWED.get(network)
     if markets and str(account.get("market") or "").lower() not in markets:
@@ -133,13 +143,31 @@ class TagLog:
                         "job_id": job_id})
 
 
+def x_mentions_enabled(env: Mapping[str, str]) -> bool:
+    """`PUBLISHER_X_MENTIONS`: on by default (founder, 2026-09-28); `off` stops X mentions."""
+    return (env.get("PUBLISHER_X_MENTIONS") or "on").strip().lower() not in ("off", "0", "false", "none")
+
+
+def choose_x_mention(verdict: str, env: Mapping[str, str], allowlist: Mapping[str, dict], log: TagLog,
+                     now: datetime, slots_today: int) -> Tag:
+    """The one @handle an X post may carry: the verdict's own allowlisted, verified X account."""
+    if not x_mentions_enabled(env):
+        return Tag("", "X mentions are off (PUBLISHER_X_MENTIONS)")
+    tag = allowlisted(verdict, X_NETWORK, allowlist, posting_day(now))
+    # the founder's X limits are per post and per account; the half-of-the-day cap is Instagram/TikTok's
+    return _guarded(tag, X_NETWORK, log, now, slots_today, half_cap=False) if tag.handle else tag
+
+
 def choose_tag(verdict: str, network: str, env: Mapping[str, str], allowlist: Mapping[str, dict],
                log: TagLog, now: datetime, slots_today: int) -> Tag:
     if network not in tag_networks(env):
         return Tag("", f"tags are off on {network} (PUBLISHER_TAG_NETWORKS)")
     tag = allowlisted(verdict, network, allowlist, posting_day(now))
-    if not tag.handle:
-        return tag
+    return _guarded(tag, network, log, now, slots_today) if tag.handle else tag
+
+
+def _guarded(tag: Tag, network: str, log: TagLog, now: datetime, slots_today: int, *, half_cap: bool = True) -> Tag:
+    """The per-handle cooldown and the half-of-the-day cap, from `state/tags.csv`."""
     rows = [r for r in log.rows() if r["network"] == network]
     when = [(r, datetime.fromisoformat(r["at"])) for r in rows]
     cooldown = COOLDOWNS.get(network, TAG_COOLDOWN)
@@ -147,6 +175,6 @@ def choose_tag(verdict: str, network: str, env: Mapping[str, str], allowlist: Ma
     if any(r["handle"] == tag.handle.lower() and abs(now - at) < cooldown for r, at in when):
         return Tag("", f"{tag.handle} was tagged on {network} in the last {cooldown.days} days")
     today = sum(1 for _r, at in when if posting_day(at) == posting_day(now))
-    if today + 1 > slots_today // 2:
+    if half_cap and today + 1 > slots_today // 2:
         return Tag("", f"tags are at half of today's {slots_today} {network} post(s)")
     return tag

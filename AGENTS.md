@@ -15,6 +15,18 @@ Context for every coding agent working in this repo (Cursor, Claude Code, others
 
 How to measure repetition: `docs/proposals/2026-09-28-repetition-metric.md`.
 
+## X rule (founder, 2026-09-28 evening; replaces the morning's no-mention rule)
+
+- An X post is `input`, then `verdict`, lowercase. When the verdict **is** an account, a third
+  line carries its `@handle` (`search engine` / `kagi` / `@KagiHQ`).
+- **At most 1 mention per post.** The account must be the verdict itself, never its maker or
+  owner. It must be in `queue/tags/allowlist.json` with a verified `x` block (evidence, checked
+  within 30 days). Never a person, never amika or any Bansk brand.
+- **Never the same account within 14 days**, tracked in publisher-state `tags.csv`.
+- **Unchanged:** X cadence and random offset, no hashtags, links or emoji, no trend-lane,
+  winner-lane or reply posts, and the near-duplicate guard.
+- `PUBLISHER_X_MENTIONS=off` stops mentions; they are on by default.
+
 ## settle it packs need no agent
 
 Building a settle-it pack is scripted and needs zero LLM or Cursor credits. See the README

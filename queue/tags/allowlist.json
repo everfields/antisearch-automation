@@ -1,5 +1,5 @@
 {
-  "_readme": "Tag allowlist for Instagram and TikTok. See README.md in this folder. Only brands, products and companies; never people. A handle is tagged only with verified=true and a checked date in the last 30 days.",
+  "_readme": "Tag allowlist for Instagram, TikTok and X mentions. See README.md in this folder. Only brands, products and companies; never people. A handle is tagged only with verified=true and a checked date in the last 30 days.",
   "japan": {
     "kind": "brand",
     "note": "Visit Japan: the destination brand of JNTO, Japan's official tourism board (CoS, 2026-09-27)",
@@ -88,6 +88,45 @@
       "market": "global",
       "by": "cursor agent (evidence: CoS)",
       "evidence": "official: bio 'Official Account of Indonesia's Ministry of Tourism' (https://infldb.com/top-brands/Indonesia); HypeAuditor lists it as the Wonderful Indonesia account (https://hypeauditor.com/instagram/wonderfulindonesia/). Verified and recent: direct instagram.com profile view by CoS, Sun 27 Sep 2026 about 16:05 Madrid (blue badge visible; date = latest non-pinned post): verified, 1,512,204 followers, latest post 27 Sep 2026."
+    }
+  },
+  "kagi": {
+    "kind": "company",
+    "aliases": [
+      "kagi search"
+    ],
+    "note": "Kagi, the paid web search engine; X pool input search engine -> kagi (founder's example, 2026-09-28)",
+    "x": {
+      "handle": "@KagiHQ",
+      "verified": true,
+      "checked": "2026-09-28",
+      "by": "cursor agent",
+      "evidence": "official: Wikidata Q123819301 ('web search engine') lists X username KagiHQ, and kagi.com links twitter.com/KagiHQ; the X profile's website is kagi.com. Verified: X profile data via api.fxtwitter.com/KagiHQ on 2026-09-28: verified true (blue check, type 'individual'), 12,846 followers, joined 2023-01-30."
+    }
+  },
+  "brave": {
+    "kind": "product",
+    "aliases": [
+      "brave browser"
+    ],
+    "note": "Brave, the web browser; X pool input browser -> brave",
+    "x": {
+      "handle": "@brave",
+      "verified": true,
+      "checked": "2026-09-28",
+      "by": "cursor agent",
+      "evidence": "official: Wikidata Q22906900 (Brave, the web browser) lists X username brave, and brave.com links x.com/brave; the X profile's website is brave.com/links. Verified: X profile data via api.fxtwitter.com/brave on 2026-09-28: verified true (organization, gold check), 433,161 followers."
+    }
+  },
+  "instagram": {
+    "kind": "product",
+    "note": "Instagram, Meta's photo and video network; X pool input social network -> instagram",
+    "x": {
+      "handle": "@instagram",
+      "verified": true,
+      "checked": "2026-09-28",
+      "by": "cursor agent",
+      "evidence": "official: Wikidata Q209330 (Instagram, the social network) lists X username instagram; the X profile's website is help.instagram.com (about.instagram.com links no X account). Verified: X profile data via api.fxtwitter.com/instagram on 2026-09-28: verified true (organization, gold check), 27,495,392 followers."
     }
   }
 }

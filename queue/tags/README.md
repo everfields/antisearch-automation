@@ -1,4 +1,4 @@
-# Tag allowlist (Instagram and TikTok)
+# Tag allowlist (Instagram, TikTok and X)
 
 `allowlist.json` is the only source of tags. A post tags the verdict's official account
 only if every rule below holds, otherwise it goes out untagged.
@@ -9,7 +9,14 @@ only if every rule below holds, otherwise it goes out untagged.
 - **Verified:** a human opened the account on that network, saw the verified badge, and
   set `verified: true`, `checked: YYYY-MM-DD`, `by: <who>`, and `evidence`. A check
   older than 30 days stops the tag until someone re-checks.
-- **Networks:** `instagram` and `tiktok` only. X is never tagged.
+- **Networks:** `instagram`, `tiktok` and `x`.
+- **X** (founder, 2026-09-28): the entry's `x` block is the post's one mention, on its third
+  line (`input`, `verdict`, `@handle`). It is used only when the account is the verdict itself,
+  never the same account within 14 days, and with no half-of-the-day cap. Evidence for an `x`
+  block: Wikidata `P2002` and/or the official site linking `x.com/<handle>`, plus the badge
+  from the X profile data. Seeds (2026-09-28): `kagi` → `@KagiHQ`, `brave` → `@brave`,
+  `instagram` → `@instagram`. `PUBLISHER_X_MENTIONS=off` stops X mentions (on by default);
+  `PUBLISHER_TAG_NETWORKS` does not affect X.
 - **Caption:** on TikTok the tag is the whole caption, `@handle`. On Instagram the caption
   is `#<input> #<verdict> #ai` and the tag rides last as its one `@mention` (Buffer
   cannot user-tag reels; its API has user tags on images only).
