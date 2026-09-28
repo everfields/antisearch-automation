@@ -654,11 +654,11 @@ def _format_table(rows: list[dict]) -> list[str]:
 
 def _creative_table(rows: list[dict], creative_of: dict[str, str]) -> list[str]:
     """Instagram creative rotation: means over posts that have the number. Blank = before the rotation."""
-    from .creatives import CURRENT, IG_ROTATION
+    from .creatives import CLEAN_COVER, CURRENT, IG_ROTATION
 
     out = ["| IG creative | posts | mean views | mean likes | mean shares | mean saves | mean eng. rate |",
            "| --- | --- | --- | --- | --- | --- | --- |"]
-    for creative in IG_ROTATION:
+    for creative in (*IG_ROTATION, CLEAN_COVER):
         mine = [r for r in rows if (creative_of.get(r.get("slug", "")) or CURRENT) == creative]
         nums = {k: [v for r in mine if (v := _int(r.get(k))) is not None] for k in ("views", "likes", "shares", "saves")}
         rates = [e for r in mine if (e := _engagement(r)) is not None]

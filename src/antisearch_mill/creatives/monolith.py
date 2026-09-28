@@ -98,6 +98,22 @@ def _font(font_path: str, size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.truetype(str(light if light.is_file() else font_path), size)
 
 
+VERDICT_TRACKING = 5
+
+
+def verdict_font(font_path: str, verdict: str, width: int) -> ImageFont.FreeTypeFont:
+    """The large verdict of the outro: 150 px at 1080 wide, smaller until it fits 82% of the width."""
+    size, probe_draw = 150, ImageDraw.Draw(Image.new("RGB", (8, 8)))
+    while size > 60 and probe_draw.textlength(verdict, font=_font(font_path, size)) + 5 * len(verdict) > width * 0.82:
+        size -= 6
+    return _font(font_path, size)
+
+
+def verdict_y(height: int) -> float:
+    """The top of the outro's verdict line, once it has risen into place."""
+    return height * 0.44 - 40
+
+
 def _tracked(draw: ImageDraw.ImageDraw, center_x: float, y: float, text: str, font, fill, tracking: float) -> None:
     widths = [draw.textlength(ch, font=font) for ch in text]
     total = sum(widths) + tracking * max(0, len(text) - 1)
@@ -178,10 +194,7 @@ class _Monolith:
         self.reflect_fade = fade
         self.category, self.verdict = category, verdict
         self.small = _font(font_path, 44)
-        size, probe_draw = 150, ImageDraw.Draw(Image.new("RGB", (8, 8)))
-        while size > 60 and probe_draw.textlength(verdict, font=_font(font_path, size)) + 5 * len(verdict) > self.W * 0.82:
-            size -= 6
-        self.big = _font(font_path, size)
+        self.big = verdict_font(font_path, verdict, self.W)
         self.submit_i = plan.intro + timeline.submit_frame
         self.verdict_i = plan.verdict_at(timeline)
         self.black = Image.new("RGB", (self.W, self.H))
@@ -276,7 +289,7 @@ class _Monolith:
             rise = round(30 * (1 - _ease((recede - 0.4) / 0.6)))
             alpha = round(255 * type_in)
             _tracked(d, W / 2, H * 0.44 - 150 + rise, self.category, self.small, (*STONE, alpha), 6)
-            _tracked(d, W / 2, H * 0.44 - 40 + rise, self.verdict, self.big, (*INK, alpha), 5)
+            _tracked(d, W / 2, verdict_y(H) + rise, self.verdict, self.big, (*INK, alpha), VERDICT_TRACKING)
             frame = Image.alpha_composite(frame.convert("RGBA"), txt).convert("RGB")
         if self.submit_i <= i < self.verdict_i + 0.35 * self.fps:  # the room darkens through the wait
             p = min(1.0, (i - self.submit_i) / max(1, self.verdict_i - self.submit_i))

@@ -192,7 +192,7 @@ def cmd_post(args, settings: Settings) -> int:
     if wnets:
         jobs += winner_jobs(winners_dir, wnets, posting_day(now_et()), log, store.categories(), claimed, winner_cap(env))
     for net in pool_networks(pools_dir):
-        jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY)
+        jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY, env=env)
 
     if args.oracle == "fixture":
         oracle = _oracle(args, settings)
@@ -419,72 +419,42 @@ def cmd_buffer_channels(args, settings: Settings) -> int:
 
 
 def cmd_settle_find(args, settings: Settings) -> int:
-    """Draft settle pack: live question threads (Reddit RSS, Bluesky), read-only; the oracle is not asked."""
-    from datetime import datetime, timedelta, timezone
+    """Thread list for settle it: live question threads (Reddit RSS, Bluesky) as bare inputs; the oracle is not asked."""
+    from datetime import datetime, timezone
 
     from . import settle_pack
-    from .publisher.verdicts import VerdictStore
 
     state_dir = Path(args.state).parent
     now = datetime.now(timezone.utc)
-    day = args.day or (now.astimezone(settle_pack.MADRID) + timedelta(days=1)).date().isoformat()
-    pack = state_dir / "settle" / f"candidates-{day}.md"
-    if pack.exists() and not args.force:
-        print(f"settle-find: {pack} exists; review it, or pass --force to replace the draft", file=sys.stderr)
+    day = args.day or now.astimezone(settle_pack.MADRID).date().isoformat()
+    path = state_dir / "settle" / f"threads-{day}.md"
+    if path.exists() and not args.force:
+        print(f"settle-find: {path} exists; pass --force to replace it", file=sys.stderr)
         return 2
-    kept, skipped = settle_pack.candidates(settle_pack.Sources().all(), now,
-                                           VerdictStore(state_dir / "verdicts.csv").categories(), args.limit)
-    settle_pack.write_draft(pack, day, kept, skipped, now)
-    print(f"settle-find: {len(kept)} candidates, {len(skipped)} skipped -> {pack}")
+    kept, skipped = settle_pack.candidates(settle_pack.Sources().all(), now, args.limit)
+    settle_pack.write_list(path, day, kept, skipped, now)
+    print(f"settle-find: {len(kept)} threads, {len(skipped)} skipped -> {path}")
     return 0 if kept else 3
 
 
 def cmd_settle_shoot(args, settings: Settings) -> int:
-    """One live run per pending pack row through antisearch.ai (headless Chrome): frozen verdict + screenshot."""
+    """One live run per pending thread-list row through antisearch.ai (headless Chrome, marked internal): frozen, text only."""
     from . import settle_pack
     from .publisher.verdicts import VerdictStore
 
     state_dir = Path(args.state).parent
-    packs = [Path(args.pack)] if args.pack else sorted((state_dir / "settle").glob("candidates-*.md"))
-    todo = [p for p in packs if f"| {settle_pack.PENDING} |" in p.read_text(encoding="utf-8")]
+    lists = [Path(args.list)] if args.list else sorted((state_dir / "settle").glob("threads-*.md"))
+    todo = [p for p in lists if any(o == settle_pack.PENDING for *_x, o in settle_pack.list_rows(p.read_text("utf-8")))]
     if not todo:
         print("settle-shoot: no pending rows")
         return 0
     browser = settle_pack.Browser(args.chrome)
     try:
         store = VerdictStore(state_dir / "verdicts.csv")
-        for pack in todo:
-            settle_pack.shoot(pack, store, browser.ask, log=lambda line, p=pack: print(f"  {p.name}: {line}"))
+        for path in todo:
+            settle_pack.shoot(path, store, browser.ask, log=lambda line, p=path: print(f"  {p.name}: {line}"))
     finally:
         browser.close()
-    return 0
-
-
-def cmd_settle_media(args, settings: Settings) -> int:
-    """A card PNG, GIF and MP4 for every settle pack row that has a frozen verdict and no media yet (never asks the oracle)."""
-    from . import settle
-    from .publisher.verdicts import VerdictStore
-
-    state_dir = Path(args.state).parent
-    store = VerdictStore(state_dir / "verdicts.csv")
-    if args.pack:
-        packs = [Path(args.pack)]
-    elif args.force:
-        packs = sorted((state_dir / "settle").glob("candidates-*.md"))
-    else:
-        packs = settle.packs_missing_media(state_dir / "settle", store)
-    if args.check:
-        print(f"settle-media: {len(packs)} pack(s) need media: {', '.join(p.name for p in packs) or 'none'}")
-        return 0 if packs else 3
-    try:
-        font = resolve_font(settings.font_path)
-        for pack in packs:
-            for line in settle.media_for_pack(pack, store, font_path=font, force=args.force):
-                print(f"  {pack.name}: {line}")
-    except (FontNotFound, RenderError) as exc:
-        print(f"settle-media error: {exc}", file=sys.stderr)
-        return 2
-    print(f"settle-media: {len(packs)} pack(s) done")
     return 0
 
 
@@ -772,26 +742,18 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--no-buffer", action="store_true", help="public sources only")
     sp.set_defaults(func=cmd_metrics)
 
-    sp = sub.add_parser("settle-find", help="draft settle pack: live question threads (Reddit RSS, Bluesky); no oracle")
+    sp = sub.add_parser("settle-find", help="settle it thread list: live question threads as bare inputs; no oracle")
     sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
-    sp.add_argument("--day", default="", help="pack day YYYY-MM-DD (default: tomorrow in Madrid)")
-    sp.add_argument("--limit", type=int, default=40, help="max candidates in the draft")
-    sp.add_argument("--force", action="store_true", help="replace an existing draft for that day")
+    sp.add_argument("--day", default="", help="list day YYYY-MM-DD (default: today in Madrid)")
+    sp.add_argument("--limit", type=int, default=20, help="max threads in the list")
+    sp.add_argument("--force", action="store_true", help="replace an existing list for that day")
     sp.set_defaults(func=cmd_settle_find)
 
-    sp = sub.add_parser("settle-shoot", help="one live run per pending pack row via the real site: frozen + screenshot")
+    sp = sub.add_parser("settle-shoot", help="one live run per pending thread-list row via the real site: frozen, text only")
     sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
-    sp.add_argument("--pack", default="", help="one pack file (default: every pack with pending rows)")
+    sp.add_argument("--list", default="", help="one thread list (default: every list with pending rows)")
     sp.add_argument("--chrome", default="", help="Chrome/Chromium executable (default: Playwright's)")
     sp.set_defaults(func=cmd_settle_shoot)
-
-    sp = sub.add_parser("settle-media",
-                        help="square card PNG + GIF + MP4 per settle pack row from its frozen verdict -> <state>/settle/{png,gif,mp4}/")
-    sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
-    sp.add_argument("--pack", default="", help="one pack file (default: every settle/candidates-*.md missing media)")
-    sp.add_argument("--check", action="store_true", help="exit 0 if a pack needs media, else 3; renders nothing")
-    sp.add_argument("--force", action="store_true", help="re-render every pack's media, even existing files (e.g. after a template change)")
-    sp.set_defaults(func=cmd_settle_media)
 
     sp = sub.add_parser("dm-list", help="yesterday's posted verdicts with an official account -> <state>/manual/dm-list-DAY.md")
     sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")

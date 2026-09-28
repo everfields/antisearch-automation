@@ -164,12 +164,37 @@ A full 10-post queue lasts 2 days at 5 a day, 3 days at 3, and 10 days at 1.
 - A posting day runs **09:00 ET → 09:00 ET**; a 00:07 slot belongs to the day that
   started at 09:00.
 - Every slot is on a **fixed :07 minute**, never on the hour. The cron wakes every
-  15 minutes in the same UTC hours, so a late GitHub start still falls inside the slot.
+  15 minutes (:04, :19, :34, :49) in the same UTC hours, so a late GitHub start still falls
+  inside the slot.
 - At least **90 minutes between two posts on the same network**, both in the slot
   plan and at run time.
 - One post per network per run.
-- A missed slot stays open until the next slot of that network, and at least 3h,
-  then expires. An expired slot is not owed, so a long outage does not post a backlog.
+- A missed slot stays open until the next slot of that network, and at least 3h.
+- **Catch-up (2026-09-29):** if a slot's whole window passes with no run (GitHub drops most
+  scheduled wakes), the next run still sends the most recently missed slot, up to 6h after
+  its time. It sends one only: older misses stay missed, so a long outage never posts a
+  backlog. The 90-minute gap and the slot's random offset still apply.
+
+### Reliable wakes (no manual kick)
+
+On 28 Sep, GitHub ran the `*/15` schedule once in 8 hours. The cron now sits off the top of the
+hour, and the catch-up covers a missed window. For wakes that don't depend on GitHub's
+scheduler, point any free external pinger at `repository_dispatch`. For example, a
+[cron-job.org](https://cron-job.org) job every 20 minutes:
+
+- `POST https://api.github.com/repos/everfields/antisearch-automation/dispatches`
+- headers `Accept: application/vnd.github+json` and `Authorization: Bearer <token>`
+- body `{"event_type":"publisher-tick"}`
+- `<token>` is a fine-grained PAT for this repo only, with **Contents: read and write**
+  (GitHub requires that permission for a dispatch).
+
+A tick runs exactly like the cron: it respects `PUBLISHER_CRON`, runs the `mill due`
+pre-check first, and posts only what is due.
+
+**Minutes.** The repo is private, so every wake is billed as at least 1 Actions minute, even
+when nothing is due. A wake every 20 minutes over the 17-hour window is about 1,500 minutes a
+month; every 15 minutes is about 2,000, which is the whole Free plan. Pick 20–30 minutes; the
+catch-up makes a late wake harmless.
 - Every post fills the slot its send time falls in: a post sent now fills the slot it
   was sent for, and a Buffer schedule holds its own slot (a 22:07 reel holds 22:07,
   not the day's first). With 2-hour slots the windows overlap, so a missed slot is
@@ -377,7 +402,8 @@ everything that can post natively.
 | `PUBLISHER_SLOTS_<NETWORK>` | variable, optional | `HH:07,...` ET, max 5, ≥90 min apart, or `off` |
 | `PUBLISHER_TREND_NETWORKS`, `PUBLISHER_TREND_CAP` | variable, optional | Trend lane: networks + rows per network per day (default 1, max 3). See `TREND_AND_REPLY_LANES.md` |
 | `PUBLISHER_WINNER_NETWORKS`, `PUBLISHER_WINNER_CAP` | variable, optional | Winner lane: networks + posts per day across networks (default 2, max 3); handles in `queue/winners/handles.json` (Instagram and TikTok tag only from the tag allowlist below) |
-| `PUBLISHER_IG_ROTATION` | variable, optional | Instagram creative rotation (founder, 2026-09-28): on by default; each slot gets `0-current`, `1-short-score`, `2-medium-monolith` or `3-computation` by posting day + slot index, logged in `posts.csv` `creative`. `off` = `0-current` only. TikTok and X are unchanged (`docs/IG_ROTATION.md`) |
+| `PUBLISHER_IG_ROTATION` | variable, optional | Instagram creative rotation. **Off by default since 2026-09-29** (founder): every reel is `0-current-cover`, the clean creative plus its cover still (the monolith's last frame, output only; Buffer `thumbnailOffset` points at it). `on` = the four-creative rotation (`0-current`, `1-short-score`, `2-medium-monolith`, `3-computation`), locally only: the publisher and manual-post workflows no longer pass this variable, so a repo variable left at `on` changes nothing; turning it back on is a one-line workflow PR. TikTok and X are unchanged (`docs/IG_ROTATION.md`) |
+| `PUBLISHER_IG_CLUSTER` | variable, optional | Proposal (2026-09-29), **off by default**. `on` = Instagram draws its pool by family (what the input ranks, by fixed rules: `restaurant in madrid` -> `restaurant`), so peers land in adjacent grid tiles (quintonil next to diverxo next to plénitude), and the unowned words come 3 at a time (one grid row in every 4, the same one-in-four share). No model. Manual and concept rows still go where they are scheduled |
 | `PUBLISHER_IG_STORIES` | variable, optional | One Stories card a day on the Instagram channel after the day's first reel sent now, same frozen verdict, through Buffer. **On by default** (founder, 2026-09-28); `off` stops it. A failed story is not retried until the next posting day |
 | `PUBLISHER_IG_CAPTION` | variable, optional | Instagram caption (Carlos, 2026-09-27): `hashtags` (default) = `#<input> #<verdict> #ai`, lowercase, letters and digits only inside a tag, no `#antisearch` or `#best`, plus at most one allowlisted US-brand `@mention` last (14-day guard). `off` = the old caption. TikTok and X are unchanged |
 | `PUBLISHER_TAG_NETWORKS` | variable, optional | Breaker for winner tags: `instagram`, `tiktok`, or both. Empty (default) = no tags. Tags come only from `queue/tags/allowlist.json` (brands, products, companies; verified, checked ≤30 days); caption = `@handle` only; one tag per handle per network per 7 days; ≤ half of a day's posts. See `queue/tags/README.md` |

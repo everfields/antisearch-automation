@@ -1,17 +1,18 @@
-"""settle it: build a pack with no LLM and no agent, in two scripted steps.
+"""settle it: a text-only thread list, with no LLM and no agent (founder, 2026-09-29).
+
+Carlos posts on Reddit himself. Every 2 days the `settle-pack` workflow runs two steps:
 
 1. `find` (read-only, no oracle): live "what's the best X?" threads from Reddit's RSS search and
-   Bluesky's search, filtered to self-contained questions under 28 h old that fit the site's
-   55-character input, with Soul's skips applied by keyword. Writes a DRAFT
-   `settle/candidates-YYYY-MM-DD.md`: each row has the thread and its exact question, and the
-   verdict and screenshot are pending (`–`). A human reviews the draft and deletes rows.
-2. `shoot`: for each pending row, ONE live run of the exact question through antisearch.ai
-   itself in headless Chrome. The verdict read from the page is frozen in `verdicts.csv`, the
-   screen is saved as `settle/img/NN-slug.png`, and the call is logged in
-   `settle/internal-calls.csv` (the browser marks it internal). An input already frozen is
-   never asked again. A `no` verdict is marked and gets no screenshot.
+   Bluesky's search, under 48 h old, with Soul's skips applied by keyword. Each thread's question
+   becomes its BARE input by fixed rules (`bare_input.from_question`: "What's the best horror movie
+   of the 80s?" -> `80s horror movie`); a question that can't be made bare is dropped. Writes
+   `settle/threads-YYYY-MM-DD.md`: thread URL, input, and the output pending (`–`).
+2. `shoot`: for each pending row, ONE live run of the bare input through antisearch.ai itself in
+   headless Chrome (User-Agent and header mark it internal), the verdict frozen in `verdicts.csv`
+   and the call logged in `settle/internal-calls.csv`. An input already frozen is never asked
+   again. A `no` (or no verdict) drops the row.
 
-`mill settle-media` then adds the GIF and MP4 (see settle.py). Nothing is ever posted.
+Text only: no screenshot, GIF, video or caption. Nothing is ever posted.
 """
 
 from __future__ import annotations
@@ -27,9 +28,9 @@ from typing import Callable
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
+from .bare_input import from_question, superlative_problem
 from .oracle import Verdict, normalize_category, normalize_verdict
 from .publisher.verdicts import VerdictStore
-from .settle import pack_rows
 
 SITE = "https://antisearch.ai/"
 UA = {"User-Agent": "antisearch-settle/0.1 (read-only; github.com/everfields/antisearch-automation)"}
@@ -37,11 +38,11 @@ BROWSER_UA = ("Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTM
               "Chrome/140.0 Mobile Safari/537.36 antisearch-internal/settle-pack")
 INTERNAL_HEADER = ("x-antisearch-internal", "settle-pack")
 MADRID = ZoneInfo("Europe/Madrid")
-MAX_AGE = timedelta(hours=28)  # a pack built the evening before is still under 48 h at posting time
-MAXLEN = 55  # the site's input box
+MAX_AGE = timedelta(hours=48)  # the list comes every 2 days
+LIMIT, MAX_ROWS = 20, 20
 PENDING = "–"
-HEADER = ("| # | platform | where | posted (Madrid) | exact question (the input) | verdict (frozen) | screenshot "
-          "| thread |")
+HEADER = "| # | thread | input | output |"
+ROW = re.compile(r"^\|\s*(\d+)\s*\|\s*(\S+)\s*\|\s*`([^`]+)`\s*\|\s*(.*?)\s*\|\s*$")
 
 REDDIT_QUERIES = ('title:"what\'s the best"', 'title:"what is the best"', 'title:"which is the best"')
 REDDIT_SUBS = ("AlignmentChartFills", "FoodNYC", "AskLosAngeles", "chicagofood", "boston", "london", "AskUK",
@@ -198,9 +199,10 @@ class Sources:
         return rows
 
 
-def candidates(threads: list[Thread], now: datetime, frozen: set[str], limit: int = 40) -> tuple[list, list]:
-    """(kept [(thread, question)], skipped [(thread, question, reason)]), freshest first, one per question."""
-    keep, skipped, seen_url, seen_q = [], [], set(), set()
+def candidates(threads: list[Thread], now: datetime, limit: int = LIMIT) -> tuple[list, list]:
+    """(kept [(thread, bare input)], skipped [(thread, question, reason)]), Reddit first, freshest first,
+    one row per input. An input frozen before is kept: its frozen output is reused, never re-asked."""
+    keep, skipped, seen_url, seen_in = [], [], set(), set()
     for t in sorted(threads, key=lambda t: t.at, reverse=True):
         if now - t.at > MAX_AGE or t.url in seen_url:
             continue
@@ -208,47 +210,49 @@ def candidates(threads: list[Thread], now: datetime, frozen: set[str], limit: in
         q = question_of(t.title) or (question_of(t.body) if t.platform == "reddit" else "")
         if not q:
             continue
-        key = normalize_category(q)
+        bare = from_question(q)
         reason = skip_reason(t.title, t.body, t.where)
-        if not reason and len(q) > MAXLEN:
-            reason = f"{len(q)} chars; the site's input holds {MAXLEN}"
-        if not reason and (key in seen_q or key in frozen):
-            reason = "same question already in the pack or frozen"
+        if not reason and not bare:
+            reason = "no bare input in the question"
+        if not reason and bare in seen_in:
+            reason = f"same input as another row (`{bare}`)"
         if reason:
             skipped.append((t, q, reason))
             continue
-        seen_q.add(key)
-        keep.append((t, q))
-    reddit_first = sorted(keep, key=lambda tq: tq[0].platform != "reddit")
+        seen_in.add(bare)
+        keep.append((t, bare))
+    reddit_first = sorted(keep, key=lambda tb: tb[0].platform != "reddit")
     return reddit_first[:limit], skipped
 
 
-def write_draft(path: Path, day: str, kept: list, skipped: list, now: datetime) -> Path:
+def write_list(path: Path, day: str, kept: list, skipped: list, now: datetime) -> Path:
     lines = [
-        f"# settle it: pack for {day}",
+        f"# settle it: threads for {day}",
         "",
-        f"Draft found {now.astimezone(MADRID):%a %d %b %H:%M} Madrid by `mill settle-find` (Reddit RSS, Bluesky "
-        "search), read-only. **No oracle run yet; nothing posted.**",
-        "",
-        "**Review:** delete the rows that shouldn't go out (Soul's skips need judgment: grief, health, legal or "
-        "money, minors, private people, politics; and each sub's rules). Then run the `settle-pack` workflow with "
-        "`step: shoot`: one live run per remaining row, the verdict frozen, a screenshot, then the GIF and MP4.",
+        f"Found {now.astimezone(MADRID):%a %d %b %H:%M} Madrid by `mill settle-find` (Reddit RSS, Bluesky search). "
+        "Text only: the thread, the bare input, and the output from one frozen live run (`mill settle-shoot`). "
+        "Nothing posted. Soul's skips were applied by keyword; each sub's rules still need a look.",
         "",
         HEADER,
-        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| --- | --- | --- | --- |",
     ]
-    for i, (t, q) in enumerate(kept, 1):
-        lines.append(f"| {i} | {t.platform} | {t.where} | {t.at.astimezone(MADRID):%a %H:%M} | `{q.replace('|', '/')}` | "
-                     f"{PENDING} | {PENDING} | {t.url} |")
+    for i, (t, bare) in enumerate(kept, 1):
+        lines.append(f"| {i} | {t.url} | `{bare}` | {PENDING} |")
     lines += ["", f"Skipped by the filters ({len(skipped)}):", ""]
-    lines += [f"- {reason}: `{q}` ({t.where})" for t, q, reason in skipped[:40]]
+    lines += [f"- {reason}: {q!r} ({t.where})" for t, q, reason in skipped[:40]]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
 
 
-def _slug(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:50]
+def list_rows(text: str) -> list[tuple[int, int, str, str, str]]:
+    """[(line index, number, thread url, input, output)] of a thread list."""
+    out = []
+    for i, line in enumerate(text.splitlines()):
+        m = ROW.match(line)
+        if m:
+            out.append((i, int(m.group(1)), m.group(2), m.group(3), m.group(4)))
+    return out
 
 
 class Browser:
@@ -266,12 +270,15 @@ class Browser:
             headers={**route.request.headers, INTERNAL_HEADER[0]: INTERNAL_HEADER[1]}))
         self.page = ctx.new_page()
 
-    def ask(self, question: str, png: Path) -> tuple[str, int]:
-        """(verdict shown on the page, or "" if none; latency ms). Saves the screen when there is a verdict."""
+    def ask(self, bare: str) -> tuple[str, int]:
+        """(verdict shown on the page, or "" if none; latency ms). Nothing is saved but the text."""
+        problem = superlative_problem(bare)
+        if problem:
+            raise ValueError(problem)
         page = self.page
         page.goto(SITE, wait_until="networkidle")
         page.click("#field")
-        page.keyboard.type(question, delay=15)
+        page.keyboard.type(bare, delay=15)
         t0 = time.monotonic()
         page.keyboard.press("Enter")
         try:
@@ -283,65 +290,66 @@ class Browser:
         except Exception:  # noqa: BLE001 - no verdict; never retried
             return "", round((time.monotonic() - t0) * 1000)
         verdict = (page.text_content("#resultText") or "").strip()
-        latency = round((time.monotonic() - t0) * 1000)
-        if verdict:
-            time.sleep(0.8)
-            png.parent.mkdir(parents=True, exist_ok=True)
-            page.screenshot(path=str(png))
-        return verdict, latency
+        return verdict, round((time.monotonic() - t0) * 1000)
 
     def close(self) -> None:
         self._browser.close()
         self._pw.stop()
 
 
-def shoot(pack: Path, store: VerdictStore, ask: Callable[[str, Path], tuple[str, int]], *,
+def shoot(path: Path, store: VerdictStore, ask: Callable[[str], tuple[str, int]], *,
           now: Callable[[], datetime] = lambda: datetime.now(timezone.utc), pause: Callable[[float], None] = time.sleep,
-          log=print) -> list[str]:
-    """One run per pending row (verdict `–`), frozen, screenshot, logged; frozen inputs are never asked again."""
-    text = pack.read_text(encoding="utf-8")
-    header, rows, _ = pack_rows(text)
-    cols = [c.lower() for c in header]
-    vi = next(i for i, c in enumerate(cols) if c.startswith("verdict"))
-    si = next(i for i, c in enumerate(cols) if "screenshot" in c)
-    settle = pack.parent
-    calls = settle / "internal-calls.csv"
-    lines = text.splitlines()
-    report = []
-    for r in rows:
-        cells = [c.strip() for c in lines[r.line].strip().strip("|").split("|")]
-        if cells[vi] != PENDING:
+          log=print, max_rows: int = MAX_ROWS) -> list[str]:
+    """One run per pending row (output `–`), frozen and logged; a frozen input is never asked again.
+    A `no` (or no verdict) drops the row; the list keeps at most `max_rows` answered rows."""
+    calls = path.parent / "internal-calls.csv"
+    report, dropped = [], []
+    for _i, number, url, bare, output in list_rows(path.read_text(encoding="utf-8")):
+        if output != PENDING:
             continue
-        key = normalize_category(r.question)
-        png = settle / "img" / f"{r.number:02d}-{_slug(r.question)}.png"
-        frozen = store.get(key)
-        if frozen is not None:
-            verdict, latency, asked = frozen.verdict, None, None  # never asked twice
+        lines = path.read_text(encoding="utf-8").splitlines()
+        at = next(i for i, n, *_ in list_rows("\n".join(lines)) if n == number)
+        answered = sum(1 for *_x, o in list_rows("\n".join(lines)) if o not in (PENDING,))
+        if superlative_problem(bare):
+            verdict, asked = "", None  # never typed: inputs are bare
+        elif (frozen := store.get(normalize_category(bare))) is not None:
+            verdict, asked = frozen.verdict, None  # never asked twice
+        elif answered >= max_rows:
+            del lines[at]
+            path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            continue
         else:
             asked = now()
-            verdict, latency = ask(r.question, png)
+            verdict, latency = ask(bare)
             if verdict:
-                store.put(Verdict(key, normalize_verdict(verdict), verdict, "live", SITE.rstrip("/") + "/verdict",
-                                  latency, 1, asked.isoformat(timespec="seconds")))
+                store.put(Verdict(normalize_category(bare), normalize_verdict(verdict), verdict, "live",
+                                  SITE.rstrip("/") + "/verdict", latency, 1, asked.isoformat(timespec="seconds")))
             new = not calls.is_file()
             with calls.open("a", newline="", encoding="utf-8") as fh:
                 w = csv.writer(fh)
                 if new:
                     w.writerow(["asked_at_utc", "asked_at_madrid", "zone", "input", "verdict", "latency_ms", "marker"])
                 w.writerow([asked.strftime("%Y-%m-%dT%H:%M:%SZ"), asked.astimezone(MADRID).isoformat(timespec="seconds"),
-                            "UTC / Europe/Madrid", r.question, verdict, latency,
-                            f"UA ends antisearch-internal/settle-pack; header X-Antisearch-Internal: settle-pack"])
+                            "UTC / Europe/Madrid", bare, verdict, latency,
+                            "UA ends antisearch-internal/settle-pack; header X-Antisearch-Internal: settle-pack"])
             pause(4)
-        if not verdict:
-            cells[vi] = "no verdict (skip)"
-        elif normalize_verdict(verdict) == "no":
-            cells[vi] = "**no** (skip)"
+        out = normalize_verdict(verdict) if verdict else ""
+        if not out or out == "no":
+            del lines[at]
+            dropped.append(f"- `{bare}` -> {out or 'no verdict'} ({url})")
         else:
-            cells[vi] = f"**{normalize_verdict(verdict)}**"
-            if png.is_file():
-                cells[si] = f"[{png.name}](img/{png.name})"
-        lines[r.line] = "| " + " | ".join(cells) + " |"
-        report.append(f"{r.number:02d} {r.question!r} -> {cells[vi]}" + ("" if asked else " (already frozen)"))
+            lines[at] = f"| {number} | {url} | `{bare}` | **{out}** |"
+        report.append(f"{number:02d} {bare!r} -> {out or 'no verdict'}" + ("" if asked else " (already frozen)")
+                      + ("" if out and out != "no" else " (dropped)"))
         log(report[-1])
-        pack.write_text("\n".join(lines) + "\n", encoding="utf-8")  # after every row: a crash loses nothing
+        if dropped:
+            lines = _with_dropped(lines, dropped[-1:])
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")  # after every row: a crash loses nothing
     return report
+
+
+def _with_dropped(lines: list[str], new: list[str]) -> list[str]:
+    title = "Dropped after the run (`no`, or no verdict):"
+    if title not in lines:
+        lines = [*lines, "", title, ""]
+    return [*lines, *new]

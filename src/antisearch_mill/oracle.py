@@ -66,6 +66,15 @@ def normalize_verdict(raw: object) -> str:
     return verdict
 
 
+def _refuse_ranked(category: str) -> None:
+    """Every lane's last line: a ranked or question input never reaches the oracle (bare_input.py)."""
+    from .bare_input import superlative_problem
+
+    problem = superlative_problem(category)
+    if problem:
+        raise OracleError(problem)
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
@@ -152,6 +161,7 @@ class LiveOracle:
         category = normalize_category(category)
         if not category:
             raise OracleError("empty category")
+        _refuse_ranked(category)
         total_attempts = 0
         rate_limit_budget = self.rate_limit_retries
         while True:
@@ -197,6 +207,7 @@ class FixtureOracle:
 
     def ask(self, category: str) -> Verdict:
         category = normalize_category(category)
+        _refuse_ranked(category)
         if category not in self.verdicts:
             raise OracleError(f"no fixture verdict for {category!r}")
         raw = self.verdicts[category]

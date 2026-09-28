@@ -21,7 +21,7 @@ from .antiban import (
     ramp_days, ramp_enabled, ramp_start,
 )
 from .fresh import looks_like_mp4, remux_fresh
-from ..creatives import CURRENT, STORY, id_tag, ig_creative, rotation_enabled
+from ..creatives import CLEAN_COVER, CURRENT, STORY, id_tag, ig_creative, rotation_enabled
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now,
@@ -249,7 +249,7 @@ def run_posts(
             continue
         creative = ""
         if net == "instagram":
-            creative = ig_creative(day, slot_index(net, slots)) if rotation_enabled(env) else CURRENT
+            creative = ig_creative(day, slot_index(net, slots)) if rotation_enabled(env) else CLEAN_COVER
             job = dataclasses.replace(job, creative=creative)
         problem = caption_problem(job.caption, job.category, net)
         if problem:

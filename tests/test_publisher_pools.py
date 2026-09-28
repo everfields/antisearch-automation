@@ -139,3 +139,35 @@ def test_runway_counts_verdicts_frozen_ahead_until_posted(xpools, state):
     assert runway("x", xpools, store, log=log) == (6, 3)
     log.append(PostRow(pool_id("ai model"), "x", "published", category="ai model"))
     assert runway("x", xpools, store, log=log) == (5, 3)
+
+
+# --- Instagram peers in adjacent slots (proposal, PUBLISHER_IG_CLUSTER=on; off by default) ------
+
+
+def test_family_is_what_the_input_ranks_by_fixed_rules():
+    from antisearch_mill.publisher.pools import family
+
+    assert family("restaurant in mexico city") == family("restaurant in madrid") == "restaurant"
+    assert family("cocktail bar in new york") == family("bar in london") == "bar"
+    assert family("hotel") == family("hotel in bali") == "hotel"
+    assert family("city for a weekend") == "city" and family("a smell") == "smell"
+
+
+def test_clustered_instagram_puts_peers_side_by_side_and_unowned_words_in_whole_rows(tmp_path, state):
+    log, store = state
+    d = tmp_path / "ig"
+    d.mkdir()
+    (d / "unowned.txt").write_text("a smell\na color\na number\nlove\n", encoding="utf-8")
+    (d / "instagram.txt").write_text("restaurant in paris\nhotel in tokyo\nrestaurant in madrid\nmuseum in paris\n"
+                                     "hotel in paris\nrestaurant in lisbon\nhotel in bali\nmuseum in rome\n",
+                                     encoding="utf-8")
+    on = {"PUBLISHER_IG_CLUSTER": "on"}
+    plain = [j.category for j in pool_jobs("instagram", d, log, store, set(), 9)]
+    assert plain[:4] == ["a smell", "restaurant in paris", "hotel in tokyo", "restaurant in madrid"]  # today: file order
+    got = [j.category for j in pool_jobs("instagram", d, log, store, set(), 11, env=on)]
+    assert got == ["a smell", "a color", "a number",  # one block of unowned words = one grid row
+                   "restaurant in paris", "restaurant in madrid", "restaurant in lisbon",
+                   "hotel in tokyo", "hotel in paris", "hotel in bali", "museum in paris", "museum in rome"]
+    (d / "tiktok.txt").write_text("sunscreen\nmascara\n", encoding="utf-8")
+    tiktok = [j.category for j in pool_jobs("tiktok", d, log, store, set(), 3, env=on)]
+    assert tiktok == ["a smell", "sunscreen", "mascara"]  # Instagram only: TikTok keeps one unowned in four

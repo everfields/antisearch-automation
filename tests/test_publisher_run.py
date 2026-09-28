@@ -117,8 +117,34 @@ def test_missed_slots_expire_instead_of_piling_up():
     # 13:07 stays open until 16:07. The expired morning slots are not owed on top of it.
     assert open_now(datetime(2026, 9, 25, 15, 30, tzinfo=ET), slots, 0) == 1
     assert open_now(datetime(2026, 9, 25, 15, 30, tzinfo=ET), slots, 1) == 1
-    assert open_now(datetime(2026, 9, 25, 22, 30, tzinfo=ET), slots, 0) == 0  # last slot's 3h window has closed
+    # 19:07's 3h window has closed with no run: the catch-up still owes that one slot (only the latest,
+    # never the earlier misses), for up to 6 h after 19:07
+    assert open_now(datetime(2026, 9, 25, 22, 30, tzinfo=ET), slots, 0) == 1
+    assert open_now(datetime(2026, 9, 25, 22, 30, tzinfo=ET), slots, 0, held=frozenset({4})) == 0  # caught up: done
+    assert open_now(datetime(2026, 9, 26, 1, 30, tzinfo=ET), slots, 0) == 0  # 6 h 23 min after 19:07: missed
     assert open_now(datetime(2026, 9, 26, 8, 30, tzinfo=ET), slots, 0) == 0  # never dump yesterday in the morning
+
+
+def test_the_catch_up_sends_the_most_recently_missed_slot_once_and_keeps_min_gap(ledger, log):
+    from antisearch_mill.publisher.guard import CATCHUP_WINDOW, taken_slots
+
+    assert CATCHUP_WINDOW == timedelta(hours=6)
+    env = {**LIVE_ENV, "PUBLISHER_SLOTS_INSTAGRAM": "16:07, 18:07", "PUBLISHER_LIVE_NETWORKS": "instagram",
+           "PUBLISHER_JITTER": "off"}
+    adapter = fake_adapter("instagram")
+    jobs = [job(f"ig-{i}", ("instagram",)) for i in range(3)]
+    for j in jobs:
+        clip(ledger, j.id)
+    # the cron slept from 15:00 to 21:20: 18:07's window (until 21:07) passed with no run
+    first = run_posts(jobs, ledger, log, now=datetime(2026, 9, 28, 21, 20, tzinfo=ET), live=True, env=env,
+                      adapters={"instagram": adapter}, sleep=lambda s: None)
+    assert [o.status for o in first if o.status == "published"] == ["published"]
+    day = datetime(2026, 9, 28).date()
+    held, loose = taken_slots(day, slots_for("instagram", env), log.slot_posts(day, "instagram"))
+    assert held == frozenset({1}) and loose == 0  # the catch-up filled 18:07, the latest missed slot
+    again = run_posts(jobs, ledger, log, now=datetime(2026, 9, 28, 23, 30, tzinfo=ET), live=True, env=env,
+                      adapters={"instagram": adapter}, sleep=lambda s: None)
+    assert not [o for o in again if o.status == "published"]  # 16:07 stays missed: one catch-up, never a dump
 
 
 def test_slot_overrides_and_limits():
@@ -271,7 +297,10 @@ def test_explicit_ramp_still_limits_reach_on_day_one(ledger, log):
 
 def test_publisher_cron_is_every_15_min_and_passes_the_ramp_variable():
     text = (ROOT / ".github" / "workflows" / "publisher.yml").read_text(encoding="utf-8")
-    assert 'cron: "*/15 0-5,13-23 * * *"' in text
+    assert 'cron: "4,19,34,49 0-5,13-23 * * *"' in text  # off the top of the hour
+    assert "types: [publisher-tick]" in text  # an external pinger wakes it like the cron
+    assert "github.event_name != 'workflow_dispatch' && vars.PUBLISHER_CRON == 'live'" in text
+    assert '[ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$LIVE" != "true" ]' in text  # ticks run `mill due`
     assert "PUBLISHER_RAMP: ${{ vars.PUBLISHER_RAMP }}" in text
     assert 'cron: "7 0-5,13-23 * * *"' not in text
 

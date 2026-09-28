@@ -1,26 +1,20 @@
 name: settle-pack
 
-# settle it, with no LLM and no agent. Two steps; a human reviews in between.
-#   find  (daily 19:00 Madrid, or by hand): live "what's the best X?" threads from Reddit RSS and
-#         Bluesky search -> DRAFT publisher-state/settle/candidates-<tomorrow>.md. No oracle call.
-#   shoot (by hand, after deleting the rows that shouldn't go out): ONE live run per remaining row
-#         through antisearch.ai in headless Chrome, verdict frozen in verdicts.csv, screenshot in
-#         settle/img/, the call logged in settle/internal-calls.csv; then the square card PNG,
-#         GIF and MP4 (settle/png/, settle/gif/, settle/mp4/) in the same run.
-# Nothing is ever posted.
+# settle it (founder, 2026-09-29), with no LLM and no agent: a TEXT-ONLY thread list every 2 days
+# for Carlos, who posts on Reddit himself.
+#   find:  live "what's the best X?" threads (Reddit RSS, Bluesky search), under 48 h, Soul's skips,
+#          each question made a BARE input -> publisher-state/settle/threads-<day>.md.
+#   shoot: ONE live run per row through antisearch.ai in headless Chrome (marked internal), the
+#          output frozen in verdicts.csv, the call in settle/internal-calls.csv; `no` drops the row.
+# No screenshot, GIF, video or caption. Nothing is ever posted.
 
 on:
   schedule:
-    - cron: "0 17 * * *"  # 19:00 Madrid (summer), 18:00 (winter): tomorrow's draft
+    - cron: "0 17 * * *"  # 19:00 Madrid (summer); the gate below keeps every other day
   workflow_dispatch:
     inputs:
-      step:
-        description: find (draft, no oracle) or shoot (one live run per pending row, then PNG/GIF/MP4)
-        type: choice
-        options: [find, shoot]
-        default: find
       day:
-        description: Pack day YYYY-MM-DD (find; empty = tomorrow in Madrid)
+        description: List day YYYY-MM-DD (empty = today in Madrid)
         default: ""
 
 permissions:
@@ -34,46 +28,61 @@ jobs:
   pack:
     runs-on: ubuntu-24.04
     env:
-      STEP: ${{ github.event_name == 'schedule' && 'find' || inputs.step }}
       DAY: ${{ inputs.day }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Every 2 days
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ $(( $(date -u +%s) / 86400 % 2 )) -ne 0 ]; then
+            echo "go=false" >> "$GITHUB_OUTPUT"; echo "odd day: the list comes every 2 days"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@v4
+      - if: steps.gate.outputs.go == 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-      - run: python -m pip install -e '.[settle]'
+      - if: steps.gate.outputs.go == 'true'
+        run: python -m pip install -e '.[settle]'
 
       - name: Load publisher-state
+        if: steps.gate.outputs.go == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git clone --quiet --depth 1 --branch publisher-state "$remote" state
 
-      - name: Find (draft, read-only)
-        if: env.STEP == 'find'
-        run: mill settle-find --state state/posts.csv $([ -n "$DAY" ] && echo --day "$DAY") || [ $? -eq 3 ]
-
-      - name: Tools for shoot (Chrome, fonts, ffmpeg)
-        if: env.STEP == 'shoot'
+      - name: Find (bare inputs, read-only)
+        id: find
+        if: steps.gate.outputs.go == 'true'
         run: |
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fonts-roboto
-          command -v google-chrome || python -m playwright install --with-deps chromium
+          if mill settle-find --state state/posts.csv $([ -n "$DAY" ] && echo --day "$DAY"); then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            code=$?; echo "found=false" >> "$GITHUB_OUTPUT"; [ $code -eq 3 ]
+          fi
 
-      - name: Shoot (one live run per pending row) and media
-        if: env.STEP == 'shoot'
-        run: |
-          mill settle-shoot --state state/posts.csv --chrome "$(command -v google-chrome || true)"
-          mill settle-media --state state/posts.csv
+      - name: Chrome for shoot
+        if: steps.find.outputs.found == 'true'
+        run: command -v google-chrome || python -m playwright install --with-deps chromium
+
+      - name: Shoot (one live run per row, text only)
+        if: steps.find.outputs.found == 'true'
+        run: mill settle-shoot --state state/posts.csv --chrome "$(command -v google-chrome || true)"
 
       - name: Save it
+        if: steps.gate.outputs.go == 'true'
         run: |
           cd state
           git add -A settle verdicts.csv
           git diff --cached --quiet && exit 0
           git -c user.name=antisearch-publisher -c user.email=actions@users.noreply.github.com \
-            commit --quiet -m "settle pack ${STEP} $(date -u +%FT%TZ)"
+            commit --quiet -m "settle threads $(date -u +%FT%TZ)"
           for i in 1 2 3 4; do
             git push --quiet origin publisher-state && exit 0
             sleep $((i * 5))

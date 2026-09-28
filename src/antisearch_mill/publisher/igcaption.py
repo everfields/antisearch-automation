@@ -12,6 +12,8 @@ from __future__ import annotations
 import re
 from typing import Mapping
 
+from ..bare_input import ranked_word
+
 IG_CAPTION_MODES = ("hashtags", "off")
 FORBIDDEN_TAGS = frozenset({"#antisearch", "#best"})
 AI_TAG = "#ai"
@@ -33,9 +35,11 @@ def hashtag(text: str) -> str:
 
 
 def ig_caption(category: str, verdict: str, mention: str = "") -> str:
+    """A tag whose words carry an "-est" superlative or "#1" (Soul, 2026-09-29) is left out."""
     tags: list[str] = []
-    for tag in (hashtag(category), hashtag(verdict), AI_TAG):
-        if tag and tag not in FORBIDDEN_TAGS and tag not in tags:
+    for source in (category, verdict, AI_TAG):
+        tag = AI_TAG if source == AI_TAG else hashtag(source)
+        if tag and tag not in FORBIDDEN_TAGS and tag not in tags and not ranked_word(source):
             tags.append(tag)
     return " ".join(tags + ([mention] if mention else []))
 
@@ -50,6 +54,9 @@ def ig_caption_problem(caption: str) -> str | None:
         return "instagram caption must be #<input> #<verdict> #ai"
     if set(tags) & FORBIDDEN_TAGS or len(set(tags)) != len(tags):
         return "instagram caption has a forbidden or repeated tag"
+    ranked = ranked_word(" ".join(t.lstrip("#@").replace("_", " ").replace(".", " ") for t in tokens))
+    if ranked or "#1" in tags:
+        return f"instagram caption carries a superlative ({ranked or '#1'!r})"
     if len(mentions) > 1 or any(not _HANDLE.match(m) for m in mentions):
         return "instagram caption takes at most one valid @mention"
     if mentions and tokens[-1] != mentions[0]:
