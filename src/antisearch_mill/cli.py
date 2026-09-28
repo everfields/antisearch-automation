@@ -461,7 +461,7 @@ def cmd_settle_shoot(args, settings: Settings) -> int:
 
 
 def cmd_settle_media(args, settings: Settings) -> int:
-    """A GIF and an MP4 for every settle pack row that has a frozen verdict and no media yet (never asks the oracle)."""
+    """A card PNG, GIF and MP4 for every settle pack row that has a frozen verdict and no media yet (never asks the oracle)."""
     from . import settle
     from .publisher.verdicts import VerdictStore
 
@@ -474,7 +474,7 @@ def cmd_settle_media(args, settings: Settings) -> int:
     try:
         font = resolve_font(settings.font_path)
         for pack in packs:
-            for line in settle.media_for_pack(pack, store, font_path=font):
+            for line in settle.media_for_pack(pack, store, font_path=font, force=args.force):
                 print(f"  {pack.name}: {line}")
     except (FontNotFound, RenderError) as exc:
         print(f"settle-media error: {exc}", file=sys.stderr)
@@ -780,10 +780,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--chrome", default="", help="Chrome/Chromium executable (default: Playwright's)")
     sp.set_defaults(func=cmd_settle_shoot)
 
-    sp = sub.add_parser("settle-media", help="GIF + MP4 per settle pack row from its frozen verdict -> <state>/settle/{gif,mp4}/")
+    sp = sub.add_parser("settle-media",
+                        help="square card PNG + GIF + MP4 per settle pack row from its frozen verdict -> <state>/settle/{png,gif,mp4}/")
     sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
     sp.add_argument("--pack", default="", help="one pack file (default: every settle/candidates-*.md missing media)")
     sp.add_argument("--check", action="store_true", help="exit 0 if a pack needs media, else 3; renders nothing")
+    sp.add_argument("--force", action="store_true", help="re-render media that already exist (e.g. after a template change)")
     sp.set_defaults(func=cmd_settle_media)
 
     sp = sub.add_parser("dm-list", help="yesterday's posted verdicts with an official account -> <state>/manual/dm-list-DAY.md")

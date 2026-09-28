@@ -1,10 +1,11 @@
-"""settle it media: a GIF and an MP4 per pack row, from the frozen verdict only."""
+"""settle it media: a square card PNG, GIF and MP4 per pack row, from the frozen verdict only."""
 
 from pathlib import Path
 
 import pytest
+from PIL import Image
 
-from antisearch_mill import settle
+from antisearch_mill import settle, settle_card
 from antisearch_mill.fonts import resolve_font
 from antisearch_mill.oracle import Verdict
 from antisearch_mill.publisher.verdicts import VerdictStore
@@ -59,19 +60,77 @@ def test_each_row_with_a_frozen_verdict_gets_a_small_looping_gif_and_a_silent_mp
     assert settle.packs_missing_media(settle_dir, store) == [pack]
     report = settle.media_for_pack(pack, store, font_path=resolve_font())
     assert asked == []  # the oracle is never asked
-    gif, mp4 = settle_dir / "gif" / "01-apple.gif", settle_dir / "mp4" / "01-apple.mp4"
+    png, gif, mp4 = (settle_dir / d / f"01-apple.{d}" for d in ("png", "gif", "mp4"))
     g, m = settle.media_info(gif), settle.media_info(mp4)
-    assert g["width"] == 480 and 12 <= g["fps"] <= 15 and 4.0 <= g["duration_s"] <= 6.1 and g["bytes"] < settle.MAX_BYTES
-    assert (m["width"], m["height"], m["vcodec"], m["acodec"]) == (720, 1280, "h264", "")  # 9:16, no audio
+    assert (g["width"], g["height"]) == (480, 480) and 12 <= g["fps"] <= 15 and 4.0 <= g["duration_s"] <= 6.1
+    assert g["bytes"] < settle.MAX_BYTES
+    assert (m["width"], m["height"], m["vcodec"], m["acodec"]) == (720, 720, "h264", "")  # square, no audio
     assert m["bytes"] < settle.MAX_BYTES and 4.0 <= m["duration_s"] <= 6.0
+    assert Image.open(png).size == (1080, 1080)
     assert not (settle_dir / "gif" / "03-soup.gif").exists()  # no frozen verdict, no media
     assert any("03 no frozen live verdict" in line for line in report)
     text = pack.read_text()
-    assert "| gif | mp4 |" in text
-    assert "[01-apple.gif](gif/01-apple.gif) | [01-apple.mp4](mp4/01-apple.mp4) |" in text
+    assert "| png | gif | mp4 |" in text
+    assert ("[01-apple.png](png/01-apple.png) | [01-apple.gif](gif/01-apple.gif) | "
+            "[01-apple.mp4](mp4/01-apple.mp4) |") in text
     assert settle.packs_missing_media(settle_dir, store) == []
+    before = gif.stat().st_mtime_ns
     settle.media_for_pack(pack, store, font_path=resolve_font())  # a rerun renders nothing and adds no columns
-    assert pack.read_text().count("| gif | mp4 |") == 1
+    assert pack.read_text().count("| png | gif | mp4 |") == 1 and gif.stat().st_mtime_ns == before
+    settle.media_for_pack(pack, store, font_path=resolve_font(), force=True)
+    assert gif.stat().st_mtime_ns != before and pack.read_text().count("| png |") == 1
+
+
+def test_an_older_pack_with_gif_and_mp4_columns_gets_the_png_column_once():
+    text = PACK.replace("| thread |", "| thread | gif | mp4 |").replace("| --- | --- |\n| 1", "| --- | --- | --- | --- |\n| 1")
+    header, rows, at = settle.pack_rows(text)
+    out = settle._with_media_columns(text, header, rows, at, {1: ["png/a.png", "gif/a.gif", "mp4/a.mp4"]})
+    assert "| thread | gif | mp4 | png |" in out and out.count("| png |") == 1
+    assert "https://r/1 | [a.gif](gif/a.gif) | [a.mp4](mp4/a.mp4) | [a.png](png/a.png) |" in out
+
+
+def test_a_frozen_no_does_not_keep_the_pack_pending(tmp_path):
+    settle_dir, store = _state(tmp_path)
+    store.put(Verdict("best soup from nowhere?", "no", "no", "live", "", 2000, 1, "2026-09-28T13:57:05+00:00"))
+    header, rows, _ = settle.pack_rows(PACK)
+    for r in rows[:2]:
+        for p in settle._media_paths(settle_dir, r):
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(b"x")
+    pack = settle_dir / "candidates-2026-09-29.md"
+    pack.write_text(PACK.replace("| thread |", "| thread | png | gif | mp4 |")
+                    .replace("| --- | --- |\n| 1", "| --- | --- | --- | --- | --- |\n| 1"), encoding="utf-8")
+    assert settle.packs_missing_media(settle_dir, store) == []
+
+
+@pytest.mark.parametrize("q,v", [
+    ("What is the best apple variety for pie?", "granny smith"),
+    ("Who is the best character from Space Jam A New Legacy?", "bugs bunny"),
+    ("What is the best decade for music?", "the 1970s — disco, punk, funk and classic rock all peaked"),
+])
+def test_the_card_keeps_big_type_and_wraps_on_words(q, v):
+    from PIL import ImageDraw
+
+    card = settle_card.CARDS[settle_card.DEFAULT_CARD]
+    assert card.width == card.height  # square: Reddit's fixed-height thumbnail keeps it widest
+    lay = settle_card.layout(q, v, font_path=resolve_font(), card=card)
+    probe = ImageDraw.Draw(Image.new("RGB", (8, 8)))
+    assert " ".join(lay.q_lines) == " ".join(q.split()) and " ".join(lay.v_lines) == " ".join(v.split())
+    assert len(lay.q_lines) <= 3 and len(lay.v_lines) <= 3
+    assert all(probe.textlength(ln, font=lay.v_font) <= card.width * 0.86 for ln in lay.v_lines)
+    assert not any(ln.startswith(("—", "-")) for ln in lay.v_lines)
+    assert lay.v_font.size >= card.width * 0.06 and lay.q_font.size >= card.width * 0.04
+    assert lay.v_top + len(lay.v_lines) * lay.v_line_h < card.height * 0.9  # clear of the footer
+
+
+def test_the_card_frames_type_then_pause_then_verdict():
+    q, v = "What is the best apple variety for pie?", "granny smith"
+    tl = settle.drop_timeline(q, v)
+    lay = settle_card.layout(q, v, font_path=resolve_font(), card=settle_card.CARDS["1x1"])
+    first, typed, last = (settle_card.frame(lay, tl, i) for i in (0, tl.verdict_frame - 1, tl.total_frames - 1))
+    assert first.tobytes() != typed.tobytes()
+    assert last.tobytes() == settle_card.frame(lay, tl, tl.verdict_frame).tobytes()  # the verdict holds still
+    assert last.tobytes() != typed.tobytes()
 
 
 def test_check_mode_needs_no_ffmpeg_and_reports(tmp_path, capsys):
