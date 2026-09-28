@@ -1,0 +1,64 @@
+name: settle-media
+
+# settle it: every pack in publisher-state/settle/candidates-*.md gets a GIF and an MP4 per row
+# (settle/gif/, settle/mp4/), next to its PNG screenshot, and GIF/MP4 columns in the pack.
+# From the FROZEN verdict only: the oracle is never asked. Nothing is posted.
+# Hourly: a pack committed to publisher-state has its media within the hour. Cheap when idle
+# (`--check` exits before ffmpeg is installed). Also runs by hand.
+
+on:
+  schedule:
+    - cron: "41 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publisher  # one writer of publisher-state at a time
+  cancel-in-progress: false
+
+jobs:
+  media:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e .
+
+      - name: Load publisher-state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git clone --quiet --depth 1 --branch publisher-state "$remote" state
+
+      - name: Anything to render?
+        id: check
+        run: |
+          if mill settle-media --state state/posts.csv --check; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "go=false" >> "$GITHUB_OUTPUT"; fi
+
+      - if: steps.check.outputs.go == 'true'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter
+
+      - name: Render
+        if: steps.check.outputs.go == 'true'
+        run: mill settle-media --state state/posts.csv
+
+      - name: Save it
+        if: steps.check.outputs.go == 'true'
+        run: |
+          cd state
+          git add -A settle
+          git diff --cached --quiet && exit 0
+          git -c user.name=antisearch-publisher -c user.email=actions@users.noreply.github.com \
+            commit --quiet -m "settle media $(date -u +%FT%TZ)"
+          for i in 1 2 3 4; do
+            git push --quiet origin publisher-state && exit 0
+            sleep $((i * 5))
+            git pull --quiet --rebase origin publisher-state
+          done
+          exit 1

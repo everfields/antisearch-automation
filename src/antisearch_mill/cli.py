@@ -418,6 +418,29 @@ def cmd_buffer_channels(args, settings: Settings) -> int:
     return 0
 
 
+def cmd_settle_media(args, settings: Settings) -> int:
+    """A GIF and an MP4 for every settle pack row that has a frozen verdict and no media yet (never asks the oracle)."""
+    from . import settle
+    from .publisher.verdicts import VerdictStore
+
+    state_dir = Path(args.state).parent
+    store = VerdictStore(state_dir / "verdicts.csv")
+    packs = [Path(args.pack)] if args.pack else settle.packs_missing_media(state_dir / "settle", store)
+    if args.check:
+        print(f"settle-media: {len(packs)} pack(s) need media: {', '.join(p.name for p in packs) or 'none'}")
+        return 0 if packs else 3
+    try:
+        font = resolve_font(settings.font_path)
+        for pack in packs:
+            for line in settle.media_for_pack(pack, store, font_path=font):
+                print(f"  {pack.name}: {line}")
+    except (FontNotFound, RenderError) as exc:
+        print(f"settle-media error: {exc}", file=sys.stderr)
+        return 2
+    print(f"settle-media: {len(packs)} pack(s) done")
+    return 0
+
+
 def cmd_dm_list(args, settings: Settings) -> int:
     """Yesterday's posted verdicts that name an entity with an official account, for Carlos to DM by hand."""
     from datetime import date, timedelta
@@ -701,6 +724,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--buffer-now", action="store_true", help="ask Buffer even if it was asked in the last 20h")
     sp.add_argument("--no-buffer", action="store_true", help="public sources only")
     sp.set_defaults(func=cmd_metrics)
+
+    sp = sub.add_parser("settle-media", help="GIF + MP4 per settle pack row from its frozen verdict -> <state>/settle/{gif,mp4}/")
+    sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
+    sp.add_argument("--pack", default="", help="one pack file (default: every settle/candidates-*.md missing media)")
+    sp.add_argument("--check", action="store_true", help="exit 0 if a pack needs media, else 3; renders nothing")
+    sp.set_defaults(func=cmd_settle_media)
 
     sp = sub.add_parser("dm-list", help="yesterday's posted verdicts with an official account -> <state>/manual/dm-list-DAY.md")
     sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
