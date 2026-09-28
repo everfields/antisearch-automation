@@ -10,6 +10,8 @@ name: manual-post
 # The clip settings are pinned to the current template defaults, not the repo's clip vars.
 
 on:
+  pull_request:  # TEMPORARY: one live run of queue/manual/2026-09-28-ig-makeup.csv, removed right after
+    paths: [.github/workflows/manual-post.yml]
   workflow_dispatch:
     inputs:
       file:
@@ -31,8 +33,8 @@ jobs:
   post:
     runs-on: ubuntu-24.04
     env:
-      FILE: ${{ inputs.file || 'queue/manual/2026-09-27-ig-travel.csv' }}
-      LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
+      FILE: ${{ github.event_name == 'pull_request' && 'queue/manual/2026-09-28-ig-makeup.csv' || inputs.file || 'queue/manual/2026-09-27-ig-travel.csv' }}
+      LIVE: ${{ github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.live) }}
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
       PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
       PUBLISHER_IG_CAPTION: ${{ vars.PUBLISHER_IG_CAPTION }}
@@ -72,6 +74,10 @@ jobs:
         run: |
           remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git clone --quiet --depth 1 --branch publisher-state "$remote" state
+
+      - name: TEMPORARY - freeze the make-up input's one live oracle run (a frozen input is never asked again)
+        if: github.event_name == 'pull_request'
+        run: mill oracle "restaurant in madrid" --state state/posts.csv
 
       - name: Post the row(s)
         run: |
