@@ -26,7 +26,7 @@ from datetime import date, datetime, time, timedelta, timezone, tzinfo
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from ..bare_input import superlative_problem
+from ..bare_input import ranked_word, superlative_problem
 from ..ledger import now_iso
 
 TZ = "America/New_York"
@@ -118,6 +118,9 @@ def caption_problem(caption: str, bare_input: str, network: str = "") -> str | N
         return "at most one mention"
     if RANKED.search(c):
         return "caption starts with a ranking word"
+    ranked = ranked_word(c.replace("_", " ").replace(".", " "))
+    if ranked:
+        return f"caption carries a superlative ({ranked!r})"
     if network == "x":
         if "@" in c:
             return "X captions cannot mention an account"

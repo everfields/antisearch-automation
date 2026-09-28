@@ -33,6 +33,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Mapping
 
+from ..bare_input import ranked_word
 from ..oracle import normalize_category
 from .guard import HANDLE, posting_day
 
@@ -106,6 +107,9 @@ def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today
     valid = X_HANDLE if network == X_NETWORK else HANDLE
     if not account.get("verified") or not valid.match(handle):
         return Tag("", f"{name} has no verified {network} handle on the allowlist")
+    ranked = ranked_word(handle.lstrip("@").replace("_", " ").replace(".", " "))
+    if ranked:
+        return Tag("", f"{handle} carries a superlative ({ranked!r}): never a tag")
     markets = MARKETS_ALLOWED.get(network)
     if markets and str(account.get("market") or "").lower() not in markets:
         return Tag("", f"{name} on {network} is not marked as a US or global account")

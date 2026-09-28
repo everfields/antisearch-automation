@@ -25,7 +25,12 @@ How to measure repetition: `docs/proposals/2026-09-28-repetition-metric.md`.
   serious brand mistake.
 - Every lane (settle, the IG/TikTok/X queues and pools, trend, reply, winner, reverse oracle)
   runs `bare_input.superlative_problem`. The oracles and `produce` refuse a ranked input.
-  Another person's question is made bare by `bare_input.from_question`, or dropped.
+- Another person's question is reduced to its bare noun phrase by `bare_input.from_question`
+  ("what's the best 80s horror movie?" becomes `80s horror movie`). If no clean noun is left,
+  the thread is skipped.
+- Soul, 2026-09-29: no "-est" superlative and no "#1" in inputs, captions or tags
+  (`bare_input.ranked_word`). An Instagram hashtag that would carry one is left out; a tag handle
+  with one is never used.
 
 ## X rule (founder, 2026-09-28 evening; replaces the morning's no-mention rule)
 

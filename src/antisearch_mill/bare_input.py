@@ -22,14 +22,30 @@ SUPERLATIVE = re.compile(
     re.I)
 # "top" is a ranking except in a garment or a hat ("tank top", "top hat")
 TOP = re.compile(r"(?<!\btank )(?<!\bcrop )(?<!\btube )(?<!\bhalter )\btop\b(?!\s+hat\b)", re.I)
-COMMON_EST = (
-    "biggest largest smallest highest lowest fastest slowest strongest weakest longest shortest oldest newest "
-    "latest coolest hottest coldest warmest cheapest richest tallest nearest deepest safest cleanest loudest "
-    "quietest brightest darkest sweetest smartest wisest bravest rarest purest truest closest widest youngest "
-    "softest hardest kindest fairest grandest wildest boldest nicest finest greatest tastiest"
-).split()
-EST = re.compile(r"\b(" + "|".join(COMMON_EST) + r"|[a-z]+iest|[a-z]*([bdgmnpt])\2est)\b", re.I)
-NOT_EST = {"priest", "priests"}
+# Soul, 2026-09-29: any "-est" superlative, in inputs, captions and tags. Every word ending in -est
+# is one, except these ordinary words (and their plurals).
+NOT_SUPERLATIVE = frozenset((
+    "best test rest nest west vest pest zest jest quest guest chest crest fest lest"  # "best" is caught above
+    " forest interest harvest honest modest earnest priest digest arrest invest suggest request contest protest"
+    " manifest conquest inquest bequest behest tempest attest detest infest molest wrest divest"
+    " breast beast feast east northeast southeast midwest northwest southwest everest budapest bucharest"
+    " celeste alkahest incest"
+).split())
+EST = re.compile(r"\b([a-z]{2,}est)(s|ed|ing|ers?)?\b", re.I)
+NUMBER_ONE = re.compile(r"#\s*1\b|\bno\.?\s*1\b|\bnumber\s*one\b|\bnumero uno\b", re.I)
+
+
+def ranked_word(text: str) -> str | None:
+    """The first "-est" superlative or "#1" in `text` (an input, a caption, a tag's words), or None."""
+    t = text or ""
+    m = NUMBER_ONE.search(t)
+    if m:
+        return m.group(0).strip().lower()
+    for m in EST.finditer(t):
+        word = m.group(1).lower()
+        if word not in NOT_SUPERLATIVE and word != "best":
+            return word
+    return None
 QUESTION = re.compile(r"^\s*(what'?s|whats|what|which'?s|which|who'?s|who|where|how)\b|\b(what'?s|whats|what is|what are"
                       r"|which is|which are|who is|who are) the\b", re.I)
 
@@ -42,9 +58,9 @@ def superlative_problem(text: str) -> str | None:
         return f"input carries a superlative ({m.group(0).strip().lower()!r}): inputs are bare"
     if TOP.search(t):
         return "input carries a superlative ('top'): inputs are bare"
-    for m in EST.finditer(t):
-        if m.group(1).lower() not in NOT_EST:
-            return f"input carries a superlative ({m.group(1).lower()!r}): inputs are bare"
+    word = ranked_word(t)
+    if word:
+        return f"input carries a superlative ({word!r}): inputs are bare"
     if QUESTION.search(t) or "?" in t:
         return "input is a question: inputs are bare"
     return None
@@ -88,12 +104,38 @@ def _singular(word: str) -> str:
     return word[:-1]
 
 
-def from_question(question: str) -> str:
-    """The bare input inside another person's 'what's the best X?' question, or "" when there isn't one.
+KIND_OF = re.compile(r"^(?:(?:type|kind|sort|style|variety|brand) of)\s+", re.I)
+CHOICE = re.compile(r"\b(or|vs\.?|versus|between)\b", re.I)
+# a head word that names nothing on its own: the question has no clean noun, so the thread is skipped
+EMPTY_HEADS = frozenset(
+    "one ones thing things stuff way ways option options choice choices part parts bit bits kind sort type "
+    "something anything everything nothing someone anyone everyone somewhere anywhere answer answers idea ideas "
+    "approach method methods move plan strategy solution setup setting settings deal bet practice combination "
+    "alternative alternatives replacement pick picks thing".split())
+NOT_A_NOUN_START = frozenset(
+    "to for in of on at by with from about into onto than as if when while where how why what which who whom "
+    "is are was were be been am do does did can could would should will shall may might must "
+    "i you he she it we they me him her us them my your his its our their this that these those "
+    "and or but so very really just more less much many".split())
 
-    'What's the best horror movie of the 80s?' -> '80s horror movie';
-    'What is the best university to study electrical engineering?' ->
-    'university to study electrical engineering'."""
+
+def _clean_noun(phrase: str) -> bool:
+    words = phrase.split()
+    if not words or words[0] in NOT_A_NOUN_START or CHOICE.search(phrase):
+        return False
+    head = next((k - 1 for k, w in enumerate(words) if k > 0 and w in PREP), len(words) - 1)
+    word = words[head]
+    return word not in EMPTY_HEADS and word not in NOT_A_NOUN_START and bool(re.search(r"[a-z]", word)) \
+        and not re.fullmatch(r"'?(19|20)?\d0'?s", word)
+
+
+def from_question(question: str) -> str:
+    """The bare noun phrase inside another person's 'what's the best X?' question, or "" when there
+    is no clean noun left (Soul, 2026-09-29: then the thread is skipped).
+
+    "What's the best 80s horror movie?" and "What's the best horror movie of the 80s?" ->
+    '80s horror movie'; 'What is the best university to study electrical engineering?' ->
+    'university to study electrical engineering'; "What's the best type of icing?" -> 'icing'."""
     t = re.sub(r"\s+", " ", (question or "").strip()).rstrip("?!. ").strip()
     t = t.replace("\u2019", "'")
     stripped = LEAD.sub("", t, count=1)
@@ -101,6 +143,7 @@ def from_question(question: str) -> str:
         return ""  # no ranking frame found: not a question we know how to make bare
     t = PERSONAL.sub("", stripped)
     t = TRAIL.sub("", t).strip(" ,;:-")
+    t = KIND_OF.sub("", t)
     m = DECADE.match(t)
     if m:
         decade = m.group("d").strip("'").lower()
@@ -111,6 +154,6 @@ def from_question(question: str) -> str:
     head = next((k - 1 for k, w in enumerate(words) if k > 0 and w.lower() in PREP), len(words) - 1)
     words[head] = _singular(words[head])
     out = " ".join(words).lower().strip()
-    if not out or len(out) > MAXLEN or superlative_problem(out):
+    if not out or len(out) > MAXLEN or superlative_problem(out) or not _clean_noun(out):
         return ""
     return out

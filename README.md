@@ -101,9 +101,9 @@ The `settle-pack` workflow runs every 2 days at 19:00 Madrid (or by hand) and wr
 
 1. **Find:** live "what's the best X?" threads from Reddit RSS and Bluesky search, under 48 h
    old. Soul's skips are applied by keyword (grief, health, legal or money, minors, private
-   people, politics, NSFW). Each question becomes its **bare input** by fixed rules: "What's the
-   best horror movie of the 80s?" becomes `80s horror movie`. A question that can't be made bare
-   is dropped.
+   people, politics, NSFW). Each question is reduced to its **bare noun phrase** by fixed rules:
+   "What's the best 80s horror movie?" becomes `80s horror movie`. If no clean noun is left
+   ("the best way to...", "the best one", "pizza or pasta"), the thread is skipped.
 2. **Shoot:** ONE live run per row through antisearch.ai in headless Chrome. The User-Agent ends
    `antisearch-internal/settle-pack` and the request carries `X-Antisearch-Internal: settle-pack`.
    The output is frozen in `verdicts.csv` and the call is logged in `settle/internal-calls.csv`.
@@ -179,8 +179,9 @@ The `category` field/column name is historical; its value is any bare input.
   2026-09-29: this is the root error). The premise is invisible; the user reads the pattern of
   excellence from the results. Every lane runs `bare_input.superlative_problem` before an input
   is used, and both oracles refuse a ranked input.
-- Never a question ("what is the best…", trailing "?"). Another person's question is made bare
-  first: "What's the best horror movie of the 80s?" becomes `80s horror movie`.
+- Never a question ("what is the best…", trailing "?"). Another person's question is reduced to
+  its bare noun phrase first: "What's the best horror movie of the 80s?" becomes `80s horror movie`.
+- No "-est" superlative and no "#1" in inputs, captions or tags (Soul, 2026-09-29).
 - Never an ask ("recommend…", "give me…", "find me…").
 - Never a ranking ("top 3…", "…ranked").
 - ≤ 55 characters. Constraints are fine as plain phrases: `restaurant in barcelona`, `gift for a new mom`.

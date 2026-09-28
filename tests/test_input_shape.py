@@ -62,8 +62,17 @@ def test_ranked_or_question_phrases_fail(phrase):
     assert offences(phrase)
 
 
+@pytest.mark.parametrize("phrase", ["cheapest flight", "latest iphone", "smallest dog breed", "nicest beach",
+                                    "#1 song", "number one hotel", "sweetest apple"])
+def test_any_est_superlative_or_number_one_is_refused(phrase):
+    from antisearch_mill.bare_input import ranked_word
+
+    assert ranked_word(phrase) and superlative_problem(phrase)
+
+
 @pytest.mark.parametrize("phrase", [
     "80s horror movie", "university to study electrical engineering", "tank top", "top hat", "forest", "priest",
+    "budapest", "contest", "interests", "harvest moon", "easter egg", "requested song",
     "west coast", "harvest festival", "honest review app", "goat cheese", "rooftop bar", "laptop",
 ])
 def test_the_lint_keeps_bare_words_that_only_look_ranked(phrase):
@@ -79,7 +88,14 @@ def test_the_lint_keeps_bare_words_that_only_look_ranked(phrase):
     ("What is the best thriller book you have ever read?", "thriller book"),
     ("What's the best book you've ever read about marketing?", "book about marketing"),
     ("What are the best topical costumes for Halloween this year?", "topical costume for halloween"),
-    ("What's the best way to spend a day?", "way to spend a day"),
+    ("what's the best 80s horror movie?", "80s horror movie"),
+    ("what's the best type of icing?", "icing"),
+    # no clean noun left: the thread is skipped (Soul, 2026-09-29)
+    ("What's the best way to spend a day?", ""),
+    ("What is the best one?", ""),
+    ("Which is the best, pizza or pasta?", ""),
+    ("What's the best for beginners?", ""),
+    ("What's the best in the 90s?", ""),
     ("Anyone been to Madrid?", ""),
 ])
 def test_a_question_becomes_its_bare_input_by_fixed_rules(question, bare):
@@ -173,7 +189,8 @@ def test_source_never_templates_best_into_the_input():
     assert bad == []
 
 
-@pytest.mark.parametrize("caption", ["best dry shampoo", "The best pizza", "top 3 hotels", "greatest actor"])
+@pytest.mark.parametrize("caption", ["best dry shampoo", "The best pizza", "top 3 hotels", "greatest actor",
+                                     "cheapest flight", "@the_finest_shop", "number one"])
 def test_publisher_guard_rejects_ranked_captions(caption):
     from antisearch_mill.publisher.guard import caption_problem
 
@@ -232,3 +249,20 @@ def test_trend_and_reply_lanes_drop_ranked_inputs():
 
     assert extract_input("What's the best pizza in New York?") == "pizza in new york"
     assert extract_input("What's the best greatest hits album?") is None
+
+
+def test_instagram_captions_and_tags_never_carry_an_est_superlative_or_number_one():
+    from datetime import date
+
+    from antisearch_mill.publisher.igcaption import ig_caption, ig_caption_problem
+    from antisearch_mill.publisher.tags import allowlisted
+
+    assert ig_caption("musical", "the greatest showman") == "#musical #ai"  # the ranked tag is left out
+    assert ig_caption("hotel", "rosewood hong kong", "@rosewood") == "#hotel #rosewoodhongkong #ai @rosewood"
+    assert ig_caption_problem("#musical #ai") is None
+    assert "superlative" in ig_caption_problem("#biggest #ai")
+    assert "superlative" in ig_caption_problem("#hotel #ai @the_coolest_shop")
+    allow = {"shop": {"kind": "brand", "tiktok": {"handle": "@coolest_shop", "verified": True, "checked": "2026-09-28"}},
+             "k18": {"kind": "brand", "tiktok": {"handle": "@k18hair", "verified": True, "checked": "2026-09-28"}}}
+    assert "superlative" in allowlisted("shop", "tiktok", allow, date(2026, 9, 29)).reason
+    assert allowlisted("k18", "tiktok", allow, date(2026, 9, 29)).handle == "@k18hair"
