@@ -258,18 +258,25 @@ def taken_slots(day: date, slots: list[time], posts: list[tuple[datetime, bool]]
     first slot, an --ignore-slots run) fills no particular slot; `open_now` has those fill
     the earliest free ones.
     """
+    placed = [i for _, i in slot_of(day, slots, posts, offsets, lookahead)]
+    return frozenset(i for i in placed if i is not None), placed.count(None)
+
+
+def slot_of(day: date, slots: list[time], posts: list[tuple[datetime, bool]],
+            offsets: list[timedelta] | None = None,
+            lookahead: timedelta = timedelta(0)) -> list[tuple[tuple[datetime, bool], int | None]]:
+    """(post, its slot) in send-time order under `taken_slots`' rule; None for a post outside every window."""
     times = slot_times(day, slots)
     opens = [s + (offsets[i] if offsets else timedelta(0)) for i, s in enumerate(times)]
     taken: set[int] = set()
-    loose = 0
+    placed: list[tuple[tuple[datetime, bool], int | None]] = []
     for when, scheduled in sorted(posts):
         fits = [i for i in range(len(times)) if i not in taken
                 and (times[i] if scheduled else opens[i] - lookahead) <= when < _slot_deadline(times, i)]
+        placed.append(((when, scheduled), max(fits) if fits else None))
         if fits:
             taken.add(max(fits))
-        else:
-            loose += 1
-    return frozenset(taken), loose
+    return placed
 
 
 def _serving(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None,

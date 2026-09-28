@@ -106,6 +106,28 @@ def test_a_manual_row_takes_the_creative_of_the_slot_it_is_scheduled_in(ledger, 
     assert seen == [("ig-manual", ig_creative(date(2026, 9, 30), 1))]  # 12:07 is slot 1 of 10:07..22:07
 
 
+def test_a_make_up_row_outside_every_window_takes_the_first_free_slots_creative(ledger, log):
+    """27 Sep: the travel row (09:37, before the first slot) and four auto posts; a make-up at 06:37 ET next
+    morning belongs to 27 Sep's posting day and fills its earliest free slot, not the already served 22:07."""
+    log.append(PostRow("ig-manual-travel", "instagram", "pending", at="2026-09-27T10:51:37+00:00",
+                       due_at="2026-09-27T13:37:00+00:00"))
+    log.append(PostRow("ig-manual-travel", "instagram", "scheduled", remote_id="b0", at="2026-09-27T10:51:37+00:00",
+                       due_at="2026-09-27T13:37:00+00:00"))
+    for job_id, at in (("p-hotel", "2026-09-27T19:16:02+00:00"), ("p-a-number", "2026-09-27T23:12:53+00:00"),
+                       ("p-restaurant-in-paris", "2026-09-28T01:40:09+00:00"),
+                       ("p-restaurant-in-tokyo", "2026-09-28T03:19:07+00:00")):
+        log.append(PostRow(job_id, "instagram", "pending", at=at))
+        log.append(PostRow(job_id, "instagram", "published", url="u", at=at))
+    seen: list = []
+    run_posts([job("ig-makeup", ("instagram",))], ledger, log, now=datetime(2026, 9, 28, 3, 0, tzinfo=ET), live=True,
+              ignore_slots=True, env=IG_ENV, adapters={"instagram": fake_adapter("instagram", state="scheduled")},
+              produce=_producer(ledger, seen), sleep=lambda s: None,
+              schedule_at=datetime(2026, 9, 28, 6, 37, tzinfo=ET))
+    sunday = date(2026, 9, 27)
+    assert seen == [("ig-makeup", ig_creative(sunday, 1))] == [("ig-makeup", COMPUTATION)]  # 12:07 was never served
+    assert log.used_on(sunday, "instagram") == 6
+
+
 def test_the_reel_cover_is_the_creatives_verdict_frame():
     m = Media.video("x.mp4", 1080, 1920, 8.567, public_url="https://h/x.mp4")
     assert _thumbnail_on_verdict(m)["metadata"]["thumbnailOffset"] == 8267  # the last frames, as before
