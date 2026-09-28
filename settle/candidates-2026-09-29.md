@@ -6,7 +6,7 @@ Ready to post by hand. **Nothing has been posted.** Carlos posts; one per thread
 - **Artifact (Soul):** the screenshot with **no text**. Where the surface requires text (TikTok comments, Reddit subs without image comments), two lowercase lines: the verdict exactly as below, then `antisearch.ai` as plain text.
 - **Screenshots:** `settle/img/`, the live site at phone size (1170×2532), unedited.
 - **Already applied:** Soul's skips (grief, health, legal or money, minors, private people, politics, NSFW), self-contained questions only, English, under 48 h old at 09:00 Madrid Tuesday. X is out for 14 days.
-- **Internal runs:** 21 calls, 2026-09-28T13:54:37+00:00 to 2026-09-28T13:58:01+00:00 UTC, from one IP, User-Agent ending `antisearch-internal/settle-pack` and header `X-Antisearch-Internal: settle-pack`. Timestamps: `settle/internal-runs-2026-09-28.csv`. Pulse should exclude them (and `ret` for the first one reads `new`).
+- **Internal runs:** 21 calls, 2026-09-28T13:54:37+00:00 to 2026-09-28T13:58:01+00:00 UTC, from one IP, User-Agent ending `antisearch-internal/settle-pack` and header `X-Antisearch-Internal: settle-pack`. Timestamps (UTC and Madrid): `settle/internal-calls.csv`. Pulse should exclude them (and `ret` for the first one reads `new`).
 - **Reddit, from Carlos's account (a few months old, about 20 karma):** read each sub's rules first (promotion, AI content, image comments). Limits are mostly hidden; the large subs (flagged) are the likeliest to filter a 20-karma account. r/AlignmentChartFills threads exist to collect one-line answers.
 - **Log each drop** in `settle/drops.csv`.
 
