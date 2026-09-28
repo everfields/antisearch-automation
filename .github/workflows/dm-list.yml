@@ -1,0 +1,63 @@
+name: dm-list
+
+# Daily: yesterday's posted verdicts that name a real entity with an official, verified
+# account (Instagram handle, X handle if any, link to our post), for Carlos to DM by hand.
+# Writes publisher-state/manual/dm-list-YYYY-MM-DD.md (the posting day, 09:00-09:00 ET).
+# Nothing is sent; no message text. Reads Wikidata and the entities' official sites, and
+# Buffer once for our post links. Runs after the posting day ends (09:00 ET) in both summer
+# and winter time.
+
+on:
+  schedule:
+    - cron: "15 14 * * *"
+  workflow_dispatch:
+    inputs:
+      day:
+        description: Posting day YYYY-MM-DD (empty = yesterday's)
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publisher  # one writer of publisher-state at a time
+  cancel-in-progress: false
+
+jobs:
+  list:
+    runs-on: ubuntu-24.04
+    env:
+      DAY: ${{ inputs.day }}
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+      BUFFER_ORG_ID: ${{ vars.BUFFER_ORG_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e .
+
+      - name: Load publisher-state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git clone --quiet --depth 1 --branch publisher-state "$remote" state
+
+      - name: Build the list
+        run: mill dm-list --state state/posts.csv $([ -n "$DAY" ] && echo --day "$DAY")
+
+      - name: Save it
+        run: |
+          cd state
+          git add -A manual
+          git diff --cached --quiet && exit 0
+          git -c user.name=antisearch-publisher -c user.email=actions@users.noreply.github.com \
+            commit --quiet -m "dm list $(date -u +%FT%TZ)"
+          for i in 1 2 3 4; do
+            git push --quiet origin publisher-state && exit 0
+            sleep $((i * 5))
+            git pull --quiet --rebase origin publisher-state
+          done
+          exit 1

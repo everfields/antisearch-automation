@@ -418,6 +418,25 @@ def cmd_buffer_channels(args, settings: Settings) -> int:
     return 0
 
 
+def cmd_dm_list(args, settings: Settings) -> int:
+    """Yesterday's posted verdicts that name an entity with an official account, for Carlos to DM by hand."""
+    from datetime import date, timedelta
+
+    from .publisher import dmlist
+    from .publisher.guard import now_et, posting_day
+
+    env = dict(os.environ)
+    log, _ = _publisher_state(args, settings, env)
+    day = date.fromisoformat(args.day) if args.day else posting_day(now_et()) - timedelta(days=1)
+    state_dir = log.path.parent
+    text = dmlist.dm_list(log, day, dmlist.Wikidata(), dmlist.load_json(Path(args.allowlist)),
+                          dmlist.load_json(Path(args.handles)), dmlist.buffer_links(state_dir, env))
+    out = dmlist.write(state_dir / "manual" / f"dm-list-{day.isoformat()}.md", text)
+    print(text)
+    print(f"dm-list: wrote {out}")
+    return 0
+
+
 def cmd_metrics(args, settings: Settings) -> int:
     """Collect per-post metrics into <state>/metrics/, rebuild summary.md, fail if a network gave nothing."""
     from datetime import datetime, timezone
@@ -682,6 +701,13 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--buffer-now", action="store_true", help="ask Buffer even if it was asked in the last 20h")
     sp.add_argument("--no-buffer", action="store_true", help="public sources only")
     sp.set_defaults(func=cmd_metrics)
+
+    sp = sub.add_parser("dm-list", help="yesterday's posted verdicts with an official account -> <state>/manual/dm-list-DAY.md")
+    sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
+    sp.add_argument("--day", default="", help="posting day YYYY-MM-DD (default: yesterday's, 09:00-09:00 ET)")
+    sp.add_argument("--allowlist", default="queue/tags/allowlist.json")
+    sp.add_argument("--handles", default="queue/winners/handles.json")
+    sp.set_defaults(func=cmd_dm_list)
 
     sp = sub.add_parser("networks", help="own publisher: routes, slots (ET + Madrid), credentials, pool runway")
     sp.add_argument("--state", help="post log CSV (default: $PUBLISHER_STATE or <out>/posts.csv)")
