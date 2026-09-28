@@ -73,7 +73,7 @@ jobs:
       PUBLISHER_RAMP: ${{ vars.PUBLISHER_RAMP }}
       PUBLISHER_JITTER: ${{ vars.PUBLISHER_JITTER }}
       PUBLISHER_AI_INPUTS: ${{ vars.PUBLISHER_AI_INPUTS }}
-      PUBLISHER_IG_ROTATION: ${{ vars.PUBLISHER_IG_ROTATION }}
+      # PUBLISHER_IG_ROTATION is not read here (founder, 2026-09-29): Instagram posts the clean creative only.
       PUBLISHER_IG_STORIES: ${{ vars.PUBLISHER_IG_STORIES }}
       PUBLISHER_LANGUAGE: ${{ vars.PUBLISHER_LANGUAGE }}
       PUBLISHER_SLOTS_BLUESKY: ${{ vars.PUBLISHER_SLOTS_BLUESKY }}

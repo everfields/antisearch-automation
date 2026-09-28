@@ -10,7 +10,8 @@
 > - **Why a frame:** Buffer's API rejects a cover image URL (`VideoAssetInput.thumbnailUrl`: "Do not use").
 > - **Why:** on the profile grid the outputs read large, side by side.
 > - **Mocks:** `docs/assets/ig-cover-mock/` (`python scripts/ig_grid_mock.py --posts state/posts.csv`).
-> - `PUBLISHER_IG_ROTATION=on` brings back the rotation below.
+> - `PUBLISHER_IG_ROTATION=on` brings back the rotation below. The workflows no longer pass the
+>   variable, so turning it back on in production is a one-line workflow PR.
 
 Founder, 2026-09-28: v2 of the creative mockups is approved (PR #30). This page covers
 what went live with it. TikTok and X are unchanged, and `PUBLISHER_LIVE_NETWORKS` is untouched.
