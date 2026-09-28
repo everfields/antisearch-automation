@@ -1,7 +1,8 @@
 name: settle-media
 
-# settle it: every pack in publisher-state/settle/candidates-*.md gets a GIF and an MP4 per row
-# (settle/gif/, settle/mp4/), next to its PNG screenshot, and GIF/MP4 columns in the pack.
+# settle it: every pack in publisher-state/settle/candidates-*.md gets a square card PNG, GIF and
+# MP4 per row (settle/png/, settle/gif/, settle/mp4/), next to its site screenshot, and
+# png/gif/mp4 columns in the pack.
 # From the FROZEN verdict only: the oracle is never asked. Nothing is posted.
 # Packs built by the settle-pack workflow get their media in that same run. This hourly check
 # catches a pack that lands any other way. A push to publisher-state can't trigger a workflow

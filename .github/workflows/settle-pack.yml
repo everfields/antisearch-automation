@@ -5,8 +5,8 @@ name: settle-pack
 #         Bluesky search -> DRAFT publisher-state/settle/candidates-<tomorrow>.md. No oracle call.
 #   shoot (by hand, after deleting the rows that shouldn't go out): ONE live run per remaining row
 #         through antisearch.ai in headless Chrome, verdict frozen in verdicts.csv, screenshot in
-#         settle/img/, the call logged in settle/internal-calls.csv; then the GIF and MP4
-#         (settle/gif/, settle/mp4/) in the same run.
+#         settle/img/, the call logged in settle/internal-calls.csv; then the square card PNG,
+#         GIF and MP4 (settle/png/, settle/gif/, settle/mp4/) in the same run.
 # Nothing is ever posted.
 
 on:
@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       step:
-        description: find (draft, no oracle) or shoot (one live run per pending row, then GIF/MP4)
+        description: find (draft, no oracle) or shoot (one live run per pending row, then PNG/GIF/MP4)
         type: choice
         options: [find, shoot]
         default: find

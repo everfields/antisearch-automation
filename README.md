@@ -93,8 +93,13 @@ verdict already frozen in `publisher-state/verdicts.csv`, scheduled for `due_et`
 ## settle it packs (`mill settle-find`, `settle-shoot`, `settle-media`)
 
 Everything is scripted, with no LLM and no agent; nothing is ever posted. Output goes to
-`publisher-state/settle/`: `candidates-YYYY-MM-DD.md`, `img/` (PNG), `gif/`, `mp4/`, and
-`internal-calls.csv`.
+`publisher-state/settle/`: `candidates-YYYY-MM-DD.md`, `img/` (site screenshot), `png/`,
+`gif/`, `mp4/`, and `internal-calls.csv`.
+
+The media are a square big-type card with no phone frame. Reddit shows comment media at a fixed
+height, so a 9:16 frame turns into a thin strip and its words shrink with it. The comparison
+mock is at `docs/assets/settle-mock/mock-compare.png`; regenerate it with
+`python3 scripts/settle_reddit_mock.py --state state --out /tmp/mock`.
 
 1. **Find:** the `settle-pack` workflow runs daily at 19:00 Madrid, or by hand with
    `step: find`. It writes a draft pack for tomorrow from Reddit RSS and Bluesky search. The
@@ -103,10 +108,11 @@ Everything is scripted, with no LLM and no agent; nothing is ever posted. Output
    sub rules. Edit the file on the `publisher-state` branch.
 3. **Shoot:** run the `settle-pack` workflow with `step: shoot`. Each remaining row gets ONE
    live run through antisearch.ai in headless Chrome, and the verdict is frozen. The same run
-   saves the screenshot, logs the call in `internal-calls.csv`, and renders the GIF (480 px,
-   12.5 fps, loops) and MP4 (9:16 H.264, no audio).
-4. **Media for any pack:** a pack that lands another way gets GIF and MP4 from the hourly
-   `settle-media` workflow. You can also run it by hand.
+   saves the screenshot, logs the call in `internal-calls.csv`, and renders the card PNG
+   (1080×1080), the GIF (480×480, 12.5 fps, loops) and the MP4 (720×720 H.264, no audio).
+4. **Media for any pack:** a pack that lands another way gets its media from the hourly
+   `settle-media` workflow. You can also run it by hand. Use `--force` to re-render after a
+   template change.
 
 Locally, with a `publisher-state` checkout in `./state`:
 
@@ -114,7 +120,7 @@ Locally, with a `publisher-state` checkout in `./state`:
 mill settle-find --state state/posts.csv      # draft
 pip install -e '.[settle]'                    # once: Playwright for shoot
 mill settle-shoot --state state/posts.csv     # one live run per pending row
-mill settle-media --state state/posts.csv     # GIF + MP4 from frozen verdicts
+mill settle-media --state state/posts.csv     # card PNG + GIF + MP4 from frozen verdicts
 ```
 
 ## Metrics (`mill metrics`)

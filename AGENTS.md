@@ -22,7 +22,9 @@ section "settle it packs".
 - **Find:** the `settle-pack` workflow drafts a pack daily, or on dispatch with `step: find`.
 - **Review:** a human deletes rows.
 - **Shoot:** dispatch `settle-pack` with `step: shoot` for one live run per row (frozen), the
-  screenshot, and the GIF and MP4.
-- **Media:** `settle-media` renders missing GIF and MP4 files hourly.
+  screenshot, and the media.
+- **Media:** `settle-media` renders any missing card PNG, GIF or MP4 hourly. The card is square
+  big type with no phone frame, so it stays legible in a Reddit comment thumbnail; don't go
+  back to 9:16 or a phone frame.
 
 Don't rebuild packs by hand in an agent session. Never re-ask a frozen input.
