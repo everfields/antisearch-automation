@@ -103,7 +103,7 @@ The `settle-pack` workflow runs every 2 days at 19:00 Madrid (or by hand) and wr
    old. Soul's skips are applied by keyword (grief, health, legal or money, minors, private
    people, politics, NSFW). Each question is reduced to its **bare noun phrase** by fixed rules:
    "What's the best 80s horror movie?" becomes `80s horror movie`. If no clean noun is left
-   ("the best way to...", "the best one", "pizza or pasta"), the thread is skipped.
+   (a "way to…" or "one" question, or "pizza or pasta"), the thread is skipped.
 2. **Shoot:** ONE live run per row through antisearch.ai in headless Chrome. The User-Agent ends
    `antisearch-internal/settle-pack` and the request carries `X-Antisearch-Internal: settle-pack`.
    The output is frozen in `verdicts.csv` and the call is logged in `settle/internal-calls.csv`.
