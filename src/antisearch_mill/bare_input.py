@@ -61,6 +61,8 @@ TRAIL = re.compile(
     r"this (?:year|season|month|week)|(?:on|in) the (?:current )?market|in (?:the )?current market|"
     r"(?:that )?you(?:'?ve| have)? (?:ever )?(?:read|seen|had|tried|watched|played|heard|eaten|visited|been to|used)))+$",
     re.I)
+PERSONAL = re.compile(r"\s+(?:that )?you(?:'?ve| have)? (?:ever )?(?:read|seen|had|tried|watched|played|heard|eaten|"
+                      r"visited|been to|used)\b", re.I)
 DECADE = re.compile(r"^(?P<head>.+?)\s+(?:of|from|in)\s+(?:the\s+)?(?P<d>'?(?:19|20)?\d0'?s)$", re.I)
 PREP = {"to", "for", "in", "of", "from", "set", "with", "about", "on", "under", "near", "by", "that", "at", "among",
         "without", "like"}
@@ -97,7 +99,8 @@ def from_question(question: str) -> str:
     stripped = LEAD.sub("", t, count=1)
     if stripped == t:
         return ""  # no ranking frame found: not a question we know how to make bare
-    t = TRAIL.sub("", stripped).strip(" ,;:-")
+    t = PERSONAL.sub("", stripped)
+    t = TRAIL.sub("", t).strip(" ,;:-")
     m = DECADE.match(t)
     if m:
         decade = m.group("d").strip("'").lower()

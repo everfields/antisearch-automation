@@ -77,6 +77,8 @@ def test_the_lint_keeps_bare_words_that_only_look_ranked(phrase):
     ("Whats the best superhero TTRPG going right now?", "superhero ttrpg"),
     ("Best soup from Malaysia?", "soup from malaysia"),
     ("What is the best thriller book you have ever read?", "thriller book"),
+    ("What's the best book you've ever read about marketing?", "book about marketing"),
+    ("What are the best topical costumes for Halloween this year?", "topical costume for halloween"),
     ("What's the best way to spend a day?", "way to spend a day"),
     ("Anyone been to Madrid?", ""),
 ])
