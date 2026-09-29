@@ -34,7 +34,7 @@ How to measure repetition: `docs/proposals/2026-09-28-repetition-metric.md`.
 
 ## X rule (founder, 2026-09-28 evening; replaces the morning's no-mention rule)
 
-- An X post is `input`, then `verdict`, lowercase. When the verdict **is** an account, a third
+- An X post is **plain text only**, never media (founder, 2026-09-29): `input`, then `verdict`, lowercase. When the verdict **is** an account, a third
   line carries its `@handle` (`search engine` / `kagi` / `@KagiHQ`).
 - **At most 1 mention per post.** The account must be the verdict itself, never its maker or
   owner. It must be in `queue/tags/allowlist.json` with a verified `x` block (evidence, checked

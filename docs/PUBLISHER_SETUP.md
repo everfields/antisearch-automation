@@ -278,13 +278,12 @@ That's 12 posts a day (17 with X), instead of 20–25.
 - **Verticals:**
   - Bluesky: companies / tech (X's brief);
   - X (Buffer route only): its own pool, `queue/pools/x.txt` (the X vertical is being
-    re-chosen). Format A/B (CoS + Soul, 2026-09-27): `PUBLISHER_X_FORMAT=alternate`
-    (default) alternates the silent phone-frame video (caption empty) and a plain text
-    post (line 1 the lowercase input, line 2 the lowercase verdict; no brand line,
-    mention, link, emoji, or hashtag). One of each a day, and which one takes the first
-    slot swaps daily. `video` or `text` locks the winner. Each `posts.csv` row records
-    `format`. Two posts a day at 09:07 and 16:07 ET (`PUBLISHER_SLOTS_X` may move or drop
-    one, never add a third);
+    re-chosen). **Plain text only** (founder, 2026-09-29; the video/text A/B and
+    `PUBLISHER_X_FORMAT` are gone): line 1 the lowercase input, line 2 the lowercase
+    verdict, line 3 the winner's verified `@handle` when one applies (AGENTS.md, X rule).
+    No media, link, emoji, or hashtag. Each `posts.csv` row records `format` = `text`.
+    Two posts a day at 09:07 and 16:07 ET (`PUBLISHER_SLOTS_X` may move or drop one,
+    never add a third);
   - LinkedIn: employers;
   - Instagram: places (restaurants, travel, hotels, entertainment);
   - TikTok: beauty / hair / skin (the lock; Carlos grouped TikTok with leisure,

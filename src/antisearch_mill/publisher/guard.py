@@ -39,7 +39,6 @@ X_MAX_PER_DAY = 2  # CoS + Soul, 2026-09-27: 1-2 X posts a day during the format
 # Founder, 2026-09-28: Instagram 6-8 reels a day for the creative rotation (Buffer allows 50 per 24h).
 IG_MAX_PER_DAY = 8
 DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY}
-X_FORMATS = ("alternate", "video", "text")
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 # GitHub's schedule drops most wakes (28 Sep: 1 scheduled run in 8 h). Once a slot's window has passed with
 # no run, the next run still sends the most recently missed slot (one; older misses stay missed), up to
@@ -399,23 +398,6 @@ class PostRow:
 
 
 COLUMNS = [f.name for f in fields(PostRow)]
-
-
-def x_format(env: dict[str, str]) -> str:
-    """`PUBLISHER_X_FORMAT`: `alternate` (default), `video`, or `text`."""
-    raw = (env.get("PUBLISHER_X_FORMAT") or "").strip().lower() or "alternate"
-    if raw not in X_FORMATS:
-        raise ValueError(f"PUBLISHER_X_FORMAT={raw!r}; use alternate, video, or text")
-    return raw
-
-
-def x_post_format(env: dict[str, str], day: date, used_today: int) -> str:
-    """The format of the next X post. `alternate` gives one of each a day and swaps which
-    one takes the first slot every day, so the time of day does not favour a format."""
-    mode = x_format(env)
-    if mode != "alternate":
-        return mode
-    return ("video", "text")[(day.toordinal() + used_today) % 2]
 
 
 class PostLog:

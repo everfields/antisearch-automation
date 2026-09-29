@@ -254,30 +254,22 @@ class BufferTikTok(BufferRoute):
 
 
 class BufferX(BufferRoute):
-    """Plain text on X (CoS + Soul, 2026-09-27): `input` then `verdict`, no media, no assets.
-
-    A video by public URL still works for manual use; X rejects thumbnailOffset, so the
-    asset is the URL alone.
-    """
+    """Plain text on X, always (founder, 2026-09-29): the bare input, the output, and the winner's
+    verified @handle when one applies (tags.choose_x_mention). No media, no assets, nothing hosted."""
 
     name = "x"
-    kinds = frozenset({VIDEO, TEXT})
+    kinds = frozenset({TEXT})
     service = "twitter"  # Buffer's service enum; the env pin is BUFFER_CHANNEL_X
-    env_sets = (("BUFFER_API_KEY", "PUBLISHER_MEDIA_REPO", "PUBLISHER_MEDIA_TOKEN", "PUBLISHER_PUBLIC_BASE_URL"),)
+    env_sets = (("BUFFER_API_KEY",),)
     optional_env = ("BUFFER_CHANNEL_X", "BUFFER_ORG_ID")
-    cannot = ("Unverified X via Buffer: 1 MP4, 0.5–140s, 50 posts per 24h. No thumbnailOffset. "
+    cannot = ("Unverified X via Buffer: plain text only, 50 posts per 24h. "
               "Free plan is 3 channels; disconnect LinkedIn in Buffer before connecting @antisearch_ai.")
 
-    def _video(self, media: Media) -> dict:
-        return {"url": media.public_url}
-
     def _post(self, media: Media, caption: str) -> PostResult:
-        if media.kind == TEXT:
-            if not caption.strip():
-                raise PublisherError("buffer: an X text post needs text")
-            return super()._post(media, caption)
-        if not (0.5 <= media.duration_s <= 140):
-            raise PublisherError(f"buffer: X wants an MP4 between 0.5s and 140s, got {media.duration_s:g}s")
+        if media.kind != TEXT:
+            raise PublisherError("buffer: X posts plain text only")
+        if not caption.strip():
+            raise PublisherError("buffer: an X text post needs text")
         return super()._post(media, caption)
 
 

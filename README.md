@@ -262,11 +262,9 @@ and every code-formatted example in README/SETUP.
 - renders are byte-identical for the same (category, verdict, pause, style, audio, frame)
 - mp4 metadata: `title=<verdict>`, `comment=capture=synthetic-oracle;oracle=<live|fixture>;category=<...>`
 
-X gets a 720×1280 derivative at publish time (X's documented portrait max is
-1200×1900); LinkedIn, TikTok and Instagram get the 1080×1920 master. The own
-publisher (`mill post`) runs an X format A/B (`PUBLISHER_X_FORMAT=alternate|video|text`,
-default `alternate`): the silent phone-frame master, or plain text with the lowercase
-input on line 1 and the lowercase verdict on line 2, one per post, two posts a day.
+LinkedIn, TikTok and Instagram get the 1080×1920 master. X is plain text only (founder,
+2026-09-29): the lowercase input on line 1, the lowercase verdict on line 2, and the winner's
+verified `@handle` on line 3 when one applies. There is no media on X, two posts a day.
 
 ### Metadata row (`out/clips.csv`)
 
