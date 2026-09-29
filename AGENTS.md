@@ -56,11 +56,12 @@ How to measure repetition: `docs/proposals/2026-09-28-repetition-metric.md`.
 ## Instagram creative (founder, 2026-09-29)
 
 - Only `0-current-cover`: the first, clean creative (the keys, then silence, and the verdict
-  appears in the silence), with a cover still appended.
-- The cover is the monolith's last frame, output only, with the same font and size. Buffer's
-  `thumbnailOffset` points at it; Buffer accepts no cover image URL.
+  appears in the silence), with the output-only cover as its frame 0.
+- The cover is the monolith's last frame, output only, with the same font and size. It is only
+  the grid thumbnail and never an added still: it replaces frame 0 (1/30 s), and Buffer's
+  `thumbnailOffset` points there. Buffer accepts no cover image for a reel.
 - The rotation is off until Carlos says otherwise (`PUBLISHER_IG_ROTATION=on` brings it back).
-  Every Instagram creative ends on that cover, so every grid tile is the big output.
+  Every Instagram creative carries that cover, so every grid tile is the big output.
 - Peers in excellence side by side is what Carlos values most on the grid.
   `PUBLISHER_IG_CLUSTER=on` (a proposal, off by default) draws the pool by family, by fixed
   rules.

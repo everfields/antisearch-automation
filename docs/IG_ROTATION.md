@@ -2,12 +2,17 @@
 
 > **Founder, 2026-09-29: the rotation is off.** Until Carlos says otherwise, every reel is
 > `0-current-cover`: the first, clean creative (the keys, then silence, and the verdict appears in the
-> silence), with a cover still appended.
+> silence), with the output-only cover as its frame 0.
 >
 > - **The cover:** the monolith's last frame with the output only, in the same font, size and place,
->   with no input text (`creatives/cover.py`). It sits after the reel's last frame for 0.2 s (6 frames),
->   and Buffer's `thumbnailOffset` points at its middle.
-> - **Why a frame:** Buffer's API rejects a cover image URL (`VideoAssetInput.thumbnailUrl`: "Do not use").
+>   with no input text (`creatives/cover.py`). It **replaces frame 0** (one frame, 1/30 s), and Buffer's
+>   `thumbnailOffset` points at the middle of that frame. Nothing is added: the reel keeps its length,
+>   its audio and its last frame, so no cover pops at the end (the 0.2 s end still of PR #45 is gone).
+> - **Why a frame:** Buffer's API takes no cover image for a reel (`VideoAssetInput.thumbnailUrl`:
+>   "the API rejects video assets that set this field"; Instagram's metadata has no cover field).
+> - **Why frame 0:** it is the least visible place. Instagram shows the thumbnail until playback
+>   starts, so the first play runs on from the same image. A loop shows it for one frame. Frame 0 is
+>   also a keyframe, so the offset lands on it exactly.
 > - **Why:** on the profile grid the outputs read large, side by side.
 > - **Mocks:** `docs/assets/ig-cover-mock/` (`python scripts/ig_grid_mock.py --posts state/posts.csv`).
 > - `PUBLISHER_IG_ROTATION=on` brings back the rotation below. The workflows no longer pass the
