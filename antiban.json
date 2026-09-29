@@ -18,7 +18,8 @@
       "#restaurantinlisbon #belcanto #ai",
       "#restaurantinmexicocity #quintonil #ai",
       "#hotelintokyo #amantokyo #ai",
-      "#aseason #autumn #ai"
+      "#aseason #autumn #ai",
+      "#hotelinparis #chevalblancparis #ai"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -48,10 +49,12 @@
       "p-restaurant-in-lisbon-64401bcd",
       "p-restaurant-in-mexico-city-b085dd90",
       "p-hotel-in-tokyo-a20fc2dd",
-      "p-a-season-886de8e7"
+      "p-a-season-886de8e7",
+      "p-hotel-in-paris-e247042d"
     ],
     "instagram_story": [
-      "p-a-smell-story-0be5de42"
+      "p-a-smell-story-0be5de42",
+      "p-hotel-in-paris-story-e4eee833"
     ],
     "tiktok": [
       "s-red-flag-6b88b670",
