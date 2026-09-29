@@ -25,7 +25,7 @@ from ..creatives import CLEAN_COVER, CURRENT, STORY, id_tag, ig_creative, rotati
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now,
-    posting_day, serving_open, serving_slot, slot_index_at, slot_of, slot_times, slots_for, taken_slots, x_post_format,
+    posting_day, serving_open, serving_slot, slot_index_at, slot_of, slot_times, slots_for, taken_slots,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
@@ -257,12 +257,10 @@ def run_posts(
             continue
 
         cls = adapters[net]
-        fmt = x_post_format(env, day, log.used_on(day, net)) if net == X_NETWORK else kind
-        if fmt == TEXT and TEXT not in cls.kinds:
-            out.append(Outcome(job.id, net, "skipped_unsupported_media", detail="X posts plain text; this route cannot"))
-            continue
-        if kind not in cls.kinds:
-            out.append(Outcome(job.id, net, "skipped_unsupported_media", detail=f"{net} cannot post {kind}"))
+        fmt = TEXT if net == X_NETWORK else kind  # founder, 2026-09-29: every X post is plain text, never media
+        if fmt not in cls.kinds:
+            detail = "X posts plain text; this route cannot" if net == X_NETWORK else f"{net} cannot post {kind}"
+            out.append(Outcome(job.id, net, "skipped_unsupported_media", detail=detail))
             continue
         missing = cls.missing(env)
         if live:
@@ -342,8 +340,7 @@ def run_posts(
             tag = picked.handle
             if tag:
                 job = dataclasses.replace(job, notes=f"{job.notes}; mention: {picked.reason}")
-        if fmt == TEXT or (net == X_NETWORK and tag):
-            # founder, 2026-09-28: a mention post is three lines, whichever format carries it
+        if fmt == TEXT:
             shown = x_text(job.category, clip.verdict, tag)
             problem = x_text_problem(shown)
             if problem:

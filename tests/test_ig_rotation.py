@@ -398,7 +398,30 @@ def test_the_cover_is_the_monoliths_verdict_alone_same_font_size_and_place_no_in
 
 
 @pytest.mark.skipif(__import__("shutil").which("ffmpeg") is None, reason="needs ffmpeg")
-def test_the_clean_reel_plays_as_before_then_holds_the_cover_that_buffer_is_pointed_at(tmp_path):
+def _frames(path: Path) -> list[bytes]:
+    """Every decoded frame, small and grey, for exact comparisons."""
+    import subprocess
+
+    raw = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", str(path), "-f", "rawvideo", "-pix_fmt", "gray",
+                          "-s", "108x192", "-"], capture_output=True, check=True).stdout
+    n = 108 * 192
+    return [raw[i:i + n] for i in range(0, len(raw), n)]
+
+
+def _diff(a: bytes, b: bytes) -> float:
+    return sum(abs(x - y) for x, y in zip(a, b)) / len(a)
+
+
+def _ffprobe_frames(path: Path) -> int:
+    import subprocess
+
+    out = subprocess.run(["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0", "-show_entries",
+                          "stream=nb_read_frames", "-of", "csv=p=0", str(path)], capture_output=True, text=True, check=True)
+    return int(out.stdout.strip())
+
+
+def test_the_cover_is_frame_zero_only_and_the_reel_ends_on_the_creatives_own_last_frame(tmp_path):
+    from antisearch_mill.creatives.cover import cover_s
     from antisearch_mill.fonts import resolve_font
     from antisearch_mill.oracle import FixtureOracle
     from antisearch_mill.produce import produce_one
@@ -413,11 +436,21 @@ def test_the_clean_reel_plays_as_before_then_holds_the_cover_that_buffer_is_poin
         assert res.status == "produced", res.detail
         rows[creative] = led.clip_for_job("p-r")
     plain, covered = rows[CURRENT], rows[CLEAN_COVER]
-    assert round(covered.duration_s - plain.duration_s, 2) == 0.2  # six frames of cover after the last frame
-    assert plain.duration_s < covered.cover_s < covered.duration_s
+    assert covered.duration_s == plain.duration_s  # nothing appended
+    assert _ffprobe_frames(Path(covered.clip_path)) == _ffprobe_frames(Path(plain.clip_path))
+    a, b = _frames(Path(plain.clip_path)), _frames(Path(covered.clip_path))
+    assert len(a) == len(b)
+    assert _diff(a[-1], b[-1]) < 1.0 and all(_diff(x, y) < 1.0 for x, y in zip(a[-10:], b[-10:]))  # no cover at the end
+    assert all(_diff(x, y) < 1.0 for x, y in zip(a[1:], b[1:]))  # playback is the creative's, frame for frame
+    from antisearch_mill.creatives.cover import cover_image
+
+    card = cover_image("diverxo", font_path=resolve_font()).convert("L").resize((108, 192)).tobytes()
+    assert _diff(b[0], card) < 2.0 < _diff(a[0], card)  # frame 0, and only frame 0, is the cover
+    assert covered.cover_s == cover_s(30) and 0 < covered.cover_s < 1 / 30  # inside frame 0
     info = probe(Path(covered.clip_path))
     assert (info.width, info.height, info.vcodec, info.acodec) == (1080, 1920, "h264", "aac")
     media = dataclasses.replace(Media.video(covered.clip_path, 1080, 1920, covered.duration_s,
                                             poster=covered.poster_path), cover_s=covered.cover_s,
                                 public_url="https://x/c.mp4")
-    assert _thumbnail_on_verdict(media)["metadata"]["thumbnailOffset"] == int(covered.cover_s * 1000)
+    offset = _thumbnail_on_verdict(media)["metadata"]["thumbnailOffset"]
+    assert offset == int(covered.cover_s * 1000) and 0 < offset < 1000 / 30  # inside frame 0 (0-33 ms)

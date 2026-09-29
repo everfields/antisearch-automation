@@ -2,7 +2,7 @@
 
 Founder, 2026-09-29: until Carlos says otherwise every Instagram reel is `0-current-cover`, the
 first, clean creative (the keys, then silence, and the verdict appears in the silence) with the
-cover still appended (creatives/cover.py). The rotation is off by default; `PUBLISHER_IG_ROTATION=on`
+output-only cover as its frame 0 (creatives/cover.py). The rotation is off by default; `PUBLISHER_IG_ROTATION=on`
 brings back the four-creative Latin square (docs/IG_ROTATION.md):
   0-current           the current clip, unchanged (TikTok's too)
   1-short-score       the current picture, the keys plus the template score
@@ -56,33 +56,28 @@ def finish(creative: str, classic: Path, timeline: Timeline, out: Path, *, categ
            metadata: dict[str, str] | None = None) -> float | None:
     """Write `creative` to `out` from the classic clip (the current creative, keys audio included).
 
-    Every Instagram reel creative ends on the output-only cover still (founder, 2026-09-29), and
+    Every Instagram reel creative carries the output-only cover as its frame 0 (creatives/cover.py) and
     returns its time in seconds; the current clip (TikTok's too) is left as it is and returns None."""
     if creative in ("", CURRENT):
         if classic != out:
             shutil.move(str(classic), out)
         return None
-    from .cover import append_cover
+    from .cover import cover_first_frame
 
     if creative == CLEAN_COVER:
-        return append_cover(classic, out, verdict, duration_s=timeline.duration_s, font_path=font_path,
-                            layout=layout, metadata=metadata)
+        return cover_first_frame(classic, out, verdict, font_path=font_path, layout=layout, metadata=metadata)
     if creative != SHORT_SCORE and creative not in MOTION:
         raise ValueError(f"unknown creative {creative!r}; choose one of {', '.join(IG_ROTATION)}")
-    from .monolith import add_score, motion_plan
+    from .monolith import add_score
 
     body = out.with_name(out.stem + "-body.mp4")
     try:
         if creative == SHORT_SCORE:
             add_score(classic, timeline, body, category=category, verdict=verdict, metadata=metadata)
-            length = timeline.duration_s
         else:
             _motion_body(creative, classic, timeline, body, category=category, verdict=verdict,
                          font_path=font_path, layout=layout, phone=phone, metadata=metadata)
-            plan = motion_plan(timeline)
-            length = plan.total / plan.fps
-        return append_cover(body, out, verdict, duration_s=length, font_path=font_path, layout=layout,
-                            metadata=metadata)
+        return cover_first_frame(body, out, verdict, font_path=font_path, layout=layout, metadata=metadata)
     finally:
         body.unlink(missing_ok=True)
 

@@ -225,12 +225,13 @@ def test_live_x_posts_carry_the_mention_on_the_third_line_and_log_it(tmp_path):
     assert again[0].status == "published" and creates[0]["text"] == "meta search\nkagi"  # within 14 days: no mention
 
 
-def test_an_x_video_post_with_a_mention_takes_the_three_lines_and_mentions_off_keeps_it_plain(tmp_path):
+def test_an_x_post_with_a_mention_is_three_lines_of_text_and_mentions_off_keeps_it_plain(tmp_path):
     now = datetime(2026, 9, 28, 16, 10, tzinfo=ET)
-    env = {**BUFFER_ENV, "PUBLISHER_SLOTS_X": "16:07", "PUBLISHER_X_FORMAT": "video"}
+    env = {**BUFFER_ENV, "PUBLISHER_SLOTS_X": "16:07", "PUBLISHER_X_FORMAT": "video"}  # the old switch: ignored
     out, creates, _ = _live_x(tmp_path, [Job("p-browser", "browser", ("x",), notes="pool:vertical")],
                               env, now, {"p-browser": "brave"})
-    assert out[0].status == "published" and creates[0]["text"] == "browser\nbrave\n@brave" and creates[0]["assets"]
+    assert out[0].status == "published" and creates[0]["text"] == "browser\nbrave\n@brave"
+    assert creates[0]["assets"] == []  # text only (founder, 2026-09-29)
     off = {**env, "PUBLISHER_X_MENTIONS": "off"}
     out, creates, log = _live_x(tmp_path / "off", [Job("p-browser", "browser", ("x",), notes="pool:vertical")],
                                 off, now, {"p-browser": "brave"})

@@ -35,15 +35,15 @@ def test_every_creative_renders_a_valid_reel(tmp_path, creative):
     sidecar = json.loads((ledger.clips_dir / f"{row.clip_id}.json").read_text())
     assert sidecar["timeline"]["creative"] == creative
     if creative in (MONOLITH, COMPUTATION):
-        assert 8.0 < info.duration_s < 9.8
+        assert 8.0 < info.duration_s < 9.5
     elif creative == STORY:
         assert info.duration_s == pytest.approx(5.0, abs=0.1)
     else:
-        assert 4.5 < info.duration_s < 7.2
+        assert 4.5 < info.duration_s < 7.0
     if creative in (CURRENT, STORY):
         assert row.cover_s == 0.0  # TikTok's clip and the Stories card keep their own frames
-    else:  # every Instagram reel ends on the output-only cover still, and Buffer's offset points at it
-        assert info.duration_s - 0.25 < row.cover_s < info.duration_s
+    else:  # every Instagram reel carries the output-only cover as frame 0, and Buffer's offset points at it
+        assert 0 < row.cover_s < 1 / 15
     assert not list(ledger.clips_dir.glob("*-classic.mp4")) and not list(ledger.clips_dir.glob("*-source2x.mp4"))
 
 
