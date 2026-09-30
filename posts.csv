@@ -126,3 +126,5 @@ instagram
 @instagram",text,,
 p-hair-oil,tiktok,pending,p-hair-oil-54572417,kérastase elixir ultime l’huile originale,,,,2026-09-30T17:11:41+00:00,hair oil,,video,,
 p-hair-oil,tiktok,published,p-hair-oil-54572417,kérastase elixir ultime l’huile originale,6abd46523197c43feb7ae41a,buffer:6abd46523197c43feb7ae41a,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-30T17:11:41+00:00,hair oil,,video,,
+p-museum-in-paris,instagram,pending,p-museum-in-paris-b95df60d,louvre,,,,2026-09-30T18:41:49+00:00,museum in paris,#museuminparis #louvre #ai,video,,0-current-cover
+p-museum-in-paris,instagram,failed,p-museum-in-paris-b95df60d,louvre,,,PublisherError: buffer: instagram rejected it: None,2026-09-30T18:41:49+00:00,museum in paris,#museuminparis #louvre #ai,video,,0-current-cover
