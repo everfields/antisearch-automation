@@ -1,26 +1,28 @@
-# Social metrics — 2026-09-30 05:44 UTC
+# Social metrics — 2026-09-30 12:48 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d n/a (no snapshot that old yet))
-- account likes: 13, posts: 14
+- account likes: 14, posts: 15
 
-### last 24h (3 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `mascara` → lancôme lash idôle | 101 | 0 | 0 | 0 | 0 | 0.0% |
-| `foundation` → armani luminous silk foundation | 49 | 0 | 0 | 0 | 0 | 0.0% |
+| `mascara` → lancôme lash idôle | 176 | 1 | 0 | 0 | 0 | 0.6% |
+| `foundation` → armani luminous silk foundation | 115 | 0 | 0 | 0 | 0 | 0.0% |
+| `a promise` → a kept promise | 48 | 0 | 0 | 0 | 0 | 0.0% |
 | `concealer` → haus labs triclone skin tech concealer | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `mascara` → lancôme lash idôle | 0.0% | 101 |
-| `foundation` → armani luminous silk foundation | 0.0% | 49 |
+| `mascara` → lancôme lash idôle | 0.6% | 176 |
+| `foundation` → armani luminous silk foundation | 0.0% | 115 |
+| `a promise` → a kept promise | 0.0% | 48 |
 
-### last 7d (16 post(s))
+### last 7d (17 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -33,28 +35,29 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
-| `a gift` → a shared experience | 0.5% | 370 |
+| `mascara` → lancôme lash idôle | 0.6% | 176 |
+| `a gift` → a shared experience | 0.5% | 373 |
 | `sunscreen` → la roche-posay uvmune 400 invisible fluid spf50+ | 0.4% | 268 |
 | `a sound` → rain on a roof | 0.4% | 813 |
-| `cleanser` → cerave hydrating facial cleanser | 0.3% | 364 |
 
 ## instagram
 
 - followers: **–** (24h –, 7d –) — Instagram's public pages carry no counts when logged out
 
-### last 24h (3 post(s))
+### last 24h (4 post(s))
 
-**3 published post(s) have no numbers yet** (shown as –)
+**4 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `hotel in paris` → cheval blanc paris | – | – | – | – | – | – |
 | `hotel in bali` → capella ubud | – | – | – | – | – | – |
 | `beach in europe` → spiaggia dei conigli, lampedusa | – | – | – | – | – | – |
+| `an hour` → golden hour | – | – | – | – | – | – |
 
-### last 7d (23 post(s))
+### last 7d (24 post(s))
 
-**19 published post(s) have no numbers yet** (shown as –)
+**20 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -77,7 +80,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | 1-short-score | 1 | – | – | – | – | – |
 | 2-medium-monolith | 1 | – | – | – | – | – |
 | 3-computation | 4 | 13.5 | 0.0 | 0.0 | 0.0 | 0.0% |
-| 0-current-cover | 4 | – | – | – | – | – |
+| 0-current-cover | 5 | – | – | – | – | – |
 
 ## x
 
