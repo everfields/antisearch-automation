@@ -130,3 +130,7 @@ p-museum-in-paris,instagram,pending,p-museum-in-paris-b95df60d,louvre,,,,2026-09
 p-museum-in-paris,instagram,failed,p-museum-in-paris-b95df60d,louvre,,,PublisherError: buffer: instagram rejected it: None,2026-09-30T18:41:49+00:00,museum in paris,#museuminparis #louvre #ai,video,,0-current-cover
 p-museum-in-new-york,instagram,pending,p-museum-in-new-york-7d6725e8,the metropolitan museum of art,,,,2026-09-30T19:11:41+00:00,museum in new york,#museuminnewyork #themetropolitanmuseumofart #ai,video,,0-current-cover
 p-museum-in-new-york,instagram,published,p-museum-in-new-york-7d6725e8,the metropolitan museum of art,6abd5f23d94b607cf60a5b7d,buffer:6abd5f23d94b607cf60a5b7d,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-09-30T19:11:41+00:00,museum in new york,#museuminnewyork #themetropolitanmuseumofart #ai,video,,0-current-cover
+p-sin,x,pending,p-sin-30661cc5,lust,,,,2026-09-30T20:11:37+00:00,sin,"sin
+lust",text,,
+p-sin,x,published,p-sin-30661cc5,lust,6abd6e0001f18483b9ef52c5,https://twitter.com/antisearch_ai/status/2105391231698096355,,2026-09-30T20:11:37+00:00,sin,"sin
+lust",text,,
