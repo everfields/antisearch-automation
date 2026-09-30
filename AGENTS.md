@@ -71,5 +71,6 @@ How to measure repetition: `docs/proposals/2026-09-28-repetition-metric.md`.
 
 - GitHub's schedule drops most wakes. The next run sends the most recently missed slot
   (one, within 6 h), with the 90-minute gap and the random offset kept.
-- An external pinger can wake the publisher via a `publisher-tick` `repository_dispatch`
-  (docs/PUBLISHER_SETUP.md, "Reliable wakes").
+- An external pinger wakes the publisher like the cron: `workflow_dispatch` with `tick=true`
+  (Carlos's box, :11/:26/:41/:56), or a `publisher-tick` `repository_dispatch`
+  (docs/PUBLISHER_SETUP.md, "Reliable wakes"). A dispatch without `tick` is a manual run.

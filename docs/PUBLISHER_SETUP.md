@@ -174,33 +174,52 @@ A full 10-post queue lasts 2 days at 5 a day, 3 days at 3, and 10 days at 1.
   scheduled wakes), the next run still sends the most recently missed slot, up to 6h after
   its time. It sends one only: older misses stay missed, so a long outage never posts a
   backlog. The 90-minute gap and the slot's random offset still apply.
-
-### Reliable wakes (no manual kick)
-
-On 28 Sep, GitHub ran the `*/15` schedule once in 8 hours. The cron now sits off the top of the
-hour, and the catch-up covers a missed window. For wakes that don't depend on GitHub's
-scheduler, point any free external pinger at `repository_dispatch`. For example, a
-[cron-job.org](https://cron-job.org) job every 20 minutes:
-
-- `POST https://api.github.com/repos/everfields/antisearch-automation/dispatches`
-- headers `Accept: application/vnd.github+json` and `Authorization: Bearer <token>`
-- body `{"event_type":"publisher-tick"}`
-- `<token>` is a fine-grained PAT for this repo only, with **Contents: read and write**
-  (GitHub requires that permission for a dispatch).
-
-A tick runs exactly like the cron: it respects `PUBLISHER_CRON`, runs the `mill due`
-pre-check first, and posts only what is due.
-
-**Minutes.** The repo is private, so every wake is billed as at least 1 Actions minute, even
-when nothing is due. A wake every 20 minutes over the 17-hour window is about 1,500 minutes a
-month; every 15 minutes is about 2,000, which is the whole Free plan. Pick 20–30 minutes; the
-catch-up makes a late wake harmless.
 - Every post fills the slot its send time falls in: a post sent now fills the slot it
   was sent for, and a Buffer schedule holds its own slot (a 22:07 reel holds 22:07,
   not the day's first). With 2-hour slots the windows overlap, so a missed slot is
   dropped once the next one is served, never caught up later and later.
 - The 90-minute gap is measured between send times: a Buffer schedule counts at the
   minute Buffer sends it, not the minute it was queued.
+
+### Reliable wakes (no manual kick)
+
+On 28 Sep, GitHub ran the `*/15` schedule once in 8 hours. The cron now sits off the top of the
+hour, and the catch-up covers a missed window. For wakes that don't depend on GitHub's
+scheduler, an external pinger can wake the publisher in either of two ways. Both run exactly
+like a schedule wake:
+
+- `PUBLISHER_CRON` decides between live and dry-run.
+- The cheap `mill due` gate runs first, so an idle wake stops before ffmpeg is installed.
+- When something is due, the same rules apply: slots, the 6 h catch-up, the 90-minute gap
+  and the caps.
+
+**The pinger in use (Carlos's box, since 2026-09-30).**
+- **Schedule:** a box cron fires at :11, :26, :41 and :56. That is off GitHub's own :04/:19/:34/:49,
+  so the two never stack.
+- **Guard:** it dispatches only when the latest publisher run is more than 20 minutes old and the
+  time is inside the cron's UTC window (13:00–05:59).
+- **Call:** `workflow_dispatch` on `publisher.yml` with inputs `live=true`, `ignore_slots=false`,
+  `network=""` and **`tick=true`**.
+- **Token:** an Actions-only fine-grained PAT (Actions: read and write) is enough.
+- **Without `tick=true`:** a dispatch is a manual run. It skips the gate and always installs
+  ffmpeg and runs `mill post`, about 2 billed minutes a ping.
+- **With `tick=true`:** the dispatch's other inputs are ignored, exactly as for the cron.
+
+**Alternative:** a `repository_dispatch` of type `publisher-tick`, for example from
+[cron-job.org](https://cron-job.org):
+- `POST https://api.github.com/repos/everfields/antisearch-automation/dispatches`
+- headers `Accept: application/vnd.github+json` and `Authorization: Bearer <token>`
+- body `{"event_type":"publisher-tick"}`
+- `<token>` needs **Contents: read and write**; GitHub requires that permission for this
+  endpoint.
+
+**Minutes.** The repo is private, so every wake is billed as at least 1 Actions minute, even
+when nothing is due.
+- An idle scheduled wake runs about 11–15 s: setup, pip install and the post-log clone, then
+  `mill due` in about 1 s. That rounds up to 1 billed minute.
+- A wake every 15 minutes over the 17-hour window is at most about 2,000 minutes a month, the
+  whole Free plan. The 20-minute guard and GitHub's own wakes keep it lower.
+- The catch-up makes a late wake harmless.
 
 **`PUBLISHER_CADENCE` picks the preset. Carlos's 5-everywhere is the default;
 `soul` is Soul's numbers. `reach` is Instagram 10:07 12:07 14:07 16:07 18:07 20:07

@@ -299,10 +299,27 @@ def test_publisher_cron_is_every_15_min_and_passes_the_ramp_variable():
     text = (ROOT / ".github" / "workflows" / "publisher.yml").read_text(encoding="utf-8")
     assert 'cron: "4,19,34,49 0-5,13-23 * * *"' in text  # off the top of the hour
     assert "types: [publisher-tick]" in text  # an external pinger wakes it like the cron
-    assert "github.event_name != 'workflow_dispatch' && vars.PUBLISHER_CRON == 'live'" in text
-    assert '[ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$LIVE" != "true" ]' in text  # ticks run `mill due`
+    assert "(github.event_name != 'workflow_dispatch' || inputs.tick) && vars.PUBLISHER_CRON == 'live'" in text
+    assert '[ "$MANUAL" = "true" ] || [ "$LIVE" != "true" ]' in text  # every wake runs `mill due` first
     assert "PUBLISHER_RAMP: ${{ vars.PUBLISHER_RAMP }}" in text
     assert 'cron: "7 0-5,13-23 * * *"' not in text
+
+
+def test_a_tick_dispatch_is_a_schedule_wake_and_a_manual_run_is_unchanged():
+    text = (ROOT / ".github" / "workflows" / "publisher.yml").read_text(encoding="utf-8")
+    tick = text.split("      tick:\n", 1)[1].split("\n  repository_dispatch:", 1)[0]
+    assert "type: boolean" in tick and "default: false" in tick
+    assert "MANUAL: ${{ github.event_name == 'workflow_dispatch' && !inputs.tick }}" in text
+    assert "github.event_name == 'workflow_dispatch' && !inputs.tick && inputs.live" in text  # manual live box
+    assert "IGNORE_SLOTS: ${{ github.event_name == 'workflow_dispatch' && !inputs.tick && inputs.ignore_slots }}" in text
+    assert "NETWORK: ${{ (github.event_name == 'workflow_dispatch' && !inputs.tick) && inputs.network || '' }}" in text
+    assert "if: (github.event_name == 'workflow_dispatch' && !inputs.tick) || vars.PUBLISHER_CRON" in text
+    steps = text.split("    steps:\n", 1)[1]
+    due, ffmpeg, post = steps.index("Anything due?"), steps.index("install -y --no-install-recommends ffmpeg"), \
+        steps.index("mill --out out post")
+    assert due < ffmpeg < post  # the gate runs before ffmpeg, so an idle tick never installs it
+    gated = steps[due:post].count("if: steps.due.outputs.go == 'true'")
+    assert gated == 2  # the ffmpeg install and the post both wait for the gate
 
 
 def test_soul_cadence_is_one_variable(ledger, log):
