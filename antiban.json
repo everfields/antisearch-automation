@@ -22,14 +22,16 @@
       "#hotelinparis #chevalblancparis #ai",
       "#hotelinbali #capellaubud #ai",
       "#beachineurope #spiaggiadeiconiglilampedusa #ai",
-      "#anhour #goldenhour #ai"
+      "#anhour #goldenhour #ai",
+      "#cityforaweekend #paris #ai"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
       "overrated\nfame",
       "search engine\nkagi",
       "programming language\npython",
-      "phone\niphone 17 pro max"
+      "phone\niphone 17 pro max",
+      "social network\ninstagram\n@instagram"
     ]
   },
   "clips": {
@@ -57,11 +59,13 @@
       "p-hotel-in-paris-e247042d",
       "p-hotel-in-bali-c5675de6",
       "p-beach-in-europe-c3257aa3",
-      "p-an-hour-369902e2"
+      "p-an-hour-369902e2",
+      "p-city-for-a-weekend-7ea6e031"
     ],
     "instagram_story": [
       "p-a-smell-story-0be5de42",
-      "p-hotel-in-paris-story-e4eee833"
+      "p-hotel-in-paris-story-e4eee833",
+      "p-city-for-a-weekend-story-2a1e3dec"
     ],
     "tiktok": [
       "s-red-flag-6b88b670",
@@ -88,7 +92,8 @@
       "p-search-engine-dcc52e49",
       "p-invention-589cef2d",
       "p-programming-language-100dbf80",
-      "p-phone-38ce3f1b"
+      "p-phone-38ce3f1b",
+      "p-social-network-67b80d6e"
     ]
   },
   "first_post": {
