@@ -160,3 +160,9 @@ p-a-habit,instagram,pending,p-a-habit-f6ef0656,daily exercise,,,,2026-10-01T18:4
 p-a-habit,instagram,published,p-a-habit-f6ef0656,daily exercise,6abeaad8ea8c2a50c92a1f05,buffer:6abeaad8ea8c2a50c92a1f05,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-01T18:41:44+00:00,a habit,#ahabit #dailyexercise #ai,video,,0-current-cover
 p-a-habit-story,instagram_story,pending,p-a-habit-story-3ef39c86,daily exercise,,,,2026-10-01T18:41:44+00:00,a habit,,video,,story
 p-a-habit-story,instagram_story,published,p-a-habit-story-3ef39c86,daily exercise,6abeab41ea8c2a50c92a2858,buffer:6abeab41ea8c2a50c92a2858,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-01T18:41:44+00:00,a habit,,video,,story
+p-a-memory,instagram,pending,p-a-memory-dfb5a9f0,a moment with someone you love,,,,2026-10-01T20:41:47+00:00,a memory,#amemory #amomentwithsomeoneyoulove #ai,video,,0-current-cover
+p-a-memory,instagram,published,p-a-memory-dfb5a9f0,a moment with someone you love,6abec5cf45400a0e30fa0b8e,https://www.instagram.com/reel/Dd9y1M5D-ou/,,2026-10-01T20:41:47+00:00,a memory,#amemory #amomentwithsomeoneyoulove #ai,video,,0-current-cover
+p-idea,x,pending,p-idea-2a74af2a,the scientific method,,,,2026-10-01T20:41:47+00:00,idea,"idea
+the scientific method",text,,
+p-idea,x,published,p-idea-2a74af2a,the scientific method,6abec5f6b435ee01190015a4,https://twitter.com/antisearch_ai/status/2105760558586712444,,2026-10-01T20:41:47+00:00,idea,"idea
+the scientific method",text,,
