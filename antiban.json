@@ -28,7 +28,8 @@
       "#aname #alexander #ai",
       "#asecret #asurpriseparty #ai",
       "#barinlondon #theconnaughtbar #ai",
-      "#cocktailbarinnewyork #superbueno #ai"
+      "#cocktailbarinnewyork #superbueno #ai",
+      "#ahabit #dailyexercise #ai"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -72,12 +73,14 @@
       "p-a-name-52c61fdb",
       "p-a-secret-c4d0a370",
       "p-bar-in-london-5ca03feb",
-      "p-cocktail-bar-in-new-york-9e93be85"
+      "p-cocktail-bar-in-new-york-9e93be85",
+      "p-a-habit-f6ef0656"
     ],
     "instagram_story": [
       "p-a-smell-story-0be5de42",
       "p-hotel-in-paris-story-e4eee833",
-      "p-city-for-a-weekend-story-2a1e3dec"
+      "p-city-for-a-weekend-story-2a1e3dec",
+      "p-a-habit-story-3ef39c86"
     ],
     "tiktok": [
       "s-red-flag-6b88b670",
