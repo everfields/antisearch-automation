@@ -1,28 +1,28 @@
-# Social metrics — 2026-10-01 10:18 UTC
+# Social metrics — 2026-10-01 18:28 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d n/a (no snapshot that old yet))
-- account likes: 19, posts: 19
+- account likes: 21, posts: 20
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hair oil` → kérastase elixir ultime l’huile originale | 185 | 0 | 0 | 0 | 0 | 0.0% |
-| `conditioner` → oribe gold lust repair & restore conditioner | 132 | 0 | 0 | 0 | 0 | 0.0% |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 98 | 1 | 0 | 0 | 0 | 1.0% |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 393 | 3 | 0 | 0 | 1 | 1.0% |
+| `conditioner` → oribe gold lust repair & restore conditioner | 248 | 0 | 0 | 0 | 0 | 0.0% |
+| `hair mask` → k18 leave-in molecular repair hair mask | 25 | 0 | 0 | 0 | 0 | 0.0% |
 | `a question` → why? | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 1.0% | 98 |
-| `hair oil` → kérastase elixir ultime l’huile originale | 0.0% | 185 |
-| `conditioner` → oribe gold lust repair & restore conditioner | 0.0% | 132 |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 1.0% | 393 |
+| `conditioner` → oribe gold lust repair & restore conditioner | 0.0% | 248 |
+| `hair mask` → k18 leave-in molecular repair hair mask | 0.0% | 25 |
 
-### last 7d (25 post(s))
+### last 7d (30 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,24 +37,24 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `a promise` → a kept promise | 1.6% | 250 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 1.0% | 98 |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 1.0% | 393 |
 | `a gift` → a shared experience | 0.5% | 373 |
 
 ## instagram
 
 - followers: **–** (24h –, 7d –) — Instagram's public pages carry no counts when logged out
 
-### last 24h (6 post(s))
+### last 24h (5 post(s))
 
-**6 published post(s) have no numbers yet** (shown as –)
+**5 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `city for a weekend` → paris | – | – | – | – | – | – |
 | `museum in new york` → the metropolitan museum of art | – | – | – | – | – | – |
 | `a name` → alexander | – | – | – | – | – | – |
 | `a secret` → a surprise party | – | – | – | – | – | – |
 | `bar in london` → the connaught bar | – | – | – | – | – | – |
+| `cocktail bar in new york` → superbueno | – | – | – | – | – | – |
 
 ### last 7d (30 post(s))
 
@@ -92,25 +92,33 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `social network` → instagram | – | 0 | 0 | – | – | – |
-| `sin` → lust | – | 0 | 0 | – | – | – |
-
-### last 7d (9 post(s))
-
-| top by views | views | likes | comments | shares | saves | eng. rate |
-| --- | --- | --- | --- | --- | --- | --- |
-| `overrated` → fame | 14 | 0 | 0 | 0 | – | 0.0% |
-| `a feeling` → love | – | 0 | 0 | – | – | – |
-| `ai model` → claude opus 5.5 | – | 0 | 0 | – | – | – |
-| `search engine` → kagi | – | 0 | 0 | – | – | – |
-| `invention` → printing press | – | 0 | 0 | – | – | – |
+| `sin` → lust | 2 | 0 | 0 | 0 | – | 0.0% |
+| `browser` → brave | – | 0 | 0 | – | – | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `overrated` → fame | 0.0% | 14 |
+| `sin` → lust | 0.0% | 2 |
+
+### last 7d (10 post(s))
+
+| top by views | views | likes | comments | shares | saves | eng. rate |
+| --- | --- | --- | --- | --- | --- | --- |
+| `a feeling` → love | 27 | 0 | 0 | 0 | – | 0.0% |
+| `search engine` → kagi | 17 | 0 | 1 | 0 | – | 5.9% |
+| `ai model` → claude opus 5.5 | 16 | 0 | 1 | 0 | – | 6.2% |
+| `overrated` → fame | 16 | 0 | 0 | 0 | – | 0.0% |
+| `invention` → printing press | 7 | 0 | 0 | 0 | – | 0.0% |
+
+| top by engagement rate | eng. rate | views |
+| --- | --- | --- |
+| `ai model` → claude opus 5.5 | 6.2% | 16 |
+| `search engine` → kagi | 5.9% | 17 |
+| `a feeling` → love | 0.0% | 27 |
+| `invention` → printing press | 0.0% | 7 |
+| `programming language` → python | 0.0% | 4 |
 
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
-| video | 2 | – | 0.0 | 0.0 | – |
-| text | 7 | 14.0 | 0.0 | 0.0 | 0.0% |
+| video | 2 | 17.0 | 0.0 | 0.0 | 0.0% |
+| text | 8 | 8.6 | 0.0 | 0.2 | 1.7% |
 
