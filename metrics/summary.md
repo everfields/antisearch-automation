@@ -1,28 +1,30 @@
-# Social metrics — 2026-09-30 20:08 UTC
+# Social metrics — 2026-10-01 00:37 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d n/a (no snapshot that old yet))
-- account likes: 15, posts: 16
+- account likes: 19, posts: 18
 
-### last 24h (4 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `foundation` → armani luminous silk foundation | 298 | 1 | 0 | 0 | 0 | 0.3% |
-| `a promise` → a kept promise | 176 | 0 | 0 | 0 | 0 | 0.0% |
-| `hair oil` → kérastase elixir ultime l’huile originale | 89 | 0 | 0 | 0 | 0 | 0.0% |
+| `a promise` → a kept promise | 230 | 4 | 0 | 0 | 0 | 1.7% |
+| `hair oil` → kérastase elixir ultime l’huile originale | 122 | 0 | 0 | 0 | 0 | 0.0% |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 27 | 0 | 0 | 0 | 0 | 0.0% |
+| `conditioner` → oribe gold lust repair & restore conditioner | 1 | 0 | 0 | 0 | 0 | 0.0% |
 | `concealer` → haus labs triclone skin tech concealer | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `foundation` → armani luminous silk foundation | 0.3% | 298 |
-| `a promise` → a kept promise | 0.0% | 176 |
-| `hair oil` → kérastase elixir ultime l’huile originale | 0.0% | 89 |
+| `a promise` → a kept promise | 1.7% | 230 |
+| `hair oil` → kérastase elixir ultime l’huile originale | 0.0% | 122 |
+| `conditioner` → oribe gold lust repair & restore conditioner | 0.0% | 1 |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 0.0% | 27 |
 
-### last 7d (22 post(s))
+### last 7d (24 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -34,31 +36,31 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `a promise` → a kept promise | 1.7% | 230 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
 | `a gift` → a shared experience | 0.5% | 373 |
-| `sunscreen` → la roche-posay uvmune 400 invisible fluid spf50+ | 0.4% | 268 |
 | `sunscreen` → la roche-posay uvmune 400 invisible fluid spf50+ | 0.4% | 268 |
 
 ## instagram
 
 - followers: **–** (24h –, 7d –) — Instagram's public pages carry no counts when logged out
 
-### last 24h (5 post(s))
+### last 24h (6 post(s))
 
-**5 published post(s) have no numbers yet** (shown as –)
+**6 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hotel in bali` → capella ubud | – | – | – | – | – | – |
 | `beach in europe` → spiaggia dei conigli, lampedusa | – | – | – | – | – | – |
 | `an hour` → golden hour | – | – | – | – | – | – |
 | `city for a weekend` → paris | – | – | – | – | – | – |
 | `museum in new york` → the metropolitan museum of art | – | – | – | – | – | – |
+| `a name` → alexander | – | – | – | – | – | – |
 
-### last 7d (26 post(s))
+### last 7d (28 post(s))
 
-**20 published post(s) have no numbers yet** (shown as –)
+**22 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -82,7 +84,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | 1-short-score | 1 | – | – | – | – | – |
 | 2-medium-monolith | 1 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0% |
 | 3-computation | 4 | 10.3 | 0.0 | 0.0 | 0.0 | 0.0% |
-| 0-current-cover | 7 | – | – | – | – | – |
+| 0-current-cover | 9 | – | – | – | – | – |
 
 ## x
 
@@ -92,29 +94,25 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `phone` → iphone 17 pro max | – | 0 | 0 | – | – | – |
 | `social network` → instagram | – | 0 | 0 | – | – | – |
+| `sin` → lust | – | 0 | 0 | – | – | – |
 
-### last 7d (8 post(s))
+### last 7d (9 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a feeling` → love | 26 | 0 | 0 | 0 | – | 0.0% |
-| `ai model` → claude opus 5.5 | 15 | 0 | 0 | 0 | – | 0.0% |
-| `search engine` → kagi | 14 | 0 | 0 | 0 | – | 0.0% |
 | `overrated` → fame | 14 | 0 | 0 | 0 | – | 0.0% |
-| `invention` → printing press | 4 | 0 | 0 | 0 | – | 0.0% |
+| `a feeling` → love | – | 0 | 0 | – | – | – |
+| `ai model` → claude opus 5.5 | – | 0 | 0 | – | – | – |
+| `search engine` → kagi | – | 0 | 0 | – | – | – |
+| `invention` → printing press | – | 0 | 0 | – | – | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `a feeling` → love | 0.0% | 26 |
-| `ai model` → claude opus 5.5 | 0.0% | 15 |
-| `search engine` → kagi | 0.0% | 14 |
-| `invention` → printing press | 0.0% | 4 |
 | `overrated` → fame | 0.0% | 14 |
 
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
-| video | 2 | 15.0 | 0.0 | 0.0 | 0.0% |
-| text | 6 | 14.3 | 0.0 | 0.0 | 0.0% |
+| video | 2 | – | 0.0 | 0.0 | – |
+| text | 7 | 14.0 | 0.0 | 0.0 | 0.0% |
 
