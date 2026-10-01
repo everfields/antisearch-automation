@@ -1,30 +1,28 @@
-# Social metrics — 2026-10-01 00:37 UTC
+# Social metrics — 2026-10-01 10:18 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d n/a (no snapshot that old yet))
-- account likes: 19, posts: 18
+- account likes: 19, posts: 19
 
-### last 24h (5 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a promise` → a kept promise | 230 | 4 | 0 | 0 | 0 | 1.7% |
-| `hair oil` → kérastase elixir ultime l’huile originale | 122 | 0 | 0 | 0 | 0 | 0.0% |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 27 | 0 | 0 | 0 | 0 | 0.0% |
-| `conditioner` → oribe gold lust repair & restore conditioner | 1 | 0 | 0 | 0 | 0 | 0.0% |
-| `concealer` → haus labs triclone skin tech concealer | 0 | 0 | 0 | 0 | 0 | – |
+| `hair oil` → kérastase elixir ultime l’huile originale | 185 | 0 | 0 | 0 | 0 | 0.0% |
+| `conditioner` → oribe gold lust repair & restore conditioner | 132 | 0 | 0 | 0 | 0 | 0.0% |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 98 | 1 | 0 | 0 | 0 | 1.0% |
+| `a question` → why? | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `a promise` → a kept promise | 1.7% | 230 |
-| `hair oil` → kérastase elixir ultime l’huile originale | 0.0% | 122 |
-| `conditioner` → oribe gold lust repair & restore conditioner | 0.0% | 1 |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 0.0% | 27 |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 1.0% | 98 |
+| `hair oil` → kérastase elixir ultime l’huile originale | 0.0% | 185 |
+| `conditioner` → oribe gold lust repair & restore conditioner | 0.0% | 132 |
 
-### last 7d (24 post(s))
+### last 7d (25 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -36,11 +34,11 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `a promise` → a kept promise | 1.7% | 230 |
+| `a promise` → a kept promise | 1.6% | 250 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 1.0% | 98 |
 | `a gift` → a shared experience | 0.5% | 373 |
-| `sunscreen` → la roche-posay uvmune 400 invisible fluid spf50+ | 0.4% | 268 |
 
 ## instagram
 
@@ -52,15 +50,15 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `beach in europe` → spiaggia dei conigli, lampedusa | – | – | – | – | – | – |
-| `an hour` → golden hour | – | – | – | – | – | – |
 | `city for a weekend` → paris | – | – | – | – | – | – |
 | `museum in new york` → the metropolitan museum of art | – | – | – | – | – | – |
 | `a name` → alexander | – | – | – | – | – | – |
+| `a secret` → a surprise party | – | – | – | – | – | – |
+| `bar in london` → the connaught bar | – | – | – | – | – | – |
 
-### last 7d (28 post(s))
+### last 7d (30 post(s))
 
-**22 published post(s) have no numbers yet** (shown as –)
+**24 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -84,7 +82,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | 1-short-score | 1 | – | – | – | – | – |
 | 2-medium-monolith | 1 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0% |
 | 3-computation | 4 | 10.3 | 0.0 | 0.0 | 0.0 | 0.0% |
-| 0-current-cover | 9 | – | – | – | – | – |
+| 0-current-cover | 11 | – | – | – | – | – |
 
 ## x
 
