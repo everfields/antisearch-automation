@@ -1,28 +1,27 @@
-# Social metrics — 2026-10-01 18:28 UTC
+# Social metrics — 2026-10-02 00:56 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d n/a (no snapshot that old yet))
-- account likes: 21, posts: 20
+- account likes: 21, posts: 22
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 393 | 3 | 0 | 0 | 1 | 1.0% |
-| `conditioner` → oribe gold lust repair & restore conditioner | 248 | 0 | 0 | 0 | 0 | 0.0% |
-| `hair mask` → k18 leave-in molecular repair hair mask | 25 | 0 | 0 | 0 | 0 | 0.0% |
+| `hair dryer` → dyson supersonic r | 93 | 0 | 0 | 0 | 0 | 0.0% |
+| `hair mask` → k18 leave-in molecular repair hair mask | 85 | 0 | 0 | 0 | 0 | 0.0% |
 | `a question` → why? | 0 | 0 | 0 | 0 | 0 | – |
+| `hair straightener` → ghd chronos | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 1.0% | 393 |
-| `conditioner` → oribe gold lust repair & restore conditioner | 0.0% | 248 |
-| `hair mask` → k18 leave-in molecular repair hair mask | 0.0% | 25 |
+| `hair mask` → k18 leave-in molecular repair hair mask | 0.0% | 85 |
+| `hair dryer` → dyson supersonic r | 0.0% | 93 |
 
-### last 7d (30 post(s))
+### last 7d (32 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,7 +36,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `a promise` → a kept promise | 1.6% | 250 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 1.0% | 393 |
+| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 0.8% | 521 |
 | `a gift` → a shared experience | 0.5% | 373 |
 
 ## instagram
@@ -50,15 +49,15 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `museum in new york` → the metropolitan museum of art | – | – | – | – | – | – |
-| `a name` → alexander | – | – | – | – | – | – |
-| `a secret` → a surprise party | – | – | – | – | – | – |
-| `bar in london` → the connaught bar | – | – | – | – | – | – |
 | `cocktail bar in new york` → superbueno | – | – | – | – | – | – |
+| `a habit` → daily exercise | – | – | – | – | – | – |
+| `a memory` → a moment with someone you love | – | – | – | – | – | – |
+| `rooftop in barcelona` → skybar at grand hotel central | – | – | – | – | – | – |
+| `pizza in naples` → 10 diego vitagliano pizzeria | – | – | – | – | – | – |
 
-### last 7d (30 post(s))
+### last 7d (34 post(s))
 
-**24 published post(s) have no numbers yet** (shown as –)
+**28 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -82,7 +81,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | 1-short-score | 1 | – | – | – | – | – |
 | 2-medium-monolith | 1 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0% |
 | 3-computation | 4 | 10.3 | 0.0 | 0.0 | 0.0 | 0.0% |
-| 0-current-cover | 11 | – | – | – | – | – |
+| 0-current-cover | 15 | – | – | – | – | – |
 
 ## x
 
@@ -92,33 +91,25 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `sin` → lust | 2 | 0 | 0 | 0 | – | 0.0% |
 | `browser` → brave | – | 0 | 0 | – | – | – |
+| `idea` → the scientific method | – | 0 | 0 | – | – | – |
 
-| top by engagement rate | eng. rate | views |
-| --- | --- | --- |
-| `sin` → lust | 0.0% | 2 |
-
-### last 7d (10 post(s))
+### last 7d (11 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a feeling` → love | 27 | 0 | 0 | 0 | – | 0.0% |
-| `search engine` → kagi | 17 | 0 | 1 | 0 | – | 5.9% |
-| `ai model` → claude opus 5.5 | 16 | 0 | 1 | 0 | – | 6.2% |
 | `overrated` → fame | 16 | 0 | 0 | 0 | – | 0.0% |
-| `invention` → printing press | 7 | 0 | 0 | 0 | – | 0.0% |
+| `a feeling` → love | – | 0 | 0 | – | – | – |
+| `ai model` → claude opus 5.5 | – | 0 | 1 | – | – | – |
+| `search engine` → kagi | – | 0 | 1 | – | – | – |
+| `invention` → printing press | – | 0 | 0 | – | – | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `ai model` → claude opus 5.5 | 6.2% | 16 |
-| `search engine` → kagi | 5.9% | 17 |
-| `a feeling` → love | 0.0% | 27 |
-| `invention` → printing press | 0.0% | 7 |
-| `programming language` → python | 0.0% | 4 |
+| `overrated` → fame | 0.0% | 16 |
 
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
-| video | 2 | 17.0 | 0.0 | 0.0 | 0.0% |
-| text | 8 | 8.6 | 0.0 | 0.2 | 1.7% |
+| video | 2 | – | 0.0 | 0.0 | – |
+| text | 9 | 16.0 | 0.0 | 0.2 | 0.0% |
 
