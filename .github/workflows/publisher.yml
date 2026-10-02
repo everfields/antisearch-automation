@@ -73,6 +73,7 @@ jobs:
       PUBLISHER_REPLY_CAP: ${{ vars.PUBLISHER_REPLY_CAP }}
       PUBLISHER_WATCH_BLUESKY: ${{ vars.PUBLISHER_WATCH_BLUESKY }}
       PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
+      PUBLISHER_CLIP_PAUSE: ${{ vars.PUBLISHER_CLIP_PAUSE }}
       PUBLISHER_CLIP_STYLE: ${{ vars.PUBLISHER_CLIP_STYLE }}
       PUBLISHER_CLIP_AUDIO: ${{ vars.PUBLISHER_CLIP_AUDIO }}
       PUBLISHER_CLIP_AUDIO_VARIANT: ${{ vars.PUBLISHER_CLIP_AUDIO_VARIANT }}
@@ -159,6 +160,10 @@ jobs:
 
       - if: steps.due.outputs.go == 'true'
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter
+
+      - name: Playwright Chromium (calc pause only)
+        if: steps.due.outputs.go == 'true' && vars.PUBLISHER_CLIP_PAUSE == 'calc'
+        run: python -m pip install playwright && python -m playwright install --with-deps chromium
 
       - name: Post (only a live run asks the real oracle; its verdict is frozen in state/verdicts.csv)
         if: steps.due.outputs.go == 'true'

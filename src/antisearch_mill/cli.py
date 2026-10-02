@@ -19,6 +19,7 @@ from .oracle import FixtureOracle, LiveOracle, OracleError
 from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound
 from .phone import FRAME_NONE, FRAME_PHONE, phone_spec
 from .produce import produce_all, sha256_file, validate_master
+from .calc_pause import clip_pause
 from .timeline import WAIT_BLINKS, WAIT_S, clip_style, clip_typing
 from .render import Layout, RenderError, contact_sheet, probe
 
@@ -66,6 +67,7 @@ def _clip_options(env=None) -> dict:
         "bed": clip_audio_bed(env),
         "keys": clip_keys_sound(env),
         "typing": clip_typing(env),
+        "pause_mode": clip_pause(env),
         "frame": FRAME_PHONE if phone else FRAME_NONE,
         "phone": phone,
     }
@@ -81,8 +83,9 @@ def _clip_label(opts: dict, env: dict[str, str] | None = None) -> str:
     fixed = opts["phone"] is not None or opts["audio"] in (AUDIO_HEARTBEAT, AUDIO_KEYS)
     wait = f"fixed:{WAIT_BLINKS}x{WAIT_S:.2f}s typing={opts['typing']}" if fixed else "latency"
     frame = opts["phone"].tag if opts["phone"] else "none"
+    pause = f" pause={opts['pause_mode']}" if opts.get("pause_mode") == "calc" else ""
     return (f"style={style} audio={_audio_label(opts['audio'], opts['audio_variant'], opts['bed'], opts['keys'])} "
-            f"frame={frame} wait={wait}")
+            f"frame={frame} wait={wait}{pause}")
 
 
 def cmd_produce(args, settings: Settings) -> int:

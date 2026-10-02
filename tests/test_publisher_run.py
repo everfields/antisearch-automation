@@ -319,7 +319,7 @@ def test_a_tick_dispatch_is_a_schedule_wake_and_a_manual_run_is_unchanged():
         steps.index("mill --out out post")
     assert due < ffmpeg < post  # the gate runs before ffmpeg, so an idle tick never installs it
     gated = steps[due:post].count("if: steps.due.outputs.go == 'true'")
-    assert gated == 2  # the ffmpeg install and the post both wait for the gate
+    assert gated == 3  # ffmpeg, optional Playwright (calc pause), and post all wait for the gate
 
 
 def test_soul_cadence_is_one_variable(ledger, log):

@@ -17,6 +17,7 @@ from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, AUDIO_PULSE, audio_tag as make_a
 from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound, pulse_for_platforms
 from .creatives import CREATIVES, STORY, finish, id_tag
 from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
+from .calc_pause import CALC_PAUSE, clip_pause
 from .timeline import (
     MAX_SECONDS, MIN_SECONDS, WAIT_BLINKS, build_timeline, clip_style, clip_typing, pause_for_style,
     pause_from_latency_ms, wait_frames,
@@ -47,6 +48,7 @@ def clip_id_for(
     fixed_wait: bool = False,
     typing: str = "",
     creative: str = "",
+    pause_mode: str = "",
 ) -> str:
     body = f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}"
     # Silent clips keep the historical hash. Pulse is part of the id only when it is actually muxed.
@@ -61,6 +63,8 @@ def clip_id_for(
         body += f"\0typing:{typing}"
     if id_tag(creative):
         body += f"\0creative:{id_tag(creative)}"
+    if pause_mode == CALC_PAUSE:
+        body += f"\0pause:{pause_mode}"
     digest = hashlib.sha256(body.encode()).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
@@ -110,6 +114,7 @@ def produce_one(
     keys: str | None = None,
     typing: str | None = None,
     creative: str | None = None,
+    pause_mode: str | None = None,
 ) -> ProduceResult:
     """`frame="phone"` draws `phone` (or the env's scale and background) and implies the `app` screen.
 
@@ -146,6 +151,7 @@ def produce_one(
     with_bed = clip_audio_bed() if bed is None else bed
     keys = clip_keys_sound() if keys is None else keys
     typing = clip_typing() if typing is None else typing
+    pause_mode = clip_pause() if pause_mode is None else pause_mode
     frame = clip_frame() if frame is None else frame
     if frame == FRAME_PHONE:
         phone = phone or PhoneSpec(scale=phone_scale(), background=phone_background())
@@ -166,7 +172,7 @@ def produce_one(
     rhythm = typing if fixed and style == "app" else "legacy"
     clip_id = clip_id_for(
         job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag, fixed_wait=fixed, typing=rhythm,
-        creative=creative,
+        creative=creative, pause_mode=pause_mode,
     )
     style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
@@ -204,6 +210,8 @@ def produce_one(
                 bed=with_bed,
                 phone=phone,
                 keys=keys if use_audio and mode == AUDIO_KEYS else None,
+                pause=pause_mode,
+                category=verdict.category,
             )
             try:
                 cover = finish(creative, classic, timeline, clip_path, category=verdict.category,
@@ -267,6 +275,7 @@ def produce_one(
                     **({"audio": audio_tag} if use_audio else {}),
                     **({"frame": frame_tag} if frame_tag else {}),
                     **({"creative": creative} if creative else {}),
+                    **({"pause": pause_mode} if pause_mode == CALC_PAUSE else {}),
                     **(
                         {
                             "wait": "fixed",
@@ -317,6 +326,7 @@ def produce_all(
     phone: PhoneSpec | None = None,
     keys: str | None = None,
     typing: str | None = None,
+    pause_mode: str | None = None,
     layout: Layout | None = None,
     force: bool = False,
     limit: int | None = None,
@@ -330,6 +340,7 @@ def produce_all(
     with_bed = clip_audio_bed() if bed is None else bed
     keys = clip_keys_sound() if keys is None else keys
     typing = clip_typing() if typing is None else typing
+    pause_mode = clip_pause() if pause_mode is None else pause_mode
     frame = clip_frame() if frame is None else frame
     if frame == FRAME_PHONE and phone is None:
         phone = PhoneSpec(scale=phone_scale(), background=phone_background())
@@ -348,6 +359,7 @@ def produce_all(
             job, oracle, ledger, font_path=font_path, layout=lay,
             pause_s=pause_s, latency_recorded=latency_recorded, style=style,
             audio=mode, audio_variant=variant, bed=with_bed, frame=frame, phone=phone, keys=keys, typing=typing,
+            pause_mode=pause_mode,
         )
         results.append(result)
         if result.status == "produced":

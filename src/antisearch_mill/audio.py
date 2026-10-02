@@ -800,7 +800,14 @@ def _synthesize_chained_keys(timeline: Timeline, sound: str) -> tuple[list[float
     return left, right
 
 
-def synthesize_keys(timeline: Timeline, sound: str = "soft") -> tuple[list[float], list[float]]:
+def _calc_bed_sample(t: float) -> float:
+    """Very quiet low hum under the calc graphic (~−54 dBFS peak)."""
+    return 0.00006 * math.sin(2 * math.pi * 48 * t) * (0.65 + 0.35 * math.sin(2 * math.pi * 0.55 * t))
+
+
+def synthesize_keys(
+    timeline: Timeline, sound: str = "soft", *, calc_bed: bool = False,
+) -> tuple[list[float], list[float]]:
     """Typing and Enter only. Exact zeros from the first wait frame to the end.
 
     Chained (saga) timelines click on every screen's typing instead; see `_synthesize_chained_keys`.
@@ -810,7 +817,7 @@ def synthesize_keys(timeline: Timeline, sound: str = "soft") -> tuple[list[float
     if len(timeline.submit_frames) > 1:
         return _synthesize_chained_keys(timeline, sound)
     if sound in SCREEN_VOICES:
-        return _synthesize_screen_keys(timeline, sound)
+        return _synthesize_screen_keys(timeline, sound, calc_bed=calc_bed)
     voice = KEY_VOICES[sound]
     fps = timeline.fps
     n = int(math.ceil(timeline.total_frames / fps * SR))
@@ -831,16 +838,29 @@ def synthesize_keys(timeline: Timeline, sound: str = "soft") -> tuple[list[float
         left, right, at(timeline.submit_frame), soft_key(enter_rng, voice, enter=True),
         10 ** (ENTER_PEAK_DB / 20.0), 0.02,
     )
+    calc = next((s for s in timeline.states if s.kind == "calc"), None)
     loading = next(s for s in timeline.states if s.kind == "loading")
-    for i in range(min(n, at(loading.start)), n):
+    wait_start = min(n, at(loading.start))
+    wait_end = min(n, at(loading.end))
+    bed_start = min(n, at(calc.start)) if calc_bed and calc else wait_end
+    bed_end = min(n, at(calc.end)) if calc_bed and calc else wait_end
+    for i in range(wait_start, wait_end):
+        if calc_bed and bed_start <= i < bed_end:
+            v = _calc_bed_sample((i - bed_start) / SR)
+            left[i] = v
+            right[i] = v * 0.97
+        else:
+            left[i] = 0.0
+            right[i] = 0.0
+    for i in range(wait_end, n):
         left[i] = 0.0
         right[i] = 0.0
     return left, right
 
 
-def write_keys_wav(timeline: Timeline, dest: Path, sound: str = "soft") -> None:
+def write_keys_wav(timeline: Timeline, dest: Path, sound: str = "soft", *, calc_bed: bool = False) -> None:
     """44.1 kHz stereo, at the absolute key levels above. No normalization: each key is already set."""
-    left, right = synthesize_keys(timeline, sound)
+    left, right = synthesize_keys(timeline, sound, calc_bed=calc_bed)
     _write_wav(dest, left, right)
 
 
@@ -913,7 +933,9 @@ def screen_key(rng: random.Random, voice: ScreenVoice, *, enter: bool = False) -
     return [v / peak for v in sig] if peak > 0 else sig
 
 
-def _synthesize_screen_keys(timeline: Timeline, sound: str) -> tuple[list[float], list[float]]:
+def _synthesize_screen_keys(
+    timeline: Timeline, sound: str, *, calc_bed: bool = False,
+) -> tuple[list[float], list[float]]:
     voice = SCREEN_VOICES[sound]
     fps = timeline.fps
     n = int(math.ceil(timeline.total_frames / fps * SR))
@@ -932,7 +954,17 @@ def _synthesize_screen_keys(timeline: Timeline, sound: str) -> tuple[list[float]
     _mix_into(left, right, at(timeline.submit_frame), screen_key(enter_rng, voice, enter=True),
               10 ** ((ENTER_PEAK_DB + SCREEN_LEVEL_OFFSET_DB) / 20.0))
     loading = next(s for s in timeline.states if s.kind == "loading")
-    for i in range(min(n, at(loading.start)), n):
+    wait_start = min(n, at(loading.start))
+    wait_end = min(n, at(loading.end))
+    for i in range(wait_start, wait_end):
+        if calc_bed:
+            v = _calc_bed_sample((i - wait_start) / SR)
+            left[i] = v
+            right[i] = v * 0.97
+        else:
+            left[i] = 0.0
+            right[i] = 0.0
+    for i in range(wait_end, n):
         left[i] = 0.0
         right[i] = 0.0
     return left, right
