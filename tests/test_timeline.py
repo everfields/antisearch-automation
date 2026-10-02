@@ -101,6 +101,8 @@ def test_clip_style_defaults_to_word_and_rejects_anything_else(monkeypatch):
     assert clip_style() == "word"
     monkeypatch.setenv("PUBLISHER_CLIP_STYLE", "App")
     assert clip_style() == "app"
+    monkeypatch.setenv("PUBLISHER_CLIP_STYLE", "saga")
+    assert clip_style() == "saga"
     monkeypatch.setenv("PUBLISHER_CLIP_STYLE", "ios")
     with pytest.raises(ValueError):
         clip_style()

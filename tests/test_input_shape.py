@@ -20,6 +20,8 @@ ASKING = re.compile(r"^(what|which|who|recommend|give me|find me)\b", re.I)
 DOC_OFFENDER = re.compile(r"""[`"'](the\s+)?(best|top|greatest)\s+[^\W\d_]""", re.I)
 
 QUEUES = sorted((ROOT / "queue").glob("*.csv"))
+SAGA_QUEUES = [q for q in QUEUES if "saga" in q.stem]
+REGULAR_QUEUES = [q for q in QUEUES if "saga" not in q.stem]
 MANUAL = sorted((ROOT / "queue" / "manual").glob("*.csv"))
 POOLS = sorted((ROOT / "queue" / "pools").glob("*.txt")) + sorted((ROOT / "queue" / "winners").glob("*.txt"))
 FIXTURES = sorted((ROOT / "fixtures").glob("*.json"))
@@ -109,9 +111,21 @@ def test_queue_files_exist_and_sample_starts_with_thing():
     assert read_queue(ROOT / "queue" / "sample_queue.csv")[0].category == "thing"
 
 
-@pytest.mark.parametrize("queue", QUEUES + MANUAL, ids=lambda p: p.name)
+@pytest.mark.parametrize("queue", REGULAR_QUEUES + MANUAL, ids=lambda p: p.name)
 def test_every_queue_row_is_a_bare_phrase(queue):
     bad = {j.id: (j.category, offences(j.category)) for j in read_queue(queue) if offences(j.category)}
+    assert bad == {}
+
+
+@pytest.mark.parametrize("queue", SAGA_QUEUES, ids=lambda p: p.name)
+def test_every_saga_input_is_a_bare_phrase(queue):
+    from antisearch_mill.saga import read_saga_queue
+
+    bad = {}
+    for job in read_saga_queue(queue):
+        for inp in job.inputs:
+            if offences(inp):
+                bad[f"{job.id}:{inp}"] = offences(inp)
     assert bad == {}
 
 
@@ -129,7 +143,11 @@ def test_every_queued_or_pooled_input_passes_the_publisher_guard():
     from antisearch_mill.publisher.guard import input_problem
     from antisearch_mill.publisher.pools import read_pool
 
-    inputs = [j.category for q in QUEUES for j in read_queue(q)] + [c for p in POOLS for c, _ in read_pool(p)]
+    from antisearch_mill.saga import read_saga_queue
+
+    inputs = [j.category for q in REGULAR_QUEUES for j in read_queue(q)]
+    inputs += [inp for q in SAGA_QUEUES for job in read_saga_queue(q) for inp in job.inputs]
+    inputs += [c for p in POOLS for c, _ in read_pool(p)]
     on = {"PUBLISHER_AI_INPUTS": "on"}  # AI-category inputs are queued again; they go out only with the switch
     bad = {c: input_problem(c, on) for c in inputs if input_problem(c, on)}
     assert bad == {}
@@ -138,8 +156,12 @@ def test_every_queued_or_pooled_input_passes_the_publisher_guard():
 def test_publisher_inputs_are_unique_across_queues_and_pools():
     from antisearch_mill.publisher.pools import read_pool
 
-    publisher_queues = [q for q in QUEUES if q.name != "sample_queue.csv"]
-    inputs = [j.category for q in publisher_queues for j in read_queue(q)] + [c for p in POOLS for c, _ in read_pool(p)]
+    from antisearch_mill.saga import read_saga_queue
+
+    publisher_queues = [q for q in REGULAR_QUEUES if q.name != "sample_queue.csv"]
+    inputs = [j.category for q in publisher_queues for j in read_queue(q)]
+    inputs += [inp for q in SAGA_QUEUES for job in read_saga_queue(q) for inp in job.inputs]
+    inputs += [c for p in POOLS for c, _ in read_pool(p)]
     assert sorted(c for c in set(inputs) if inputs.count(c) > 1) == []
 
 

@@ -70,7 +70,11 @@ APP_KEYBOARD_CSS_H = 182
 APP_KEYBOARD_FRAC = APP_KEYBOARD_CSS_H / 640
 
 DEFAULT_CLIP_STYLE = "word"
-CLIP_STYLES = ("word", "app")
+CLIP_STYLES = ("word", "app", "saga")
+
+# Saga clips: 3–4 chained screens plus an antisearch.ai outro.
+SAGA_MIN_SECONDS = 8.0
+SAGA_MAX_SECONDS = 10.0
 
 # The product caret: CSS `blink 1.05s steps(1)`, 51% on.
 BLINK_PERIOD_S = 1.05
@@ -157,13 +161,13 @@ def _segment_k(seg: KeySegment, frame: int) -> float:
 
 
 def clip_style(env: Mapping[str, str] | None = None) -> str:
-    """`PUBLISHER_CLIP_STYLE`: `word` (default) or `app`. Blank means `word`."""
+    """`PUBLISHER_CLIP_STYLE`: `word` (default), `app`, or `saga`. Blank means `word`."""
     source = os.environ if env is None else env
     raw = (source.get("PUBLISHER_CLIP_STYLE") or "").strip().lower()
     if not raw:
         return DEFAULT_CLIP_STYLE
     if raw not in CLIP_STYLES:
-        raise ValueError(f"PUBLISHER_CLIP_STYLE={raw!r}; use word or app")
+        raise ValueError(f"PUBLISHER_CLIP_STYLE={raw!r}; use word, app, or saga")
     return raw
 
 
