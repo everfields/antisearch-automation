@@ -12,11 +12,14 @@ from antisearch_mill.ledger import Ledger, QueueError
 from antisearch_mill.oracle import FixtureOracle
 from antisearch_mill.saga import (
     OUTRO,
+    SAGA_BODY_FONT_CSS,
+    SAGA_VERDICT_S,
     build_saga_timeline,
     produce_saga_one,
     read_saga_queue,
     saga_enabled,
     saga_job_as_post_job,
+    saga_layout,
 )
 from antisearch_mill.timeline import SAGA_MAX_SECONDS, SAGA_MIN_SECONDS, clip_style
 from conftest import ROOT, requires_ffmpeg
@@ -90,6 +93,41 @@ def test_saga_timeline_duration_and_structure():
     assert kinds.count("loading") == 3
     for a, b in zip(tl.states, tl.states[1:]):
         assert a.end == b.start
+
+
+def test_saga_verdict_hold_is_at_least_one_point_two_seconds():
+    screens = [
+        ("taylor swift album", "folklore"),
+        ("taylor swift song", "all too well (10 minute version)"),
+        ("taylor swift era", "1989"),
+    ]
+    tl = build_saga_timeline(screens, fps=30)
+    verdicts = [s for s in tl.states if s.kind == "result" and s.text != OUTRO]
+    assert len(verdicts) == 3
+    for st in verdicts:
+        assert (st.end - st.start) / tl.fps >= SAGA_VERDICT_S - 0.05
+    outro = next(s for s in tl.states if s.text == OUTRO)
+    assert (outro.end - outro.start) / tl.fps == pytest.approx(1.5, abs=0.1)
+
+
+def test_saga_body_font_is_twice_the_default():
+    from antisearch_mill.render import Layout
+
+    lay = saga_layout()
+    assert lay.body_font_css == SAGA_BODY_FONT_CSS
+    assert lay.font_px == Layout().font_px * 2
+
+
+def test_saga_long_verdict_wraps_to_two_lines():
+    from antisearch_mill.fonts import metrics, resolve_font
+    from antisearch_mill.render import layout_frame
+
+    lay = saga_layout()
+    fm = metrics(resolve_font(), lay.font_px)
+    short = layout_frame("folklore", "result", False, fm, lay)
+    long = layout_frame("all too well (10 minute version)", "result", False, fm, lay)
+    assert len(short.lines) == 1
+    assert len(long.lines) == 2
 
 
 def test_saga_timeline_four_inputs():

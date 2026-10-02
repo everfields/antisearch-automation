@@ -74,7 +74,7 @@ CLIP_STYLES = ("word", "app", "saga")
 
 # Saga clips: 3–4 chained screens plus an antisearch.ai outro.
 SAGA_MIN_SECONDS = 8.0
-SAGA_MAX_SECONDS = 10.0
+SAGA_MAX_SECONDS = 11.0
 
 # The product caret: CSS `blink 1.05s steps(1)`, 51% on.
 BLINK_PERIOD_S = 1.05

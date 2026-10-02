@@ -37,13 +37,14 @@ _ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
 SAGA_INPUT_COLS = ("input1", "input2", "input3", "input4")
 OUTRO = "antisearch.ai"
 
-# Per-screen timing (seconds). Tuned so 3 inputs + outro ≈ 9s, 4 inputs + outro ≈ 10s.
+# Per-screen timing (seconds). 3 inputs + outro ≈ 10 s; 4 inputs may trim pause to stay ≤ 11 s.
 SAGA_LEAD_S = 0.18
 SAGA_HOLD_S = 0.12
 SAGA_PAUSE_S = 0.65
-SAGA_VERDICT_S = 0.45
-SAGA_OUTRO_S = 1.6
+SAGA_VERDICT_S = 1.2  # founder: every verdict readable at phone scale
+SAGA_OUTRO_S = 1.5
 SAGA_TYPING_CAP_S = 0.55
+SAGA_BODY_FONT_CSS = 36  # 2× the product's 18 px body for phone legibility
 
 
 @dataclass(frozen=True)
@@ -63,6 +64,12 @@ class SagaJob:
 
 def saga_enabled(env: dict[str, str] | None = None) -> bool:
     return clip_style(env) == "saga"
+
+
+def saga_layout(layout: Layout | None = None) -> Layout:
+    """Saga body text at 2× the default monolith size; footer unchanged."""
+    base = layout or Layout()
+    return Layout(width=base.width, height=base.height, fps=base.fps, body_font_css=SAGA_BODY_FONT_CSS)
 
 
 def read_saga_queue(path: str | Path) -> list[SagaJob]:
@@ -117,11 +124,11 @@ def read_saga_queue(path: str | Path) -> list[SagaJob]:
     return jobs
 
 
-def _segment_frames(category: str, verdict: str, fps: int) -> tuple[list[State], int]:
+def _segment_frames(category: str, verdict: str, fps: int, *, pause_s: float = SAGA_PAUSE_S) -> tuple[list[State], int]:
     """One input screen: typing, pause with caret, verdict."""
     lead = max(1, round(SAGA_LEAD_S * fps))
     hold = max(1, round(SAGA_HOLD_S * fps))
-    pause = max(1, round(SAGA_PAUSE_S * fps))
+    pause = max(1, round(pause_s * fps))
     result = max(1, round(SAGA_VERDICT_S * fps))
     intervals = char_intervals(category, fps, SAGA_TYPING_CAP_S)
     appear: list[int] = []
@@ -148,16 +155,13 @@ def _outro_frames(fps: int) -> tuple[list[State], int]:
     return [State(0, total, "result", OUTRO, False)], total
 
 
-def build_saga_timeline(screens: list[tuple[str, str]], *, fps: int = 30) -> Timeline:
-    """Chain input→verdict screens, then the antisearch.ai outro. 8–10 s total."""
-    if not screens:
-        raise ValueError("saga needs at least one screen")
+def _build_chained(screens: list[tuple[str, str]], fps: int, pause_s: float) -> tuple[list[State], int, int, int]:
     all_states: list[State] = []
     offset = 0
     submit_frame = 0
     verdict_frame = 0
     for category, verdict in screens:
-        seg_states, seg_len = _segment_frames(category, verdict, fps)
+        seg_states, seg_len = _segment_frames(category, verdict, fps, pause_s=pause_s)
         for st in seg_states:
             all_states.append(State(st.start + offset, st.end + offset, st.kind, st.text, st.cursor))
         submit_frame = offset + next(s.start for s in seg_states if s.kind == "loading")
@@ -167,12 +171,23 @@ def build_saga_timeline(screens: list[tuple[str, str]], *, fps: int = 30) -> Tim
     outro_states, outro_len = _outro_frames(fps)
     for st in outro_states:
         all_states.append(State(st.start + offset, st.end + offset, st.kind, st.text, st.cursor))
-    total = offset + outro_len
+    return all_states, offset + outro_len, submit_frame, verdict_frame
+
+
+def build_saga_timeline(screens: list[tuple[str, str]], *, fps: int = 30) -> Timeline:
+    """Chain input→verdict screens, then the antisearch.ai outro. 8–11 s total."""
+    if not screens:
+        raise ValueError("saga needs at least one screen")
+    pause_s = SAGA_PAUSE_S
+    all_states, total, submit_frame, verdict_frame = _build_chained(screens, fps, pause_s)
 
     min_f = round(SAGA_MIN_SECONDS * fps)
     max_f = round(SAGA_MAX_SECONDS * fps)
+    # Four-input sagas trim pause only; verdict hold stays at SAGA_VERDICT_S.
+    while total > max_f and pause_s > 0.25:
+        pause_s = max(0.25, pause_s - 0.05)
+        all_states, total, submit_frame, verdict_frame = _build_chained(screens, fps, pause_s)
     if total < min_f:
-        # Pad the outro to reach the minimum.
         pad = min_f - total
         all_states[-1] = State(all_states[-1].start, all_states[-1].end + pad, "result", OUTRO, False)
         total = min_f
@@ -251,8 +266,9 @@ def produce_saga_one(
     oracle_source = "live" if all(s == "live" for s in sources) else sources[0]
     composite_verdict = " / ".join(v for _, v in screens)
 
+    lay = saga_layout(layout)
     try:
-        timeline = build_saga_timeline(screens, fps=layout.fps)
+        timeline = build_saga_timeline(screens, fps=lay.fps)
         comment = (
             f"capture={CAPTURE_TAG};oracle={oracle_source};category={job.family};"
             f"format=saga;screens={len(screens)}"
@@ -264,7 +280,7 @@ def produce_saga_one(
             timeline,
             clip_path,
             font_path=font_path,
-            layout=layout,
+            layout=lay,
             metadata=meta,
             pulse=variant if use_audio and mode == AUDIO_PULSE else None,
             heartbeat=use_audio and mode == AUDIO_HEARTBEAT,
@@ -272,7 +288,7 @@ def produce_saga_one(
             keys=keys if use_audio and mode == AUDIO_KEYS else None,
         )
         info = probe(clip_path)
-        problems = validate_saga_master(info, layout)
+        problems = validate_saga_master(info, lay)
         if problems:
             raise RenderError("; ".join(problems))
         extract_poster(clip_path, poster_path, timeline.duration_s - 0.25)
