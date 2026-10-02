@@ -1,27 +1,29 @@
-# Social metrics — 2026-10-02 00:56 UTC
+# Social metrics — 2026-10-02 09:55 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d n/a (no snapshot that old yet))
-- account likes: 21, posts: 22
+- account likes: 22, posts: 23
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hair dryer` → dyson supersonic r | 93 | 0 | 0 | 0 | 0 | 0.0% |
-| `hair mask` → k18 leave-in molecular repair hair mask | 85 | 0 | 0 | 0 | 0 | 0.0% |
-| `a question` → why? | 0 | 0 | 0 | 0 | 0 | – |
-| `hair straightener` → ghd chronos | 0 | 0 | 0 | 0 | 0 | – |
+| `hair mask` → k18 leave-in molecular repair hair mask | 148 | 0 | 0 | 0 | 0 | 0.0% |
+| `hair dryer` → dyson supersonic r | 106 | 0 | 0 | 0 | 0 | 0.0% |
+| `hair straightener` → ghd chronos | 99 | 0 | 0 | 0 | 0 | 0.0% |
+| `a letter` → e | 70 | 1 | 0 | 0 | 0 | 1.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `hair mask` → k18 leave-in molecular repair hair mask | 0.0% | 85 |
-| `hair dryer` → dyson supersonic r | 0.0% | 93 |
+| `a letter` → e | 1.4% | 70 |
+| `hair mask` → k18 leave-in molecular repair hair mask | 0.0% | 148 |
+| `hair straightener` → ghd chronos | 0.0% | 99 |
+| `hair dryer` → dyson supersonic r | 0.0% | 106 |
 
-### last 7d (32 post(s))
+### last 7d (33 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -34,10 +36,10 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `a promise` → a kept promise | 1.6% | 250 |
+| `a letter` → e | 1.4% | 70 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
 | `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
 | `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 0.8% | 521 |
-| `a gift` → a shared experience | 0.5% | 373 |
 
 ## instagram
 
@@ -49,15 +51,15 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `cocktail bar in new york` → superbueno | – | – | – | – | – | – |
 | `a habit` → daily exercise | – | – | – | – | – | – |
 | `a memory` → a moment with someone you love | – | – | – | – | – | – |
 | `rooftop in barcelona` → skybar at grand hotel central | – | – | – | – | – | – |
 | `pizza in naples` → 10 diego vitagliano pizzeria | – | – | – | – | – | – |
+| `an answer` → the truth | – | – | – | – | – | – |
 
-### last 7d (34 post(s))
+### last 7d (35 post(s))
 
-**28 published post(s) have no numbers yet** (shown as –)
+**29 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -81,7 +83,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | 1-short-score | 1 | – | – | – | – | – |
 | 2-medium-monolith | 1 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0% |
 | 3-computation | 4 | 10.3 | 0.0 | 0.0 | 0.0 | 0.0% |
-| 0-current-cover | 15 | – | – | – | – | – |
+| 0-current-cover | 16 | – | – | – | – | – |
 
 ## x
 
