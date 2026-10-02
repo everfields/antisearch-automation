@@ -216,6 +216,14 @@ def cmd_post(args, settings: Settings) -> int:
     for net in pool_networks(pools_dir):
         jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY, env=env)
 
+    if saga_jobs:
+        from .saga import SAGA_NETWORK, alternate_saga, next_tiktok_format
+
+        last = log.last_job(SAGA_NETWORK)
+        jobs = alternate_saga(jobs, set(saga_jobs), last)
+        print(f"saga: alternating with single clips on {SAGA_NETWORK}; last={last or '-'} "
+              f"next={next_tiktok_format(set(saga_jobs), last)}")
+
     if args.oracle == "fixture":
         oracle = _oracle(args, settings)
     elif args.live:

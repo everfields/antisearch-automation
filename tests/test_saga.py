@@ -243,3 +243,62 @@ def test_saga_produce_with_keys_has_audio(tmp_path):
     ).stderr
     max_line = next(l for l in vol.splitlines() if "max_volume" in l)
     assert float(max_line.split("max_volume:")[1].split("dB")[0]) > -40.0
+
+
+def test_saga_style_keeps_single_clips_unchanged(monkeypatch):
+    """PUBLISHER_CLIP_STYLE=saga only adds saga rows: normal rows render exactly as with the default style."""
+    from antisearch_mill.cli import _clip_options
+
+    base = {"PUBLISHER_CLIP_AUDIO": "keys", "PUBLISHER_CLIP_KEYS_SOUND": "tap"}
+    assert _clip_options({**base, "PUBLISHER_CLIP_STYLE": "saga"}) == _clip_options(base)
+
+
+def test_single_and_saga_tiktok_queues_load_together():
+    from antisearch_mill.cli import _load_queues
+
+    env = {"PUBLISHER_CLIP_STYLE": "saga"}
+    q = " ".join(str(ROOT / "queue" / n) for n in ("bluesky_trial.csv", "tiktok_trial.csv",
+                                                   "tiktok_saga_trial.csv", "surprise_trial.csv"))
+    _, jobs, saga_jobs = _load_queues([q], env)
+    ids = [j.id for j in jobs]
+    assert "t-dry-shampoo" in ids and "t-dry-shampoo" not in saga_jobs
+    assert len(saga_jobs) == 7
+
+
+def _job(id_, net="tiktok"):
+    from antisearch_mill.ledger import Job
+
+    return Job(id=id_, category=id_, platforms=(net,), caption="@?", notes="")
+
+
+def test_saga_alternates_with_single_clips():
+    from antisearch_mill.saga import alternate_saga, next_tiktok_format
+
+    jobs = [_job("b-1", "bluesky"), _job("t-1"), _job("saga-a"), _job("saga-b"), _job("pool-t-2")]
+    sagas = {"saga-a", "saga-b"}
+    # Last TikTok post was a single clip (or nothing yet): saga goes first on TikTok.
+    assert next_tiktok_format(sagas, "t-0") == "saga"
+    assert next_tiktok_format(sagas, None) == "saga"
+    order = [j.id for j in alternate_saga(jobs, sagas, "t-0")]
+    assert order == ["b-1", "saga-a", "saga-b", "t-1", "pool-t-2"]
+    # Last TikTok post was a saga: the single clip goes first, sagas wait.
+    assert next_tiktok_format(sagas, "saga-a") == "single"
+    assert next_tiktok_format(sagas, "saga-retired-row") == "single"
+    order = [j.id for j in alternate_saga(jobs, sagas, "saga-a")]
+    assert order == ["b-1", "t-1", "pool-t-2", "saga-a", "saga-b"]
+    # No saga rows: untouched.
+    assert alternate_saga(jobs[:2], set(), None) == jobs[:2]
+
+
+def test_post_log_last_job_per_network(tmp_path):
+    from antisearch_mill.publisher.guard import PostLog, PostRow
+
+    log = PostLog(tmp_path / "posts.csv")
+    assert log.last_job("tiktok") is None
+    log.append(PostRow("t-1", "tiktok", "pending", at="2026-10-01T15:00:00+00:00"))
+    log.append(PostRow("t-1", "tiktok", "published", at="2026-10-01T15:01:00+00:00"))
+    log.append(PostRow("saga-a", "tiktok", "pending", at="2026-10-02T15:00:00+00:00"))
+    log.append(PostRow("saga-a", "tiktok", "published", at="2026-10-02T15:01:00+00:00"))
+    log.append(PostRow("b-1", "bluesky", "pending", at="2026-10-03T15:00:00+00:00"))
+    assert log.last_job("tiktok") == "saga-a"
+    assert log.last_job("bluesky") == "b-1"

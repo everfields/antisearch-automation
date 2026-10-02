@@ -381,3 +381,30 @@ def saga_job_as_post_job(job: SagaJob):
         caption=job.caption,
         notes=job.notes or "saga",
     )
+
+
+SAGA_NETWORK = "tiktok"
+SAGA_ID_PREFIX = "saga-"  # every saga queue id; a retired saga row still counts as saga
+
+
+def next_tiktok_format(saga_ids: set[str] | frozenset[str], last_job: str | None) -> str:
+    """Saga alternates with the single-verdict clip: the opposite of the latest TikTok post."""
+    was_saga = bool(last_job) and (last_job in saga_ids or last_job.startswith(SAGA_ID_PREFIX))
+    return "single" if was_saga else "saga"
+
+
+def alternate_saga(jobs: list, saga_ids: set[str] | frozenset[str], last_job: str | None) -> list:
+    """Order jobs so the next TikTok slot takes the other format from the last TikTok post.
+
+    Only the saga rows move: they go just ahead of the first single-verdict TikTok job when saga
+    is due, or after every other job when the single clip is due. Everything else keeps its
+    order, so when one format runs dry the other still fills the slot.
+    """
+    sagas = [j for j in jobs if j.id in saga_ids]
+    if not sagas:
+        return list(jobs)
+    rest = [j for j in jobs if j.id not in saga_ids]
+    if next_tiktok_format(saga_ids, last_job) == "single":
+        return rest + sagas
+    first = next((i for i, j in enumerate(rest) if SAGA_NETWORK in j.platforms), len(rest))
+    return rest[:first] + sagas + rest[first:]
