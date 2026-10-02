@@ -174,3 +174,72 @@ def test_saga_job_adapts_to_publisher_job():
     assert post.category == "taylor swift"
     assert post.platforms == ("tiktok",)
 
+
+
+@pytest.mark.parametrize("sound", ["tap", "soft"])
+def test_saga_keys_click_on_every_screen(sound):
+    """PUBLISHER_CLIP_AUDIO=keys: clicks track each screen's typing and Enter, verdicts stay silent."""
+    from antisearch_mill.audio import SR, synthesize_keys
+
+    screens = [
+        ("taylor swift album", "folklore"),
+        ("taylor swift song", "all too well"),
+        ("taylor swift era", "1989"),
+    ]
+    tl = build_saga_timeline(screens, fps=30)
+    assert len(tl.submit_frames) == 3
+    left, right = synthesize_keys(tl, sound)
+
+    def at(frame):
+        return int(round(frame / tl.fps * SR))
+
+    def loud(a, b):
+        return max((abs(v) for v in left[a:b]), default=0.0) > 1e-4
+
+    typing = [s for s in tl.states if s.kind == "typing" and s.text]
+    loadings = [s for s in tl.states if s.kind == "loading"]
+    # Typing on every screen is audible (a click lands on each new character).
+    for load in loadings:
+        screen_keys = [s for s in typing if s.end <= load.start and s.text == load.text[: len(s.text)]]
+        last = screen_keys[-1]
+        assert loud(at(last.start), at(last.start) + int(0.03 * SR))
+        # Enter on every screen.
+        assert loud(at(load.start), at(load.start) + int(0.03 * SR))
+    # Every verdict and the outro are exact zeros.
+    for s in tl.states:
+        if s.kind == "result":
+            seg = left[at(s.start):at(s.end)] + right[at(s.start):at(s.end)]
+            assert seg and all(v == 0.0 for v in seg)
+
+
+def test_saga_produce_with_keys_has_audio(tmp_path):
+    """End to end: PUBLISHER_CLIP_AUDIO=keys gives the saga clip an audible aac track and tags it."""
+    import subprocess
+
+    from antisearch_mill.fonts import resolve_font
+    from antisearch_mill.render import Layout
+
+    ledger = Ledger(tmp_path)
+    oracle = FixtureOracle({
+        "taylor swift album": "folklore",
+        "taylor swift song": "all too well",
+        "taylor swift era": "1989",
+    })
+    jobs = read_saga_queue(ROOT / "queue" / "tiktok_saga_trial.csv")
+    result = produce_saga_one(
+        jobs[0], oracle, ledger,
+        font_path=resolve_font(), layout=Layout(), audio="keys", keys="tap",
+    )
+    assert result.status == "produced"
+    row = ledger.clip_for_job("saga-taylor-swift")
+    meta = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format_tags=comment", "-of", "csv=p=0", row.clip_path],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    assert "audio=keys" in meta
+    vol = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-i", row.clip_path, "-af", "volumedetect", "-f", "null", "-"],
+        capture_output=True, text=True,
+    ).stderr
+    max_line = next(l for l in vol.splitlines() if "max_volume" in l)
+    assert float(max_line.split("max_volume:")[1].split("dB")[0]) > -40.0

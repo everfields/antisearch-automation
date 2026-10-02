@@ -155,23 +155,27 @@ def _outro_frames(fps: int) -> tuple[list[State], int]:
     return [State(0, total, "result", OUTRO, False)], total
 
 
-def _build_chained(screens: list[tuple[str, str]], fps: int, pause_s: float) -> tuple[list[State], int, int, int]:
+def _build_chained(
+    screens: list[tuple[str, str]], fps: int, pause_s: float
+) -> tuple[list[State], int, int, int, tuple[int, ...]]:
     all_states: list[State] = []
     offset = 0
     submit_frame = 0
     verdict_frame = 0
+    submits: list[int] = []
     for category, verdict in screens:
         seg_states, seg_len = _segment_frames(category, verdict, fps, pause_s=pause_s)
         for st in seg_states:
             all_states.append(State(st.start + offset, st.end + offset, st.kind, st.text, st.cursor))
         submit_frame = offset + next(s.start for s in seg_states if s.kind == "loading")
+        submits.append(submit_frame)
         verdict_frame = offset + next(s.start for s in seg_states if s.kind == "result")
         offset += seg_len
 
     outro_states, outro_len = _outro_frames(fps)
     for st in outro_states:
         all_states.append(State(st.start + offset, st.end + offset, st.kind, st.text, st.cursor))
-    return all_states, offset + outro_len, submit_frame, verdict_frame
+    return all_states, offset + outro_len, submit_frame, verdict_frame, tuple(submits)
 
 
 def build_saga_timeline(screens: list[tuple[str, str]], *, fps: int = 30) -> Timeline:
@@ -179,14 +183,14 @@ def build_saga_timeline(screens: list[tuple[str, str]], *, fps: int = 30) -> Tim
     if not screens:
         raise ValueError("saga needs at least one screen")
     pause_s = SAGA_PAUSE_S
-    all_states, total, submit_frame, verdict_frame = _build_chained(screens, fps, pause_s)
+    all_states, total, submit_frame, verdict_frame, submits = _build_chained(screens, fps, pause_s)
 
     min_f = round(SAGA_MIN_SECONDS * fps)
     max_f = round(SAGA_MAX_SECONDS * fps)
     # Four-input sagas trim pause only; verdict hold stays at SAGA_VERDICT_S.
     while total > max_f and pause_s > 0.25:
         pause_s = max(0.25, pause_s - 0.05)
-        all_states, total, submit_frame, verdict_frame = _build_chained(screens, fps, pause_s)
+        all_states, total, submit_frame, verdict_frame, submits = _build_chained(screens, fps, pause_s)
     if total < min_f:
         pad = min_f - total
         all_states[-1] = State(all_states[-1].start, all_states[-1].end + pad, "result", OUTRO, False)
@@ -202,6 +206,7 @@ def build_saga_timeline(screens: list[tuple[str, str]], *, fps: int = 30) -> Tim
         verdict_frame=verdict_frame,
         pause_s=SAGA_PAUSE_S,
         style="word",
+        submit_frames=submits,
     )
 
 

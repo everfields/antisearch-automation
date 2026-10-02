@@ -122,6 +122,9 @@ class Timeline:
     keyboard: tuple[KeySegment, ...] = ()
     exceeded_cap: bool = False
     fixed_wait: bool = False
+    # Chained (saga) clips: every Enter frame, one per input screen. Empty for single clips,
+    # which use `submit_frame` alone.
+    submit_frames: tuple[int, ...] = ()
 
     @property
     def duration_s(self) -> float:
