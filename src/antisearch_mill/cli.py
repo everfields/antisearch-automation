@@ -56,8 +56,11 @@ def _audio_label(audio: str, variant: str, bed: bool = False, keys: str = "tap")
 def _clip_options(env=None) -> dict:
     """Every PUBLISHER_CLIP_* flag, checked before anything renders. Raises ValueError."""
     phone = phone_spec(env)
+    style = clip_style(env)
+    if style == "saga":
+        style = "word"  # saga clips render via produce_saga_one; word is the fallback
     return {
-        "style": clip_style(env),
+        "style": style,
         "audio": clip_audio(env),
         "audio_variant": clip_audio_variant(env),
         "bed": clip_audio_bed(env),
@@ -68,7 +71,12 @@ def _clip_options(env=None) -> dict:
     }
 
 
-def _clip_label(opts: dict) -> str:
+def _clip_label(opts: dict, env: dict[str, str] | None = None) -> str:
+    from .saga import saga_enabled
+
+    if saga_enabled(env):
+        return (f"style=saga audio={_audio_label(opts['audio'], opts['audio_variant'], opts['bed'], opts['keys'])} "
+                f"screens=3-4+outro")
     style = "app" if opts["phone"] else opts["style"]
     fixed = opts["phone"] is not None or opts["audio"] in (AUDIO_HEARTBEAT, AUDIO_KEYS)
     wait = f"fixed:{WAIT_BLINKS}x{WAIT_S:.2f}s typing={opts['typing']}" if fixed else "latency"
@@ -91,8 +99,8 @@ def cmd_produce(args, settings: Settings) -> int:
         print(f"produce error: {exc}", file=sys.stderr)
         return 2
     print(f"produce: {len(jobs)} job(s) from {args.queue}, oracle={oracle.source} "
-          f"({getattr(oracle, 'url', '')}), capture={CAPTURE_TAG}, {_clip_label(opts)}"
-          + ("" if "wait=fixed" in _clip_label(opts) else f", pause={args.pause or 'oracle latency'}"))
+          f"({getattr(oracle, 'url', '')}), capture={CAPTURE_TAG}, {_clip_label(opts, os.environ)}"
+          + ("" if "wait=fixed" in _clip_label(opts, os.environ) else f", pause={args.pause or 'oracle latency'}"))
     try:
         results = produce_all(
             jobs, oracle, ledger,
@@ -139,16 +147,32 @@ def _publisher_state(args, settings: Settings, env: dict[str, str]):
     return PostLog(state), VerdictStore(state.with_name("verdicts.csv"))
 
 
-def _load_queues(raw_queues: list[str] | None) -> tuple[list[str], list]:
+def _is_saga_queue(path: str) -> bool:
+    return "saga" in Path(path).stem
+
+
+def _load_queues(raw_queues: list[str] | None, env: dict[str, str] | None = None) -> tuple[list[str], list, dict]:
+    from .saga import read_saga_queue, saga_enabled, saga_job_as_post_job
+
     queues = [q for raw in (raw_queues or [DEFAULT_POST_QUEUES]) for q in raw.replace(",", " ").split()]
-    jobs, seen = [], set()
+    jobs, seen, saga_jobs = [], set(), {}
     for q in queues:
-        for job in read_queue(q):
-            if job.id in seen:
-                raise QueueError(f"{q}: id {job.id!r} also appears in an earlier queue (ids key the post log)")
-            seen.add(job.id)
-            jobs.append(job)
-    return queues, jobs
+        if _is_saga_queue(q):
+            if not saga_enabled(env):
+                raise QueueError(f"{q}: saga queue needs PUBLISHER_CLIP_STYLE=saga")
+            for saga in read_saga_queue(q):
+                if saga.id in seen:
+                    raise QueueError(f"{q}: id {saga.id!r} also appears in an earlier queue")
+                seen.add(saga.id)
+                saga_jobs[saga.id] = saga
+                jobs.append(saga_job_as_post_job(saga))
+        else:
+            for job in read_queue(q):
+                if job.id in seen:
+                    raise QueueError(f"{q}: id {job.id!r} also appears in an earlier queue (ids key the post log)")
+                seen.add(job.id)
+                jobs.append(job)
+    return queues, jobs, saga_jobs
 
 
 def cmd_post(args, settings: Settings) -> int:
@@ -160,6 +184,7 @@ def cmd_post(args, settings: Settings) -> int:
     from .publisher.verdicts import DryRunOracle, FrozenOracle
     from .publisher.winners import load_handles, winner_cap, winner_jobs, winner_networks
     from .publisher.tags import DEFAULT_ALLOWLIST, load_allowlist
+    from .saga import produce_saga_one, saga_enabled
 
     env = dict(os.environ)
     try:
@@ -169,7 +194,7 @@ def cmd_post(args, settings: Settings) -> int:
         return 2
     ledger = Ledger(settings.out_dir)
     try:
-        queues, jobs = _load_queues(args.queue)
+        queues, jobs, saga_jobs = _load_queues(args.queue, env)
         adapters = resolve_adapters(env)
     except (QueueError, ValueError) as exc:
         print(f"queue error: {exc}", file=sys.stderr)
@@ -191,6 +216,14 @@ def cmd_post(args, settings: Settings) -> int:
     for net in pool_networks(pools_dir):
         jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY, env=env)
 
+    if saga_jobs:
+        from .saga import SAGA_NETWORK, alternate_saga, next_tiktok_format
+
+        last = log.last_job(SAGA_NETWORK)
+        jobs = alternate_saga(jobs, set(saga_jobs), last)
+        print(f"saga: alternating with single clips on {SAGA_NETWORK}; last={last or '-'} "
+              f"next={next_tiktok_format(set(saga_jobs), last)}")
+
     if args.oracle == "fixture":
         oracle = _oracle(args, settings)
     elif args.live:
@@ -198,16 +231,26 @@ def cmd_post(args, settings: Settings) -> int:
     else:
         oracle = DryRunOracle(store)
 
+    lay = Layout()
+
     def produce(job):
-        (result,) = produce_all(
-            [job], oracle, ledger, font=settings.font_path, force=True, **opts,
-        )
+        if saga_enabled(env) and job.id in saga_jobs:
+            result = produce_saga_one(
+                saga_jobs[job.id], oracle, ledger,
+                font_path=resolve_font(settings.font_path), layout=lay,
+                audio=opts["audio"], audio_variant=opts["audio_variant"],
+                bed=opts["bed"], keys=opts["keys"],
+            )
+        else:
+            (result,) = produce_all(
+                [job], oracle, ledger, font=settings.font_path, force=True, **opts,
+            )
         if result.status == "failed":
             raise RuntimeError(result.detail)
         return ledger.clip_for_job(job.id)
 
     now = now_et()
-    print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} {_clip_label(opts)} x-format=text "
+    print(f"post: mode={'LIVE' if args.live else 'dry-run'} oracle={oracle.source} {_clip_label(opts, env)} x-format=text "
           f"queue={' '.join(queues)} "
           f"pools={pools_dir} state={log.path} now={now:%Y-%m-%d %H:%M %Z} posting-day={posting_day(now)}")
     try:

@@ -539,6 +539,11 @@ class PostLog:
         return {r.get("category", "") for r in self.latest_by_job().values()
                 if r["status"] not in (FAILED, REOPENED)} - {""}
 
+    def last_job(self, network: str) -> str | None:
+        """The job of the latest post on `network` (sent or scheduled to go out), or None."""
+        sends = [(when, job) for job, (when, net, _) in self._sends().items() if net == network]
+        return max(sends)[1] if sends else None
+
     def lifetime(self, network: str) -> int:
         """Posts on `network` that went (or may have gone) out, ever; drives the unowned-word rhythm."""
         final: dict[str, dict[str, str]] = self.latest_by_job()

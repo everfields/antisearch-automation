@@ -1,0 +1,304 @@
+"""Saga clip: queue, timeline, and publisher wiring."""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+import pytest
+
+from antisearch_mill.ledger import Ledger, QueueError
+from antisearch_mill.oracle import FixtureOracle
+from antisearch_mill.saga import (
+    OUTRO,
+    SAGA_BODY_FONT_CSS,
+    SAGA_VERDICT_S,
+    build_saga_timeline,
+    produce_saga_one,
+    read_saga_queue,
+    saga_enabled,
+    saga_job_as_post_job,
+    saga_layout,
+)
+from antisearch_mill.timeline import SAGA_MAX_SECONDS, SAGA_MIN_SECONDS, clip_style
+from conftest import ROOT, requires_ffmpeg
+
+pytestmark = requires_ffmpeg
+
+
+def test_saga_queue_reads_trial_file():
+    jobs = read_saga_queue(ROOT / "queue" / "tiktok_saga_trial.csv")
+    assert len(jobs) == 7
+    swift = jobs[0]
+    assert swift.id == "saga-taylor-swift"
+    assert swift.family == "taylor swift"
+    assert swift.inputs == ("taylor swift album", "taylor swift song", "taylor swift era")
+    assert swift.platforms == ("tiktok",)
+    assert swift.caption == "@?"
+
+
+def test_saga_queue_rejects_superlative():
+    from tempfile import NamedTemporaryFile
+
+    body = (
+        "id,family,input1,input2,input3,input4,platforms,caption,notes\n"
+        "saga-bad,bad,best album,ok one,ok two,,tiktok,@?,test\n"
+    )
+    with NamedTemporaryFile("w", suffix=".csv", delete=False) as fh:
+        fh.write(body)
+        path = fh.name
+    with pytest.raises(QueueError, match="superlative"):
+        read_saga_queue(path)
+
+
+def test_saga_queue_needs_saga_flag_in_publisher(tmp_path, monkeypatch):
+    from antisearch_mill.cli import _load_queues
+
+    monkeypatch.delenv("PUBLISHER_CLIP_STYLE", raising=False)
+    with pytest.raises(QueueError, match="PUBLISHER_CLIP_STYLE=saga"):
+        _load_queues([str(ROOT / "queue" / "tiktok_saga_trial.csv")])
+
+
+def test_saga_queue_loads_with_flag(monkeypatch):
+    from antisearch_mill.cli import _load_queues
+
+    monkeypatch.setenv("PUBLISHER_CLIP_STYLE", "saga")
+    queues, jobs, saga_jobs = _load_queues([str(ROOT / "queue" / "tiktok_saga_trial.csv")], dict(os.environ))
+    assert len(jobs) == 7
+    assert len(saga_jobs) == 7
+    assert jobs[0].category == "taylor swift"
+    assert jobs[0].notes.startswith("saga trial")
+
+
+def test_clip_style_accepts_saga(monkeypatch):
+    monkeypatch.setenv("PUBLISHER_CLIP_STYLE", "saga")
+    assert clip_style() == "saga"
+    assert saga_enabled()
+
+
+def test_saga_timeline_duration_and_structure():
+    screens = [
+        ("taylor swift album", "folklore"),
+        ("taylor swift song", "all too well"),
+        ("taylor swift era", "1989"),
+    ]
+    tl = build_saga_timeline(screens, fps=30)
+    assert SAGA_MIN_SECONDS <= tl.duration_s <= SAGA_MAX_SECONDS
+    assert tl.states[0].start == 0
+    assert tl.states[-1].end == tl.total_frames
+    assert tl.states[-1].text == OUTRO
+    kinds = [s.kind for s in tl.states]
+    assert kinds.count("result") == 4  # 3 verdicts + outro
+    assert kinds.count("loading") == 3
+    for a, b in zip(tl.states, tl.states[1:]):
+        assert a.end == b.start
+
+
+def test_saga_verdict_hold_is_at_least_one_point_two_seconds():
+    screens = [
+        ("taylor swift album", "folklore"),
+        ("taylor swift song", "all too well (10 minute version)"),
+        ("taylor swift era", "1989"),
+    ]
+    tl = build_saga_timeline(screens, fps=30)
+    verdicts = [s for s in tl.states if s.kind == "result" and s.text != OUTRO]
+    assert len(verdicts) == 3
+    for st in verdicts:
+        assert (st.end - st.start) / tl.fps >= SAGA_VERDICT_S - 0.05
+    outro = next(s for s in tl.states if s.text == OUTRO)
+    assert (outro.end - outro.start) / tl.fps == pytest.approx(1.5, abs=0.1)
+
+
+def test_saga_body_font_is_twice_the_default():
+    from antisearch_mill.render import Layout
+
+    lay = saga_layout()
+    assert lay.body_font_css == SAGA_BODY_FONT_CSS
+    assert lay.font_px == Layout().font_px * 2
+
+
+def test_saga_long_verdict_wraps_to_two_lines():
+    from antisearch_mill.fonts import metrics, resolve_font
+    from antisearch_mill.render import layout_frame
+
+    lay = saga_layout()
+    fm = metrics(resolve_font(), lay.font_px)
+    short = layout_frame("folklore", "result", False, fm, lay)
+    long = layout_frame("all too well (10 minute version)", "result", False, fm, lay)
+    assert len(short.lines) == 1
+    assert len(long.lines) == 2
+
+
+def test_saga_timeline_four_inputs():
+    screens = [
+        ("marvel movie", "endgame"),
+        ("marvel hero", "iron man"),
+        ("marvel villain", "thanos"),
+        ("extra screen", "skip"),
+    ]
+    tl = build_saga_timeline(screens[:3], fps=30)
+    assert SAGA_MIN_SECONDS <= tl.duration_s <= SAGA_MAX_SECONDS
+
+
+def test_produce_saga_fixture(tmp_path):
+    from antisearch_mill.fonts import resolve_font
+    from antisearch_mill.render import Layout
+
+    ledger = Ledger(tmp_path)
+    oracle = FixtureOracle({
+        "taylor swift album": "folklore",
+        "taylor swift song": "all too well",
+        "taylor swift era": "1989",
+    })
+    jobs = read_saga_queue(ROOT / "queue" / "tiktok_saga_trial.csv")
+    result = produce_saga_one(
+        jobs[0], oracle, ledger,
+        font_path=resolve_font(), layout=Layout(),
+    )
+    assert result.status == "produced"
+    row = ledger.clip_for_job("saga-taylor-swift")
+    assert row is not None
+    assert row.render_style == "monolith-saga"
+    assert "folklore" in row.verdict
+    assert Path(row.clip_path).is_file()
+    sidecar = json.loads(Path(row.clip_path).with_suffix(".json").read_text())
+    assert sidecar["saga"]["family"] == "taylor swift"
+    assert len(sidecar["saga"]["screens"]) == 3
+
+
+def test_saga_job_adapts_to_publisher_job():
+    jobs = read_saga_queue(ROOT / "queue" / "tiktok_saga_trial.csv")
+    post = saga_job_as_post_job(jobs[0])
+    assert post.id == "saga-taylor-swift"
+    assert post.category == "taylor swift"
+    assert post.platforms == ("tiktok",)
+
+
+
+@pytest.mark.parametrize("sound", ["tap", "soft"])
+def test_saga_keys_click_on_every_screen(sound):
+    """PUBLISHER_CLIP_AUDIO=keys: clicks track each screen's typing and Enter, verdicts stay silent."""
+    from antisearch_mill.audio import SR, synthesize_keys
+
+    screens = [
+        ("taylor swift album", "folklore"),
+        ("taylor swift song", "all too well"),
+        ("taylor swift era", "1989"),
+    ]
+    tl = build_saga_timeline(screens, fps=30)
+    assert len(tl.submit_frames) == 3
+    left, right = synthesize_keys(tl, sound)
+
+    def at(frame):
+        return int(round(frame / tl.fps * SR))
+
+    def loud(a, b):
+        return max((abs(v) for v in left[a:b]), default=0.0) > 1e-4
+
+    typing = [s for s in tl.states if s.kind == "typing" and s.text]
+    loadings = [s for s in tl.states if s.kind == "loading"]
+    # Typing on every screen is audible (a click lands on each new character).
+    for load in loadings:
+        screen_keys = [s for s in typing if s.end <= load.start and s.text == load.text[: len(s.text)]]
+        last = screen_keys[-1]
+        assert loud(at(last.start), at(last.start) + int(0.03 * SR))
+        # Enter on every screen.
+        assert loud(at(load.start), at(load.start) + int(0.03 * SR))
+    # Every verdict and the outro are exact zeros.
+    for s in tl.states:
+        if s.kind == "result":
+            seg = left[at(s.start):at(s.end)] + right[at(s.start):at(s.end)]
+            assert seg and all(v == 0.0 for v in seg)
+
+
+def test_saga_produce_with_keys_has_audio(tmp_path):
+    """End to end: PUBLISHER_CLIP_AUDIO=keys gives the saga clip an audible aac track and tags it."""
+    import subprocess
+
+    from antisearch_mill.fonts import resolve_font
+    from antisearch_mill.render import Layout
+
+    ledger = Ledger(tmp_path)
+    oracle = FixtureOracle({
+        "taylor swift album": "folklore",
+        "taylor swift song": "all too well",
+        "taylor swift era": "1989",
+    })
+    jobs = read_saga_queue(ROOT / "queue" / "tiktok_saga_trial.csv")
+    result = produce_saga_one(
+        jobs[0], oracle, ledger,
+        font_path=resolve_font(), layout=Layout(), audio="keys", keys="tap",
+    )
+    assert result.status == "produced"
+    row = ledger.clip_for_job("saga-taylor-swift")
+    meta = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format_tags=comment", "-of", "csv=p=0", row.clip_path],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    assert "audio=keys" in meta
+    vol = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-i", row.clip_path, "-af", "volumedetect", "-f", "null", "-"],
+        capture_output=True, text=True,
+    ).stderr
+    max_line = next(l for l in vol.splitlines() if "max_volume" in l)
+    assert float(max_line.split("max_volume:")[1].split("dB")[0]) > -40.0
+
+
+def test_saga_style_keeps_single_clips_unchanged(monkeypatch):
+    """PUBLISHER_CLIP_STYLE=saga only adds saga rows: normal rows render exactly as with the default style."""
+    from antisearch_mill.cli import _clip_options
+
+    base = {"PUBLISHER_CLIP_AUDIO": "keys", "PUBLISHER_CLIP_KEYS_SOUND": "tap"}
+    assert _clip_options({**base, "PUBLISHER_CLIP_STYLE": "saga"}) == _clip_options(base)
+
+
+def test_single_and_saga_tiktok_queues_load_together():
+    from antisearch_mill.cli import _load_queues
+
+    env = {"PUBLISHER_CLIP_STYLE": "saga"}
+    q = " ".join(str(ROOT / "queue" / n) for n in ("bluesky_trial.csv", "tiktok_trial.csv",
+                                                   "tiktok_saga_trial.csv", "surprise_trial.csv"))
+    _, jobs, saga_jobs = _load_queues([q], env)
+    ids = [j.id for j in jobs]
+    assert "t-dry-shampoo" in ids and "t-dry-shampoo" not in saga_jobs
+    assert len(saga_jobs) == 7
+
+
+def _job(id_, net="tiktok"):
+    from antisearch_mill.ledger import Job
+
+    return Job(id=id_, category=id_, platforms=(net,), caption="@?", notes="")
+
+
+def test_saga_alternates_with_single_clips():
+    from antisearch_mill.saga import alternate_saga, next_tiktok_format
+
+    jobs = [_job("b-1", "bluesky"), _job("t-1"), _job("saga-a"), _job("saga-b"), _job("pool-t-2")]
+    sagas = {"saga-a", "saga-b"}
+    # Last TikTok post was a single clip (or nothing yet): saga goes first on TikTok.
+    assert next_tiktok_format(sagas, "t-0") == "saga"
+    assert next_tiktok_format(sagas, None) == "saga"
+    order = [j.id for j in alternate_saga(jobs, sagas, "t-0")]
+    assert order == ["b-1", "saga-a", "saga-b", "t-1", "pool-t-2"]
+    # Last TikTok post was a saga: the single clip goes first, sagas wait.
+    assert next_tiktok_format(sagas, "saga-a") == "single"
+    assert next_tiktok_format(sagas, "saga-retired-row") == "single"
+    order = [j.id for j in alternate_saga(jobs, sagas, "saga-a")]
+    assert order == ["b-1", "t-1", "pool-t-2", "saga-a", "saga-b"]
+    # No saga rows: untouched.
+    assert alternate_saga(jobs[:2], set(), None) == jobs[:2]
+
+
+def test_post_log_last_job_per_network(tmp_path):
+    from antisearch_mill.publisher.guard import PostLog, PostRow
+
+    log = PostLog(tmp_path / "posts.csv")
+    assert log.last_job("tiktok") is None
+    log.append(PostRow("t-1", "tiktok", "pending", at="2026-10-01T15:00:00+00:00"))
+    log.append(PostRow("t-1", "tiktok", "published", at="2026-10-01T15:01:00+00:00"))
+    log.append(PostRow("saga-a", "tiktok", "pending", at="2026-10-02T15:00:00+00:00"))
+    log.append(PostRow("saga-a", "tiktok", "published", at="2026-10-02T15:01:00+00:00"))
+    log.append(PostRow("b-1", "bluesky", "pending", at="2026-10-03T15:00:00+00:00"))
+    assert log.last_job("tiktok") == "saga-a"
+    assert log.last_job("bluesky") == "b-1"

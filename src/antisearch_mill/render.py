@@ -58,6 +58,7 @@ class Layout:
     width: int = 1080
     height: int = 1920
     fps: int = 30
+    body_font_css: float = 18  # product default; saga doubles this for phone legibility
 
     @property
     def scale(self) -> float:
@@ -68,7 +69,7 @@ class Layout:
 
     @property
     def font_px(self) -> int:
-        return self.px(18)
+        return self.px(self.body_font_css)
 
     @property
     def line_h(self) -> float:

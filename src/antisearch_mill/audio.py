@@ -744,10 +744,71 @@ def _peak(sig: list[float]) -> float:
     return max((abs(s) for s in sig), default=0.0)
 
 
+def _chained_keystrokes(timeline: Timeline) -> list[tuple[int, str, str, int]]:
+    """Saga clips: (frame, char, screen text, index in screen) for every typed character on every screen."""
+    out: list[tuple[int, str, str, int]] = []
+    for s in timeline.states:
+        if s.kind == "typing" and s.text:
+            out.append((s.start, s.text[-1], s.text, len(s.text) - 1))
+    return out
+
+
+def _synthesize_chained_keys(timeline: Timeline, sound: str) -> tuple[list[float], list[float]]:
+    """Keys for chained (saga) clips: clicks synced with every screen's typing, one Enter per screen.
+
+    Same voicings and levels as the single clip. Every verdict screen (and the outro) is exact zeros.
+    """
+    fps = timeline.fps
+    n = int(math.ceil(timeline.total_frames / fps * SR))
+    left = [0.0] * n
+    right = [0.0] * n
+    screen = sound in SCREEN_VOICES
+
+    def at(frame: int) -> int:
+        return int(round(frame / fps * SR))
+
+    for frame, ch, text, i in _chained_keystrokes(timeline):
+        if screen:
+            voice = SCREEN_VOICES[sound]
+            rng = _rng("screen-key", sound, text, i)
+            level = KEY_PEAK_DB + SCREEN_LEVEL_OFFSET_DB + rng.uniform(-SCREEN_KEY_PEAK_SPREAD_DB, SCREEN_KEY_PEAK_SPREAD_DB)
+            _mix_into(left, right, at(frame), screen_key(rng, voice), 10 ** (level / 20.0))
+        else:
+            voice = KEY_VOICES[sound]
+            rng = _rng("soft-key", sound, text, i, ch)
+            level = KEY_PEAK_DB + rng.uniform(-KEY_PEAK_SPREAD_DB, KEY_PEAK_SPREAD_DB)
+            _mix_into(left, right, at(frame), soft_key(rng, voice), 10 ** (level / 20.0), rng.uniform(-0.06, 0.06))
+    typed_by_submit = {}
+    for s in timeline.states:
+        if s.kind == "loading":
+            typed_by_submit[s.start] = s.text
+    for submit in timeline.submit_frames:
+        text = typed_by_submit.get(submit, "")
+        if screen:
+            enter_rng = _rng("screen-enter", sound, text)
+            _mix_into(left, right, at(submit), screen_key(enter_rng, SCREEN_VOICES[sound], enter=True),
+                      10 ** ((ENTER_PEAK_DB + SCREEN_LEVEL_OFFSET_DB) / 20.0))
+        else:
+            enter_rng = _rng("soft-enter", sound, text)
+            _mix_into(left, right, at(submit), soft_key(enter_rng, KEY_VOICES[sound], enter=True),
+                      10 ** (ENTER_PEAK_DB / 20.0), 0.02)
+    for s in timeline.states:
+        if s.kind == "result":
+            for k in range(min(n, at(s.start)), min(n, at(s.end))):
+                left[k] = 0.0
+                right[k] = 0.0
+    return left, right
+
+
 def synthesize_keys(timeline: Timeline, sound: str = "soft") -> tuple[list[float], list[float]]:
-    """Typing and Enter only. Exact zeros from the first wait frame to the end."""
+    """Typing and Enter only. Exact zeros from the first wait frame to the end.
+
+    Chained (saga) timelines click on every screen's typing instead; see `_synthesize_chained_keys`.
+    """
     if sound not in KEY_VOICES and sound not in SCREEN_VOICES:
         raise ValueError(f"unknown key sound {sound!r}; use {', '.join(KEY_SOUNDS)}")
+    if len(timeline.submit_frames) > 1:
+        return _synthesize_chained_keys(timeline, sound)
     if sound in SCREEN_VOICES:
         return _synthesize_screen_keys(timeline, sound)
     voice = KEY_VOICES[sound]
