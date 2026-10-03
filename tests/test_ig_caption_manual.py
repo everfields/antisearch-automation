@@ -27,17 +27,21 @@ ET = ZoneInfo("America/New_York")
 
 
 @pytest.mark.parametrize("category,verdict,caption", [
-    ("travel", "japan", "#travel #japan #ai"),
-    ("situationship", "clear boundaries", "#situationship #clearboundaries #ai"),
-    ("sunscreen", "la roche-posay uvmune 400 invisible fluid spf50+", "#sunscreen #larocheposayuvmune400invisiblefluidspf50 #ai"),
-    ("writer", "lászló krasznahorkai", "#writer #lászlókrasznahorkai #ai"),
-    ("ai model", "ai", "#aimodel #ai"),            # no repeated tag
-    ("emoji", "😂", "#emoji #ai"),                  # nothing left of the verdict: no empty tag
-    ("best", "antisearch", "#ai"),                  # never #best, never #antisearch
+    ("travel", "japan", "#travel #japan"),
+    ("situationship", "clear boundaries", "#situationship #clearboundaries"),
+    ("sunscreen", "la roche-posay uvmune 400 invisible fluid spf50+", "#sunscreen #larocheposayuvmune400invisiblefluidspf50"),
+    ("writer", "lászló krasznahorkai", "#writer #lászlókrasznahorkai"),
+    ("ai model", "ai", "#aimodel"),            # no repeated tag
+    ("emoji", "😂", "#emoji"),                  # nothing left of the verdict: no empty tag
 ])
-def test_caption_is_input_verdict_ai(category, verdict, caption):
+def test_caption_is_input_and_verdict_tags(category, verdict, caption):
     assert ig_caption(category, verdict) == caption
     assert ig_caption_problem(caption) is None
+
+
+def test_caption_empty_when_every_tag_is_forbidden():
+    assert ig_caption("best", "antisearch") == ""
+    assert ig_caption_problem("") is not None
 
 
 def test_caption_mode_and_validation():
@@ -46,12 +50,12 @@ def test_caption_mode_and_validation():
     with pytest.raises(ValueError, match="PUBLISHER_IG_CAPTION"):
         ig_caption_mode({"PUBLISHER_IG_CAPTION": "emoji"})
     assert hashtag("Clear Boundaries!") == "#clearboundaries"
-    assert ig_caption("travel", "japan", "@visitjapan") == "#travel #japan #ai @visitjapan"
-    assert ig_caption_problem("#travel #japan #ai @a @b")  # one mention at most
-    assert ig_caption_problem("#travel #japan #ai #antisearch")
-    assert ig_caption_problem("#travel #best #ai")
-    assert ig_caption_problem("travel #japan #ai")  # hashtags only
-    assert ig_caption_problem("@visitjapan #travel #japan #ai")  # the mention goes last
+    assert ig_caption("travel", "japan", "@visitjapan") == "#travel #japan @visitjapan"
+    assert ig_caption_problem("#travel #japan @a @b")  # one mention at most
+    assert ig_caption_problem("#travel #japan #antisearch")
+    assert ig_caption_problem("#travel #best")
+    assert ig_caption_problem("travel #japan")  # hashtags only
+    assert ig_caption_problem("@visitjapan #travel #japan")  # the mention goes last
 
 
 # --- US-brand mention on Instagram --------------------------------------------
@@ -109,10 +113,10 @@ def test_live_instagram_caption_is_hashtags_plus_one_us_mention_and_tiktok_is_un
                     tag_allowlist=ALLOW)
     assert [o.status for o in out] == ["published", "published"]
     ig, tt = _creates(t)
-    assert ig["text"] == "#hairmask #k18 #ai @k18hair"
+    assert ig["text"] == "#hairmask #k18 @k18hair"
     assert tt["text"] == ""  # TikTok unchanged (tags off there, no hashtags ever)
     rows = {r["job_id"]: r for r in log.rows() if r["status"] == "published"}
-    assert rows["p-hair-mask"]["caption"] == "#hairmask #k18 #ai @k18hair"
+    assert rows["p-hair-mask"]["caption"] == "#hairmask #k18 @k18hair"
 
 
 def test_caption_off_keeps_the_old_instagram_caption(tmp_path):
@@ -168,11 +172,11 @@ def test_manual_row_goes_out_once_scheduled_even_with_instagram_paused(tmp_path)
     out, creates, log = _manual(tmp_path, [row], now)
     assert [o.status for o in out] == ["scheduled"]
     (payload,) = creates
-    assert payload["text"] == "#travel #japan #ai"
+    assert payload["text"] == "#travel #japan"
     assert payload["mode"] == "customScheduled" and payload["dueAt"] == "2026-09-27T13:37:00.000Z"
     final = log.rows()[-1]
     assert (final["status"], final["caption"], final["format"], final["remote_id"]) == (
-        "scheduled", "#travel #japan #ai", "video", "dry-post")
+        "scheduled", "#travel #japan", "video", "dry-post")
     again, creates, _ = _manual(tmp_path, [row], now + timedelta(minutes=30))
     assert again[0].status == "skipped_already_posted" and creates == []  # never twice
 
@@ -206,11 +210,11 @@ def test_a_scheduled_manual_row_gets_its_mention_by_editing_the_caption(tmp_path
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
     row = ManualRow("ig-manual-travel", "travel", "instagram", datetime(2026, 9, 27, 9, 37, tzinfo=ET))
     first, creates, _ = _manual(tmp_path, [row], datetime(2026, 9, 27, 6, 50, tzinfo=ET))  # no allowlist yet
-    assert first[0].status == "scheduled" and creates[0]["text"] == "#travel #japan #ai"
+    assert first[0].status == "scheduled" and creates[0]["text"] == "#travel #japan"
     out, creates, log = _manual(tmp_path, [row], datetime(2026, 9, 27, 7, 10, tzinfo=ET), frozen=False, allow=allow)
     assert out[0].status == "caption_edited" and creates == []  # the same post, never a second one
     (edit,) = _manual.edits
-    assert (edit["id"], edit["text"]) == ("dry-post", "#travel #japan #ai @visitjapan.us")
+    assert (edit["id"], edit["text"]) == ("dry-post", "#travel #japan @visitjapan.us")
     assert "mode" not in edit and "dueAt" not in edit  # the schedule is kept
     # Buffer re-validates the whole post on edit: the same video and reel type go with it
     assert edit["assets"] == [{"video": {"url": "https://everfields.github.io/antisearch-clips/clips/ig-manual-travel.mp4",
@@ -218,7 +222,7 @@ def test_a_scheduled_manual_row_gets_its_mention_by_editing_the_caption(tmp_path
     assert edit["metadata"] == {"instagram": {"type": "reel", "shouldShareToFeed": True}}
     last = log.rows()[-1]
     assert (last["status"], last["remote_id"], last["caption"], last["format"]) == (
-        "scheduled", "dry-post", "#travel #japan #ai @visitjapan.us", "video")
+        "scheduled", "dry-post", "#travel #japan @visitjapan.us", "video")
     tags = TagLog(log.path.parent / "tags.csv").rows()
     assert [(r["network"], r["handle"], r["job_id"]) for r in tags] == [("instagram", "@visitjapan.us", "ig-manual-travel")]
     again, creates, _ = _manual(tmp_path, [row], datetime(2026, 9, 27, 7, 20, tzinfo=ET), frozen=False, allow=allow)
@@ -233,7 +237,7 @@ def test_a_new_manual_row_carries_the_mention_from_the_start(tmp_path):
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
     row = ManualRow("ig-manual-travel", "travel", "instagram", datetime(2026, 9, 27, 9, 37, tzinfo=ET))
     out, creates, _ = _manual(tmp_path, [row], datetime(2026, 9, 27, 6, 50, tzinfo=ET), allow=allow)
-    assert out[0].status == "scheduled" and creates[0]["text"] == "#travel #japan #ai @visitjapan.us"
+    assert out[0].status == "scheduled" and creates[0]["text"] == "#travel #japan @visitjapan.us"
 
 
 def test_never_amika_or_a_bansk_brand():
@@ -297,8 +301,8 @@ def test_the_concept_mentions_resolve_to_the_checked_accounts():
     assert got == {"new zealand": "@purenewzealand", "bora bora": "@tahititourisme", "santorini": "@visitgreecegr",
                    "bali": "@wonderfulindonesia"}
     assert all((e.get("instagram") or {}).get("handle") != "@indtravel" for e in allow.values())  # rejected
-    assert ig_caption("island", "bali", got["bali"]) == "#island #bali #ai @wonderfulindonesia"
-    assert ig_caption("paradise", "bora bora", got["bora bora"]) == "#paradise #borabora #ai @tahititourisme"
+    assert ig_caption("island", "bali", got["bali"]) == "#island #bali @wonderfulindonesia"
+    assert ig_caption("paradise", "bora bora", got["bora bora"]) == "#paradise #borabora @tahititourisme"
 
 
 def test_the_hermes_mention_keeps_the_accent(tmp_path):
@@ -307,7 +311,7 @@ def test_the_hermes_mention_keeps_the_accent(tmp_path):
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
     tag = allowlisted("hermès", "instagram", allow, datetime(2026, 9, 30).date())
     assert tag.handle == "@hermes" and allow["hermès"]["instagram"]["market"] == "global"
-    assert ig_caption("fashion", "hermès", tag.handle) == "#fashion #hermès #ai @hermes"
+    assert ig_caption("fashion", "hermès", tag.handle) == "#fashion #hermès @hermes"
 
 
 def test_rows_scheduled_days_ahead_each_keep_their_mention(tmp_path):
@@ -334,9 +338,9 @@ def test_rows_scheduled_days_ahead_each_keep_their_mention(tmp_path):
                      tag_allowlist=allow)
     assert [o.status for o in out] == ["scheduled"] * 3
     assert [(c["text"], c["dueAt"]) for c in _creates(t)] == [
-        ("#wanderlust #newzealand #ai @h0", "2026-09-28T16:07:00.000Z"),
-        ("#paradise #borabora #ai @h1", "2026-09-29T16:07:00.000Z"),
-        ("#fashion #hermès #ai @h2", "2026-09-30T16:07:00.000Z")]
+        ("#wanderlust #newzealand @h0", "2026-09-28T16:07:00.000Z"),
+        ("#paradise #borabora @h1", "2026-09-29T16:07:00.000Z"),
+        ("#fashion #hermès @h2", "2026-09-30T16:07:00.000Z")]
     tags = TagLog(log.path.parent / "tags.csv").rows()
     assert [r["at"][:10] for r in tags] == ["2026-09-28", "2026-09-29", "2026-09-30"]  # the day each goes out
 

@@ -279,11 +279,12 @@ def test_instagram_captions_and_tags_never_carry_an_est_superlative_or_number_on
     from antisearch_mill.publisher.igcaption import ig_caption, ig_caption_problem
     from antisearch_mill.publisher.tags import allowlisted
 
-    assert ig_caption("musical", "the greatest showman") == "#musical #ai"  # the ranked tag is left out
-    assert ig_caption("hotel", "rosewood hong kong", "@rosewood") == "#hotel #rosewoodhongkong #ai @rosewood"
-    assert ig_caption_problem("#musical #ai") is None
-    assert "superlative" in ig_caption_problem("#biggest #ai")
-    assert "superlative" in ig_caption_problem("#hotel #ai @the_coolest_shop")
+    assert ig_caption("musical", "the greatest showman") == "#musical"  # the ranked tag is left out
+    assert ig_caption("hotel", "rosewood hong kong", "@rosewood") == "#hotel #rosewoodhongkong @rosewood"
+    assert ig_caption_problem("#musical") is None
+    assert "superlative" in ig_caption_problem("#biggest")
+    assert "superlative" in ig_caption_problem("#hotel @the_coolest_shop")
+    assert ig_caption_problem("#travel #ai")
     allow = {"shop": {"kind": "brand", "tiktok": {"handle": "@coolest_shop", "verified": True, "checked": "2026-09-28"}},
              "k18": {"kind": "brand", "tiktok": {"handle": "@k18hair", "verified": True, "checked": "2026-09-28"}}}
     assert "superlative" in allowlisted("shop", "tiktok", allow, date(2026, 9, 29)).reason
