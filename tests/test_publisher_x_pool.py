@@ -1,7 +1,6 @@
 """X pool: the CoS mix (main line 3 of 4, rotating slot 1 of 4), posted at the X slots."""
 
 import json
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -18,7 +17,7 @@ from antisearch_mill.publisher.media_host import GitHubPagesHost
 from antisearch_mill.publisher.pools import UNOWNED, pool_jobs, pool_networks, read_pool, read_rotation
 from antisearch_mill.publisher.run import run_posts
 from antisearch_mill.publisher.verdicts import VerdictStore
-from conftest import ROOT, requires_ffmpeg
+from conftest import ROOT
 
 POOLS = ROOT / "queue" / "pools"
 ET = ZoneInfo("America/New_York")
@@ -138,7 +137,6 @@ def _live_run(tmp_path, now, monkeypatch):
     return jobs, out, transport, ledger
 
 
-@requires_ffmpeg
 def test_live_run_posts_one_x_job_at_a_due_x_slot(tmp_path, monkeypatch):
     now = datetime(2026, 9, 28, 9, 12, tzinfo=ET)  # a Monday, just after the one 09:07 X slot
     jobs, out, transport, ledger = _live_run(tmp_path, now, monkeypatch)
@@ -160,18 +158,10 @@ def test_live_run_posts_one_x_job_at_a_due_x_slot(tmp_path, monkeypatch):
     assert not any("api.github.com" in r.url for r in transport.requests)  # no clip uploaded for X
 
     clip = ledger.clip_for_job(job.id)
-    side = json.loads((ledger.clips_dir / f"{clip.clip_id}.json").read_text())["timeline"]
-    assert "audio" not in side  # keys are Instagram / TikTok only: X is silent
-    assert side["frame"] == "phone:0.80:stone" and side["wait"] == "fixed"
-    assert 0.5 <= clip.duration_s <= 140
-    rate = subprocess.run(
-        ["ffprobe", "-v", "error", "-select_streams", "a:0", "-show_entries", "stream=sample_rate",
-         "-of", "csv=p=0", clip.clip_path], capture_output=True, text=True, check=True).stdout.strip()
-    assert rate == "48000"  # the silent track, not the 44.1 kHz keys mix
-    vol = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", clip.clip_path, "-af", "volumedetect",
-                          "-f", "null", "-"], capture_output=True, text=True).stderr
-    max_db = float(vol.split("max_volume:")[1].split("dB")[0])
-    assert max_db <= -80.0
+    assert clip.render_style == "text" and clip.duration_s == 0.0
+    side = json.loads((ledger.clips_dir / f"{clip.clip_id}.json").read_text())
+    assert side["verdict"]["verdict"] == "stand-in verdict"
+    assert not list(ledger.clips_dir.glob("*.mp4"))  # X never renders a clip
 
 
 def test_live_run_waits_when_no_x_slot_is_due(tmp_path, monkeypatch):

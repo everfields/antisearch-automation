@@ -30,6 +30,7 @@ the pause is the centered caret alone.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import tempfile
@@ -634,10 +635,45 @@ def _calc_hold_spans(timeline: Timeline) -> tuple[tuple[int, int], tuple[int, in
     return (loadings[0].start, loadings[0].end), (loadings[1].start, loadings[1].end)
 
 
-def _trim_graph(graph: str, start: int, end: int) -> str:
-    """Keep frames ``[start, end)`` from a filtergraph that ends in ``[v]``."""
-    body, suffix = graph.rsplit("[v]", 1)
-    return f"{body}[v0];[v0]select='between(n,{start},{end - 1})',setpts=PTS-STARTPTS[v]{suffix}"
+def _trim_graph(graph: str, start: int, end: int, *, fps: int) -> str:
+    """Keep frames ``[start, end)`` by shifting the timeline to 0.
+
+    A trailing ``select`` over the full timeline forces ffmpeg to evaluate every
+    frame through the phone overlay; shifting frame numbers and shortening the
+    color source is far cheaper.
+    """
+    seg = end - start
+    dur = seg / fps
+
+    def shift_between(m: re.Match[str]) -> str:
+        a, b = int(m.group(1)), int(m.group(2))
+        na, nb = max(a, start), min(b, end - 1)
+        if na > nb:
+            return "between(n,-1,-1)"
+        return f"between(n,{na - start},{nb - start})"
+
+    def shift_eq(m: re.Match[str]) -> str:
+        n = int(m.group(1))
+        if start <= n < end:
+            return f"eq(n,{n - start})"
+        return "eq(n,-1)"
+
+    def shift_mod_anchor(m: re.Match[str]) -> str:
+        a = int(m.group(1))
+        return f"mod(n-{a - start},"
+
+    if "[v0];[v0]select=" in graph:
+        graph = graph.split("[v0];[v0]select=")[0] + "[v]"
+    graph = re.sub(r"between\(n,(\d+),(\d+)\)", shift_between, graph)
+    graph = re.sub(r"eq\(n,(\d+)\)", shift_eq, graph)
+    graph = re.sub(r"mod\(n-(\d+),", shift_mod_anchor, graph)
+    graph = re.sub(
+        r"(color=c=[^:]+:s=\d+x\d+:r=\d+:)(d=[\d.]+)",
+        rf"\1d={dur:.4f}",
+        graph,
+        count=1,
+    )
+    return graph
 
 
 def _concat_videos(parts: list[Path], dest: Path) -> None:
@@ -705,22 +741,24 @@ def _render_calc_clip(
     hold_graph = build_filtergraph(timeline, font_path, lay, work, phone=phone, skip_calc=True)
     if ps > 0:
         _encode_segment(
-            timeline, _trim_graph(graph, 0, ps), prefix, lay, work,
-            font_path=font_path, phone=phone, audio=False,
+            timeline, _trim_graph(graph, 0, ps, fps=timeline.fps), prefix, lay, work,
+            font_path=font_path, phone=phone, audio=False, segment_frames=ps,
         )
     _encode_segment(
-        timeline, _trim_graph(hold_graph, ps, pe), pre_hold, lay, work,
-        font_path=font_path, phone=phone, audio=False,
+        timeline, _trim_graph(hold_graph, ps, pe, fps=timeline.fps), pre_hold, lay, work,
+        font_path=font_path, phone=phone, audio=False, segment_frames=pe - ps,
     )
     frames_to_video(calc_dir, calc_vid, fps=timeline.fps)
     _encode_segment(
-        timeline, _trim_graph(hold_graph, qs, qe), post_hold, lay, work,
-        font_path=font_path, phone=phone, audio=False,
+        timeline, _trim_graph(hold_graph, qs, qe, fps=timeline.fps), post_hold, lay, work,
+        font_path=font_path, phone=phone, audio=False, segment_frames=qe - qs,
     )
     if timeline.verdict_frame < timeline.total_frames:
         _encode_segment(
-            timeline, _trim_graph(graph, timeline.verdict_frame, timeline.total_frames), suffix, lay, work,
-            font_path=font_path, phone=phone, audio=False,
+            timeline,
+            _trim_graph(graph, timeline.verdict_frame, timeline.total_frames, fps=timeline.fps),
+            suffix, lay, work, font_path=font_path, phone=phone, audio=False,
+            segment_frames=timeline.total_frames - timeline.verdict_frame,
         )
 
     parts = [p for p in (prefix if ps > 0 else None, pre_hold, calc_vid, post_hold,
@@ -782,6 +820,7 @@ def _encode_segment(
     font_path: str,
     phone: PhoneSpec | None,
     audio: bool,
+    segment_frames: int | None = None,
 ) -> None:
     still = ["-loop", "1", "-framerate", str(timeline.fps), "-i"]
     extra: list[str] = []
@@ -806,6 +845,8 @@ def _encode_segment(
         "-c:v", "libx264", "-preset", "medium", "-crf", "18",
         "-pix_fmt", "yuv420p",
     ]
+    if segment_frames is not None:
+        cmd += ["-t", f"{segment_frames / timeline.fps:.4f}", "-r", str(timeline.fps)]
     if audio:
         cmd += ["-c:a", "aac", "-b:a", "96k"]
     cmd.append(str(out_path))
