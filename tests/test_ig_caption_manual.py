@@ -23,6 +23,12 @@ from test_publisher_run import clip
 ET = ZoneInfo("America/New_York")
 
 
+@pytest.fixture(autouse=True)
+def _ig_caption_tests_expect_tags(monkeypatch):
+    """These fixtures predate the ~1/3 silent-caption rule; keep them tagged."""
+    monkeypatch.setattr("antisearch_mill.publisher.igcaption.ig_tags_silent", lambda _job_id: False)
+
+
 # --- caption ------------------------------------------------------------------
 
 

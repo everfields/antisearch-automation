@@ -718,6 +718,7 @@ def _render_calc_clip(
     bed: bool,
     phone: PhoneSpec | None,
     keys: str | None,
+    calc_variant=None,
 ) -> None:
     from .calc_pause import frames_to_video, render_calc_frames
     from .timeline import _apply_calc_holds
@@ -728,7 +729,7 @@ def _render_calc_clip(
     (ps, pe), (qs, qe) = _calc_hold_spans(timeline)
     calc_dir = work / "calc"
     render_calc_frames(
-        category, calc_dir, frame_count=ce - cs, font_path=font_path, layout=lay,
+        category, calc_dir, frame_count=ce - cs, font_path=font_path, layout=lay, variant=calc_variant,
     )
     prefix = work / "prefix.mp4"
     pre_hold = work / "pre.mp4"
@@ -868,6 +869,7 @@ def render_clip(
     keys: str | None = None,
     pause: str = "blink",
     category: str = "",
+    calc_variant=None,
 ) -> ClipInfo:
     """`pulse` is a pulse variant; `heartbeat` (with an optional `bed`) replaces it.
     `keys` is a key voicing: typing and Enter only, silence after.
@@ -890,6 +892,7 @@ def render_clip(
             _render_calc_clip(
                 timeline, tmp_out, font_path=font_path, lay=lay, work=work, category=category,
                 metadata=metadata, pulse=pulse, heartbeat=heartbeat, bed=bed, phone=phone, keys=keys,
+                calc_variant=calc_variant,
             )
             tmp_out.replace(out_path)
             return probe(out_path)
