@@ -52,7 +52,8 @@
       "browser\nbrave\n@brave",
       "idea\nthe scientific method",
       "virtue\ncompassion",
-      "empire\nroman empire"
+      "empire\nroman empire",
+      "fear\ncomplacency"
     ]
   },
   "clips": {
@@ -133,7 +134,8 @@
       "p-curling-iron-9c56be79",
       "p-perfume-for-men-47fef3df",
       "p-body-lotion-71bf8585",
-      "p-a-film-cb070e50"
+      "p-a-film-cb070e50",
+      "p-face-mask-0fc65e7c"
     ],
     "x": [
       "p-a-feeling-725bad0d",
@@ -149,7 +151,8 @@
       "p-browser-4b402265",
       "p-idea-2a74af2a",
       "p-virtue-39925bcd",
-      "p-empire-14e67e91"
+      "p-empire-14e67e91",
+      "p-fear-14d909af"
     ]
   },
   "first_post": {
