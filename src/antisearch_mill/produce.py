@@ -17,7 +17,10 @@ from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, AUDIO_PULSE, audio_tag as make_a
 from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound, pulse_for_platforms
 from .creatives import CREATIVES, STORY, finish, id_tag
 from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
-from .calc_pause import ALTERNATE_PAUSE, CALC_PAUSE, clip_pause, resolve_pause_mode
+from .calc_pause import (
+    ALTERNATE_PAUSE, CALC_PAUSE, IG_NETWORK, CalcVariant, calc_variant, clip_pause, resolve_pause_mode,
+    variant_id_tag,
+)
 from .timeline import (
     MAX_SECONDS, MIN_SECONDS, WAIT_BLINKS, build_timeline, clip_style, clip_typing, pause_for_style,
     pause_from_latency_ms, wait_frames,
@@ -51,6 +54,7 @@ def clip_id_for(
     typing: str = "",
     creative: str = "",
     pause_mode: str = "",
+    calc_variant_tag: str = "",
 ) -> str:
     body = f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}"
     # Silent clips keep the historical hash. Pulse is part of the id only when it is actually muxed.
@@ -67,8 +71,16 @@ def clip_id_for(
         body += f"\0creative:{id_tag(creative)}"
     if pause_mode == CALC_PAUSE:
         body += f"\0pause:{pause_mode}"
+    if calc_variant_tag:
+        body += f"\0calcvar:{calc_variant_tag}"
     digest = hashlib.sha256(body.encode()).hexdigest()[:8]
     return f"{job_id}-{digest}"
+
+
+def _job_network(job: Job) -> str:
+    if len(job.platforms) == 1:
+        return job.platforms[0].strip().lower()
+    return ""
 
 
 def sha256_file(path: Path) -> str:
@@ -225,6 +237,7 @@ def produce_one(
         pause = pause_for_style(verdict.latency_ms, recorded=latency_recorded, style=style, explicit=pause_s)
     frame_tag = phone.tag if phone else ""
     rhythm = typing if fixed and style == "app" else "legacy"
+    network = _job_network(job)
     if raw_pause == ALTERNATE_PAUSE:
         parity_id = clip_id_for(
             job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag,
@@ -232,13 +245,17 @@ def produce_one(
         )
         pause_mode = resolve_pause_mode(
             job_id=job.id, post_log=post_log, clips_dir=ledger.clips_dir,
-            parity_clip_id=parity_id,
+            parity_clip_id=parity_id, network=network,
         )
     else:
-        pause_mode = raw_pause
+        pause_mode = resolve_pause_mode(
+            job_id=job.id, post_log=post_log, clips_dir=ledger.clips_dir,
+            network=network,
+        ) if network == IG_NETWORK else raw_pause
+    calc_var = calc_variant(job.id) if network == IG_NETWORK and pause_mode == CALC_PAUSE else None
     clip_id = clip_id_for(
         job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag, fixed_wait=fixed, typing=rhythm,
-        creative=creative, pause_mode=pause_mode,
+        creative=creative, pause_mode=pause_mode, calc_variant_tag=variant_id_tag(calc_var),
     )
     style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
@@ -246,9 +263,11 @@ def produce_one(
     sidecar_path = ledger.clips_dir / f"{clip_id}.json"
     cover = None
     try:
+        ig_calc = network == IG_NETWORK and pause_mode == CALC_PAUSE
         timeline = build_timeline(
             verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style,
             wait="fixed" if fixed else "latency", typing=rhythm, pause_mode=pause_mode,
+            ig_calc=ig_calc,
         )
         comment = f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}"
         if use_audio:
@@ -278,10 +297,12 @@ def produce_one(
                 keys=keys if use_audio and mode == AUDIO_KEYS else None,
                 pause=pause_mode,
                 category=verdict.category,
+                calc_variant=calc_var,
             )
             try:
                 cover = finish(creative, classic, timeline, clip_path, category=verdict.category,
-                               verdict=verdict.verdict, font_path=font_path, layout=layout, phone=phone, metadata=meta)
+                               verdict=verdict.verdict, font_path=font_path, layout=layout, phone=phone,
+                               metadata=meta, calc_variant=calc_var)
             finally:
                 if classic != clip_path:
                     classic.unlink(missing_ok=True)

@@ -8,6 +8,7 @@ import random
 import shutil
 import subprocess
 from collections.abc import Mapping
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
@@ -21,6 +22,8 @@ DEFAULT_PAUSE = "blink"
 ALTERNATE_PAUSE = "alternate"
 PAUSE_MODES = (DEFAULT_PAUSE, CALC_PAUSE, ALTERNATE_PAUSE)
 REEL_NETWORKS = frozenset({"instagram", "tiktok"})
+IG_NETWORK = "instagram"
+TIKTOK_NETWORK = "tiktok"
 CALC_PRE_HOLD_S = 0.8
 CALC_POST_HOLD_S = 0.25
 
@@ -121,7 +124,9 @@ def pause_from_clip_sidecar(clip_id: str, clips_dir: Path | None) -> str:
 
 
 def last_single_clip_pause(post_log, clips_dir: Path | None = None) -> str | None:
-    """Pause mode of the latest single-verdict clip in the post log, or None."""
+    """Pause mode of the latest TikTok single-verdict clip in the post log, or None.
+
+    Instagram reels always use calc; alternation reads TikTok only."""
     from datetime import datetime
 
     from .publisher.guard import DONE, FAILED, WITHHELD
@@ -133,7 +138,7 @@ def last_single_clip_pause(post_log, clips_dir: Path | None = None) -> str | Non
     for job_id, row in post_log.latest_by_job().items():
         if job_id.startswith(SAGA_ID_PREFIX):
             continue
-        if (row.get("network") or "").strip().lower() not in REEL_NETWORKS:
+        if (row.get("network") or "").strip().lower() != TIKTOK_NETWORK:
             continue
         if row.get("status") in (FAILED, WITHHELD, "reopened"):
             continue
@@ -177,10 +182,15 @@ def resolve_pause_mode(
     clips_dir: Path | None = None,
     is_saga: bool = False,
     parity_clip_id: str = "",
+    network: str = "",
 ) -> str:
-    """Effective pause for one clip: blink, calc, or alternate resolved to blink/calc."""
+    """Effective pause for one clip: blink, calc, or alternate resolved to blink/calc.
+
+    Instagram reels always use calc (founder, 2026-10-03); TikTok follows the env flag."""
     if is_saga:
         return DEFAULT_PAUSE
+    if (network or "").strip().lower() == IG_NETWORK:
+        return CALC_PAUSE
     raw = clip_pause(env)
     if raw != ALTERNATE_PAUSE:
         return raw
@@ -189,8 +199,122 @@ def resolve_pause_mode(
     return next_single_pause(last, pid)
 
 
-def calc_seed(category: str) -> int:
-    return int.from_bytes(hashlib.sha256(f"calc|{category}".encode()).digest()[:8], "big")
+@dataclass(frozen=True)
+class IgPalette:
+    """Visibly distinct reel background (founder, 2026-10-03)."""
+
+    name: str
+    bg: tuple[int, int, int]
+    fg: tuple[int, int, int]
+    dim: tuple[int, int, int]
+
+
+IG_PALETTES: tuple[IgPalette, ...] = (
+    IgPalette("stone", (42, 40, 36), (232, 228, 216), (120, 115, 108)),
+    IgPalette("ink", (18, 28, 48), (210, 220, 245), (90, 110, 150)),
+    IgPalette("paper", (228, 222, 208), (28, 26, 24), (100, 95, 88)),
+    IgPalette("graphite", (48, 50, 54), (235, 230, 220), (130, 128, 122)),
+    IgPalette("slate", (32, 38, 44), (220, 228, 235), (100, 115, 130)),
+    IgPalette("moss", (34, 42, 32), (218, 232, 210), (95, 120, 88)),
+)
+IG_LAYOUT_Y = (0.30, 0.38, 0.46)  # top third, center, lower third
+IG_OPENING_S = 0.5
+
+
+@dataclass(frozen=True)
+class CalcVariant:
+    """Per-post calc look, seeded by job id (Instagram reels only)."""
+
+    seed: int
+    palette: IgPalette
+    layout_y_frac: float
+    formula_offset: int
+    curve_power: float
+    hop_scale: float
+    intro_idx: int
+
+
+def calc_variant(job_id: str) -> CalcVariant:
+    """Deterministic calc variation for one post id."""
+    raw = hashlib.sha256(f"ig-calc|{job_id}".encode()).digest()
+    seed = int.from_bytes(raw[:8], "big")
+    rng = random.Random(seed)
+    return CalcVariant(
+        seed=seed,
+        palette=IG_PALETTES[rng.randrange(len(IG_PALETTES))],
+        layout_y_frac=IG_LAYOUT_Y[rng.randrange(len(IG_LAYOUT_Y))],
+        formula_offset=rng.randint(0, len(FORMULAS) - 1),
+        curve_power=round(2.2 + rng.random() * 1.4, 3),
+        hop_scale=round(0.75 + rng.random() * 0.6, 3),
+        intro_idx=(seed + rng.randint(0, 999)) % len(FORMULAS),
+    )
+
+
+def ig_opening_frames(fps: int) -> int:
+    return max(1, round(IG_OPENING_S * fps))
+
+
+def variant_id_tag(variant: CalcVariant | None) -> str:
+    if variant is None:
+        return ""
+    return hashlib.sha256(
+        f"{variant.seed}\0{variant.palette.name}\0{variant.layout_y_frac}\0{variant.formula_offset}\0"
+        f"{variant.curve_power}\0{variant.hop_scale}\0{variant.intro_idx}".encode(),
+    ).hexdigest()[:8]
+
+
+_GRAIN_TILE = 128
+
+
+@lru_cache(maxsize=16)
+def _grain_tile(palette_name: str, seed: int) -> Image.Image:
+    """One static grain tile per palette+seed; tiled across each frame (not re-rolled per frame)."""
+    palette = next(p for p in IG_PALETTES if p.name == palette_name)
+    rng = random.Random(seed + 17)
+    tile = Image.new("RGB", (_GRAIN_TILE, _GRAIN_TILE), palette.bg)
+    px = tile.load()
+    r0, g0, b0 = palette.bg
+    for y in range(_GRAIN_TILE):
+        for x in range(_GRAIN_TILE):
+            n = rng.randint(-8, 8)
+            px[x, y] = (max(0, min(255, r0 + n)), max(0, min(255, g0 + n)), max(0, min(255, b0 + n)))
+    return tile
+
+
+def _fill_palette(width: int, height: int, palette: IgPalette, seed: int) -> Image.Image:
+    """Tiled grain surface: distinct per reel, cheap to draw and to encode."""
+    tile = _grain_tile(palette.name, seed)
+    img = Image.new("RGB", (width, height))
+    tw, th = tile.size
+    for y in range(0, height, th):
+        for x in range(0, width, tw):
+            img.paste(tile, (x, y))
+    return img
+
+
+def frame_mean_diff(a: Image.Image, b: Image.Image) -> float:
+    """Mean absolute RGB difference between two same-size images."""
+    pa, pb = a.convert("RGB").getdata(), b.convert("RGB").getdata()
+    total = 0.0
+    n = 0
+    for ca, cb in zip(pa, pb, strict=True):
+        total += abs(ca[0] - cb[0]) + abs(ca[1] - cb[1]) + abs(ca[2] - cb[2])
+        n += 3
+    return total / max(1, n)
+
+
+def frame_is_uniform(img: Image.Image, *, spread: float = 12.0) -> bool:
+    """True when the frame is nearly a flat field (e.g. empty black + cursor)."""
+    px = list(img.convert("RGB").getdata())
+    rs = [p[0] for p in px]
+    gs = [p[1] for p in px]
+    bs = [p[2] for p in px]
+    return max(rs) - min(rs) < spread and max(gs) - min(gs) < spread and max(bs) - min(bs) < spread
+
+
+def calc_seed(category: str, variant: CalcVariant | None = None) -> int:
+    base = int.from_bytes(hashlib.sha256(f"calc|{category}".encode()).digest()[:8], "big")
+    return (base ^ variant.seed) if variant else base
 
 
 def formula_fragments() -> tuple[str, ...]:
@@ -251,19 +375,33 @@ def _mutate(formula: str, rng: random.Random, intensity: float) -> str:
     return "".join(out)
 
 
-def _formula_line(seed: int, frame: int, total: int, fm, lay: Layout) -> str:
+def _formula_line(
+    seed: int,
+    frame: int,
+    total: int,
+    fm,
+    lay: Layout,
+    variant: CalcVariant | None = None,
+) -> str:
     t = frame / max(1, total - 1)
     rng = random.Random(seed + frame * 9973 + int(t * 80000))
-    intensity = min(10.0, 0.4 + 18 * t * t)
+    power = variant.curve_power if variant else 2.8
+    hop_scale = variant.hop_scale if variant else 1.0
+    offset = variant.formula_offset if variant else 0
+    intensity = min(10.0, 0.35 + 18 * t ** (power * 0.35 + 0.65))
     target = lay.max_text_w * 0.88
     # Accelerating identity changes: many distinct formulas per second near the end.
-    hop = max(1, int(1 + 22 * t ** 2.8))
-    base_idx = (seed + (frame // hop) * 17) % len(FORMULAS)
+    hop = max(1, int((1 + 22 * t ** power) * hop_scale))
+    if frame == 0 and variant is not None:
+        base_idx = variant.intro_idx
+        intro_rng = random.Random(variant.seed + 41)
+        return _mutate(FORMULAS[base_idx], intro_rng, max(0.55, intensity))
+    base_idx = (seed + offset + (frame // hop) * 17) % len(FORMULAS)
     parts = [_mutate(FORMULAS[base_idx], rng, intensity)]
     for j in range(3):
         if fm.width(" · ".join(parts)) >= target * 0.85:
             break
-        idx = (seed + frame * (j + 3) + rng.randint(0, 9999)) % len(FORMULAS)
+        idx = (seed + offset + frame * (j + 3) + rng.randint(0, 9999)) % len(FORMULAS)
         nxt = _mutate(FORMULAS[idx], random.Random(seed + frame + idx * 31), intensity)
         trial = " · ".join(parts + [nxt])
         if fm.width(trial) > lay.max_text_w:
@@ -272,8 +410,8 @@ def _formula_line(seed: int, frame: int, total: int, fm, lay: Layout) -> str:
     return " · ".join(parts)
 
 
-def _baseline_y(fm, lay: Layout) -> int:
-    cy = lay.center_y
+def _baseline_y(fm, lay: Layout, center_frac: float | None = None) -> int:
+    cy = (center_frac if center_frac is not None else 0.38) * lay.height
     top = cy - lay.line_h / 2
     half_leading = (lay.line_h - (fm.ascent + fm.descent)) / 2
     return round(top + half_leading + fm.ascent)
@@ -297,6 +435,18 @@ def _draw_mixed(
         cx += font.getlength(ch)
 
 
+def _draw_text_centered(
+    draw: ImageDraw.ImageDraw,
+    y: int,
+    text: str,
+    font: ImageFont.FreeTypeFont,
+    lay: Layout,
+    fill: tuple[int, int, int],
+) -> None:
+    w = font.getlength(text)
+    draw.text(((lay.width - w) / 2, y), text, font=font, fill=fill, anchor="ls")
+
+
 def _draw_calc_frame(
     category: str,
     frame: int,
@@ -304,14 +454,17 @@ def _draw_calc_frame(
     font_path: str,
     math_path: str,
     lay: Layout,
+    variant: CalcVariant | None = None,
 ) -> Image.Image:
+    if variant is not None:
+        return _draw_ig_calc_frame(category, frame, total, font_path, math_path, lay, variant)
     img = Image.new("RGB", (lay.width, lay.height), BG_RGB)
     draw = ImageDraw.Draw(img)
     fm = metrics(font_path, lay.font_px)
     main_font = _font(font_path, lay.font_px)
     math_font = _font(math_path, lay.font_px)
     main_cmap, math_cmap = _cmap(font_path), _cmap(math_path)
-    formula = _formula_line(calc_seed(category), frame, total, fm, lay)
+    formula = _formula_line(calc_seed(category, variant), frame, total, fm, lay, variant)
     baseline = _baseline_y(fm, lay)
     text_w = sum(
         (math_font if _use_math_font(ch, main_cmap, math_cmap) else main_font).getlength(ch)
@@ -332,6 +485,62 @@ def _draw_calc_frame(
     return img
 
 
+def _draw_ig_calc_frame(
+    category: str,
+    frame: int,
+    total: int,
+    font_path: str,
+    math_path: str,
+    lay: Layout,
+    variant: CalcVariant,
+    bg: Image.Image | None = None,
+) -> Image.Image:
+    """Instagram calc frame: palette surface, input already typed, formula below. No lone cursor."""
+    palette = variant.palette
+    img = bg.copy() if bg is not None else _fill_palette(lay.width, lay.height, palette, variant.seed)
+    draw = ImageDraw.Draw(img)
+    fm = metrics(font_path, lay.font_px)
+    main_font = _font(font_path, lay.font_px)
+    math_font = _font(math_path, lay.font_px)
+    main_cmap, math_cmap = _cmap(font_path), _cmap(math_path)
+    input_y = _baseline_y(fm, lay, variant.layout_y_frac)
+    _draw_text_centered(draw, input_y, category, main_font, lay, palette.fg)
+    formula_y = round(input_y + lay.line_h * 1.15)
+    formula = _formula_line(calc_seed(category, variant), frame, total, fm, lay, variant)
+    text_w = sum(
+        (math_font if _use_math_font(ch, main_cmap, math_cmap) else main_font).getlength(ch)
+        for ch in formula
+    )
+    margin = lay.px(20)
+    max_w = lay.max_text_w
+    t = frame / max(1, total - 1)
+    if text_w <= max_w:
+        fx = (lay.width - text_w) / 2
+    else:
+        scroll = int((t ** 1.5) * (text_w - max_w + 40))
+        fx = margin - scroll
+    _draw_mixed(draw, fx, formula_y, formula, main_font, math_font, main_cmap, math_cmap, palette.fg)
+    ff = metrics(font_path, lay.footer_px)
+    fp = footer_placement(lay, ff)
+    draw.text((fp.x, fp.baseline), fp.text, font=_font(font_path, lay.footer_px), fill=palette.dim, anchor="ls")
+    return img
+
+
+def render_ig_opening_frame(
+    category: str,
+    job_id: str,
+    *,
+    font_path: str,
+    layout: Layout | None = None,
+) -> Image.Image:
+    """Frame 0 of an Instagram reel body (before cover replacement)."""
+    lay = layout or Layout()
+    variant = calc_variant(job_id)
+    return _draw_ig_calc_frame(
+        category, 0, ig_opening_frames(lay.fps), font_path, resolve_math_font(), lay, variant,
+    )
+
+
 def render_calc_frames(
     category: str,
     out_dir: Path,
@@ -341,14 +550,19 @@ def render_calc_frames(
     width: int = 1080,
     height: int = 1920,
     layout: Layout | None = None,
+    variant: CalcVariant | None = None,
 ) -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     lay = layout or Layout(width=width, height=height)
     math_path = resolve_math_font()
+    bg = _fill_palette(lay.width, lay.height, variant.palette, variant.seed) if variant else None
     paths: list[Path] = []
     for i in range(frame_count):
         path = out_dir / f"frame_{i:04d}.png"
-        _draw_calc_frame(category, i, frame_count, font_path, math_path, lay).save(path)
+        if variant is not None:
+            _draw_ig_calc_frame(category, i, frame_count, font_path, math_path, lay, variant, bg).save(path)
+        else:
+            _draw_calc_frame(category, i, frame_count, font_path, math_path, lay, variant).save(path)
         paths.append(path)
     return paths
 

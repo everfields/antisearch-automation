@@ -31,7 +31,7 @@ from .guard import (
     DONE, PENDING, SCHEDULED_STATES, PostLog, PostRow, approved_networks, posting_day, slot_times, slots_for, tz,
 )
 from .antiban import jitter_enabled
-from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
+from .igcaption import build_ig_caption, ig_caption_mode, ig_caption_problem
 from .jitter import scheduled_offset, slot_offsets
 from .run import Outcome, run_posts
 from .tags import TagLog, choose_tag, tag_networks
@@ -179,8 +179,8 @@ def _maybe_edit(row: ManualRow, prior: dict, log: PostLog, store: VerdictStore, 
     tag_log = TagLog(log.path.parent / "tags.csv")
     picked = choose_tag(frozen.verdict, row.network, env, dict(tag_allowlist or {}), tag_log, row.due,
                         len(slots_for(row.network, dict(env))))
-    caption = ig_caption(row.category, frozen.verdict, picked.handle)
-    problem = ig_caption_problem(caption)
+    caption = build_ig_caption(row.category, frozen.verdict, picked.handle, row.id, log)
+    problem = ig_caption_problem(caption, allow_empty=True)
     if problem:
         return Outcome(row.id, row.network, "rejected_caption", detail=f"{problem}: {caption!r}")
     if not picked.handle or caption == current:

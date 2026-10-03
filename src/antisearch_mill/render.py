@@ -631,7 +631,7 @@ def _calc_span(timeline: Timeline) -> tuple[int, int]:
 def _calc_hold_spans(timeline: Timeline) -> tuple[tuple[int, int], tuple[int, int]]:
     loadings = [s for s in timeline.states if s.kind == "loading"]
     if len(loadings) < 2:
-        raise RenderError("calc pause timeline missing pre/post holds")
+        return (0, 0), (0, 0)  # Instagram calc: no empty cursor holds
     return (loadings[0].start, loadings[0].end), (loadings[1].start, loadings[1].end)
 
 
@@ -718,6 +718,7 @@ def _render_calc_clip(
     bed: bool,
     phone: PhoneSpec | None,
     keys: str | None,
+    calc_variant=None,
 ) -> None:
     from .calc_pause import frames_to_video, render_calc_frames
     from .timeline import _apply_calc_holds
@@ -728,7 +729,7 @@ def _render_calc_clip(
     (ps, pe), (qs, qe) = _calc_hold_spans(timeline)
     calc_dir = work / "calc"
     render_calc_frames(
-        category, calc_dir, frame_count=ce - cs, font_path=font_path, layout=lay,
+        category, calc_dir, frame_count=ce - cs, font_path=font_path, layout=lay, variant=calc_variant,
     )
     prefix = work / "prefix.mp4"
     pre_hold = work / "pre.mp4"
@@ -744,15 +745,17 @@ def _render_calc_clip(
             timeline, _trim_graph(graph, 0, ps, fps=timeline.fps), prefix, lay, work,
             font_path=font_path, phone=phone, audio=False, segment_frames=ps,
         )
-    _encode_segment(
-        timeline, _trim_graph(hold_graph, ps, pe, fps=timeline.fps), pre_hold, lay, work,
-        font_path=font_path, phone=phone, audio=False, segment_frames=pe - ps,
-    )
+    if pe > ps:
+        _encode_segment(
+            timeline, _trim_graph(hold_graph, ps, pe, fps=timeline.fps), pre_hold, lay, work,
+            font_path=font_path, phone=phone, audio=False, segment_frames=pe - ps,
+        )
     frames_to_video(calc_dir, calc_vid, fps=timeline.fps)
-    _encode_segment(
-        timeline, _trim_graph(hold_graph, qs, qe, fps=timeline.fps), post_hold, lay, work,
-        font_path=font_path, phone=phone, audio=False, segment_frames=qe - qs,
-    )
+    if qe > qs:
+        _encode_segment(
+            timeline, _trim_graph(hold_graph, qs, qe, fps=timeline.fps), post_hold, lay, work,
+            font_path=font_path, phone=phone, audio=False, segment_frames=qe - qs,
+        )
     if timeline.verdict_frame < timeline.total_frames:
         _encode_segment(
             timeline,
@@ -761,8 +764,16 @@ def _render_calc_clip(
             segment_frames=timeline.total_frames - timeline.verdict_frame,
         )
 
-    parts = [p for p in (prefix if ps > 0 else None, pre_hold, calc_vid, post_hold,
-                          suffix if timeline.verdict_frame < timeline.total_frames else None) if p]
+    parts: list[Path] = []
+    if ps > 0:
+        parts.append(prefix)
+    if pe > ps:
+        parts.append(pre_hold)
+    parts.append(calc_vid)
+    if qe > qs:
+        parts.append(post_hold)
+    if timeline.verdict_frame < timeline.total_frames:
+        parts.append(suffix)
     if len(parts) == 1:
         shutil.copy(parts[0], joined)
     else:
@@ -868,6 +879,7 @@ def render_clip(
     keys: str | None = None,
     pause: str = "blink",
     category: str = "",
+    calc_variant=None,
 ) -> ClipInfo:
     """`pulse` is a pulse variant; `heartbeat` (with an optional `bed`) replaces it.
     `keys` is a key voicing: typing and Enter only, silence after.
@@ -890,6 +902,7 @@ def render_clip(
             _render_calc_clip(
                 timeline, tmp_out, font_path=font_path, lay=lay, work=work, category=category,
                 metadata=metadata, pulse=pulse, heartbeat=heartbeat, bed=bed, phone=phone, keys=keys,
+                calc_variant=calc_variant,
             )
             tmp_out.replace(out_path)
             return probe(out_path)

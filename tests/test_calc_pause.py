@@ -134,10 +134,12 @@ def test_resolve_pause_mode_from_post_log(tmp_path):
     log.append(PostRow("t-1", "tiktok", "published", clip_id=calc_id, at="2026-10-02T15:00:00+00:00"))
     env = {"PUBLISHER_CLIP_PAUSE": "alternate"}
     parity = clip_id_for("t-2", verdict, 2.0)
-    assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity) == "blink"
-    log.append(PostRow("t-0", "instagram", "published", clip_id=blink_id, at="2026-10-03T15:00:00+00:00"))
+    assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity,
+                              network="tiktok") == "blink"
+    log.append(PostRow("t-0", "tiktok", "published", clip_id=blink_id, at="2026-10-03T15:00:00+00:00"))
     assert last_single_clip_pause(log, clips) == "blink"
-    assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity) == "calc"
+    assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity,
+                              network="tiktok") == "calc"
 
 
 def test_last_single_clip_pause_uses_reel_networks_only(tmp_path):
@@ -148,7 +150,7 @@ def test_last_single_clip_pause_uses_reel_networks_only(tmp_path):
     (clips / f"{calc_id}.json").write_text('{"timeline": {"pause": "calc"}}', encoding="utf-8")
     log.append(PostRow("t-1", "bluesky", "published", clip_id=calc_id, at="2026-10-02T15:00:00+00:00"))
     assert last_single_clip_pause(log, clips) is None
-    log.append(PostRow("t-2", "instagram", "published", clip_id=calc_id, at="2026-10-03T15:00:00+00:00"))
+    log.append(PostRow("t-2", "tiktok", "published", clip_id=calc_id, at="2026-10-03T15:00:00+00:00"))
     assert last_single_clip_pause(log, clips) == "calc"
 
 

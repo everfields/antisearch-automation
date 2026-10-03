@@ -32,7 +32,7 @@ from .media_host import GitHubPagesHost
 from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
 from .registry import ADAPTERS
-from .igcaption import ig_caption, ig_caption_mode, ig_caption_problem
+from .igcaption import build_ig_caption, ig_caption_mode, ig_caption_problem
 from .tags import TAG_NETWORKS, X_HANDLE, TagLog, choose_tag, choose_x_mention
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
@@ -324,13 +324,14 @@ def run_posts(
                 job = dataclasses.replace(job, caption=tag, notes=f"{job.notes}; tag: {picked.reason}")
 
         if net == "instagram" and ig_caption_mode(env) == "hashtags":
-            # Carlos, 2026-09-27: `#<input> #<verdict>`, plus the one allowlisted mention if any.
-            caption = ig_caption(job.category, clip.verdict, tag if tag.startswith("@") else "")
-            problem = ig_caption_problem(caption)
+            caption = build_ig_caption(
+                job.category, clip.verdict, tag if tag.startswith("@") else "", job.id, log,
+            )
+            problem = ig_caption_problem(caption, allow_empty=True)
             if problem:
                 out.append(Outcome(job.id, net, "rejected_caption", detail=f"{problem}: {caption!r}"))
                 continue
-            job = dataclasses.replace(job, caption=caption)
+            job = dataclasses.replace(job, caption=caption or "-")
         shown = effective_caption(job.caption)
         if net == X_NETWORK and (job.notes.startswith("trend:") or job.notes.startswith("winner")):
             out.append(Outcome(job.id, net, "skipped_x_no_trend", detail="X takes no trend-lane or winner-lane posts"))
@@ -413,7 +414,10 @@ def stories_enabled(env: Mapping[str, str]) -> bool:
 def _story(job: Job, clip: ClipRow, log: PostLog, ledger: Ledger, env, *, live: bool, transport, sleep,
            now: datetime, day, produce, state: AntibanState, flags: Path) -> Outcome:
     """The Stories card for the reel that just went out through Buffer: the same frozen verdict, never a
-    second oracle run."""
+    second oracle run.
+
+    Founder, 2026-10-03: stories use the fixed StoryCard template (creatives/story.py), not the reel's
+    blink/calc monolith, so they are unchanged while reels always use calc."""
     from .buffer import BufferInstagramStory
 
     net = BufferInstagramStory.name
