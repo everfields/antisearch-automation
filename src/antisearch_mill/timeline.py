@@ -458,6 +458,24 @@ def _app_states(
     )
 
 
+def _apply_calc_outro(tl: Timeline) -> Timeline:
+    """After the verdict hold, append the antisearch.ai outro (calc clips only)."""
+    from .saga import OUTRO, SAGA_OUTRO_S
+
+    outro_f = max(1, round(SAGA_OUTRO_S * tl.fps))
+    verdict = next(s for s in tl.states if s.kind == "result")
+    outro_start = verdict.end
+    new_total = outro_start + outro_f
+    new_states: list[State] = []
+    for st in tl.states:
+        if st.kind == "result":
+            new_states.append(State(verdict.start, outro_start, "result", verdict.text, False))
+            new_states.append(State(outro_start, new_total, "result", OUTRO, False))
+        else:
+            new_states.append(st)
+    return replace(tl, states=tuple(s for s in new_states if s.end > s.start), total_frames=new_total)
+
+
 def _apply_calc_holds(tl: Timeline, category: str) -> Timeline:
     """Split the word-style pause into input hold, formula, empty-cursor beat."""
     from .calc_pause import calc_hold_frames
@@ -509,6 +527,7 @@ def build_timeline(
             tl = _word_timeline(category, verdict, fps=fps, pause_s=pause_s)
         if pause_mode == "calc":
             tl = _apply_calc_holds(tl, category)
+            tl = _apply_calc_outro(tl)
         return tl
     if style == "app":
         if wait == "fixed":

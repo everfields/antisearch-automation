@@ -83,7 +83,8 @@ def _clip_label(opts: dict, env: dict[str, str] | None = None) -> str:
     fixed = opts["phone"] is not None or opts["audio"] in (AUDIO_HEARTBEAT, AUDIO_KEYS)
     wait = f"fixed:{WAIT_BLINKS}x{WAIT_S:.2f}s typing={opts['typing']}" if fixed else "latency"
     frame = opts["phone"].tag if opts["phone"] else "none"
-    pause = f" pause={opts['pause_mode']}" if opts.get("pause_mode") == "calc" else ""
+    pm = opts.get("pause_mode")
+    pause = f" pause={pm}" if pm in ("calc", "alternate") else ""
     return (f"style={style} audio={_audio_label(opts['audio'], opts['audio_variant'], opts['bed'], opts['keys'])} "
             f"frame={frame} wait={wait}{pause}")
 
@@ -246,7 +247,7 @@ def cmd_post(args, settings: Settings) -> int:
             )
         else:
             (result,) = produce_all(
-                [job], oracle, ledger, font=settings.font_path, force=True, **opts,
+                [job], oracle, ledger, font=settings.font_path, force=True, post_log=log, **opts,
             )
         if result.status == "failed":
             raise RuntimeError(result.detail)

@@ -18,7 +18,8 @@ from .render import Layout, footer_placement
 
 CALC_PAUSE = "calc"
 DEFAULT_PAUSE = "blink"
-PAUSE_MODES = (DEFAULT_PAUSE, CALC_PAUSE)
+ALTERNATE_PAUSE = "alternate"
+PAUSE_MODES = (DEFAULT_PAUSE, CALC_PAUSE, ALTERNATE_PAUSE)
 CALC_PRE_HOLD_S = 0.8
 CALC_POST_HOLD_S = 0.25
 
@@ -99,8 +100,90 @@ def clip_pause(env: Mapping[str, str] | None = None) -> str:
     if not raw:
         return DEFAULT_PAUSE
     if raw not in PAUSE_MODES:
-        raise ValueError(f"PUBLISHER_CLIP_PAUSE={raw!r}; use blink or calc")
+        raise ValueError(f"PUBLISHER_CLIP_PAUSE={raw!r}; use blink, calc, or alternate")
     return raw
+
+
+def pause_from_clip_sidecar(clip_id: str, clips_dir: Path | None) -> str:
+    """Whether a posted clip used calc, from its sidecar. Missing sidecar means blink."""
+    if not clip_id or not clips_dir:
+        return DEFAULT_PAUSE
+    path = clips_dir / f"{clip_id}.json"
+    if not path.is_file():
+        return DEFAULT_PAUSE
+    import json
+
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if data.get("timeline", {}).get("pause") == CALC_PAUSE:
+        return CALC_PAUSE
+    return DEFAULT_PAUSE
+
+
+def last_single_clip_pause(post_log, clips_dir: Path | None = None) -> str | None:
+    """Pause mode of the latest single-verdict clip in the post log, or None."""
+    from datetime import datetime
+
+    from .publisher.guard import DONE, FAILED, WITHHELD
+    from .saga import SAGA_ID_PREFIX
+
+    if post_log is None:
+        return None
+    candidates: list[tuple[datetime, str]] = []
+    for job_id, row in post_log.latest_by_job().items():
+        if job_id.startswith(SAGA_ID_PREFIX):
+            continue
+        if row.get("status") in (FAILED, WITHHELD, "reopened"):
+            continue
+        if row.get("status") not in DONE:
+            continue
+        if (row.get("format") or "").strip().lower() == "text":
+            continue
+        clip_id = (row.get("clip_id") or "").strip()
+        if not clip_id:
+            continue
+        try:
+            when = datetime.fromisoformat(row["at"])
+        except (KeyError, ValueError):
+            continue
+        candidates.append((when, clip_id))
+    if not candidates:
+        return None
+    _, clip_id = max(candidates, key=lambda x: x[0])
+    return pause_from_clip_sidecar(clip_id, clips_dir)
+
+
+def next_single_pause(last: str | None, parity_clip_id: str) -> str:
+    """Alternate calc/blink from the previous single clip, or clip-id parity when there is no log."""
+    if last == CALC_PAUSE:
+        return DEFAULT_PAUSE
+    if last == DEFAULT_PAUSE:
+        return CALC_PAUSE
+    tag = parity_clip_id.rsplit("-", 1)[-1] if parity_clip_id else "0"
+    try:
+        even = int(tag, 16) % 2 == 0
+    except ValueError:
+        even = int(hashlib.sha256(parity_clip_id.encode()).hexdigest(), 16) % 2 == 0
+    return CALC_PAUSE if even else DEFAULT_PAUSE
+
+
+def resolve_pause_mode(
+    env: Mapping[str, str] | None = None,
+    *,
+    job_id: str,
+    post_log=None,
+    clips_dir: Path | None = None,
+    is_saga: bool = False,
+    parity_clip_id: str = "",
+) -> str:
+    """Effective pause for one clip: blink, calc, or alternate resolved to blink/calc."""
+    if is_saga:
+        return DEFAULT_PAUSE
+    raw = clip_pause(env)
+    if raw != ALTERNATE_PAUSE:
+        return raw
+    last = last_single_clip_pause(post_log, clips_dir)
+    pid = parity_clip_id or hashlib.sha256(job_id.encode()).hexdigest()[:8]
+    return next_single_pause(last, pid)
 
 
 def calc_seed(category: str) -> int:

@@ -7,9 +7,13 @@ from pathlib import Path
 import pytest
 
 from antisearch_mill.calc_pause import (
-    CALC_PAUSE, CALC_POST_HOLD_S, CALC_PRE_HOLD_S, DEFAULT_PAUSE, calc_hold_frames, calc_seed,
-    clip_pause, formula_fragments, frame_hash, missing_glyphs, render_calc_frames, resolve_math_font,
+    ALTERNATE_PAUSE, CALC_PAUSE, CALC_POST_HOLD_S, CALC_PRE_HOLD_S, DEFAULT_PAUSE, calc_hold_frames,
+    calc_seed, clip_pause, formula_fragments, frame_hash, last_single_clip_pause, missing_glyphs,
+    next_single_pause, render_calc_frames, resolve_math_font, resolve_pause_mode,
 )
+from antisearch_mill.publisher.guard import PostLog, PostRow
+from antisearch_mill.produce import clip_id_for
+from antisearch_mill.oracle import Verdict
 from antisearch_mill.fonts import resolve_font
 from antisearch_mill.render import Layout, probe, render_clip
 from antisearch_mill.timeline import build_timeline, wait_frames
@@ -29,17 +33,28 @@ def test_pause_flag_calc():
     assert clip_pause({"PUBLISHER_CLIP_PAUSE": "CALC"}) == CALC_PAUSE
 
 
+def test_pause_flag_alternate():
+    assert clip_pause({"PUBLISHER_CLIP_PAUSE": "alternate"}) == ALTERNATE_PAUSE
+    assert clip_pause({"PUBLISHER_CLIP_PAUSE": "ALTERNATE"}) == ALTERNATE_PAUSE
+
+
 def test_pause_flag_rejects_unknown():
     with pytest.raises(ValueError, match="PUBLISHER_CLIP_PAUSE"):
         clip_pause({"PUBLISHER_CLIP_PAUSE": "matrix"})
 
 
-def test_timeline_duration_unchanged_with_calc_flag():
-    """Calc splits the pause; total clip length and verdict hold stay the same."""
+def test_timeline_calc_adds_outro_after_verdict():
+    """Calc splits the pause and appends antisearch.ai after the verdict hold."""
+    from antisearch_mill.saga import OUTRO, SAGA_OUTRO_S
+
     blink = build_timeline("80s horror movie", "the thing", pause_s=2.0)
     calc = build_timeline("80s horror movie", "the thing", pause_s=2.0, pause_mode="calc")
-    assert calc.total_frames == blink.total_frames
     assert calc.verdict_frame == blink.verdict_frame
+    assert calc.total_frames == blink.total_frames + round(SAGA_OUTRO_S * calc.fps)
+    results = [s for s in calc.states if s.kind == "result"]
+    assert len(results) == 2
+    assert results[0].text == "the thing"
+    assert results[1].text == OUTRO
     assert calc.pause_s == pytest.approx(2.0)
     pre_f, post_f = calc_hold_frames(calc.fps)
     assert pre_f == round(CALC_PRE_HOLD_S * calc.fps)
@@ -81,6 +96,56 @@ def test_every_formula_glyph_is_in_main_or_math_font():
     assert missing_glyphs(main, math) == []
 
 
+def test_next_single_pause_alternates():
+    assert next_single_pause("calc", "job-00000000") == "blink"
+    assert next_single_pause("blink", "job-00000000") == "calc"
+    assert next_single_pause(None, "job-00000000") == "calc"
+    assert next_single_pause(None, "job-00000001") == "blink"
+
+
+def test_resolve_pause_mode_calc_and_blink_unchanged():
+    env = {"PUBLISHER_CLIP_PAUSE": "calc"}
+    assert resolve_pause_mode(env, job_id="t-1") == "calc"
+    env = {"PUBLISHER_CLIP_PAUSE": "blink"}
+    assert resolve_pause_mode(env, job_id="t-1") == "blink"
+    assert resolve_pause_mode({}, job_id="t-1") == "blink"
+
+
+def test_resolve_pause_mode_saga_forces_blink():
+    env = {"PUBLISHER_CLIP_PAUSE": "alternate"}
+    assert resolve_pause_mode(env, job_id="saga-a", is_saga=True) == "blink"
+    env = {"PUBLISHER_CLIP_PAUSE": "calc"}
+    assert resolve_pause_mode(env, job_id="saga-a", is_saga=True) == "blink"
+
+
+def test_resolve_pause_mode_from_post_log(tmp_path):
+    clips = tmp_path / "clips"
+    clips.mkdir()
+    log = PostLog(tmp_path / "posts.csv")
+    verdict = Verdict(
+        category="thing", verdict="love", raw="love", source="fixture", url="",
+        latency_ms=2000, attempts=1, fetched_at="2026-10-01T00:00:00+00:00",
+    )
+    blink_id = clip_id_for("t-0", verdict, 2.0)
+    calc_id = clip_id_for("t-1", verdict, 2.0, pause_mode="calc")
+    (clips / f"{calc_id}.json").write_text(
+        '{"timeline": {"pause": "calc"}}', encoding="utf-8",
+    )
+    log.append(PostRow("t-1", "tiktok", "published", clip_id=calc_id, at="2026-10-02T15:00:00+00:00"))
+    env = {"PUBLISHER_CLIP_PAUSE": "alternate"}
+    parity = clip_id_for("t-2", verdict, 2.0)
+    assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity) == "blink"
+    log.append(PostRow("t-0", "instagram", "published", clip_id=blink_id, at="2026-10-03T15:00:00+00:00"))
+    assert last_single_clip_pause(log, clips) == "blink"
+    assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity) == "calc"
+
+
+def test_last_single_clip_pause_skips_saga(tmp_path):
+    log = PostLog(tmp_path / "posts.csv")
+    log.append(PostRow("saga-a", "tiktok", "published", clip_id="saga-a-deadbeef", at="2026-10-03T15:00:00+00:00"))
+    assert last_single_clip_pause(log) is None
+
+
 def test_calc_seed_is_stable():
     assert calc_seed("80s horror movie") == calc_seed("80s horror movie")
     assert calc_seed("taylor swift album") != calc_seed("80s horror movie")
@@ -106,7 +171,7 @@ def test_calc_smoke_render_low_res(tmp_path):
         pause="calc", category="thing", keys="tap",
     )
     assert info.width == 270
-    assert 4.0 <= info.duration_s <= 8.5
+    assert 4.0 <= info.duration_s <= 10.0
     assert probe(clip).acodec == "aac"
 
 
