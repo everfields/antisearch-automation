@@ -263,23 +263,32 @@ def variant_id_tag(variant: CalcVariant | None) -> str:
     ).hexdigest()[:8]
 
 
-def _fill_palette(width: int, height: int, palette: IgPalette, seed: int) -> Image.Image:
-    """Background fill with light grain so palettes read as distinct surfaces."""
-    img = Image.new("RGB", (width, height), palette.bg)
+_GRAIN_TILE = 128
+
+
+@lru_cache(maxsize=16)
+def _grain_tile(palette_name: str, seed: int) -> Image.Image:
+    """One static grain tile per palette+seed; tiled across each frame (not re-rolled per frame)."""
+    palette = next(p for p in IG_PALETTES if p.name == palette_name)
     rng = random.Random(seed + 17)
-    px = img.load()
-    for y in range(0, height, 2):
-        for x in range(0, width, 2):
-            n = rng.randint(-10, 10)
-            r, g, b = palette.bg
-            tone = (max(0, min(255, r + n)), max(0, min(255, g + n)), max(0, min(255, b + n)))
-            px[x, y] = tone
-            if x + 1 < width:
-                px[x + 1, y] = tone
-            if y + 1 < height:
-                px[x, y + 1] = tone
-                if x + 1 < width:
-                    px[x + 1, y + 1] = tone
+    tile = Image.new("RGB", (_GRAIN_TILE, _GRAIN_TILE), palette.bg)
+    px = tile.load()
+    r0, g0, b0 = palette.bg
+    for y in range(_GRAIN_TILE):
+        for x in range(_GRAIN_TILE):
+            n = rng.randint(-8, 8)
+            px[x, y] = (max(0, min(255, r0 + n)), max(0, min(255, g0 + n)), max(0, min(255, b0 + n)))
+    return tile
+
+
+def _fill_palette(width: int, height: int, palette: IgPalette, seed: int) -> Image.Image:
+    """Tiled grain surface: distinct per reel, cheap to draw and to encode."""
+    tile = _grain_tile(palette.name, seed)
+    img = Image.new("RGB", (width, height))
+    tw, th = tile.size
+    for y in range(0, height, th):
+        for x in range(0, width, tw):
+            img.paste(tile, (x, y))
     return img
 
 
@@ -484,10 +493,11 @@ def _draw_ig_calc_frame(
     math_path: str,
     lay: Layout,
     variant: CalcVariant,
+    bg: Image.Image | None = None,
 ) -> Image.Image:
     """Instagram calc frame: palette surface, input already typed, formula below. No lone cursor."""
     palette = variant.palette
-    img = _fill_palette(lay.width, lay.height, palette, variant.seed + frame)
+    img = bg.copy() if bg is not None else _fill_palette(lay.width, lay.height, palette, variant.seed)
     draw = ImageDraw.Draw(img)
     fm = metrics(font_path, lay.font_px)
     main_font = _font(font_path, lay.font_px)
@@ -545,10 +555,14 @@ def render_calc_frames(
     out_dir.mkdir(parents=True, exist_ok=True)
     lay = layout or Layout(width=width, height=height)
     math_path = resolve_math_font()
+    bg = _fill_palette(lay.width, lay.height, variant.palette, variant.seed) if variant else None
     paths: list[Path] = []
     for i in range(frame_count):
         path = out_dir / f"frame_{i:04d}.png"
-        _draw_calc_frame(category, i, frame_count, font_path, math_path, lay, variant).save(path)
+        if variant is not None:
+            _draw_ig_calc_frame(category, i, frame_count, font_path, math_path, lay, variant, bg).save(path)
+        else:
+            _draw_calc_frame(category, i, frame_count, font_path, math_path, lay, variant).save(path)
         paths.append(path)
     return paths
 

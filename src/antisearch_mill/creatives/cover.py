@@ -35,7 +35,7 @@ def cover_image(verdict: str, *, font_path: str, width: int = 1080, height: int 
         frame = _fill_palette(width, height, calc_variant.palette, calc_variant.seed + 99).convert("RGBA")
         ink = (*calc_variant.palette.fg, 255)
     else:
-        frame = _background(width, height)
+        frame = _background(width, height).convert("RGBA")
         ink = (*INK, 255)
     txt = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     _tracked(ImageDraw.Draw(txt), width / 2, verdict_y(height), verdict, verdict_font(font_path, verdict, width),

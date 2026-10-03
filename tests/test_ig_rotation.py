@@ -442,9 +442,10 @@ def test_the_cover_is_frame_zero_only_and_the_reel_ends_on_the_creatives_own_las
     assert len(a) == len(b)
     assert _diff(a[-1], b[-1]) < 1.0 and all(_diff(x, y) < 1.0 for x, y in zip(a[-10:], b[-10:]))  # no cover at the end
     assert all(_diff(x, y) < 1.0 for x, y in zip(a[1:], b[1:]))  # playback is the creative's, frame for frame
+    from antisearch_mill.calc_pause import calc_variant
     from antisearch_mill.creatives.cover import cover_image
 
-    card = cover_image("diverxo", font_path=resolve_font()).convert("L").resize((108, 192)).tobytes()
+    card = cover_image("diverxo", font_path=resolve_font(), calc_variant=calc_variant("p-r")).convert("L").resize((108, 192)).tobytes()
     assert _diff(b[0], card) < 2.0 < _diff(a[0], card)  # frame 0, and only frame 0, is the cover
     assert covered.cover_s == cover_s(30) and 0 < covered.cover_s < 1 / 30  # inside frame 0
     info = probe(Path(covered.clip_path))

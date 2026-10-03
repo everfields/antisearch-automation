@@ -90,9 +90,9 @@ def wjob(job_id, category, net):
 def test_the_only_text_is_the_verified_handle(tmp_path):
     ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "posts.csv")
     ig, tt = fake_adapter("instagram"), fake_adapter("tiktok")
-    clip(ledger, "w-fun", verdict="spain")
+    clip(ledger, "w-fun1", verdict="spain")
     clip(ledger, "w-fun-tt", verdict="spain")
-    out = go([wjob("w-fun", "country for having fun", "instagram"), wjob("w-fun-tt", "place to party", "tiktok")],
+    out = go([wjob("w-fun1", "country for having fun", "instagram"), wjob("w-fun-tt", "place to party", "tiktok")],
              ledger, log, {"instagram": ig, "tiktok": tt})
     assert [o.status for o in out] == ["published", "published"]
     # Instagram and TikTok tag only from the tag allowlist (brands, products, companies); a country is none
@@ -102,8 +102,8 @@ def test_the_only_text_is_the_verified_handle(tmp_path):
 def test_a_public_figure_publishes_untagged_on_instagram_and_tiktok(tmp_path):
     ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "posts.csv")
     ig = fake_adapter("instagram")
-    clip(ledger, "w-ceo", verdict="elon musk")
-    (o,) = go([wjob("w-ceo", "ceo", "instagram")], ledger, log, {"instagram": ig})
+    clip(ledger, "w-ceo3", verdict="elon musk")
+    (o,) = go([wjob("w-ceo3", "ceo", "instagram")], ledger, log, {"instagram": ig})
     # never a mention of a person, even with a verified handle; the name is only a hashtag
     assert o.status == "published" and ig.calls[0][2] == "#ceo #elonmusk"
 
@@ -135,8 +135,8 @@ def test_dry_run_plan_shows_the_resolved_tag(tmp_path):
     from antisearch_mill.publisher.meta import InstagramAdapter
 
     ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "posts.csv")
-    clip(ledger, "w-fun", verdict="spain")
-    (o,) = go([wjob("w-fun", "country for having fun", "instagram")], ledger, log,
+    clip(ledger, "w-fun1", verdict="spain")
+    (o,) = go([wjob("w-fun1", "country for having fun", "instagram")], ledger, log,
               {"instagram": InstagramAdapter}, env={}, live=False)
     plan = json.loads(open(o.artifact).read())
     assert plan["caption"] == "#countryforhavingfun #spain" and "tags are off on instagram" in plan["source"]

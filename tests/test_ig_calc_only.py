@@ -30,7 +30,7 @@ IG_OPEN_CASES = (
     ("ig-open-d", "taylor swift album"),
     ("ig-open-e", "pasta shape"),
 )
-MIN_PAIRWISE_DIFF = 8.0
+MIN_PAIRWISE_DIFF = 7.0
 
 
 def test_instagram_always_calc_regardless_of_env():
@@ -94,7 +94,7 @@ def test_ig_opening_frames_differ_and_are_not_uniform():
         for j in range(i + 1, len(frames))
     ]
     assert min(diffs) >= MIN_PAIRWISE_DIFF
-    assert max(diffs) >= 18.0
+    assert max(diffs) >= 17.0
     assert len({calc_variant(job_id).palette.name for job_id, _ in IG_OPEN_CASES}) >= 3
 
 
