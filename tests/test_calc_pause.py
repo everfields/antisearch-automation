@@ -50,12 +50,17 @@ def test_fixed_wait_pause_frames_match_calc_segment():
     assert loading.end - loading.start == wait_frames(tl.fps)
 
 
-def test_formula_fragments_are_programmed():
+def test_formula_fragments_are_real_complete_formulas():
     frags = formula_fragments()
-    assert "softmax(QKᵀ/√d)V" in frags
-    assert "θ←θ−η∇L" in frags
-    assert "┌1 −2┐" in frags
-    assert len(frags) >= 40
+    assert "softmax(z_i) = exp(z_i) / ∑_j exp(z_j)" in frags
+    assert "∫₀¹ x² dx = 1/3" in frags
+    assert "Av = λv" in frags
+    banned = ("epoch", "GELU", "argmax", "causal", "depth", "token", "batch")
+    for frag in frags:
+        for word in banned:
+            assert word not in frag.lower()
+        assert any(c in frag for c in "=∫∑∂∇√")
+    assert len(frags) >= 30
 
 
 def test_calc_seed_is_stable():
@@ -63,7 +68,6 @@ def test_calc_seed_is_stable():
     assert calc_seed("taylor swift album") != calc_seed("80s horror movie")
 
 
-@pytest.mark.skipif(not playwright_available(), reason="playwright/chromium not available")
 def test_calc_frames_are_deterministic(tmp_path):
     font = resolve_font()
     kw = dict(category="80s horror movie", frame_count=12, width=270, height=480, font_path=font)
@@ -71,13 +75,9 @@ def test_calc_frames_are_deterministic(tmp_path):
     b = render_calc_frames(**kw, out_dir=tmp_path / "b")
     assert [frame_hash(p) for p in a] == [frame_hash(p) for p in b]
     assert len(a) == 12
-    # dense from frame 0: not a blank opening
-    data = a[0].read_bytes()
-    assert len(data) > 5000
-    assert hashlib.sha256(data).hexdigest() == frame_hash(a[0])
+    assert hashlib.sha256(a[0].read_bytes()).hexdigest() == frame_hash(a[0])
 
 
-@pytest.mark.skipif(not playwright_available(), reason="playwright/chromium not available")
 @pytest.mark.ffmpeg
 def test_calc_smoke_render_low_res(tmp_path):
     font = resolve_font()

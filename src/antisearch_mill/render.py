@@ -674,8 +674,9 @@ def _render_calc_clip(
     ls, le = _loading_span(timeline)
     calc_frames = le - ls
     calc_dir = work / "calc"
-    render_calc_frames(category, calc_dir, frame_count=calc_frames, width=lay.width, height=lay.height,
-                       font_path=font_path)
+    render_calc_frames(
+        category, calc_dir, frame_count=calc_frames, font_path=font_path, layout=lay,
+    )
     prefix = work / "prefix.mp4"
     calc_vid = work / "calc.mp4"
     suffix = work / "suffix.mp4"
