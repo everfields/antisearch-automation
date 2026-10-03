@@ -159,7 +159,7 @@ jobs:
           if mill due --state state/posts.csv; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "go=false" >> "$GITHUB_OUTPUT"; fi
 
       - if: steps.due.outputs.go == 'true'
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fonts-noto-extra fonts-dejavu-core
 
       - name: Playwright Chromium (calc pause only)
         if: steps.due.outputs.go == 'true' && vars.PUBLISHER_CLIP_PAUSE == 'calc'

@@ -8,7 +8,7 @@ import pytest
 
 from antisearch_mill.calc_pause import (
     CALC_PAUSE, DEFAULT_PAUSE, calc_seed, clip_pause, formula_fragments, frame_hash,
-    playwright_available, render_calc_frames,
+    missing_glyphs, render_calc_frames, resolve_math_font,
 )
 from antisearch_mill.fonts import resolve_font
 from antisearch_mill.render import Layout, probe, render_clip
@@ -52,15 +52,24 @@ def test_fixed_wait_pause_frames_match_calc_segment():
 
 def test_formula_fragments_are_real_complete_formulas():
     frags = formula_fragments()
-    assert "softmax(z_i) = exp(z_i) / ∑_j exp(z_j)" in frags
+    assert "softmax(zᵢ) = exp(zᵢ) / ∑ⱼ exp(zⱼ)" in frags
     assert "∫₀¹ x² dx = 1/3" in frags
-    assert "Av = λv" in frags
+    assert "β = (X⊤X)⁻¹X⊤y" in frags
     banned = ("epoch", "GELU", "argmax", "causal", "depth", "token", "batch")
     for frag in frags:
         for word in banned:
             assert word not in frag.lower()
         assert any(c in frag for c in "=∫∑∂∇√")
+        assert "^" not in frag
+        assert "_{" not in frag
+        assert "^{" not in frag
     assert len(frags) >= 30
+
+
+def test_every_formula_glyph_is_in_main_or_math_font():
+    main = resolve_font()
+    math = resolve_math_font()
+    assert missing_glyphs(main, math) == []
 
 
 def test_calc_seed_is_stable():

@@ -1,11 +1,4 @@
-"""Calc pause: one accelerating formula line during the oracle wait.
-
-When ``PUBLISHER_CLIP_PAUSE=calc``, the blinking-caret pause is replaced by a
-single line of real mathematical formulas at the same position and size as the
-typed input and verdict. The line mutates faster and faster, spans most of the
-screen width, then the verdict appears on that same line. Deterministic from the
-input; rendered with Pillow to match the monolith layout exactly.
-"""
+"""Calc pause: one accelerating formula line during the oracle wait."""
 
 from __future__ import annotations
 
@@ -15,9 +8,10 @@ import random
 import shutil
 import subprocess
 from collections.abc import Mapping
+from functools import lru_cache
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 from .fonts import _font, metrics
 from .render import Layout, footer_placement
@@ -28,61 +22,71 @@ PAUSE_MODES = (DEFAULT_PAUSE, CALC_PAUSE)
 
 BG_RGB = (10, 10, 10)
 FG_RGB = (232, 228, 216)
-DIM_RGB = (70, 68, 65)  # E8E4D8 at 30%
+DIM_RGB = (70, 68, 65)
 
-# Complete formulas only: calculus, algebra, linear algebra, statistics.
+MATH_FONT_CANDIDATES = (
+    "/usr/share/fonts/truetype/noto/NotoSansMath-Regular.ttf",
+    "/usr/share/fonts/opentype/noto/NotoSansMath-Regular.otf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+)
+
+_DIGITS = "0123456789"
+_SUBS = "ᵢⱼₙₖₘₜₚₗₛ₀₁₂₃₄₅₆₇₈₉"
+_VARS = "xyzabctuvw"
+_SUPS = "⁰¹²³⁴⁵⁶⁷⁸⁹ⁿⁱ⁻⁺"
+_MAIN_ASCII = set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 =+(),.[]/|")
+
+# Complete formulas: Unicode superscripts/subscripts only, no raw LaTeX.
 FORMULAS: tuple[str, ...] = (
     "∫₀¹ x² dx = 1/3",
-    "∂f/∂x = lim_{h→0} (f(x+h) − f(x))/h",
-    "∑_{i=1}^n i = n(n+1)/2",
-    "E[X] = ∑_i x_i P(x_i)",
+    "∂f/∂x = limₕ→₀ (f(x+h) − f(x))/h",
+    "∑ᵢ₌₁ⁿ i = n(n+1)/2",
+    "E[X] = ∑ᵢ xᵢ P(xᵢ)",
     "Var(X) = E[X²] − (E[X])²",
-    "softmax(z_i) = exp(z_i) / ∑_j exp(z_j)",
-    "∇f(x) = (∂f/∂x_1, …, ∂f/∂x_n)",
-    "Ax = b",
+    "softmax(zᵢ) = exp(zᵢ) / ∑ⱼ exp(zⱼ)",
+    "∇f = (∂f/∂x₁, …, ∂f/∂xₙ)",
     "det([[a,b],[c,d]]) = ad − bc",
     "Av = λv",
     "f(x) = f(a) + f'(a)(x−a) + f''(a)(x−a)²/2",
-    "θ_{t+1} = θ_t − η ∇L(θ_t)",
-    "∂L/∂w = (1/m) ∑_i ∇L_i",
-    "σ² = (1/n) ∑_i (x_i − μ)²",
-    "(AB)_{ij} = ∑_k A_{ik} B_{kj}",
-    "‖x‖₂ = √(∑_i x_i²)",
+    "θₜ₊₁ = θₜ − η∇L(θₜ)",
+    "∂L/∂w = (1/m) ∑ᵢ ∇Lᵢ",
+    "σ² = (1/n) ∑ᵢ (xᵢ − μ)²",
+    "(AB)ᵢⱼ = ∑ₖ AᵢₖBₖⱼ",
+    "‖x‖₂ = √(∑ᵢ xᵢ²)",
     "P(A∩B) = P(A)P(B|A)",
-    "∫_{−∞}^{∞} e^{−x²} dx = √π",
-    "dy/dx + P(x)y = Q(x)",
+    "∫₋∞…∞ e⁻ˣ² dx = √π",
     "Cov(X,Y) = E[XY] − E[X]E[Y]",
     "P(A|B) = P(B|A)P(A) / P(B)",
     "∂²f/∂x∂y = ∂²f/∂y∂x",
-    "∫_a^b f'(x)dx = f(b) − f(a)",
-    "∑_{k=0}^∞ ar^k = a/(1−r), |r|<1",
-    "log(ab) = log a + log b",
+    "∫ₐᵇ f'(x)dx = f(b) − f(a)",
+    "∑ₖ₌₀…∞ a·rᵏ = a/(1−r)",
     "sin²θ + cos²θ = 1",
     "∇·(∇φ) = ∇²φ",
-    "z = (x−μ)/σ",
-    "r = ∑(x_i−x̄)(y_i−ȳ) / √(∑(x_i−x̄)² ∑(y_i−ȳ)²)",
-    "∫ sin(x)cos(x)dx = sin²(x)/2 + C",
-    "∂/∂x (x^n) = n x^{n−1}",
-    "E[aX+b] = aE[X] + b",
-    "∑_{i,j} A_{ij} = tr(A)",
-    "x^T A x = ∑_{i,j} x_i A_{ij} x_j",
-    "∇_θ J(θ) = ∂J/∂θ",
-    "H_{ij} = ∂²L / ∂θ_i ∂θ_j",
-    "∫_0^{2π} sin(x)dx = 0",
-    "P(X=k) = e^{−λ} λ^k / k!",
-    "β = (X^T X)^{−1} X^T y",
-    "SVD: A = UΣV^T",
-    "‖A‖_F = √(∑_{i,j} A_{ij}²)",
+    "β = (X⊤X)⁻¹X⊤y",
+    "‖A‖₂ = √(∑ᵢⱼ Aᵢⱼ²)",
+    "KL(p‖q) = ∑ᵢ pᵢ log(pᵢ/qᵢ)",
+    "det(A) = ∏ᵢ λᵢ",
+    "∑ᵢ₌₁ⁿ 1/i² = π²/6",
     "∂L/∂z = ŷ − y",
-    "KL(p‖q) = ∑_i p_i log(p_i/q_i)",
-    "∫_0^1 (1−x)^n dx = 1/(n+1)",
-    "det(A) = ∏_i λ_i",
-    "∑_{i=1}^n 1/i² = π²/6",
+    "A = UΣV⊤",
+    "Hᵢⱼ = ∂²L / ∂θᵢ ∂θⱼ",
+    "⟨a,b⟩ = ∑ᵢ aᵢbᵢ = ‖a‖‖b‖cos θ",
+    "∑ᵢ₌₁ⁿ aᵢbᵢ − (∑ᵢ aᵢ)(∑ᵢ bᵢ)/n",
+    "∂/∂xᵢ (½ x⊤Ax) = Ax",
+    "∫ sin(x)cos(x)dx = sin²(x)/2 + C",
+    "z = (x−μ)/σ",
+    "r = ∑ᵢ(xᵢ−x̄)(yᵢ−ȳ) / √(∑ᵢ(xᵢ−x̄)² ∑ᵢ(yᵢ−ȳ)²)",
+    "log(ab) = log a + log b",
+    "dy/dx + P(x)y = Q(x)",
+    "E[aX+b] = aE[X] + b",
+    "∑ᵢⱼ Aᵢⱼ = tr(A)",
+    "x⊤Ax = ∑ᵢⱼ xᵢAᵢⱼxⱼ",
+    "∇θ J(θ) = ∂J/∂θ",
 )
 
 
 def clip_pause(env: Mapping[str, str] | None = None) -> str:
-    """``PUBLISHER_CLIP_PAUSE``: ``blink`` (default) or ``calc``. Blank means ``blink``."""
     source = os.environ if env is None else env
     raw = (source.get("PUBLISHER_CLIP_PAUSE") or "").strip().lower()
     if not raw:
@@ -97,63 +101,138 @@ def calc_seed(category: str) -> int:
 
 
 def formula_fragments() -> tuple[str, ...]:
-    """The programmed formula set (for tests)."""
     return FORMULAS
 
 
-def _formula_at(seed: int, frame: int, total: int) -> str:
-    """One complete formula, mutating faster as the pause progresses."""
+@lru_cache(maxsize=8)
+def _cmap(path: str) -> frozenset[int]:
+    from fontTools.ttLib import TTFont
+
+    return frozenset(TTFont(path).getBestCmap().keys())
+
+
+def resolve_math_font() -> str:
+    for candidate in MATH_FONT_CANDIDATES:
+        if Path(candidate).is_file():
+            return candidate
+    raise RuntimeError("no math font found; install fonts-noto-extra or fonts-dejavu")
+
+
+def missing_glyphs(main_path: str, math_path: str, formulas: tuple[str, ...] = FORMULAS) -> list[str]:
+    main_cmap = _cmap(main_path)
+    math_cmap = _cmap(math_path)
+    missing: list[str] = []
+    for formula in formulas:
+        for ch in formula:
+            if ord(ch) in main_cmap or ord(ch) in math_cmap:
+                continue
+            if ch not in missing:
+                missing.append(ch)
+    return missing
+
+
+def _use_math_font(ch: str, main_cmap: frozenset[int], math_cmap: frozenset[int]) -> bool:
+    cp = ord(ch)
+    if ch in _MAIN_ASCII and cp in main_cmap:
+        return False
+    if cp in math_cmap:
+        return True
+    return cp not in main_cmap
+
+
+def _mutate(formula: str, rng: random.Random, intensity: float) -> str:
+    """Change operands/indices/variables only; structure stays intact."""
+    out: list[str] = []
+    for ch in formula:
+        r = rng.random()
+        if ch in _DIGITS and r < 0.2 * intensity:
+            out.append(rng.choice(_DIGITS))
+        elif ch in _SUBS and r < 0.16 * intensity:
+            out.append(rng.choice(_SUBS))
+        elif ch in _VARS and r < 0.14 * intensity:
+            out.append(rng.choice(_VARS))
+        elif ch in _SUPS and r < 0.14 * intensity:
+            out.append(rng.choice(_SUPS))
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def _formula_line(seed: int, frame: int, total: int, fm, lay: Layout) -> str:
     t = frame / max(1, total - 1)
-    rng = random.Random(seed + frame * 9973)
-    base = FORMULAS[(seed + int(t * len(FORMULAS) * 4)) % len(FORMULAS)]
-    if t > 0.9:
-        return base
-    rate = 1.0 + 14.0 * t * t
-    chars = list(base)
-    digits = "0123456789"
-    subs = "ᵢⱼₙₖₘₜₚₗₛ"
-    n = max(1, int(rate * len(chars) * 0.14))
-    for _ in range(n):
-        i = rng.randrange(len(chars))
-        c = chars[i]
-        if c in digits:
-            chars[i] = rng.choice(digits)
-        elif c in subs:
-            chars[i] = rng.choice(subs)
-        elif c in "xyzabctuvw":
-            chars[i] = rng.choice("xyzabctuvw")
-        elif c in "+−×/=<>[]()":
-            chars[i] = rng.choice("+−×/=<>[]()")
-    if t > 0.1 and rng.random() < 0.1 * t:
-        return FORMULAS[rng.randrange(len(FORMULAS))]
-    return "".join(chars)
+    rng = random.Random(seed + frame * 9973 + int(t * 80000))
+    intensity = min(10.0, 0.4 + 18 * t * t)
+    target = lay.max_text_w * 0.88
+    # Accelerating identity changes: many distinct formulas per second near the end.
+    hop = max(1, int(1 + 22 * t ** 2.8))
+    base_idx = (seed + (frame // hop) * 17) % len(FORMULAS)
+    parts = [_mutate(FORMULAS[base_idx], rng, intensity)]
+    for j in range(3):
+        if fm.width(" · ".join(parts)) >= target * 0.85:
+            break
+        idx = (seed + frame * (j + 3) + rng.randint(0, 9999)) % len(FORMULAS)
+        nxt = _mutate(FORMULAS[idx], random.Random(seed + frame + idx * 31), intensity)
+        trial = " · ".join(parts + [nxt])
+        if fm.width(trial) > lay.max_text_w:
+            break
+        parts.append(nxt)
+    return " · ".join(parts)
 
 
 def _baseline_y(fm, lay: Layout) -> int:
-    """Same vertical position as a single-line input or verdict."""
     cy = lay.center_y
     top = cy - lay.line_h / 2
     half_leading = (lay.line_h - (fm.ascent + fm.descent)) / 2
     return round(top + half_leading + fm.ascent)
 
 
-def _draw_calc_frame(category: str, frame: int, total: int, font_path: str, lay: Layout) -> Image.Image:
+def _draw_mixed(
+    draw: ImageDraw.ImageDraw,
+    x: float,
+    y: int,
+    text: str,
+    main_font: ImageFont.FreeTypeFont,
+    math_font: ImageFont.FreeTypeFont,
+    main_cmap: frozenset[int],
+    math_cmap: frozenset[int],
+    fill: tuple[int, int, int],
+) -> None:
+    cx = x
+    for ch in text:
+        font = math_font if _use_math_font(ch, main_cmap, math_cmap) else main_font
+        draw.text((cx, y), ch, font=font, fill=fill, anchor="ls")
+        cx += font.getlength(ch)
+
+
+def _draw_calc_frame(
+    category: str,
+    frame: int,
+    total: int,
+    font_path: str,
+    math_path: str,
+    lay: Layout,
+) -> Image.Image:
     img = Image.new("RGB", (lay.width, lay.height), BG_RGB)
     draw = ImageDraw.Draw(img)
     fm = metrics(font_path, lay.font_px)
-    font = _font(font_path, lay.font_px)
-    formula = _formula_at(calc_seed(category), frame, total)
+    main_font = _font(font_path, lay.font_px)
+    math_font = _font(math_path, lay.font_px)
+    main_cmap, math_cmap = _cmap(font_path), _cmap(math_path)
+    formula = _formula_line(calc_seed(category), frame, total, fm, lay)
     baseline = _baseline_y(fm, lay)
-    text_w = fm.width(formula)
+    text_w = sum(
+        (math_font if _use_math_font(ch, main_cmap, math_cmap) else main_font).getlength(ch)
+        for ch in formula
+    )
     margin = lay.px(20)
     max_w = lay.max_text_w
+    t = frame / max(1, total - 1)
     if text_w <= max_w:
         x = (lay.width - text_w) / 2
     else:
-        t = frame / max(1, total - 1)
-        scroll = int((t ** 1.7) * (text_w - max_w + 60))
+        scroll = int((t ** 1.5) * (text_w - max_w + 40))
         x = margin - scroll
-    draw.text((x, baseline), formula, font=font, fill=FG_RGB, anchor="ls")
+    _draw_mixed(draw, x, baseline, formula, main_font, math_font, main_cmap, math_cmap, FG_RGB)
     ff = metrics(font_path, lay.footer_px)
     fp = footer_placement(lay, ff)
     draw.text((fp.x, fp.baseline), fp.text, font=_font(font_path, lay.footer_px), fill=DIM_RGB, anchor="ls")
@@ -170,19 +249,18 @@ def render_calc_frames(
     height: int = 1920,
     layout: Layout | None = None,
 ) -> list[Path]:
-    """Render ``frame_count`` PNG frames into ``out_dir``. Deterministic from ``category``."""
     out_dir.mkdir(parents=True, exist_ok=True)
     lay = layout or Layout(width=width, height=height)
+    math_path = resolve_math_font()
     paths: list[Path] = []
     for i in range(frame_count):
         path = out_dir / f"frame_{i:04d}.png"
-        _draw_calc_frame(category, i, frame_count, font_path, lay).save(path)
+        _draw_calc_frame(category, i, frame_count, font_path, math_path, lay).save(path)
         paths.append(path)
     return paths
 
 
 def frames_to_video(frames_dir: Path, dest: Path, *, fps: int) -> None:
-    """Encode a PNG sequence as a short h264 clip."""
     pattern = str(frames_dir / "frame_%04d.png")
     subprocess.run(
         [
@@ -202,5 +280,4 @@ def frame_hash(path: Path) -> str:
 
 
 def playwright_available() -> bool:
-    """Calc frames render with Pillow; only ffmpeg is required for the full pipeline."""
     return bool(shutil.which("ffmpeg"))
