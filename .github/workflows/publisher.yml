@@ -57,7 +57,9 @@ jobs:
   post:
     if: (github.event_name == 'workflow_dispatch' && !inputs.tick) || vars.PUBLISHER_CRON == 'dry-run' || vars.PUBLISHER_CRON == 'live'
     runs-on: ubuntu-24.04
+    timeout-minutes: 25
     env:
+      PYTHONUNBUFFERED: "1"
       # MANUAL: a person's Run workflow. Everything else (schedule, publisher-tick, tick: true) is a wake.
       MANUAL: ${{ github.event_name == 'workflow_dispatch' && !inputs.tick }}
       LIVE: ${{ (github.event_name == 'workflow_dispatch' && !inputs.tick && inputs.live) || ((github.event_name != 'workflow_dispatch' || inputs.tick) && vars.PUBLISHER_CRON == 'live') }}

@@ -23,6 +23,8 @@ from .timeline import (
     pause_from_latency_ms, wait_frames,
 )
 
+TEXT_ONLY_PLATFORMS = frozenset({"x"})
+
 
 @dataclass
 class ProduceResult:
@@ -97,6 +99,54 @@ def validate_master(info: ClipInfo, layout: Layout, render_style: str = "", *, c
     return problems
 
 
+def _produce_verdict_only(
+    job: Job,
+    verdict: Verdict,
+    ledger: Ledger,
+    *,
+    creative: str = "",
+) -> ProduceResult:
+    """X posts are plain text: freeze the oracle verdict, no ffmpeg clip."""
+    clip_id = clip_id_for(job.id, verdict, 0.0, style="word")
+    ledger.clips_dir.mkdir(parents=True, exist_ok=True)
+    sidecar_path = ledger.clips_dir / f"{clip_id}.json"
+    row = ClipRow(
+        clip_id=clip_id,
+        job_id=job.id,
+        category=verdict.category,
+        verdict=verdict.verdict,
+        capture=CAPTURE_TAG,
+        oracle_source=verdict.source,
+        oracle_url=verdict.url,
+        oracle_latency_ms=verdict.latency_ms,
+        oracle_fetched_at=verdict.fetched_at,
+        produced_at=now_iso(),
+        clip_path=str(sidecar_path),
+        poster_path="",
+        duration_s=0.0,
+        width=0,
+        height=0,
+        fps=0.0,
+        size_bytes=0,
+        sha256="",
+        font="",
+        render_style="text",
+        mill_version=__version__,
+        platforms="|".join(job.platforms),
+        caption=job.caption,
+        creative=creative,
+        cover_s=0.0,
+    )
+    sidecar_path.write_text(
+        json.dumps({"clip": asdict(row), "verdict": verdict.to_dict()}, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    ledger.upsert_clip(row)
+    ledger.log("clip.produced", job_id=job.id, clip_id=clip_id, verdict=verdict.verdict,
+                 oracle_source=verdict.source, format="text")
+    return ProduceResult(job.id, "produced", clip_id)
+
+
 def produce_one(
     job: Job,
     oracle: Oracle,
@@ -146,6 +196,9 @@ def produce_one(
         latency_ms=verdict.latency_ms,
         attempts=verdict.attempts,
     )
+
+    if len(job.platforms) == 1 and job.platforms[0] in TEXT_ONLY_PLATFORMS:
+        return _produce_verdict_only(job, verdict, ledger, creative=creative)
 
     style = clip_style() if style is None else style
     mode = clip_audio() if audio is None else audio
