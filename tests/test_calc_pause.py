@@ -140,6 +140,18 @@ def test_resolve_pause_mode_from_post_log(tmp_path):
     assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity) == "calc"
 
 
+def test_last_single_clip_pause_uses_reel_networks_only(tmp_path):
+    clips = tmp_path / "clips"
+    clips.mkdir()
+    log = PostLog(tmp_path / "posts.csv")
+    calc_id = "t-1-deadbeef"
+    (clips / f"{calc_id}.json").write_text('{"timeline": {"pause": "calc"}}', encoding="utf-8")
+    log.append(PostRow("t-1", "bluesky", "published", clip_id=calc_id, at="2026-10-02T15:00:00+00:00"))
+    assert last_single_clip_pause(log, clips) is None
+    log.append(PostRow("t-2", "instagram", "published", clip_id=calc_id, at="2026-10-03T15:00:00+00:00"))
+    assert last_single_clip_pause(log, clips) == "calc"
+
+
 def test_last_single_clip_pause_skips_saga(tmp_path):
     log = PostLog(tmp_path / "posts.csv")
     log.append(PostRow("saga-a", "tiktok", "published", clip_id="saga-a-deadbeef", at="2026-10-03T15:00:00+00:00"))

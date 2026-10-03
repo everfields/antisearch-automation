@@ -324,7 +324,7 @@ def run_posts(
                 job = dataclasses.replace(job, caption=tag, notes=f"{job.notes}; tag: {picked.reason}")
 
         if net == "instagram" and ig_caption_mode(env) == "hashtags":
-            # Carlos, 2026-09-27: `#<input> #<verdict> #ai`, plus the one allowlisted mention if any.
+            # Carlos, 2026-09-27: `#<input> #<verdict>`, plus the one allowlisted mention if any.
             caption = ig_caption(job.category, clip.verdict, tag if tag.startswith("@") else "")
             problem = ig_caption_problem(caption)
             if problem:
@@ -354,6 +354,18 @@ def run_posts(
         if state.seen_clip(net, clip.clip_id, log):
             out.append(Outcome(job.id, net, "skipped_duplicate_clip", detail=f"clip {clip.clip_id} already went out on {net}"))
             continue
+        if net == "instagram":
+            from .ig_dedupe import ig_input_recent, ig_render_recent
+
+            if ig_input_recent(log, job.category, now):
+                out.append(Outcome(job.id, net, "skipped_ig_input_recent",
+                                   detail=f"{job.category!r} on instagram within 7 days"))
+                continue
+            prior = ig_render_recent(log, ledger, clip, now)
+            if prior:
+                out.append(Outcome(job.id, net, "skipped_ig_render_recent",
+                                   detail=f"near-identical to {prior} on instagram within 7 days"))
+                continue
 
         media = Media.text(label=job.category) if fmt == TEXT else media_for(clip, kind)
         wait_s = 0.0

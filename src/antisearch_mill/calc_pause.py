@@ -20,6 +20,7 @@ CALC_PAUSE = "calc"
 DEFAULT_PAUSE = "blink"
 ALTERNATE_PAUSE = "alternate"
 PAUSE_MODES = (DEFAULT_PAUSE, CALC_PAUSE, ALTERNATE_PAUSE)
+REEL_NETWORKS = frozenset({"instagram", "tiktok"})
 CALC_PRE_HOLD_S = 0.8
 CALC_POST_HOLD_S = 0.25
 
@@ -131,6 +132,8 @@ def last_single_clip_pause(post_log, clips_dir: Path | None = None) -> str | Non
     candidates: list[tuple[datetime, str]] = []
     for job_id, row in post_log.latest_by_job().items():
         if job_id.startswith(SAGA_ID_PREFIX):
+            continue
+        if (row.get("network") or "").strip().lower() not in REEL_NETWORKS:
             continue
         if row.get("status") in (FAILED, WITHHELD, "reopened"):
             continue

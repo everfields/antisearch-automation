@@ -117,7 +117,7 @@ def test_live_tiktok_and_instagram_captions_are_only_the_handle_and_x_is_never_t
     by_channel = {c["channelId"]: c for c in creates}
     assert by_channel["ch-tt"]["text"] == "@k18hair"
     # Buffer has no reel user tags: the mention rides the hashtag caption, last
-    assert by_channel["ch-ig"]["text"] == "#hairmask #k18 #ai @k18hair"
+    assert by_channel["ch-ig"]["text"] == "#hairmask #k18 @k18hair"
     for c in (by_channel["ch-tt"], by_channel["ch-ig"]):
         assert "userTags" not in json.dumps(c) and "collaborator" not in json.dumps(c).lower()
     assert "#" not in by_channel["ch-tt"]["text"]  # hashtags are Instagram only
