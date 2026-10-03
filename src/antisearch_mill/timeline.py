@@ -498,6 +498,32 @@ def _apply_calc_holds(tl: Timeline, category: str) -> Timeline:
     return replace(tl, states=tuple(s for s in new_states if s.end > s.start))
 
 
+def _word_timeline_ig(category: str, verdict: str, *, fps: int, pause_s: float) -> Timeline:
+    """Instagram calc reel: no empty cursor, no input hold — formula field from frame 0."""
+    pause_s = clamp_pause(pause_s)
+    pause = max(1, round(pause_s * fps))
+    min_result = round(MIN_RESULT_S * fps)
+    total = max(pause + min_result, round(MIN_SECONDS * fps))
+    cap = round(MAX_SECONDS * fps)
+    if total > cap:
+        min_result = max(1, min_result - (total - cap))
+        total = pause + min_result
+    verdict_at = pause
+    states = (
+        State(0, pause, "calc", category, False),
+        State(pause, total, "result", verdict, False),
+    )
+    return Timeline(
+        fps=fps,
+        total_frames=total,
+        states=states,
+        submit_frame=0,
+        verdict_frame=verdict_at,
+        pause_s=pause / fps,
+        style="word",
+    )
+
+
 def build_timeline(
     category: str,
     verdict: str,
@@ -508,6 +534,7 @@ def build_timeline(
     wait: str = "latency",
     typing: str = "legacy",
     pause_mode: str = "blink",
+    ig_calc: bool = False,
 ) -> Timeline:
     """`wait="fixed"` ignores `pause_s`: the wait is WAIT_BLINKS blinks in every clip.
 
@@ -520,6 +547,10 @@ def build_timeline(
     if wait not in WAITS:
         raise ValueError(f"unknown wait {wait!r}; use latency or fixed")
     if style == "word":
+        if ig_calc:
+            tl = _word_timeline_ig(category, verdict, fps=fps, pause_s=pause_s)
+            tl = _apply_calc_outro(tl)
+            return tl
         if wait == "fixed":
             tl = _word_timeline(category, verdict, fps=fps, pause_s=wait_frames(fps) / fps)
             tl = replace(tl, fixed_wait=True)

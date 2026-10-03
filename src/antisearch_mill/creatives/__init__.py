@@ -53,7 +53,7 @@ def id_tag(creative: str) -> str:
 
 def finish(creative: str, classic: Path, timeline: Timeline, out: Path, *, category: str, verdict: str,
            font_path: str, layout: Layout, phone: PhoneSpec | None,
-           metadata: dict[str, str] | None = None) -> float | None:
+           metadata: dict[str, str] | None = None, calc_variant=None) -> float | None:
     """Write `creative` to `out` from the classic clip (the current creative, keys audio included).
 
     Every Instagram reel creative carries the output-only cover as its frame 0 (creatives/cover.py) and
@@ -65,7 +65,8 @@ def finish(creative: str, classic: Path, timeline: Timeline, out: Path, *, categ
     from .cover import cover_first_frame
 
     if creative == CLEAN_COVER:
-        return cover_first_frame(classic, out, verdict, font_path=font_path, layout=layout, metadata=metadata)
+        return cover_first_frame(classic, out, verdict, font_path=font_path, layout=layout, metadata=metadata,
+                                 calc_variant=calc_variant)
     if creative != SHORT_SCORE and creative not in MOTION:
         raise ValueError(f"unknown creative {creative!r}; choose one of {', '.join(IG_ROTATION)}")
     from .monolith import add_score
@@ -77,7 +78,8 @@ def finish(creative: str, classic: Path, timeline: Timeline, out: Path, *, categ
         else:
             _motion_body(creative, classic, timeline, body, category=category, verdict=verdict,
                          font_path=font_path, layout=layout, phone=phone, metadata=metadata)
-        return cover_first_frame(body, out, verdict, font_path=font_path, layout=layout, metadata=metadata)
+        return cover_first_frame(body, out, verdict, font_path=font_path, layout=layout, metadata=metadata,
+                                 calc_variant=calc_variant)
     finally:
         body.unlink(missing_ok=True)
 

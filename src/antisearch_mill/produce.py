@@ -263,9 +263,11 @@ def produce_one(
     sidecar_path = ledger.clips_dir / f"{clip_id}.json"
     cover = None
     try:
+        ig_calc = network == IG_NETWORK and pause_mode == CALC_PAUSE
         timeline = build_timeline(
             verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style,
             wait="fixed" if fixed else "latency", typing=rhythm, pause_mode=pause_mode,
+            ig_calc=ig_calc,
         )
         comment = f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}"
         if use_audio:
@@ -299,7 +301,8 @@ def produce_one(
             )
             try:
                 cover = finish(creative, classic, timeline, clip_path, category=verdict.category,
-                               verdict=verdict.verdict, font_path=font_path, layout=layout, phone=phone, metadata=meta)
+                               verdict=verdict.verdict, font_path=font_path, layout=layout, phone=phone,
+                               metadata=meta, calc_variant=calc_var)
             finally:
                 if classic != clip_path:
                     classic.unlink(missing_ok=True)

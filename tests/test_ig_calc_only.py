@@ -4,10 +4,11 @@ import hashlib
 from pathlib import Path
 
 import pytest
+from PIL import Image
 
 from antisearch_mill.calc_pause import (
-    CALC_PAUSE, DEFAULT_PAUSE, ALTERNATE_PAUSE, calc_variant, frame_hash, render_calc_frames,
-    resolve_pause_mode,
+    CALC_PAUSE, DEFAULT_PAUSE, calc_variant, frame_hash, frame_is_uniform, frame_mean_diff,
+    render_ig_opening_frame, resolve_pause_mode,
 )
 from antisearch_mill.fonts import resolve_font
 from antisearch_mill.oracle import Verdict
@@ -18,8 +19,18 @@ from antisearch_mill.publisher.igcaption import (
 )
 from antisearch_mill.ledger import Job, Ledger
 from antisearch_mill.render import Layout
+from antisearch_mill.timeline import build_timeline
 
 pytestmark = pytest.mark.filterwarnings("ignore")
+
+IG_OPEN_CASES = (
+    ("ig-open-a", "80s horror movie"),
+    ("ig-open-b", "search engine"),
+    ("ig-open-c", "sunscreen"),
+    ("ig-open-d", "taylor swift album"),
+    ("ig-open-e", "pasta shape"),
+)
+MIN_PAIRWISE_DIFF = 8.0
 
 
 def test_instagram_always_calc_regardless_of_env():
@@ -60,12 +71,31 @@ def test_calc_variant_differs_by_post_id():
     assert calc_variant("ig-post-a") == a
 
 
-def test_calc_first_frames_differ_across_post_ids(tmp_path):
+def test_ig_timeline_has_no_cursor_holds():
+    tl = build_timeline("80s horror movie", "the thing", pause_s=2.0, pause_mode="calc", ig_calc=True)
+    assert not any(s.kind == "loading" for s in tl.states)
+    assert tl.states[0].kind == "calc" and tl.states[0].start == 0
+    assert tl.states[0].text == "80s horror movie"
+    assert not tl.states[0].cursor
+
+
+def test_ig_opening_frames_differ_and_are_not_uniform():
     font = resolve_font()
-    kw = dict(category="80s horror movie", frame_count=1, width=270, height=480, font_path=font)
-    a = render_calc_frames(**kw, out_dir=tmp_path / "a", variant=calc_variant("ig-a"))
-    b = render_calc_frames(**kw, out_dir=tmp_path / "b", variant=calc_variant("ig-b"))
-    assert frame_hash(a[0]) != frame_hash(b[0])
+    lay = Layout(width=540, height=960, fps=30)
+    frames = [
+        render_ig_opening_frame(category, job_id, font_path=font, layout=lay)
+        for job_id, category in IG_OPEN_CASES
+    ]
+    for img in frames:
+        assert not frame_is_uniform(img)
+    diffs = [
+        frame_mean_diff(frames[i], frames[j])
+        for i in range(len(frames))
+        for j in range(i + 1, len(frames))
+    ]
+    assert min(diffs) >= MIN_PAIRWISE_DIFF
+    assert max(diffs) >= 18.0
+    assert len({calc_variant(job_id).palette.name for job_id, _ in IG_OPEN_CASES}) >= 3
 
 
 def test_ig_tags_silent_is_about_one_third():

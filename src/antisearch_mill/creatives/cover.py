@@ -27,13 +27,23 @@ from ..render import Layout, RenderError
 from .monolith import INK, VERDICT_TRACKING, _background, _tracked, _vignette, verdict_font, verdict_y
 
 
-def cover_image(verdict: str, *, font_path: str, width: int = 1080, height: int = 1920) -> Image.Image:
-    frame = _background(width, height)
+def cover_image(verdict: str, *, font_path: str, width: int = 1080, height: int = 1920,
+                calc_variant=None) -> Image.Image:
+    if calc_variant is not None:
+        from ..calc_pause import _fill_palette
+
+        frame = _fill_palette(width, height, calc_variant.palette, calc_variant.seed + 99).convert("RGBA")
+        ink = (*calc_variant.palette.fg, 255)
+    else:
+        frame = _background(width, height)
+        ink = (*INK, 255)
     txt = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     _tracked(ImageDraw.Draw(txt), width / 2, verdict_y(height), verdict, verdict_font(font_path, verdict, width),
-             (*INK, 255), VERDICT_TRACKING)
-    frame = Image.alpha_composite(frame.convert("RGBA"), txt).convert("RGB")
-    return ImageChops.multiply(frame, _vignette(width, height))
+             ink, VERDICT_TRACKING)
+    frame = Image.alpha_composite(frame, txt).convert("RGB")
+    if calc_variant is None:
+        frame = ImageChops.multiply(frame, _vignette(width, height))
+    return frame
 
 
 def cover_s(fps: int) -> float:
@@ -42,12 +52,13 @@ def cover_s(fps: int) -> float:
 
 
 def cover_first_frame(body: Path, out: Path, verdict: str, *, font_path: str, layout: Layout,
-                      metadata: dict[str, str] | None = None) -> float:
+                      metadata: dict[str, str] | None = None, calc_variant=None) -> float:
     """`body` with its frame 0 replaced by the cover (audio copied), into `out`. Returns the cover time."""
     fps = layout.fps
     with tempfile.TemporaryDirectory(prefix="cover-") as td:
         png = Path(td) / "cover.png"
-        cover_image(verdict, font_path=font_path, width=layout.width, height=layout.height).save(png)
+        cover_image(verdict, font_path=font_path, width=layout.width, height=layout.height,
+                    calc_variant=calc_variant).save(png)
         cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(body), "-i", str(png),
                "-filter_complex",
                "[0:v]setsar=1,format=yuv420p[m];[1:v]setsar=1,format=yuv420p[c];"
