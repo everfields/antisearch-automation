@@ -953,12 +953,15 @@ def _synthesize_screen_keys(
     enter_rng = _rng("screen-enter", sound, typed)
     _mix_into(left, right, at(timeline.submit_frame), screen_key(enter_rng, voice, enter=True),
               10 ** ((ENTER_PEAK_DB + SCREEN_LEVEL_OFFSET_DB) / 20.0))
+    calc = next((s for s in timeline.states if s.kind == "calc"), None)
     loading = next(s for s in timeline.states if s.kind == "loading")
     wait_start = min(n, at(loading.start))
     wait_end = min(n, at(loading.end))
+    bed_start = min(n, at(calc.start)) if calc_bed and calc else wait_end
+    bed_end = min(n, at(calc.end)) if calc_bed and calc else wait_end
     for i in range(wait_start, wait_end):
-        if calc_bed:
-            v = _calc_bed_sample((i - wait_start) / SR)
+        if calc_bed and bed_start <= i < bed_end:
+            v = _calc_bed_sample((i - bed_start) / SR)
             left[i] = v
             right[i] = v * 0.97
         else:

@@ -182,7 +182,7 @@ def produce_one(
     try:
         timeline = build_timeline(
             verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style,
-            wait="fixed" if fixed else "latency", typing=rhythm,
+            wait="fixed" if fixed else "latency", typing=rhythm, pause_mode=pause_mode,
         )
         comment = f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}"
         if use_audio:

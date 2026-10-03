@@ -367,7 +367,8 @@ def _k_expr(timeline: Timeline) -> str:
 
 
 def _app_filtergraph(
-    timeline: Timeline, font_path: str, lay: Layout, workdir: Path, *, skip_loading: bool = False,
+    timeline: Timeline, font_path: str, lay: Layout, workdir: Path,
+    *, skip_loading: bool = False, skip_calc: bool = False,
 ) -> str:
     """`app` screen. Input 1 is the keyboard still; input 0 stays the silent audio."""
     fm = metrics(font_path, lay.font_px)
@@ -380,6 +381,8 @@ def _app_filtergraph(
     moving: list[tuple[int, int]] = []
     for st in timeline.states:
         if skip_loading and st.kind == "loading":
+            continue
+        if skip_calc and st.kind == "calc":
             continue
         k0 = timeline.keyboard_at(st.start)
         k1 = timeline.keyboard_at(st.end - 1)
@@ -481,11 +484,13 @@ def build_filtergraph(
     phone: PhoneSpec | None = None,
     *,
     skip_loading: bool = False,
+    skip_calc: bool = False,
 ) -> str:
     if phone is not None:
         geom = geometry(phone, lay.width, lay.height)
         inner = build_filtergraph(
-            timeline, font_path, screen_layout(phone, lay), workdir, skip_loading=skip_loading,
+            timeline, font_path, screen_layout(phone, lay), workdir,
+            skip_loading=skip_loading, skip_calc=skip_calc,
         )
         inner = inner[: -len("[v]")] + "[scr]"
         idx = phone_input_index(timeline)
@@ -497,7 +502,7 @@ def build_filtergraph(
             f"[base][ph]overlay=x=0:y=0:format=gbrp:eof_action=repeat,format=yuv420p[v]"
         )
     if timeline.style == "app":
-        return _app_filtergraph(timeline, font_path, lay, workdir, skip_loading=skip_loading)
+        return _app_filtergraph(timeline, font_path, lay, workdir, skip_loading=skip_loading, skip_calc=skip_calc)
     fm = metrics(font_path, lay.font_px)
     fm_footer = metrics(font_path, lay.footer_px)
 
@@ -505,6 +510,8 @@ def build_filtergraph(
     cursor_ranges: dict[CursorBox, list[tuple[int, int]]] = {}
     for st in timeline.states:
         if skip_loading and st.kind == "loading":
+            continue
+        if skip_calc and st.kind == "calc":
             continue
         frame = layout_frame(st.text, st.kind, st.cursor, fm, lay)
         for p in frame.lines:
@@ -615,9 +622,16 @@ def _run(cmd: list[str]) -> None:
         raise RenderError(f"ffmpeg failed ({proc.returncode}):\n{tail}")
 
 
-def _loading_span(timeline: Timeline) -> tuple[int, int]:
-    loading = next(s for s in timeline.states if s.kind == "loading")
-    return loading.start, loading.end
+def _calc_span(timeline: Timeline) -> tuple[int, int]:
+    calc = next(s for s in timeline.states if s.kind == "calc")
+    return calc.start, calc.end
+
+
+def _calc_hold_spans(timeline: Timeline) -> tuple[tuple[int, int], tuple[int, int]]:
+    loadings = [s for s in timeline.states if s.kind == "loading"]
+    if len(loadings) < 2:
+        raise RenderError("calc pause timeline missing pre/post holds")
+    return (loadings[0].start, loadings[0].end), (loadings[1].start, loadings[1].end)
 
 
 def _trim_graph(graph: str, start: int, end: int) -> str:
@@ -670,32 +684,47 @@ def _render_calc_clip(
     keys: str | None,
 ) -> None:
     from .calc_pause import frames_to_video, render_calc_frames
+    from .timeline import _apply_calc_holds
 
-    ls, le = _loading_span(timeline)
-    calc_frames = le - ls
+    if not any(s.kind == "calc" for s in timeline.states):
+        timeline = _apply_calc_holds(timeline, category)
+    cs, ce = _calc_span(timeline)
+    (ps, pe), (qs, qe) = _calc_hold_spans(timeline)
     calc_dir = work / "calc"
     render_calc_frames(
-        category, calc_dir, frame_count=calc_frames, font_path=font_path, layout=lay,
+        category, calc_dir, frame_count=ce - cs, font_path=font_path, layout=lay,
     )
     prefix = work / "prefix.mp4"
+    pre_hold = work / "pre.mp4"
     calc_vid = work / "calc.mp4"
+    post_hold = work / "post.mp4"
     suffix = work / "suffix.mp4"
     joined = work / "joined.mp4"
 
-    graph = build_filtergraph(timeline, font_path, lay, work, phone=phone, skip_loading=True)
-    if ls > 0:
+    graph = build_filtergraph(timeline, font_path, lay, work, phone=phone, skip_loading=True, skip_calc=True)
+    hold_graph = build_filtergraph(timeline, font_path, lay, work, phone=phone, skip_calc=True)
+    if ps > 0:
         _encode_segment(
-            timeline, _trim_graph(graph, 0, ls), prefix, lay, work,
+            timeline, _trim_graph(graph, 0, ps), prefix, lay, work,
             font_path=font_path, phone=phone, audio=False,
         )
+    _encode_segment(
+        timeline, _trim_graph(hold_graph, ps, pe), pre_hold, lay, work,
+        font_path=font_path, phone=phone, audio=False,
+    )
     frames_to_video(calc_dir, calc_vid, fps=timeline.fps)
-    if le < timeline.total_frames:
+    _encode_segment(
+        timeline, _trim_graph(hold_graph, qs, qe), post_hold, lay, work,
+        font_path=font_path, phone=phone, audio=False,
+    )
+    if timeline.verdict_frame < timeline.total_frames:
         _encode_segment(
-            timeline, _trim_graph(graph, le, timeline.total_frames), suffix, lay, work,
+            timeline, _trim_graph(graph, timeline.verdict_frame, timeline.total_frames), suffix, lay, work,
             font_path=font_path, phone=phone, audio=False,
         )
 
-    parts = [p for p in (prefix if ls > 0 else None, calc_vid, suffix if le < timeline.total_frames else None) if p]
+    parts = [p for p in (prefix if ps > 0 else None, pre_hold, calc_vid, post_hold,
+                          suffix if timeline.verdict_frame < timeline.total_frames else None) if p]
     if len(parts) == 1:
         shutil.copy(parts[0], joined)
     else:

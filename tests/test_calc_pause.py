@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 
 from antisearch_mill.calc_pause import (
-    CALC_PAUSE, DEFAULT_PAUSE, calc_seed, clip_pause, formula_fragments, frame_hash,
-    missing_glyphs, render_calc_frames, resolve_math_font,
+    CALC_PAUSE, CALC_POST_HOLD_S, CALC_PRE_HOLD_S, DEFAULT_PAUSE, calc_hold_frames, calc_seed,
+    clip_pause, formula_fragments, frame_hash, missing_glyphs, render_calc_frames, resolve_math_font,
 )
 from antisearch_mill.fonts import resolve_font
 from antisearch_mill.render import Layout, probe, render_clip
@@ -35,13 +35,22 @@ def test_pause_flag_rejects_unknown():
 
 
 def test_timeline_duration_unchanged_with_calc_flag():
-    """Calc replaces only the pause frames; total clip length stays the same."""
-    tl = build_timeline("80s horror movie", "the thing", pause_s=2.0)
-    assert tl.pause_s == pytest.approx(2.0)
-    loading = next(s for s in tl.states if s.kind == "loading")
-    assert loading.end - loading.start == round(2.0 * tl.fps)
-    assert tl.total_frames >= loading.end + round(1.0 * tl.fps)
-    assert tl.verdict_frame == loading.end
+    """Calc splits the pause; total clip length and verdict hold stay the same."""
+    blink = build_timeline("80s horror movie", "the thing", pause_s=2.0)
+    calc = build_timeline("80s horror movie", "the thing", pause_s=2.0, pause_mode="calc")
+    assert calc.total_frames == blink.total_frames
+    assert calc.verdict_frame == blink.verdict_frame
+    assert calc.pause_s == pytest.approx(2.0)
+    pre_f, post_f = calc_hold_frames(calc.fps)
+    assert pre_f == round(CALC_PRE_HOLD_S * calc.fps)
+    assert post_f == round(CALC_POST_HOLD_S * calc.fps)
+    loadings = [s for s in calc.states if s.kind == "loading"]
+    formula = next(s for s in calc.states if s.kind == "calc")
+    assert loadings[0].text == "80s horror movie" and loadings[0].cursor
+    assert loadings[1].text == "" and loadings[1].cursor
+    assert loadings[0].end - loadings[0].start == pre_f
+    assert loadings[1].end - loadings[1].start == post_f
+    assert formula.end - formula.start == round(2.0 * calc.fps) - pre_f - post_f
 
 
 def test_fixed_wait_pause_frames_match_calc_segment():
@@ -90,7 +99,7 @@ def test_calc_frames_are_deterministic(tmp_path):
 @pytest.mark.ffmpeg
 def test_calc_smoke_render_low_res(tmp_path):
     font = resolve_font()
-    tl = build_timeline("thing", "love", pause_s=2.0)
+    tl = build_timeline("thing", "love", pause_s=2.0, pause_mode="calc")
     clip = tmp_path / "calc.mp4"
     info = render_clip(
         tl, clip, font_path=font, layout=Layout(width=270, height=480, fps=15),

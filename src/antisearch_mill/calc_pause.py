@@ -19,6 +19,13 @@ from .render import Layout, footer_placement
 CALC_PAUSE = "calc"
 DEFAULT_PAUSE = "blink"
 PAUSE_MODES = (DEFAULT_PAUSE, CALC_PAUSE)
+CALC_PRE_HOLD_S = 0.8
+CALC_POST_HOLD_S = 0.25
+
+
+def calc_hold_frames(fps: int) -> tuple[int, int]:
+    """Pre- and post-formula hold frames (input+cursor, then empty+cursor)."""
+    return max(1, round(CALC_PRE_HOLD_S * fps)), max(1, round(CALC_POST_HOLD_S * fps))
 
 BG_RGB = (10, 10, 10)
 FG_RGB = (232, 228, 216)

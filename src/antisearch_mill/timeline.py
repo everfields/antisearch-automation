@@ -95,7 +95,7 @@ def wait_frames(fps: int) -> int:
 class State:
     start: int  # first frame, inclusive
     end: int  # last frame, exclusive
-    kind: str  # "typing" | "dismiss" | "loading" | "result"
+    kind: str  # "typing" | "dismiss" | "loading" | "calc" | "result"
     text: str
     cursor: bool
 
@@ -458,6 +458,28 @@ def _app_states(
     )
 
 
+def _apply_calc_holds(tl: Timeline, category: str) -> Timeline:
+    """Split the word-style pause into input hold, formula, empty-cursor beat."""
+    from .calc_pause import calc_hold_frames
+
+    loading = next(s for s in tl.states if s.kind == "loading")
+    pre_f, post_f = calc_hold_frames(tl.fps)
+    pause_frames = loading.end - loading.start
+    calc_f = pause_frames - pre_f - post_f
+    if calc_f < 1:
+        raise ValueError(f"pause {pause_frames / tl.fps:.3f}s too short for calc holds")
+    start = loading.start
+    new_states: list[State] = []
+    for st in tl.states:
+        if st.kind != "loading":
+            new_states.append(st)
+            continue
+        new_states.append(State(start, start + pre_f, "loading", category, True))
+        new_states.append(State(start + pre_f, start + pre_f + calc_f, "calc", "", False))
+        new_states.append(State(start + pre_f + calc_f, loading.end, "loading", "", True))
+    return replace(tl, states=tuple(s for s in new_states if s.end > s.start))
+
+
 def build_timeline(
     category: str,
     verdict: str,
@@ -467,6 +489,7 @@ def build_timeline(
     style: str = DEFAULT_CLIP_STYLE,
     wait: str = "latency",
     typing: str = "legacy",
+    pause_mode: str = "blink",
 ) -> Timeline:
     """`wait="fixed"` ignores `pause_s`: the wait is WAIT_BLINKS blinks in every clip.
 
@@ -481,8 +504,12 @@ def build_timeline(
     if style == "word":
         if wait == "fixed":
             tl = _word_timeline(category, verdict, fps=fps, pause_s=wait_frames(fps) / fps)
-            return replace(tl, fixed_wait=True)
-        return _word_timeline(category, verdict, fps=fps, pause_s=pause_s)
+            tl = replace(tl, fixed_wait=True)
+        else:
+            tl = _word_timeline(category, verdict, fps=fps, pause_s=pause_s)
+        if pause_mode == "calc":
+            tl = _apply_calc_holds(tl, category)
+        return tl
     if style == "app":
         if wait == "fixed":
             return _app_fixed_timeline(category, verdict, fps=fps, typing=typing)
