@@ -170,17 +170,18 @@ def test_cadence_presets_carlos_and_soul():
     assert slots_for("bluesky", {}) == slots_for("bluesky", {"PUBLISHER_CADENCE": "carlos"})
 
 
-def test_reach_cadence_is_seven_ig_four_tiktok_and_leaves_the_others():
+def test_reach_cadence_is_seven_ig_six_tiktok_and_leaves_the_others():
     env = {"PUBLISHER_CADENCE": "reach"}
     soul = {"PUBLISHER_CADENCE": "soul"}
     assert [f"{t:%H:%M}" for t in slots_for("instagram", env)] == [
         "10:07", "12:07", "14:07", "16:07", "18:07", "20:07", "22:07"]
-    assert [f"{t:%H:%M}" for t in slots_for("tiktok", env)] == ["13:07", "17:07", "20:07", "23:07"]
+    assert [f"{t:%H:%M}" for t in slots_for("tiktok", env)] == [
+        "11:07", "13:07", "15:07", "17:07", "19:07", "21:07"]
     for net in ("x", "linkedin", "bluesky", "threads", "mastodon", "reddit"):
         assert slots_for(net, env) == slots_for(net, soul)
-    # Instagram 7 under its own cap of 8, TikTok 4 under 5, both 90+ minutes apart (slots_for enforces all).
+    # Instagram 7 under its cap of 8, TikTok 6 under its cap of 6, both 90+ minutes apart.
     assert len(slots_for("instagram", env)) == 7
-    assert len(slots_for("tiktok", env)) == 4
+    assert len(slots_for("tiktok", env)) == 6
 
 
 def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five():
@@ -188,8 +189,9 @@ def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five
     assert len(slots_for("instagram", {"PUBLISHER_CADENCE": "reach", "PUBLISHER_SLOTS_INSTAGRAM": eight})) == 8
     with pytest.raises(ValueError, match="cap is 8"):
         slots_for("instagram", {"PUBLISHER_SLOTS_INSTAGRAM": eight + ",02:07"})
-    with pytest.raises(ValueError, match="cap is 5"):
-        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,12:07,14:07,16:07,18:07,20:07"})
+    assert len(slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,12:07,14:07,16:07,18:07,20:07"})) == 6
+    with pytest.raises(ValueError, match="cap is 6"):
+        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,12:07,14:07,16:07,18:07,20:07,22:07"})
 
 
 def test_reach_slot_stays_open_until_the_next_one_or_three_hours():
@@ -203,7 +205,7 @@ def test_reach_slot_stays_open_until_the_next_one_or_three_hours():
     assert open_now(datetime(2026, 9, 26, 19, 10, tzinfo=ET), ig, 0) == 1
     tt = slots_for("tiktok", {"PUBLISHER_CADENCE": "reach"})
     # Last slot of the day gets 3h, not the whole night until the next posting day.
-    assert open_now(datetime(2026, 9, 27, 1, 30, tzinfo=ET), tt, 3) == 1  # 23:07 still inside 3h
+    assert open_now(datetime(2026, 9, 26, 23, 30, tzinfo=ET), tt, 3) == 1  # 21:07 still inside 3h
     assert open_now(datetime(2026, 9, 27, 8, 30, tzinfo=ET), tt, 0) == 0
 
 
@@ -319,7 +321,7 @@ def test_a_tick_dispatch_is_a_schedule_wake_and_a_manual_run_is_unchanged():
         steps.index("mill --out out post")
     assert due < ffmpeg < post  # the gate runs before ffmpeg, so an idle tick never installs it
     gated = steps[due:post].count("if: steps.due.outputs.go == 'true'")
-    assert gated == 2  # the ffmpeg install and the post both wait for the gate
+    assert gated == 3  # ffmpeg, optional Playwright (calc pause), and post all wait for the gate
 
 
 def test_soul_cadence_is_one_variable(ledger, log):

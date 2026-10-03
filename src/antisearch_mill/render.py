@@ -366,7 +366,10 @@ def _k_expr(timeline: Timeline) -> str:
     return expr
 
 
-def _app_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: Path) -> str:
+def _app_filtergraph(
+    timeline: Timeline, font_path: str, lay: Layout, workdir: Path,
+    *, skip_loading: bool = False, skip_calc: bool = False,
+) -> str:
     """`app` screen. Input 1 is the keyboard still; input 0 stays the silent audio."""
     fm = metrics(font_path, lay.font_px)
     fm_footer = metrics(font_path, lay.footer_px)
@@ -377,6 +380,10 @@ def _app_filtergraph(timeline: Timeline, font_path: str, lay: Layout, workdir: P
     cursor_ranges: dict[CursorBox, list[tuple[int, int]]] = {}
     moving: list[tuple[int, int]] = []
     for st in timeline.states:
+        if skip_loading and st.kind == "loading":
+            continue
+        if skip_calc and st.kind == "calc":
+            continue
         k0 = timeline.keyboard_at(st.start)
         k1 = timeline.keyboard_at(st.end - 1)
         if abs(k0 - k1) > 1e-4:
@@ -475,10 +482,16 @@ def build_filtergraph(
     lay: Layout,
     workdir: Path,
     phone: PhoneSpec | None = None,
+    *,
+    skip_loading: bool = False,
+    skip_calc: bool = False,
 ) -> str:
     if phone is not None:
         geom = geometry(phone, lay.width, lay.height)
-        inner = build_filtergraph(timeline, font_path, screen_layout(phone, lay), workdir)
+        inner = build_filtergraph(
+            timeline, font_path, screen_layout(phone, lay), workdir,
+            skip_loading=skip_loading, skip_calc=skip_calc,
+        )
         inner = inner[: -len("[v]")] + "[scr]"
         idx = phone_input_index(timeline)
         # Composite in planar RGB so the rounded screen edge blends without chroma fringes.
@@ -489,13 +502,17 @@ def build_filtergraph(
             f"[base][ph]overlay=x=0:y=0:format=gbrp:eof_action=repeat,format=yuv420p[v]"
         )
     if timeline.style == "app":
-        return _app_filtergraph(timeline, font_path, lay, workdir)
+        return _app_filtergraph(timeline, font_path, lay, workdir, skip_loading=skip_loading, skip_calc=skip_calc)
     fm = metrics(font_path, lay.font_px)
     fm_footer = metrics(font_path, lay.footer_px)
 
     text_ranges: dict[Placed, list[tuple[int, int]]] = {}
     cursor_ranges: dict[CursorBox, list[tuple[int, int]]] = {}
     for st in timeline.states:
+        if skip_loading and st.kind == "loading":
+            continue
+        if skip_calc and st.kind == "calc":
+            continue
         frame = layout_frame(st.text, st.kind, st.cursor, fm, lay)
         for p in frame.lines:
             text_ranges.setdefault(p, []).append((st.start, st.end))
@@ -605,6 +622,196 @@ def _run(cmd: list[str]) -> None:
         raise RenderError(f"ffmpeg failed ({proc.returncode}):\n{tail}")
 
 
+def _calc_span(timeline: Timeline) -> tuple[int, int]:
+    calc = next(s for s in timeline.states if s.kind == "calc")
+    return calc.start, calc.end
+
+
+def _calc_hold_spans(timeline: Timeline) -> tuple[tuple[int, int], tuple[int, int]]:
+    loadings = [s for s in timeline.states if s.kind == "loading"]
+    if len(loadings) < 2:
+        raise RenderError("calc pause timeline missing pre/post holds")
+    return (loadings[0].start, loadings[0].end), (loadings[1].start, loadings[1].end)
+
+
+def _trim_graph(graph: str, start: int, end: int) -> str:
+    """Keep frames ``[start, end)`` from a filtergraph that ends in ``[v]``."""
+    body, suffix = graph.rsplit("[v]", 1)
+    return f"{body}[v0];[v0]select='between(n,{start},{end - 1})',setpts=PTS-STARTPTS[v]{suffix}"
+
+
+def _concat_videos(parts: list[Path], dest: Path) -> None:
+    listing = dest.with_suffix(".txt")
+    listing.write_text(
+        "".join(f"file {_q(str(p))}\n" for p in parts),
+        encoding="utf-8",
+    )
+    _run([
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-f", "concat", "-safe", "0", "-i", str(listing),
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+        "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+        str(dest),
+    ])
+
+
+def _mux_audio(video: Path, audio: Path, dest: Path, *, duration_s: float, fps: int) -> None:
+    _run([
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-i", str(video), "-i", str(audio),
+        "-map", "0:v", "-map", "1:a",
+        "-t", f"{duration_s:.4f}", "-r", str(fps),
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2",
+        "-shortest",
+        "-movflags", "+faststart",
+        str(dest),
+    ])
+
+
+def _render_calc_clip(
+    timeline: Timeline,
+    out_path: Path,
+    *,
+    font_path: str,
+    lay: Layout,
+    work: Path,
+    category: str,
+    metadata: dict[str, str] | None,
+    pulse: str | None,
+    heartbeat: bool,
+    bed: bool,
+    phone: PhoneSpec | None,
+    keys: str | None,
+) -> None:
+    from .calc_pause import frames_to_video, render_calc_frames
+    from .timeline import _apply_calc_holds
+
+    if not any(s.kind == "calc" for s in timeline.states):
+        timeline = _apply_calc_holds(timeline, category)
+    cs, ce = _calc_span(timeline)
+    (ps, pe), (qs, qe) = _calc_hold_spans(timeline)
+    calc_dir = work / "calc"
+    render_calc_frames(
+        category, calc_dir, frame_count=ce - cs, font_path=font_path, layout=lay,
+    )
+    prefix = work / "prefix.mp4"
+    pre_hold = work / "pre.mp4"
+    calc_vid = work / "calc.mp4"
+    post_hold = work / "post.mp4"
+    suffix = work / "suffix.mp4"
+    joined = work / "joined.mp4"
+
+    graph = build_filtergraph(timeline, font_path, lay, work, phone=phone, skip_loading=True, skip_calc=True)
+    hold_graph = build_filtergraph(timeline, font_path, lay, work, phone=phone, skip_calc=True)
+    if ps > 0:
+        _encode_segment(
+            timeline, _trim_graph(graph, 0, ps), prefix, lay, work,
+            font_path=font_path, phone=phone, audio=False,
+        )
+    _encode_segment(
+        timeline, _trim_graph(hold_graph, ps, pe), pre_hold, lay, work,
+        font_path=font_path, phone=phone, audio=False,
+    )
+    frames_to_video(calc_dir, calc_vid, fps=timeline.fps)
+    _encode_segment(
+        timeline, _trim_graph(hold_graph, qs, qe), post_hold, lay, work,
+        font_path=font_path, phone=phone, audio=False,
+    )
+    if timeline.verdict_frame < timeline.total_frames:
+        _encode_segment(
+            timeline, _trim_graph(graph, timeline.verdict_frame, timeline.total_frames), suffix, lay, work,
+            font_path=font_path, phone=phone, audio=False,
+        )
+
+    parts = [p for p in (prefix if ps > 0 else None, pre_hold, calc_vid, post_hold,
+                          suffix if timeline.verdict_frame < timeline.total_frames else None) if p]
+    if len(parts) == 1:
+        shutil.copy(parts[0], joined)
+    else:
+        _concat_videos(parts, joined)
+
+    dur = timeline.total_frames / timeline.fps
+    audio_wav = work / "audio.wav"
+    _write_audio(timeline, audio_wav, pulse=pulse, heartbeat=heartbeat, bed=bed, keys=keys, calc_bed=bool(keys))
+    _mux_audio(joined, audio_wav, out_path, duration_s=dur, fps=timeline.fps)
+    if metadata:
+        tagged = out_path.with_suffix(".tagged.mp4")
+        cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(out_path)]
+        for k, v in metadata.items():
+            cmd += ["-metadata", f"{k}={v}"]
+        cmd += ["-c", "copy", "-map_metadata", "-1", str(tagged)]
+        _run(cmd)
+        tagged.replace(out_path)
+
+
+def _write_audio(
+    timeline: Timeline,
+    dest: Path,
+    *,
+    pulse: str | None,
+    heartbeat: bool,
+    bed: bool,
+    keys: str | None,
+    calc_bed: bool,
+) -> None:
+    if keys:
+        from .audio import write_keys_wav
+        write_keys_wav(timeline, dest, keys, calc_bed=calc_bed)
+    elif heartbeat:
+        from .audio import write_heartbeat_wav
+        write_heartbeat_wav(timeline, dest, bed=bed, work=dest.parent)
+    elif pulse:
+        from .audio import write_pulse_wav
+        write_pulse_wav(timeline, pulse, dest, work=dest.parent)
+    else:
+        _run([
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+            "-t", f"{timeline.total_frames / timeline.fps:.4f}",
+            "-c:a", "pcm_s16le", str(dest),
+        ])
+
+
+def _encode_segment(
+    timeline: Timeline,
+    graph: str,
+    out_path: Path,
+    lay: Layout,
+    work: Path,
+    *,
+    font_path: str,
+    phone: PhoneSpec | None,
+    audio: bool,
+) -> None:
+    still = ["-loop", "1", "-framerate", str(timeline.fps), "-i"]
+    extra: list[str] = []
+    if timeline.style == "app":
+        kb = work / f"kb_{out_path.stem}.png"
+        draw_keyboard(kb, screen_layout(phone, lay) if phone else lay, font_path)
+        extra += [*still, str(kb)]
+    if phone is not None:
+        frame_png = work / f"phone_{out_path.stem}.png"
+        draw_phone(frame_png, phone, geometry(phone, lay.width, lay.height))
+        extra += [*still, str(frame_png)]
+    cmd = [
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+        *extra,
+        "-filter_complex", graph,
+        "-map", "[v]",
+    ]
+    if audio:
+        cmd += ["-map", "0:a"]
+    cmd += [
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+        "-pix_fmt", "yuv420p",
+    ]
+    if audio:
+        cmd += ["-c:a", "aac", "-b:a", "96k"]
+    cmd.append(str(out_path))
+    _run(cmd)
+
+
 def render_clip(
     timeline: Timeline,
     out_path: Path,
@@ -618,12 +825,16 @@ def render_clip(
     bed: bool = False,
     phone: PhoneSpec | None = None,
     keys: str | None = None,
+    pause: str = "blink",
+    category: str = "",
 ) -> ClipInfo:
     """`pulse` is a pulse variant; `heartbeat` (with an optional `bed`) replaces it.
     `keys` is a key voicing: typing and Enter only, silence after.
 
     `phone` draws the screen inside the phone mockup. The output stays the
     layout's full 9:16 frame either way.
+
+    ``pause=calc`` replaces the blinking wait with the programmed calc graphic.
     """
     require_tools()
     lay = layout or Layout(fps=timeline.fps)
@@ -632,6 +843,15 @@ def render_clip(
     dur = timeline.total_frames / timeline.fps
     with tempfile.TemporaryDirectory(prefix="mill-") as td:
         work = Path(td)
+        if pause == "calc":
+            if not category:
+                raise RenderError("category is required for PUBLISHER_CLIP_PAUSE=calc")
+            _render_calc_clip(
+                timeline, tmp_out, font_path=font_path, lay=lay, work=work, category=category,
+                metadata=metadata, pulse=pulse, heartbeat=heartbeat, bed=bed, phone=phone, keys=keys,
+            )
+            tmp_out.replace(out_path)
+            return probe(out_path)
         graph = build_filtergraph(timeline, font_path, lay, work, phone=phone)
         if keep_graph:
             keep_graph.parent.mkdir(parents=True, exist_ok=True)

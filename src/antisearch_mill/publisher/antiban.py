@@ -38,7 +38,7 @@ def _on(env: dict[str, str], key: str, default: str = "on") -> bool:
 def ramp_enabled(env: dict[str, str]) -> bool:
     """Warm-up is on unless `PUBLISHER_RAMP` says otherwise.
 
-    `reach` posts Instagram and TikTok at 4 from day one, so an unset ramp is off
+    `reach` posts Instagram at 7 and TikTok at 6 from day one, so an unset ramp is off
     for that cadence. Set `PUBLISHER_RAMP=on` to warm up anyway.
     """
     raw = (env.get("PUBLISHER_RAMP") or "").strip()

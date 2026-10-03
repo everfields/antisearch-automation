@@ -17,6 +17,7 @@ from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, AUDIO_PULSE, audio_tag as make_a
 from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound, pulse_for_platforms
 from .creatives import CREATIVES, STORY, finish, id_tag
 from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
+from .calc_pause import ALTERNATE_PAUSE, CALC_PAUSE, clip_pause, resolve_pause_mode
 from .timeline import (
     MAX_SECONDS, MIN_SECONDS, WAIT_BLINKS, build_timeline, clip_style, clip_typing, pause_for_style,
     pause_from_latency_ms, wait_frames,
@@ -47,6 +48,7 @@ def clip_id_for(
     fixed_wait: bool = False,
     typing: str = "",
     creative: str = "",
+    pause_mode: str = "",
 ) -> str:
     body = f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}"
     # Silent clips keep the historical hash. Pulse is part of the id only when it is actually muxed.
@@ -61,6 +63,8 @@ def clip_id_for(
         body += f"\0typing:{typing}"
     if id_tag(creative):
         body += f"\0creative:{id_tag(creative)}"
+    if pause_mode == CALC_PAUSE:
+        body += f"\0pause:{pause_mode}"
     digest = hashlib.sha256(body.encode()).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
@@ -73,12 +77,13 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def validate_master(info: ClipInfo, layout: Layout, render_style: str = "") -> list[str]:
+def validate_master(info: ClipInfo, layout: Layout, render_style: str = "", *, calc_outro: bool = False) -> list[str]:
     problems = []
     name = render_style or RENDER_STYLE
     # `app` may run past 5s when the oracle pause is long, and it is not padded to 5s.
-    if name != APP_RENDER_STYLE and not MIN_SECONDS - 0.05 <= info.duration_s <= MAX_SECONDS + 0.001:
-        problems.append(f"duration {info.duration_s}s outside [{MIN_SECONDS}, {MAX_SECONDS}]")
+    max_s = MAX_SECONDS + (1.5 if calc_outro else 0.0)
+    if name != APP_RENDER_STYLE and not MIN_SECONDS - 0.05 <= info.duration_s <= max_s + 0.001:
+        problems.append(f"duration {info.duration_s}s outside [{MIN_SECONDS}, {max_s}]")
     if name == APP_RENDER_STYLE and info.duration_s < 1.0:
         problems.append(f"duration {info.duration_s}s is empty")
     if (info.width, info.height) != (layout.width, layout.height):
@@ -110,6 +115,8 @@ def produce_one(
     keys: str | None = None,
     typing: str | None = None,
     creative: str | None = None,
+    pause_mode: str | None = None,
+    post_log=None,
 ) -> ProduceResult:
     """`frame="phone"` draws `phone` (or the env's scale and background) and implies the `app` screen.
 
@@ -146,6 +153,7 @@ def produce_one(
     with_bed = clip_audio_bed() if bed is None else bed
     keys = clip_keys_sound() if keys is None else keys
     typing = clip_typing() if typing is None else typing
+    raw_pause = clip_pause() if pause_mode is None else pause_mode
     frame = clip_frame() if frame is None else frame
     if frame == FRAME_PHONE:
         phone = phone or PhoneSpec(scale=phone_scale(), background=phone_background())
@@ -164,9 +172,20 @@ def produce_one(
         pause = pause_for_style(verdict.latency_ms, recorded=latency_recorded, style=style, explicit=pause_s)
     frame_tag = phone.tag if phone else ""
     rhythm = typing if fixed and style == "app" else "legacy"
+    if raw_pause == ALTERNATE_PAUSE:
+        parity_id = clip_id_for(
+            job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag,
+            fixed_wait=fixed, typing=rhythm, creative=creative, pause_mode="",
+        )
+        pause_mode = resolve_pause_mode(
+            job_id=job.id, post_log=post_log, clips_dir=ledger.clips_dir,
+            parity_clip_id=parity_id,
+        )
+    else:
+        pause_mode = raw_pause
     clip_id = clip_id_for(
         job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag, fixed_wait=fixed, typing=rhythm,
-        creative=creative,
+        creative=creative, pause_mode=pause_mode,
     )
     style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
@@ -176,7 +195,7 @@ def produce_one(
     try:
         timeline = build_timeline(
             verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style,
-            wait="fixed" if fixed else "latency", typing=rhythm,
+            wait="fixed" if fixed else "latency", typing=rhythm, pause_mode=pause_mode,
         )
         comment = f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}"
         if use_audio:
@@ -204,6 +223,8 @@ def produce_one(
                 bed=with_bed,
                 phone=phone,
                 keys=keys if use_audio and mode == AUDIO_KEYS else None,
+                pause=pause_mode,
+                category=verdict.category,
             )
             try:
                 cover = finish(creative, classic, timeline, clip_path, category=verdict.category,
@@ -212,7 +233,7 @@ def produce_one(
                 if classic != clip_path:
                     classic.unlink(missing_ok=True)
         info = probe(clip_path)
-        problems = validate_master(info, layout, style_name)
+        problems = validate_master(info, layout, style_name, calc_outro=pause_mode == CALC_PAUSE)
         if problems:
             raise RenderError("; ".join(problems))
         end = info.duration_s if creative == STORY else timeline.duration_s
@@ -267,6 +288,7 @@ def produce_one(
                     **({"audio": audio_tag} if use_audio else {}),
                     **({"frame": frame_tag} if frame_tag else {}),
                     **({"creative": creative} if creative else {}),
+                    **({"pause": pause_mode} if pause_mode == CALC_PAUSE else {}),
                     **(
                         {
                             "wait": "fixed",
@@ -317,6 +339,8 @@ def produce_all(
     phone: PhoneSpec | None = None,
     keys: str | None = None,
     typing: str | None = None,
+    pause_mode: str | None = None,
+    post_log=None,
     layout: Layout | None = None,
     force: bool = False,
     limit: int | None = None,
@@ -348,6 +372,7 @@ def produce_all(
             job, oracle, ledger, font_path=font_path, layout=lay,
             pause_s=pause_s, latency_recorded=latency_recorded, style=style,
             audio=mode, audio_variant=variant, bed=with_bed, frame=frame, phone=phone, keys=keys, typing=typing,
+            pause_mode=pause_mode, post_log=post_log,
         )
         results.append(result)
         if result.status == "produced":

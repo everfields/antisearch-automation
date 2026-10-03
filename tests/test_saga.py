@@ -35,7 +35,7 @@ def test_saga_queue_reads_trial_file():
     assert swift.family == "taylor swift"
     assert swift.inputs == ("taylor swift album", "taylor swift song", "taylor swift era")
     assert swift.platforms == ("tiktok",)
-    assert swift.caption == "@?"
+    assert swift.caption == "-"
 
 
 def test_saga_queue_rejects_superlative():

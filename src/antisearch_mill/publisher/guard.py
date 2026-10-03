@@ -38,7 +38,9 @@ MIN_GAP = timedelta(minutes=90)  # between two posts on the same network
 X_MAX_PER_DAY = 2  # CoS + Soul, 2026-09-27: 1-2 X posts a day during the format A/B
 # Founder, 2026-09-28: Instagram 6-8 reels a day for the creative rotation (Buffer allows 50 per 24h).
 IG_MAX_PER_DAY = 8
-DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY}
+# Founder, 2026-10-03: TikTok 6/day on the reach cadence (was 4); other presets stay at 5.
+TT_MAX_PER_DAY = 6
+DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY, "tiktok": TT_MAX_PER_DAY}
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 # GitHub's schedule drops most wakes (28 Sep: 1 scheduled run in 8 h). Once a slot's window has passed with
 # no run, the next run still sends the most recently missed slot (one; older misses stay missed), up to
@@ -69,13 +71,13 @@ CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
         "reddit": ("13:07", "19:07"),
     },
 }
-# TikTok at 4 from day one, Instagram at 7 (every 2 hours, 10:07-22:07 ET: 7-19 PT).
-# X, LinkedIn, and Bluesky stay on the conservative `soul` slots (X stays off unless
-# Buffer is the route).
+# TikTok at 6 from day one (every 2 hours, 11:07-21:07 ET), Instagram at 7
+# (every 2 hours, 10:07-22:07 ET: 7-19 PT). X, LinkedIn, and Bluesky stay on the
+# conservative `soul` slots (X stays off unless Buffer is the route).
 CADENCES["reach"] = {
     **CADENCES["soul"],
     "instagram": ("10:07", "12:07", "14:07", "16:07", "18:07", "20:07", "22:07"),
-    "tiktok": ("13:07", "17:07", "20:07", "23:07"),
+    "tiktok": ("11:07", "13:07", "15:07", "17:07", "19:07", "21:07"),
 }
 DEFAULT_CADENCE = "carlos"
 
