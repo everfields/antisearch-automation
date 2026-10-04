@@ -55,7 +55,8 @@
       "empire\nroman empire",
       "fear\ncomplacency",
       "book\ndon quixote",
-      "ceo\njensen huang"
+      "ceo\njensen huang",
+      "weakness\ncompassion"
     ]
   },
   "clips": {
@@ -161,7 +162,8 @@
       "p-empire-14e67e91",
       "p-fear-14d909af",
       "p-book-03a44e7b",
-      "p-ceo-0b997309"
+      "p-ceo-0b997309",
+      "p-weakness-bfaeee3b"
     ]
   },
   "first_post": {
