@@ -158,10 +158,11 @@ def test_publisher_inputs_are_unique_across_queues_and_pools():
 
     from antisearch_mill.saga import read_saga_queue
 
-    publisher_queues = [q for q in REGULAR_QUEUES if q.name != "sample_queue.csv"]
+    publisher_queues = [q for q in REGULAR_QUEUES if q.name not in ("sample_queue.csv", "tiktok_es_trial.csv")]
     inputs = [j.category for q in publisher_queues for j in read_queue(q)]
     inputs += [inp for q in SAGA_QUEUES for job in read_saga_queue(q) for inp in job.inputs]
-    inputs += [c for p in POOLS for c, _ in read_pool(p)]
+    pools = [p for p in POOLS if p.name != "tiktok_es.txt"]  # mirrored in tiktok_es_trial.csv
+    inputs += [c for p in pools for c, _ in read_pool(p)]
     assert sorted(c for c in set(inputs) if inputs.count(c) > 1) == []
 
 

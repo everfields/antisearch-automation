@@ -18,7 +18,8 @@ import re
 MAXLEN = 55  # the site's input box
 
 SUPERLATIVE = re.compile(
-    r"\b(best|greatest|finest|ultimate|worst|most|least|number\s*one|no\.?\s*1|all[- ]time|of all time)\b|#\s*1\b",
+    r"\b(best|greatest|finest|ultimate|worst|most|least|number\s*one|no\.?\s*1|all[- ]time|of all time"
+    r"|mejor|peor|número uno|numero uno)\b|#\s*1\b",
     re.I)
 # "top" is a ranking except in a garment or a hat ("tank top", "top hat")
 TOP = re.compile(r"(?<!\btank )(?<!\bcrop )(?<!\btube )(?<!\bhalter )\btop\b(?!\s+hat\b)", re.I)
