@@ -30,5 +30,6 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 markers = [
   "ffmpeg: needs ffmpeg/ffprobe on PATH",
+  "calc_kill_switch: run with the production calc kill switch as shipped",
   "network: hits the live antisearch.ai oracle (opt-in via MILL_TEST_NETWORK=1)",
 ]

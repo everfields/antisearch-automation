@@ -26,6 +26,8 @@ IG_NETWORK = "instagram"
 TIKTOK_NETWORK = "tiktok"
 CALC_PRE_HOLD_S = 0.8
 CALC_POST_HOLD_S = 0.25
+# Hotfix 2026-10-04: calc clips drew input+formula overlapping; produce renders blink until fixed.
+CALC_KILL_SWITCH = True
 
 
 def calc_hold_frames(fps: int) -> tuple[int, int]:

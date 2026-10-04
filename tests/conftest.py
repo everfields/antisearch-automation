@@ -68,3 +68,13 @@ def produced(tmp_path, _produced_template) -> Ledger:
         row.poster_path = str(dst / "clips" / Path(row.poster_path).name)
         ledger.upsert_clip(row)
     return ledger
+
+
+@pytest.fixture(autouse=True)
+def _calc_enabled_for_tests(request, monkeypatch):
+    """Calc kill switch is a production hotfix; tests exercise calc unless marked."""
+    if request.node.get_closest_marker("calc_kill_switch"):
+        return
+    import antisearch_mill.produce as produce
+
+    monkeypatch.setattr(produce, "CALC_KILL_SWITCH", False)

@@ -154,3 +154,22 @@ def test_produce_instagram_forces_calc(tmp_path, monkeypatch):
     sidecar = ledger.clips_dir / f"{result.clip_id}.json"
     data = __import__("json").loads(sidecar.read_text())
     assert data["timeline"].get("pause") == "calc"
+
+
+@pytest.mark.calc_kill_switch
+def test_kill_switch_forces_blink_on_instagram(tmp_path):
+    from antisearch_mill import produce
+
+    if not produce.CALC_KILL_SWITCH:
+        pytest.skip("calc re-enabled")
+    from antisearch_mill.fonts import resolve_font
+    from antisearch_mill.ledger import Job, Ledger
+    from antisearch_mill.render import Layout
+
+    ledger = Ledger(tmp_path / "ledger")
+    job = Job(id="ig-kill-1", category="thing", platforms=("instagram",), creative="0-current-cover")
+    result = produce.produce_one(job, _Fix(), ledger, font_path=resolve_font(),
+                                 layout=Layout(width=270, height=480, fps=15))
+    assert result.status == "produced"
+    data = __import__("json").loads((ledger.clips_dir / f"{result.clip_id}.json").read_text())
+    assert data["timeline"].get("pause") != "calc"

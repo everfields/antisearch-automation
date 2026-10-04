@@ -18,7 +18,7 @@ from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sou
 from .creatives import CREATIVES, STORY, finish, id_tag
 from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
 from .calc_pause import (
-    ALTERNATE_PAUSE, CALC_PAUSE, IG_NETWORK, CalcVariant, calc_variant, clip_pause, resolve_pause_mode,
+    ALTERNATE_PAUSE, CALC_KILL_SWITCH, CALC_PAUSE, DEFAULT_PAUSE, IG_NETWORK, CalcVariant, calc_variant, clip_pause, resolve_pause_mode,
     variant_id_tag,
 )
 from .timeline import (
@@ -252,6 +252,8 @@ def produce_one(
             job_id=job.id, post_log=post_log, clips_dir=ledger.clips_dir,
             network=network,
         ) if network == IG_NETWORK else raw_pause
+    if CALC_KILL_SWITCH and pause_mode == CALC_PAUSE:
+        pause_mode = DEFAULT_PAUSE  # hotfix: calc overlap bug, render blink everywhere until fixed
     calc_var = calc_variant(job.id) if network == IG_NETWORK and pause_mode == CALC_PAUSE else None
     clip_id = clip_id_for(
         job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag, fixed_wait=fixed, typing=rhythm,
