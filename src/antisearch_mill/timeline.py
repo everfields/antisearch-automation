@@ -140,11 +140,13 @@ class Timeline:
 
     def segments(self) -> dict[str, int]:
         """Frames per part. `typing` runs to Enter and includes the slide-in and the hold."""
-        loading = next(s for s in self.states if s.kind == "loading")
+        # A calc clip splits the wait into input hold, formula and an empty beat (an
+        # Instagram word reel has only the calc state); the wait still ends at the verdict.
+        first = next(s for s in self.states if s.kind in ("loading", "calc"))
         return {
             "typing": self.submit_frame,
-            "enter": loading.start - self.submit_frame,
-            "wait": loading.end - loading.start,
+            "enter": first.start - self.submit_frame,
+            "wait": self.verdict_frame - first.start,
             "verdict": self.total_frames - self.verdict_frame,
         }
 
@@ -498,6 +500,16 @@ def _apply_calc_holds(tl: Timeline, category: str) -> Timeline:
     return replace(tl, states=tuple(s for s in new_states if s.end > s.start))
 
 
+def _carry_input_through_dismiss(tl: Timeline, category: str) -> Timeline:
+    """`app` calc: the input rides down with the keyboard instead of vanishing at Enter.
+
+    It then holds on the row the formula line and the verdict use, so nothing jumps."""
+    states = tuple(
+        State(s.start, s.end, "dismiss", category, True) if s.kind == "dismiss" else s for s in tl.states
+    )
+    return replace(tl, states=states)
+
+
 def _word_timeline_ig(category: str, verdict: str, *, fps: int, pause_s: float) -> Timeline:
     """Instagram calc reel: no empty cursor, no input hold — formula field from frame 0."""
     pause_s = clamp_pause(pause_s)
@@ -562,6 +574,12 @@ def build_timeline(
         return tl
     if style == "app":
         if wait == "fixed":
-            return _app_fixed_timeline(category, verdict, fps=fps, typing=typing)
-        return _app_timeline(category, verdict, fps=fps, pause_s=pause_s)
+            tl = _app_fixed_timeline(category, verdict, fps=fps, typing=typing)
+        else:
+            tl = _app_timeline(category, verdict, fps=fps, pause_s=pause_s)
+        if pause_mode == "calc":
+            tl = _apply_calc_holds(tl, category)
+            tl = _carry_input_through_dismiss(tl, category)
+            tl = _apply_calc_outro(tl)
+        return tl
     raise ValueError(f"unknown clip style {style!r}; use word or app")

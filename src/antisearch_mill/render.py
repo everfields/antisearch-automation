@@ -379,7 +379,7 @@ def _app_filtergraph(
 
     text_ranges: dict[Placed, list[tuple[int, int]]] = {}
     cursor_ranges: dict[CursorBox, list[tuple[int, int]]] = {}
-    moving: list[tuple[int, int]] = []
+    moving: list[tuple[int, int, str, bool]] = []
     for st in timeline.states:
         if skip_loading and st.kind == "loading":
             continue
@@ -388,8 +388,8 @@ def _app_filtergraph(
         k0 = timeline.keyboard_at(st.start)
         k1 = timeline.keyboard_at(st.end - 1)
         if abs(k0 - k1) > 1e-4:
-            if st.cursor:
-                moving.append((st.start, st.end))
+            if st.cursor or st.text:
+                moving.append((st.start, st.end, st.text, st.cursor))
             continue
         frame = layout_frame(
             st.text, st.kind, st.cursor, fm, lay,
@@ -450,12 +450,19 @@ def _app_filtergraph(
         )
     # drawbox's y expression has no frame number, so each frame of a slide is its own box.
     # The caret stays on through a 0.30s slide: the on-phase of the 1.05s blink is longer.
-    for a, b in moving:
+    # A calc clip's input rides the slide too (one drawtext per frame and row), so it
+    # never vanishes at Enter and lands on the row the formula and the verdict share.
+    text_idx = len(text_ranges) + 1
+    for a, b, text, cursor in moving:
         for n in range(a, b):
-            if (n - a) % period_f >= on_f:
-                continue
             cy = terminal_center_y(lay.height, kb_h, timeline.keyboard_at(n))
-            box = layout_frame("", "loading", True, fm, lay, center_y=cy).cursor
+            frame = layout_frame(text, "loading", cursor, fm, lay, center_y=cy)
+            for p in frame.lines:
+                filters.append(drawtext(p, lay.font_px, FG, f"eq(n,{n})", text_idx))
+                text_idx += 1
+            if not cursor or (n - a) % period_f >= on_f:
+                continue
+            box = frame.cursor
             assert box is not None
             filters.append(
                 f"drawbox=x={box.x}:y={box.y}:w={box.w}:h={box.h}:color={FG}:t=fill:enable={_q(f'eq(n,{n})')}"
@@ -698,8 +705,36 @@ def _mux_audio(video: Path, audio: Path, dest: Path, *, duration_s: float, fps: 
         "-map", "0:v", "-map", "1:a",
         "-t", f"{duration_s:.4f}", "-r", str(fps),
         "-c:v", "copy", "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2",
-        "-shortest",
+        # No -shortest: with -t and a B-frame stream copy it drops the last frames (the outro).
         "-movflags", "+faststart",
+        str(dest),
+    ])
+
+
+def _frames_segment(frames_dir: Path, dest: Path, *, fps: int, lay: Layout, phone: PhoneSpec | None,
+                    work: Path) -> None:
+    """PNG frames (screen-sized when ``phone``) to a segment, inside the same phone mockup
+    and through the same planar-RGB composite the ffmpeg screens use."""
+    from .calc_pause import frames_to_video
+
+    if phone is None:
+        frames_to_video(frames_dir, dest, fps=fps)
+        return
+    geom = geometry(phone, lay.width, lay.height)
+    frame_png = work / f"phone_{dest.stem}.png"
+    draw_phone(frame_png, phone, geom)
+    graph = (
+        f"[0:v]format=yuv420p,pad={lay.width}:{lay.height}:{geom.screen_x}:{geom.screen_y}:color=black,"
+        f"format=gbrp[base];[1:v]format=gbrap[ph];"
+        f"[base][ph]overlay=x=0:y=0:format=gbrp:eof_action=repeat,format=yuv420p[v]"
+    )
+    n = len(list(frames_dir.glob("frame_*.png")))
+    _run([
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-framerate", str(fps), "-start_number", "0", "-i", str(frames_dir / "frame_%04d.png"),
+        "-loop", "1", "-framerate", str(fps), "-i", str(frame_png),
+        "-filter_complex", graph, "-map", "[v]", "-frames:v", str(n),
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", "-r", str(fps),
         str(dest),
     ])
 
@@ -720,16 +755,28 @@ def _render_calc_clip(
     keys: str | None,
     calc_variant=None,
 ) -> None:
-    from .calc_pause import frames_to_video, render_calc_frames
+    """Input, then the formula line alone on the input's row, a beat, the verdict on that
+    same row, then the antisearch.ai outro. No two of them ever share a frame."""
+    from .calc_pause import (
+        app_look, calc_hold_frames, draw_text_frame, ig_look, render_calc_frames, render_still_frames,
+    )
     from .timeline import _apply_calc_holds
 
     if not any(s.kind == "calc" for s in timeline.states):
         timeline = _apply_calc_holds(timeline, category)
     cs, ce = _calc_span(timeline)
     (ps, pe), (qs, qe) = _calc_hold_spans(timeline)
+    held = pe > ps  # the ffmpeg screens draw the input hold and the empty beat
+    screen = screen_layout(phone, lay) if phone else lay
+    # The palette look belongs to the full-frame Instagram reel; inside the phone every
+    # segment is the app screen, so the calc frames are too.
+    word_ig = calc_variant is not None and phone is None and not held
+    look = ig_look(screen, calc_variant) if word_ig else app_look(screen)
+    pre_f, post_f = calc_hold_frames(timeline.fps)
     calc_dir = work / "calc"
     render_calc_frames(
-        category, calc_dir, frame_count=ce - cs, font_path=font_path, layout=lay, variant=calc_variant,
+        category, calc_dir, frame_count=ce - cs, font_path=font_path, layout=screen, variant=calc_variant,
+        look=look, input_frames=0 if held else pre_f, empty_frames=0 if held else post_f,
     )
     prefix = work / "prefix.mp4"
     pre_hold = work / "pre.mp4"
@@ -738,8 +785,13 @@ def _render_calc_clip(
     suffix = work / "suffix.mp4"
     joined = work / "joined.mp4"
 
-    graph = build_filtergraph(timeline, font_path, lay, work, phone=phone, skip_loading=True, skip_calc=True)
-    hold_graph = build_filtergraph(timeline, font_path, lay, work, phone=phone, skip_calc=True)
+    # Each graph writes its drawtext text files (t0000.txt, ...) into its own directory:
+    # shared names let the hold graph overwrite the verdict's file with the input text.
+    gdir, hdir = work / "graph", work / "graph_hold"
+    gdir.mkdir()
+    hdir.mkdir()
+    graph = build_filtergraph(timeline, font_path, lay, gdir, phone=phone, skip_loading=True, skip_calc=True)
+    hold_graph = build_filtergraph(timeline, font_path, lay, hdir, phone=phone, skip_calc=True)
     if ps > 0:
         _encode_segment(
             timeline, _trim_graph(graph, 0, ps, fps=timeline.fps), prefix, lay, work,
@@ -750,19 +802,35 @@ def _render_calc_clip(
             timeline, _trim_graph(hold_graph, ps, pe, fps=timeline.fps), pre_hold, lay, work,
             font_path=font_path, phone=phone, audio=False, segment_frames=pe - ps,
         )
-    frames_to_video(calc_dir, calc_vid, fps=timeline.fps)
+    _frames_segment(calc_dir, calc_vid, fps=timeline.fps, lay=lay, phone=phone, work=work)
     if qe > qs:
         _encode_segment(
             timeline, _trim_graph(hold_graph, qs, qe, fps=timeline.fps), post_hold, lay, work,
             font_path=font_path, phone=phone, audio=False, segment_frames=qe - qs,
         )
     if timeline.verdict_frame < timeline.total_frames:
-        _encode_segment(
-            timeline,
-            _trim_graph(graph, timeline.verdict_frame, timeline.total_frames, fps=timeline.fps),
-            suffix, lay, work, font_path=font_path, phone=phone, audio=False,
-            segment_frames=timeline.total_frames - timeline.verdict_frame,
-        )
+        if word_ig:
+            # Verdict and outro on the reel's own palette and row, like the input and formula.
+            sdir = work / "suffix_frames"
+            sdir.mkdir()
+            i = 0
+            for st in timeline.states:
+                if st.kind != "result":
+                    continue
+                img = draw_text_frame(st.text, "result", font_path, screen, look)
+                part = work / f"still_{st.start}"
+                render_still_frames(img, part, st.end - st.start)
+                for f in sorted(part.glob("frame_*.png")):
+                    f.rename(sdir / f"frame_{i:04d}.png")
+                    i += 1
+            _frames_segment(sdir, suffix, fps=timeline.fps, lay=lay, phone=None, work=work)
+        else:
+            _encode_segment(
+                timeline,
+                _trim_graph(graph, timeline.verdict_frame, timeline.total_frames, fps=timeline.fps),
+                suffix, lay, work, font_path=font_path, phone=phone, audio=False,
+                segment_frames=timeline.total_frames - timeline.verdict_frame,
+            )
 
     parts: list[Path] = []
     if ps > 0:

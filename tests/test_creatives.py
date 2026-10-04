@@ -34,12 +34,14 @@ def test_every_creative_renders_a_valid_reel(tmp_path, creative):
     assert row.creative == creative and row.verdict == "japan"
     sidecar = json.loads((ledger.clips_dir / f"{row.clip_id}.json").read_text())
     assert sidecar["timeline"]["creative"] == creative
+    # Instagram reels are calc clips: they end on the 1.5s antisearch.ai outro.
+    outro = 1.5 if sidecar["timeline"].get("pause") == "calc" else 0.0
     if creative in (MONOLITH, COMPUTATION):
-        assert 8.0 < info.duration_s < 9.5
+        assert 8.0 < info.duration_s - outro < 9.5
     elif creative == STORY:
         assert info.duration_s == pytest.approx(5.0, abs=0.1)
     else:
-        assert 4.5 < info.duration_s < 7.0
+        assert 4.5 < info.duration_s - outro < 7.0
     if creative in (CURRENT, STORY):
         assert row.cover_s == 0.0  # TikTok's clip and the Stories card keep their own frames
     else:  # every Instagram reel carries the output-only cover as frame 0, and Buffer's offset points at it

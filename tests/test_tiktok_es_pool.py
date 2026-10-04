@@ -83,7 +83,10 @@ def test_spanish_tiktok_renders(tmp_path):
         job, _Fix(), ledger, font_path=resolve_font(), layout=Layout(width=360, height=640, fps=15),
     )
     assert result.status == "produced"
-    out = Path("/opt/cursor/artifacts/tiktok-es-sample.mp4")
-    out.parent.mkdir(parents=True, exist_ok=True)
     src = ledger.clips_dir / f"{result.clip_id}.mp4"
-    out.write_bytes(src.read_bytes())
+    out = Path("/opt/cursor/artifacts/tiktok-es-sample.mp4")
+    try:  # sample for reviewers when the artifacts dir is writable; not part of the check
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(src.read_bytes())
+    except OSError:
+        pass

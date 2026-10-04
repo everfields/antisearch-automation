@@ -839,9 +839,11 @@ def synthesize_keys(
         10 ** (ENTER_PEAK_DB / 20.0), 0.02,
     )
     calc = next((s for s in timeline.states if s.kind == "calc"), None)
-    loading = next(s for s in timeline.states if s.kind == "loading")
-    wait_start = min(n, at(loading.start))
-    wait_end = min(n, at(loading.end))
+    # The wait runs from the first loading/calc state to the verdict. A calc clip splits it
+    # into input hold, formula, empty beat; an Instagram word reel has no loading state.
+    first = next(s for s in timeline.states if s.kind in ("loading", "calc"))
+    wait_start = min(n, at(first.start))
+    wait_end = min(n, at(timeline.verdict_frame))
     bed_start = min(n, at(calc.start)) if calc_bed and calc else wait_end
     bed_end = min(n, at(calc.end)) if calc_bed and calc else wait_end
     for i in range(wait_start, wait_end):
@@ -954,9 +956,11 @@ def _synthesize_screen_keys(
     _mix_into(left, right, at(timeline.submit_frame), screen_key(enter_rng, voice, enter=True),
               10 ** ((ENTER_PEAK_DB + SCREEN_LEVEL_OFFSET_DB) / 20.0))
     calc = next((s for s in timeline.states if s.kind == "calc"), None)
-    loading = next(s for s in timeline.states if s.kind == "loading")
-    wait_start = min(n, at(loading.start))
-    wait_end = min(n, at(loading.end))
+    # The wait runs from the first loading/calc state to the verdict. A calc clip splits it
+    # into input hold, formula, empty beat; an Instagram word reel has no loading state.
+    first = next(s for s in timeline.states if s.kind in ("loading", "calc"))
+    wait_start = min(n, at(first.start))
+    wait_end = min(n, at(timeline.verdict_frame))
     bed_start = min(n, at(calc.start)) if calc_bed and calc else wait_end
     bed_end = min(n, at(calc.end)) if calc_bed and calc else wait_end
     for i in range(wait_start, wait_end):

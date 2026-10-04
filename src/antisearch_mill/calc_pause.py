@@ -26,8 +26,9 @@ IG_NETWORK = "instagram"
 TIKTOK_NETWORK = "tiktok"
 CALC_PRE_HOLD_S = 0.8
 CALC_POST_HOLD_S = 0.25
-# Hotfix 2026-10-04: calc clips drew input+formula overlapping; produce renders blink until fixed.
-CALC_KILL_SWITCH = True
+# Kill switch (2026-10-04 hotfix): True makes produce render blink instead of calc everywhere.
+# Off again since calc renders input -> formula -> verdict -> outro on one row (frame-verified).
+CALC_KILL_SWITCH = False
 
 
 def calc_hold_frames(fps: int) -> tuple[int, int]:
@@ -36,7 +37,7 @@ def calc_hold_frames(fps: int) -> tuple[int, int]:
 
 BG_RGB = (10, 10, 10)
 FG_RGB = (232, 228, 216)
-DIM_RGB = (70, 68, 65)
+DIM_RGB = (77, 75, 72)  # FG at 30% over BG, as the ffmpeg footer (0xE8E4D8@0.30)
 
 MATH_FONT_CANDIDATES = (
     "/usr/share/fonts/truetype/noto/NotoSansMath-Regular.ttf",
@@ -377,21 +378,35 @@ def _mutate(formula: str, rng: random.Random, intensity: float) -> str:
     return "".join(out)
 
 
+def _mixed_width(
+    text: str,
+    main_font: ImageFont.FreeTypeFont,
+    math_font: ImageFont.FreeTypeFont,
+    main_cmap: frozenset[int],
+    math_cmap: frozenset[int],
+) -> float:
+    """Drawn width of a formula line (per-glyph font fallback, as `_draw_mixed` draws it)."""
+    return sum(
+        (math_font if _use_math_font(ch, main_cmap, math_cmap) else main_font).getlength(ch) for ch in text
+    )
+
+
 def _formula_line(
     seed: int,
     frame: int,
     total: int,
-    fm,
-    lay: Layout,
+    width_of,
+    max_w: float,
     variant: CalcVariant | None = None,
 ) -> str:
+    """One wide line of mutating formulas. ``width_of`` measures the line as drawn."""
     t = frame / max(1, total - 1)
     rng = random.Random(seed + frame * 9973 + int(t * 80000))
     power = variant.curve_power if variant else 2.8
     hop_scale = variant.hop_scale if variant else 1.0
     offset = variant.formula_offset if variant else 0
     intensity = min(10.0, 0.35 + 18 * t ** (power * 0.35 + 0.65))
-    target = lay.max_text_w * 0.88
+    target = max_w * 0.88
     # Accelerating identity changes: many distinct formulas per second near the end.
     hop = max(1, int((1 + 22 * t ** power) * hop_scale))
     if frame == 0 and variant is not None:
@@ -401,12 +416,12 @@ def _formula_line(
     base_idx = (seed + offset + (frame // hop) * 17) % len(FORMULAS)
     parts = [_mutate(FORMULAS[base_idx], rng, intensity)]
     for j in range(3):
-        if fm.width(" · ".join(parts)) >= target * 0.85:
+        if width_of(" · ".join(parts)) >= target * 0.85:
             break
         idx = (seed + offset + frame * (j + 3) + rng.randint(0, 9999)) % len(FORMULAS)
         nxt = _mutate(FORMULAS[idx], random.Random(seed + frame + idx * 31), intensity)
         trial = " · ".join(parts + [nxt])
-        if fm.width(trial) > lay.max_text_w:
+        if width_of(trial) > max_w:
             break
         parts.append(nxt)
     return " · ".join(parts)
@@ -437,95 +452,150 @@ def _draw_mixed(
         cx += font.getlength(ch)
 
 
-def _draw_text_centered(
-    draw: ImageDraw.ImageDraw,
-    y: int,
-    text: str,
-    font: ImageFont.FreeTypeFont,
-    lay: Layout,
-    fill: tuple[int, int, int],
-) -> None:
-    w = font.getlength(text)
-    draw.text(((lay.width - w) / 2, y), text, font=font, fill=fill, anchor="ls")
+MIN_FORMULA_SCALE = 0.45
 
 
-def _draw_calc_frame(
+@dataclass(frozen=True)
+class FormulaPlacement:
+    """Where one formula frame lands: always centered, always inside the side margins."""
+
+    text: str
+    x: float
+    baseline: int
+    size: int
+    width: float
+
+
+def place_formula(
+    text: str, baseline: int, font_path: str, math_path: str, lay: Layout,
+) -> FormulaPlacement:
+    """Center the line; shrink the font (never scroll) until it fits ``lay.max_text_w``."""
+    main_cmap, math_cmap = _cmap(font_path), _cmap(math_path)
+    size = lay.font_px
+    floor = max(1, int(lay.font_px * MIN_FORMULA_SCALE))
+    while True:
+        w = _mixed_width(text, _font(font_path, size), _font(math_path, size), main_cmap, math_cmap)
+        if w <= lay.max_text_w or size <= floor:
+            break
+        size = max(floor, min(size - 1, int(size * lay.max_text_w / w)))
+    if w > lay.max_text_w:  # still too wide at the floor size: drop trailing formulas
+        parts = text.split(" · ")
+        while len(parts) > 1 and w > lay.max_text_w:
+            parts.pop()
+            text = " · ".join(parts)
+            w = _mixed_width(text, _font(font_path, size), _font(math_path, size), main_cmap, math_cmap)
+    return FormulaPlacement(text, (lay.width - w) / 2, baseline, size, w)
+
+
+def input_layout(category: str, font_path: str, lay: Layout, center_y: float):
+    """The input exactly as the ffmpeg screens place it (centered rows around ``center_y``)."""
+    from .render import layout_frame
+
+    return layout_frame(category, "loading", False, metrics(font_path, lay.font_px), lay, center_y=center_y)
+
+
+def formula_baseline(font_path: str, lay: Layout, center_y: float) -> int:
+    """Baseline of a single row centered on ``center_y``: the input's own row when it fits one line."""
+    from .render import layout_frame
+
+    frame = layout_frame("x", "loading", False, metrics(font_path, lay.font_px), lay, center_y=center_y)
+    return frame.lines[0].baseline
+
+
+@dataclass(frozen=True)
+class CalcLook:
+    """Surface, ink and the row the input / formula / verdict share."""
+
+    bg: tuple[int, int, int]
+    fg: tuple[int, int, int]
+    dim: tuple[int, int, int]
+    center_y: float
+    surface: Image.Image | None = None  # palette grain; flat ``bg`` when None
+
+
+def app_look(lay: Layout) -> CalcLook:
+    return CalcLook(BG_RGB, FG_RGB, DIM_RGB, lay.center_y)
+
+
+def ig_look(lay: Layout, variant: CalcVariant) -> CalcLook:
+    p = variant.palette
+    return CalcLook(p.bg, p.fg, p.dim, variant.layout_y_frac * lay.height,
+                    _fill_palette(lay.width, lay.height, p, variant.seed))
+
+
+def _surface(lay: Layout, look: CalcLook) -> Image.Image:
+    if look.surface is not None:
+        return look.surface.copy()
+    return Image.new("RGB", (lay.width, lay.height), look.bg)
+
+
+def _draw_footer(draw: ImageDraw.ImageDraw, font_path: str, lay: Layout, fill) -> None:
+    ff = metrics(font_path, lay.footer_px)
+    fp = footer_placement(lay, ff)
+    draw.text((fp.x, fp.baseline), fp.text, font=_font(font_path, lay.footer_px), fill=fill, anchor="ls")
+
+
+def draw_text_frame(text: str, kind: str, font_path: str, lay: Layout, look: CalcLook) -> Image.Image:
+    """Input or verdict alone, placed like the ffmpeg screens (same rows, same center)."""
+    from .render import layout_frame
+
+    img = _surface(lay, look)
+    draw = ImageDraw.Draw(img)
+    if text:
+        frame = layout_frame(text, kind, False, metrics(font_path, lay.font_px), lay, center_y=look.center_y)
+        font = _font(font_path, lay.font_px)
+        for p in frame.lines:
+            draw.text((p.x, p.baseline), p.text, font=font, fill=look.fg, anchor="ls")
+    _draw_footer(draw, font_path, lay, look.dim)
+    return img
+
+
+def draw_formula_frame(
     category: str,
     frame: int,
     total: int,
     font_path: str,
     math_path: str,
     lay: Layout,
+    look: CalcLook,
     variant: CalcVariant | None = None,
 ) -> Image.Image:
-    if variant is not None:
-        return _draw_ig_calc_frame(category, frame, total, font_path, math_path, lay, variant)
-    img = Image.new("RGB", (lay.width, lay.height), BG_RGB)
+    """Formula line alone, on the input's row. The input is never drawn on this frame."""
+    img = _surface(lay, look)
     draw = ImageDraw.Draw(img)
-    fm = metrics(font_path, lay.font_px)
+    main_cmap, math_cmap = _cmap(font_path), _cmap(math_path)
     main_font = _font(font_path, lay.font_px)
     math_font = _font(math_path, lay.font_px)
-    main_cmap, math_cmap = _cmap(font_path), _cmap(math_path)
-    formula = _formula_line(calc_seed(category, variant), frame, total, fm, lay, variant)
-    baseline = _baseline_y(fm, lay)
-    text_w = sum(
-        (math_font if _use_math_font(ch, main_cmap, math_cmap) else main_font).getlength(ch)
-        for ch in formula
-    )
-    margin = lay.px(20)
-    max_w = lay.max_text_w
-    t = frame / max(1, total - 1)
-    if text_w <= max_w:
-        x = (lay.width - text_w) / 2
-    else:
-        scroll = int((t ** 1.5) * (text_w - max_w + 40))
-        x = margin - scroll
-    _draw_mixed(draw, x, baseline, formula, main_font, math_font, main_cmap, math_cmap, FG_RGB)
-    ff = metrics(font_path, lay.footer_px)
-    fp = footer_placement(lay, ff)
-    draw.text((fp.x, fp.baseline), fp.text, font=_font(font_path, lay.footer_px), fill=DIM_RGB, anchor="ls")
+
+    def width_of(text: str) -> float:
+        return _mixed_width(text, main_font, math_font, main_cmap, math_cmap)
+
+    line = _formula_line(calc_seed(category, variant), frame, total, width_of, lay.max_text_w, variant)
+    fp = place_formula(line, formula_baseline(font_path, lay, look.center_y), font_path, math_path, lay)
+    _draw_mixed(draw, fp.x, fp.baseline, fp.text, _font(font_path, fp.size), _font(math_path, fp.size),
+                main_cmap, math_cmap, look.fg)
+    _draw_footer(draw, font_path, lay, look.dim)
     return img
 
 
-def _draw_ig_calc_frame(
-    category: str,
-    frame: int,
-    total: int,
-    font_path: str,
-    math_path: str,
-    lay: Layout,
-    variant: CalcVariant,
-    bg: Image.Image | None = None,
-) -> Image.Image:
-    """Instagram calc frame: palette surface, input already typed, formula below. No lone cursor."""
-    palette = variant.palette
-    img = bg.copy() if bg is not None else _fill_palette(lay.width, lay.height, palette, variant.seed)
-    draw = ImageDraw.Draw(img)
-    fm = metrics(font_path, lay.font_px)
+def formula_placements(
+    category: str, total: int, font_path: str, lay: Layout, look: CalcLook,
+    variant: CalcVariant | None = None,
+) -> list[FormulaPlacement]:
+    """Placement of every formula frame (for checks: centered, inside the margins)."""
+    math_path = resolve_math_font()
+    main_cmap, math_cmap = _cmap(font_path), _cmap(math_path)
     main_font = _font(font_path, lay.font_px)
     math_font = _font(math_path, lay.font_px)
-    main_cmap, math_cmap = _cmap(font_path), _cmap(math_path)
-    input_y = _baseline_y(fm, lay, variant.layout_y_frac)
-    _draw_text_centered(draw, input_y, category, main_font, lay, palette.fg)
-    formula_y = round(input_y + lay.line_h * 1.15)
-    formula = _formula_line(calc_seed(category, variant), frame, total, fm, lay, variant)
-    text_w = sum(
-        (math_font if _use_math_font(ch, main_cmap, math_cmap) else main_font).getlength(ch)
-        for ch in formula
-    )
-    margin = lay.px(20)
-    max_w = lay.max_text_w
-    t = frame / max(1, total - 1)
-    if text_w <= max_w:
-        fx = (lay.width - text_w) / 2
-    else:
-        scroll = int((t ** 1.5) * (text_w - max_w + 40))
-        fx = margin - scroll
-    _draw_mixed(draw, fx, formula_y, formula, main_font, math_font, main_cmap, math_cmap, palette.fg)
-    ff = metrics(font_path, lay.footer_px)
-    fp = footer_placement(lay, ff)
-    draw.text((fp.x, fp.baseline), fp.text, font=_font(font_path, lay.footer_px), fill=palette.dim, anchor="ls")
-    return img
+    base = formula_baseline(font_path, lay, look.center_y)
+    out = []
+    for i in range(total):
+        line = _formula_line(
+            calc_seed(category, variant), i, total,
+            lambda t: _mixed_width(t, main_font, math_font, main_cmap, math_cmap), lay.max_text_w, variant,
+        )
+        out.append(place_formula(line, base, font_path, math_path, lay))
+    return out
 
 
 def render_ig_opening_frame(
@@ -535,12 +605,10 @@ def render_ig_opening_frame(
     font_path: str,
     layout: Layout | None = None,
 ) -> Image.Image:
-    """Frame 0 of an Instagram reel body (before cover replacement)."""
+    """Frame 0 of an Instagram word-style reel body: the typed input alone on its palette."""
     lay = layout or Layout()
     variant = calc_variant(job_id)
-    return _draw_ig_calc_frame(
-        category, 0, ig_opening_frames(lay.fps), font_path, resolve_math_font(), lay, variant,
-    )
+    return draw_text_frame(category, "loading", font_path, lay, ig_look(lay, variant))
 
 
 def render_calc_frames(
@@ -553,20 +621,45 @@ def render_calc_frames(
     height: int = 1920,
     layout: Layout | None = None,
     variant: CalcVariant | None = None,
+    look: CalcLook | None = None,
+    input_frames: int = 0,
+    empty_frames: int = 0,
 ) -> list[Path]:
+    """``input_frames`` of input alone, then the formula line alone, then ``empty_frames`` of
+    bare surface. Input and formula never share a frame; both sit on ``look.center_y``."""
     out_dir.mkdir(parents=True, exist_ok=True)
     lay = layout or Layout(width=width, height=height)
+    look = look or (ig_look(lay, variant) if variant is not None else app_look(lay))
     math_path = resolve_math_font()
-    bg = _fill_palette(lay.width, lay.height, variant.palette, variant.seed) if variant else None
+    formula_n = frame_count - input_frames - empty_frames
+    if formula_n < 1:
+        raise ValueError("calc span too short for its input and empty holds")
     paths: list[Path] = []
+    input_png = out_dir / "input.png"
+    empty_png = out_dir / "empty.png"
+    if input_frames:
+        draw_text_frame(category, "loading", font_path, lay, look).save(input_png)
+    if empty_frames:
+        draw_text_frame("", "loading", font_path, lay, look).save(empty_png)
     for i in range(frame_count):
         path = out_dir / f"frame_{i:04d}.png"
-        if variant is not None:
-            _draw_ig_calc_frame(category, i, frame_count, font_path, math_path, lay, variant, bg).save(path)
+        if i < input_frames:
+            shutil.copyfile(input_png, path)
+        elif i >= input_frames + formula_n:
+            shutil.copyfile(empty_png, path)
         else:
-            _draw_calc_frame(category, i, frame_count, font_path, math_path, lay, variant).save(path)
+            draw_formula_frame(category, i - input_frames, formula_n, font_path, math_path, lay, look,
+                               variant).save(path)
         paths.append(path)
     return paths
+
+
+def render_still_frames(img: Image.Image, out_dir: Path, frame_count: int) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    first = out_dir / "frame_0000.png"
+    img.save(first)
+    for i in range(1, frame_count):
+        shutil.copyfile(first, out_dir / f"frame_{i:04d}.png")
 
 
 def frames_to_video(frames_dir: Path, dest: Path, *, fps: int) -> None:

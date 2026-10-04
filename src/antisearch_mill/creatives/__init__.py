@@ -91,7 +91,9 @@ def _motion_body(creative: str, classic: Path, timeline: Timeline, out: Path, *,
     big = Layout(layout.width * 2, layout.height * 2, layout.fps)
     source = out.with_name(out.stem + "-source2x.mp4")
     try:
-        render_clip(timeline, source, font_path=font_path, layout=big, phone=phone)
+        calc = any(st.kind == "calc" for st in timeline.states)
+        render_clip(timeline, source, font_path=font_path, layout=big, phone=phone,
+                    pause="calc" if calc else "blink", category=category)
         if phone is not None:
             g = geometry(phone, big.width, big.height)
             screen = (g.screen_x, g.screen_y, g.screen_w, g.screen_h)
