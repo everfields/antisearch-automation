@@ -32,6 +32,31 @@ UNOWNED = "unowned"
 UNOWNED_EVERY = 4
 POOL_NOTE = "pool"
 ROTATE = "rotate"
+TIKTOK_ES_POOL = "tiktok_es"
+ES_JOB_PREFIX = "es-"
+
+
+def tiktok_es_every(env: Mapping[str, str]) -> int:
+    """Every Nth TikTok post draws from the Spanish pool; 0 disables (default N=3)."""
+    raw = (env.get("PUBLISHER_TIKTOK_ES_EVERY") or "3").strip()
+    try:
+        n = int(raw)
+    except ValueError:
+        n = 3
+    return max(0, n)
+
+
+def tiktok_spanish_turn(log: PostLog, env: Mapping[str, str]) -> bool:
+    """True when the next TikTok pool draw should use the Spanish vertical."""
+    every = tiktok_es_every(env)
+    if every <= 0:
+        return False
+    return log.lifetime("tiktok") % every == every - 1
+
+
+def job_language(job: Job) -> str:
+    """`es` when the job id marks a Spanish pool draw; else `en`."""
+    return "es" if job.id.startswith(ES_JOB_PREFIX) else "en"
 
 
 def _lines(path: Path) -> list[tuple[str, str]]:
@@ -62,12 +87,19 @@ def read_rotation(path: Path) -> list[tuple[str, str]]:
     return [(c, "") for c, f in _lines(path) if f == ROTATE]
 
 
-def pool_id(category: str) -> str:
-    return "p-" + re.sub(r"[^a-z0-9]+", "-", category).strip("-")[:60]
+def pool_id(category: str, *, lang: str = "") -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", category).strip("-")[:60]
+    return f"{ES_JOB_PREFIX}{slug}" if lang == "es" else f"p-{slug}"
 
 
 def pool_networks(pools_dir: Path) -> list[str]:
-    return sorted(p.stem for p in pools_dir.glob("*.txt") if p.stem != UNOWNED)
+    return sorted(p.stem for p in pools_dir.glob("*.txt") if p.stem not in (UNOWNED, TIKTOK_ES_POOL))
+
+
+def spanish_pool_inputs(pools_dir: Path | None = None) -> frozenset[str]:
+    """Bare inputs in queue/pools/tiktok_es.txt; the only Spanish allowed under PUBLISHER_LANGUAGE=en."""
+    root = pools_dir or Path(__file__).resolve().parents[3] / "queue" / "pools"
+    return frozenset(c for c, _ in read_pool(root / f"{TIKTOK_ES_POOL}.txt"))
 
 
 GRID_ROW = 3  # an Instagram profile grid row
@@ -107,27 +139,33 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
     cluster = cluster_enabled(network, env or {})
     latest = log.latest_by_job()
     frozen = store.categories()
-    own_file = pools_dir / f"{network}.txt"
-    own = {c for c, f in _lines(own_file) if f != HOLD_FOR_TAG}  # a tag hold keeps its own rules
+    en_file = pools_dir / f"{network}.txt"
+    es_file = pools_dir / f"{TIKTOK_ES_POOL}.txt"
+    own_en = {c for c, f in _lines(en_file) if f != HOLD_FOR_TAG}
+    own_es = {c for c, f in _lines(es_file) if f != HOLD_FOR_TAG} if network == "tiktok" else set()
     posted_inputs = log.used_inputs()
+    every = tiktok_es_every(env or {}) if network == "tiktok" else 0
 
-    def usable(category: str) -> bool:
+    def usable(category: str, *, lang: str = "") -> bool:
         if category in claimed:
             return False
-        prior = latest.get(pool_id(category))
+        prior = latest.get(pool_id(category, lang=lang))
         if prior is not None:
             return prior["network"] == network and prior["status"] not in DONE
         if category not in frozen:
             return True
+        own = own_es if lang == "es" else own_en
         if category not in own or category in posted_inputs:
             return False
         verdict = store.get(category)
         return verdict is not None and verdict.verdict != "no"
 
-    vertical = [c for c in read_pool(own_file) if usable(c[0])]
+    vertical_en = [c for c in read_pool(en_file) if usable(c[0])]
+    vertical_es = [c for c in read_pool(es_file) if usable(c[0], lang="es")] if network == "tiktok" else []
     if cluster:
-        vertical = clustered(vertical)
-    rotation_lines = read_rotation(own_file)
+        vertical_en = clustered(vertical_en)
+        vertical_es = clustered(vertical_es)
+    rotation_lines = read_rotation(en_file)
     shared = rotation_lines or read_pool(pools_dir / f"{UNOWNED}.txt")
     unowned = [c for c in shared if usable(c[0])]
     second_kind = ROTATE if rotation_lines else UNOWNED
@@ -135,6 +173,8 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
     jobs: list[Job] = []
     for k in range(count):
         n = posted + k
+        spanish = every > 0 and n % every == every - 1 and bool(vertical_es)
+        vertical = vertical_es if spanish else vertical_en
         unowned_turn = (n // GRID_ROW) % UNOWNED_EVERY == 0 if cluster else n % UNOWNED_EVERY == 0
         first, second = (unowned, vertical) if unowned_turn else (vertical, unowned)
         source = first if first else second
@@ -143,8 +183,9 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
         category, caption = source.pop(0)
         kind = second_kind if source is unowned else "vertical"
         claimed.add(category)
-        jobs.append(Job(id=pool_id(category), category=category, platforms=(network,), caption=caption,
-                        notes=f"{POOL_NOTE}:{kind}"))
+        lang = "es" if spanish else ""
+        jobs.append(Job(id=pool_id(category, lang=lang), category=category, platforms=(network,), caption=caption,
+                        notes=f"{POOL_NOTE}:{kind}" + (";lang:es" if spanish else "")))
     return jobs
 
 

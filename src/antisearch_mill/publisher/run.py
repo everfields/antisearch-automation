@@ -33,6 +33,7 @@ from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
 from .registry import ADAPTERS
 from .igcaption import build_ig_caption, ig_caption_mode, ig_caption_problem
+from .pools import job_language
 from .tags import TAG_NETWORKS, X_HANDLE, TagLog, choose_tag, choose_x_mention
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
@@ -303,7 +304,7 @@ def run_posts(
                 if live:
                     log.append(PostRow(job.id, net, WITHHELD, clip.clip_id, clip.verdict, detail=res.reason,
                                        at=now.astimezone(timezone.utc).isoformat(timespec="seconds"),
-                                       category=job.category))
+                                       category=job.category, language=job_language(job)))
                 used_inputs.add(job.category)
                 out.append(Outcome(job.id, net, "withheld_winner", detail=f"{clip.verdict!r}: {res.reason}"))
                 continue
@@ -483,7 +484,7 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     shown = effective_caption(job.caption)
     fmt = media.kind
     log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
-                       format=fmt, due_at=due, creative=job.creative))
+                       format=fmt, due_at=due, creative=job.creative, language=job_language(job)))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
@@ -498,13 +499,14 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
-                           category=job.category, caption=shown, format=fmt, due_at=due, creative=job.creative))
+                           category=job.category, caption=shown, format=fmt, due_at=due, creative=job.creative,
+                           language=job_language(job)))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
-                       job.category, shown, fmt, due, job.creative))
+                       job.category, shown, fmt, due, job.creative, language=job_language(job)))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):
@@ -560,6 +562,7 @@ def _post_dry(cls, job: Job, clip: ClipRow, media: Media, ledger: Ledger, env, m
         "upload_wait_s": round(wait_s, 3),
         "clip_id": clip.clip_id,
         "verdict": clip.verdict,
+        "language": job_language(job),
         "oracle_source": clip.oracle_source,
         "media": {"path": str(media.path), "kind": media.kind, "mime": media.mime, "public_url": media.public_url,
                   "width": media.width, "height": media.height, "duration_s": media.duration_s},

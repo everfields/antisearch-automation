@@ -154,6 +154,10 @@ def input_problem(category: str, env: dict[str, str]) -> str | None:
         return "AI-category inputs are blocked until the oracle's self-bias fix ships (PUBLISHER_AI_INPUTS)"
     language = (env.get("PUBLISHER_LANGUAGE") or "en").strip().lower()
     if language == "en" and not ENGLISH_CHARS.match(category):
+        from .pools import spanish_pool_inputs
+
+        if category in spanish_pool_inputs():
+            return None
         return "inputs are English by default (PUBLISHER_LANGUAGE=en): plain ascii words only"
     return None
 
@@ -397,6 +401,7 @@ class PostRow:
     format: str = ""  # video | image | text: what went out, for the per-format metrics
     due_at: str = ""  # a post scheduled in Buffer: when it goes out (UTC ISO); counts on that day
     creative: str = ""  # Instagram: which template went out (creatives.CREATIVES), for views per creative
+    language: str = ""  # en | es: TikTok language bucket for views per language
 
 
 COLUMNS = [f.name for f in fields(PostRow)]
