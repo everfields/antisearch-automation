@@ -127,9 +127,13 @@ def pause_from_clip_sidecar(clip_id: str, clips_dir: Path | None) -> str:
 
 
 def last_single_clip_pause(post_log, clips_dir: Path | None = None) -> str | None:
-    """Pause mode of the latest TikTok single-verdict clip in the post log, or None.
+    """Pause style of the latest published TikTok single-verdict clip, or None with no such post.
 
-    Instagram reels always use calc; alternation reads TikTok only."""
+    The post log on `publisher-state` is the memory that survives runs (CI clips are
+    ephemeral): its `pause` column is read first. A last post without a recorded style
+    falls back to its local sidecar, then to lifetime parity: the k-th TikTok single
+    (1-based) was blink when k is odd (the first posts predate calc). Instagram reels
+    always use calc; alternation reads TikTok only, and sagas are skipped."""
     from datetime import datetime
 
     from .publisher.guard import DONE, FAILED, WITHHELD
@@ -137,7 +141,7 @@ def last_single_clip_pause(post_log, clips_dir: Path | None = None) -> str | Non
 
     if post_log is None:
         return None
-    candidates: list[tuple[datetime, str]] = []
+    candidates: list[tuple[datetime, str, str]] = []
     for job_id, row in post_log.latest_by_job().items():
         if job_id.startswith(SAGA_ID_PREFIX):
             continue
@@ -156,11 +160,15 @@ def last_single_clip_pause(post_log, clips_dir: Path | None = None) -> str | Non
             when = datetime.fromisoformat(row["at"])
         except (KeyError, ValueError):
             continue
-        candidates.append((when, clip_id))
+        candidates.append((when, clip_id, (row.get("pause") or "").strip().lower()))
     if not candidates:
         return None
-    _, clip_id = max(candidates, key=lambda x: x[0])
-    return pause_from_clip_sidecar(clip_id, clips_dir)
+    _, clip_id, recorded = max(candidates, key=lambda x: x[0])
+    if recorded in (CALC_PAUSE, DEFAULT_PAUSE):
+        return recorded
+    if clips_dir and (clips_dir / f"{clip_id}.json").is_file():
+        return pause_from_clip_sidecar(clip_id, clips_dir)
+    return DEFAULT_PAUSE if len(candidates) % 2 == 1 else CALC_PAUSE
 
 
 def next_single_pause(last: str | None, parity_clip_id: str) -> str:

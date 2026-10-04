@@ -402,6 +402,7 @@ class PostRow:
     due_at: str = ""  # a post scheduled in Buffer: when it goes out (UTC ISO); counts on that day
     creative: str = ""  # Instagram: which template went out (creatives.CREATIVES), for views per creative
     language: str = ""  # en | es: TikTok language bucket for views per language
+    pause: str = ""  # blink | calc: the clip's wait style (TikTok alternates them); blank in old rows = blink
 
 
 COLUMNS = [f.name for f in fields(PostRow)]

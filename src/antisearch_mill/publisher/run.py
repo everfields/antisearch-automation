@@ -476,6 +476,18 @@ def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep, media: M
     return None
 
 
+def clip_pause_style(clip: ClipRow) -> str:
+    """blink | calc for a video clip, from its sidecar (written by produce next to the mp4)."""
+    from ..calc_pause import CALC_PAUSE, DEFAULT_PAUSE
+
+    sidecar = Path(clip.clip_path).with_suffix(".json")
+    try:
+        data = json.loads(sidecar.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return DEFAULT_PAUSE
+    return CALC_PAUSE if data.get("timeline", {}).get("pause") == CALC_PAUSE else DEFAULT_PAUSE
+
+
 def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, transport, sleep,
                now: datetime, due_at: datetime | None, state: AntibanState, flags: Path, wait_s: float) -> Outcome:
     net = cls.name
@@ -483,8 +495,10 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     due = due_at.astimezone(timezone.utc).isoformat(timespec="seconds") if due_at is not None else ""
     shown = effective_caption(job.caption)
     fmt = media.kind
+    pause = clip_pause_style(clip) if fmt == VIDEO else ""
     log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
-                       format=fmt, due_at=due, creative=job.creative, language=job_language(job)))
+                       format=fmt, due_at=due, creative=job.creative, language=job_language(job),
+                       pause=pause))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
@@ -500,13 +514,13 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
                            category=job.category, caption=shown, format=fmt, due_at=due, creative=job.creative,
-                           language=job_language(job)))
+                           language=job_language(job), pause=pause))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
-                       job.category, shown, fmt, due, job.creative, language=job_language(job)))
+                       job.category, shown, fmt, due, job.creative, language=job_language(job), pause=pause))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):

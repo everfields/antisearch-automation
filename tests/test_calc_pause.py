@@ -136,7 +136,7 @@ def test_resolve_pause_mode_from_post_log(tmp_path):
     parity = clip_id_for("t-2", verdict, 2.0)
     assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity,
                               network="tiktok") == "blink"
-    log.append(PostRow("t-0", "tiktok", "published", clip_id=blink_id, at="2026-10-03T15:00:00+00:00"))
+    log.append(PostRow("t-0", "tiktok", "published", clip_id=blink_id, at="2026-10-03T15:00:00+00:00", pause="blink"))
     assert last_single_clip_pause(log, clips) == "blink"
     assert resolve_pause_mode(env, job_id="t-2", post_log=log, clips_dir=clips, parity_clip_id=parity,
                               network="tiktok") == "calc"
