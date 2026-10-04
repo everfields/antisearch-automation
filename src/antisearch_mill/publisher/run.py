@@ -25,7 +25,8 @@ from ..creatives import CLEAN_COVER, CURRENT, STORY, id_tag, ig_creative, rotati
 from .guard import (
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now,
-    posting_day, serving_open, serving_slot, slot_index_at, slot_of, slot_times, slots_for, taken_slots,
+    posting_day, serving_open, serving_slot, slot_index_at, slot_language, slot_of, slot_times, slots_for,
+    taken_slots,
 )
 from .winners import resolve
 from .media_host import GitHubPagesHost
@@ -109,7 +110,7 @@ def run_posts(
             out.append(Outcome(job.id, net, status, detail=detail))
 
     def slots_now(net: str) -> list:
-        full = slots_for(net, env)
+        full = slots_for(net, env, day)
         n = daily_slot_count(
             len(full),
             days_since_first=state.days_since_first(net, day),
@@ -175,6 +176,16 @@ def run_posts(
             sent, held = use(net, slots)
             return max(now, serving_open(now, slots, sent, offsets(net, slots), lookahead, held) or now)
         return now
+
+    def tiktok_slot_language() -> str:
+        """`es` or `en` for the TikTok slot a post now would fill (a catch-up keeps its slot's language)."""
+        slots = slots_now("tiktok")
+        if not slots:
+            return "en"
+        i = slot_index("tiktok", slots)
+        return slot_language("tiktok", slot_times(day, slots)[i], env)
+
+    jobs = order_by_slot_language(jobs, tiktok_slot_language, out)
 
     for job in jobs:
         if only and job.id not in only:
@@ -474,6 +485,28 @@ def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep, media: M
     if cls.needs_public_url and not GitHubPagesHost.missing(env):
         return GitHubPagesHost(transport, env, sleep=sleep)
     return None
+
+
+def order_by_slot_language(jobs: list[Job], slot_lang: Callable[[], str], out: list[Outcome]) -> list[Job]:
+    """TikTok's Spanish rows go out only on a Spanish slot, and go first there (English after
+    them as the fallback when no Spanish row can post). On every other slot they are held back."""
+    tiktok = [j for j in jobs if tuple(j.platforms) == ("tiktok",)]
+    spanish = [j for j in tiktok if job_language(j) == "es"]
+    if not tiktok:
+        return jobs
+    lang = slot_lang()
+    english = [j for j in tiktok if job_language(j) != "es"]
+    group = spanish + english if lang == "es" else english
+    if lang != "es" and spanish:
+        out.append(Outcome(spanish[0].id, "tiktok", "skipped_spanish_off_slot",
+                           detail="Spanish TikTok posts only on a Spanish slot (Spain-awake hours)"))
+    ordered: list[Job] = []
+    for j in jobs:  # the TikTok group takes the place of the first TikTok row
+        if j is tiktok[0]:
+            ordered += group
+        elif j not in tiktok:
+            ordered.append(j)
+    return ordered
 
 
 def clip_pause_style(clip: ClipRow) -> str:

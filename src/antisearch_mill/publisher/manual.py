@@ -136,7 +136,7 @@ def _slot_ahead(network: str, when: datetime, now: datetime, log: PostLog, env: 
     if network != "x" or day != posting_day(now):
         return None
     try:
-        slots = slots_for(network, dict(env))
+        slots = slots_for(network, dict(env), day)
     except ValueError:
         return None
     offsets = slot_offsets(network, day, slots, env) if jitter_enabled(dict(env)) else [timedelta(0)] * len(slots)

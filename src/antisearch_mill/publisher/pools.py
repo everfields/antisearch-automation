@@ -14,6 +14,9 @@ Rules:
   `no`) is posted as frozen: that is its one honest run, not a second ask.
 - rhythm per network: the first post ever is an unowned word, then one in every
   UNOWNED_EVERY posts; if one pool is dry the other fills the slot.
+- TikTok Spanish (queue/pools/tiktok_es.txt) is chosen by slot, not by count: Spanish
+  candidates are listed after the English ones and only go out on a Spanish slot
+  (guard.slot_language). PUBLISHER_TIKTOK_ES_EVERY=0 turns Spanish off.
 - humans (CoS, Soul) curate the pools; nobody curates verdicts.
 """
 
@@ -37,7 +40,8 @@ ES_JOB_PREFIX = "es-"
 
 
 def tiktok_es_every(env: Mapping[str, str]) -> int:
-    """Every Nth TikTok post draws from the Spanish pool; 0 disables (default N=3)."""
+    """`PUBLISHER_TIKTOK_ES_EVERY`: 0 turns Spanish TikTok off (the kill switch). Any other
+    value leaves it on; which posts are Spanish is decided by slot (guard.slot_language)."""
     raw = (env.get("PUBLISHER_TIKTOK_ES_EVERY") or "3").strip()
     try:
         n = int(raw)
@@ -46,12 +50,8 @@ def tiktok_es_every(env: Mapping[str, str]) -> int:
     return max(0, n)
 
 
-def tiktok_spanish_turn(log: PostLog, env: Mapping[str, str]) -> bool:
-    """True when the next TikTok pool draw should use the Spanish vertical."""
-    every = tiktok_es_every(env)
-    if every <= 0:
-        return False
-    return log.lifetime("tiktok") % every == every - 1
+def tiktok_es_enabled(env: Mapping[str, str]) -> bool:
+    return tiktok_es_every(env) > 0
 
 
 def job_language(job: Job) -> str:
@@ -144,7 +144,7 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
     own_en = {c for c, f in _lines(en_file) if f != HOLD_FOR_TAG}
     own_es = {c for c, f in _lines(es_file) if f != HOLD_FOR_TAG} if network == "tiktok" else set()
     posted_inputs = log.used_inputs()
-    every = tiktok_es_every(env or {}) if network == "tiktok" else 0
+    spanish_on = network == "tiktok" and tiktok_es_enabled(env or {})
 
     def usable(category: str, *, lang: str = "") -> bool:
         if category in claimed:
@@ -161,7 +161,7 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
         return verdict is not None and verdict.verdict != "no"
 
     vertical_en = [c for c in read_pool(en_file) if usable(c[0])]
-    vertical_es = [c for c in read_pool(es_file) if usable(c[0], lang="es")] if network == "tiktok" else []
+    vertical_es = [c for c in read_pool(es_file) if usable(c[0], lang="es")] if spanish_on else []
     if cluster:
         vertical_en = clustered(vertical_en)
         vertical_es = clustered(vertical_es)
@@ -173,8 +173,7 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
     jobs: list[Job] = []
     for k in range(count):
         n = posted + k
-        spanish = every > 0 and n % every == every - 1 and bool(vertical_es)
-        vertical = vertical_es if spanish else vertical_en
+        vertical = vertical_en
         unowned_turn = (n // GRID_ROW) % UNOWNED_EVERY == 0 if cluster else n % UNOWNED_EVERY == 0
         first, second = (unowned, vertical) if unowned_turn else (vertical, unowned)
         source = first if first else second
@@ -183,9 +182,14 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
         category, caption = source.pop(0)
         kind = second_kind if source is unowned else "vertical"
         claimed.add(category)
-        lang = "es" if spanish else ""
-        jobs.append(Job(id=pool_id(category, lang=lang), category=category, platforms=(network,), caption=caption,
-                        notes=f"{POOL_NOTE}:{kind}" + (";lang:es" if spanish else "")))
+        jobs.append(Job(id=pool_id(category), category=category, platforms=(network,), caption=caption,
+                        notes=f"{POOL_NOTE}:{kind}"))
+    # Spanish candidates follow the English ones; the runner puts them first on a Spanish
+    # slot (Spain-awake hours) and drops them on every other slot (run.order_by_slot_language).
+    for category, caption in vertical_es[:count]:
+        claimed.add(category)
+        jobs.append(Job(id=pool_id(category, lang="es"), category=category, platforms=(network,),
+                        caption=caption, notes=f"{POOL_NOTE}:vertical;lang:es"))
     return jobs
 
 

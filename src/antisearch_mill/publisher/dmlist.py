@@ -1,7 +1,7 @@
 """The daily DM list: yesterday's posted verdicts that name a real entity with an official account.
 
 Carlos DMs these by hand (docs/proposals/2026-09-28-winner-dm.md); nothing here sends a
-message and there is no message text. For each posting day (09:00-09:00 ET) the list holds
+message and there is no message text. For each posting day (08:00-08:00 ET) the list holds
 every distinct verdict that went out on Instagram, TikTok or X, and for each one the
 official Instagram handle (and the X handle, if there is one), plus the link to our post.
 
@@ -254,7 +254,7 @@ def _pick(wikidata: list[str], site: list[str], *, site_needed: bool = False) ->
 
 def render(day: date, found: list[tuple[Posted, Found]], others: list[Posted],
            unknown: list[tuple[Posted, str]]) -> str:
-    lines = [f"# DM list, posting day {day:%a %d %b %Y} (09:00-09:00 ET)", "",
+    lines = [f"# DM list, posting day {day:%a %d %b %Y} (08:00-08:00 ET)", "",
              "Posted verdicts that name a real entity with an official account. Carlos DMs by hand; "
              "open each account first (recent posts are not checked). No message text.", ""]
     if found:

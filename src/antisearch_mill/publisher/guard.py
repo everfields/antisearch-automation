@@ -3,8 +3,8 @@
 - caption: empty, the bare input, or an @handle; never a ranking word up front.
   Bluesky: empty, or the verified domain handle of the crowned company
 - cadence: each network posts only at its own slots, in America/New_York wall-clock
-  time (DST from the tz database, never fixed offsets). A posting day runs 09:00 ET
-  to 09:00 ET, so a midnight slot belongs to the day that started at 09:00. At most
+  time (DST from the tz database, never fixed offsets). A posting day runs 08:00 ET
+  to 08:00 ET, so a midnight slot belongs to the day that started at 08:00. At most
   MAX_PER_NETWORK_PER_DAY posts per network per day (X and Instagram: DAILY_CAP) and
   one per network per run. A post scheduled in Buffer holds the slot its send time
   falls in, and no two posts on one network go out within MIN_GAP of each other.
@@ -24,13 +24,14 @@ import re
 from dataclasses import asdict, dataclass, field, fields
 from datetime import date, datetime, time, timedelta, timezone, tzinfo
 from pathlib import Path
+from typing import Mapping
 from zoneinfo import ZoneInfo
 
 from ..bare_input import ranked_word, superlative_problem
 from ..ledger import now_iso
 
 TZ = "America/New_York"
-DAY_START = time(9, 0)
+DAY_START = time(8, 0)  # 08:00 ET since 2026-10-05 (was 09:00): the 14:07 Madrid slot opens the day
 MAX_PER_NETWORK_PER_DAY = 5
 PER_RUN_PER_NETWORK = 1
 SLOT_MINUTE = 7  # every slot sits on a fixed :07, off the hour and off :30
@@ -39,7 +40,8 @@ X_MAX_PER_DAY = 2  # CoS + Soul, 2026-09-27: 1-2 X posts a day during the format
 # Founder, 2026-09-28: Instagram 6-8 reels a day for the creative rotation (Buffer allows 50 per 24h).
 IG_MAX_PER_DAY = 8
 # Founder, 2026-10-03: TikTok 6/day on the reach cadence (was 4); other presets stay at 5.
-TT_MAX_PER_DAY = 6
+# Founder, 2026-10-05: plus one Spanish slot at 14:07 Madrid (reach cadence) = 7.
+TT_MAX_PER_DAY = 7
 DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY, "tiktok": TT_MAX_PER_DAY}
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 # GitHub's schedule drops most wakes (28 Sep: 1 scheduled run in 8 h). Once a slot's window has passed with
@@ -80,6 +82,16 @@ CADENCES["reach"] = {
     "tiktok": ("11:07", "13:07", "15:07", "17:07", "19:07", "21:07"),
 }
 DEFAULT_CADENCE = "carlos"
+
+# Spanish TikTok (founder, 2026-10-05): Spanish inputs go out only at Spain-awake hours.
+# The reach cadence gains one extra TikTok slot pinned to 14:07 Madrid (its ET time is
+# recomputed per date, so it stays 14:07 in Madrid across both DST switches), always
+# Spanish. Of the ET slots, the ones in TIKTOK_ES_SLOTS_ET are Spanish too, but only on
+# days their Madrid time falls in TIKTOK_ES_MADRID_HOURS; every other slot is English.
+MADRID = "Europe/Madrid"
+TIKTOK_ES_MADRID_SLOT = time(14, 7)
+TIKTOK_ES_SLOTS_ET = (time(11, 7), time(15, 7))  # 17:07 and 21:07 Madrid in summer and winter
+TIKTOK_ES_MADRID_HOURS = range(13, 24)  # 13:00-23:59 Madrid
 
 RANKED = re.compile(r"^(the\s+)?(best|top|greatest|#1)\b", re.I)
 HANDLE = re.compile(r"^@[A-Za-z0-9][A-Za-z0-9._-]{0,99}$")
@@ -201,13 +213,47 @@ def cadence(env: dict[str, str]) -> str:
     return name
 
 
-def slots_for(network: str, env: dict[str, str]) -> list[time]:
-    """The network's slots (ET), in posting-day order: the cadence preset, or `PUBLISHER_SLOTS_<NETWORK>`."""
+def madrid_slot_et(day: date) -> time | None:
+    """ET wall time of posting day `day`'s 14:07 Madrid slot: 08:07 ET most of the year,
+    09:07 ET in the weeks Europe and the US switch DST on different dates. None on the one
+    posting day around such a switch whose 08:00-08:00 ET span holds no 14:07 Madrid."""
+    for d in (day, day + timedelta(days=1)):
+        local = datetime.combine(d, TIKTOK_ES_MADRID_SLOT, tzinfo=ZoneInfo(MADRID)).astimezone(tz())
+        if posting_day(local) == day:
+            return local.time().replace(tzinfo=None)
+    return None
+
+
+def slot_language(network: str, when: datetime, env: Mapping[str, str]) -> str:
+    """`es` when the slot at `when` is a Spanish TikTok slot, else `en` (always `en` off TikTok
+    or with Spanish off). Spanish never lands outside 13:00-23:59 Madrid, whatever the DST."""
+    from .pools import tiktok_es_enabled
+
+    if network != "tiktok" or not tiktok_es_enabled(env):
+        return "en"
+    madrid = when.astimezone(ZoneInfo(MADRID))
+    if madrid.hour not in TIKTOK_ES_MADRID_HOURS:
+        return "en"
+    if madrid.time().replace(second=0, microsecond=0) == TIKTOK_ES_MADRID_SLOT:
+        return "es"
+    et = when.astimezone(tz()).time().replace(second=0, microsecond=0, tzinfo=None)
+    return "es" if et in TIKTOK_ES_SLOTS_ET else "en"
+
+
+def slots_for(network: str, env: dict[str, str], day: date | None = None) -> list[time]:
+    """The network's slots (ET), in posting-day order: the cadence preset, or `PUBLISHER_SLOTS_<NETWORK>`.
+
+    The reach cadence's TikTok list adds the 14:07 Madrid Spanish slot at its ET time for
+    posting day `day` (default: the current posting day)."""
     raw = (env.get(f"PUBLISHER_SLOTS_{network.upper()}") or "").strip()
     if raw.lower() in ("off", "none", "0"):
         return []
     preset = CADENCES[cadence(env)].get(network, CADENCES[cadence(env)]["bluesky"])
     items = [s.strip() for s in re.split(r"[,\s]+", raw) if s.strip()] if raw else list(preset)
+    if network == "tiktok" and not raw and cadence(env) == "reach":
+        madrid = madrid_slot_et(day if day is not None else posting_day(now_et()))
+        if madrid is not None:
+            items.append(f"{madrid:%H:%M}")
     slots = []
     for s in items:
         m = HHMM.match(s)

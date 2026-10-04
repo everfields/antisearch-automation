@@ -22,7 +22,8 @@ def test_offsets_are_0_to_40_minutes_off_the_half_hour_and_reruns_agree():
         plan = day_plan(day, REACH)
         assert plan == day_plan(day, REACH)  # seeded: a rerun computes the same times
         for (net, t), when in plan.items():
-            nominal = next(s for s, x in zip(slot_times(day, slots_for(net, REACH)), slots_for(net, REACH)) if x == t)
+            nominal = next(s for s, x in zip(slot_times(day, slots_for(net, REACH, day)), slots_for(net, REACH, day))
+                           if x == t)
             off = when - nominal
             assert timedelta(0) <= off <= timedelta(minutes=MAX_OFFSET)
             assert when.minute not in (0, 30)

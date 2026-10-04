@@ -1,4 +1,4 @@
-"""TikTok Spanish pool: every Nth post draws from tiktok_es, recorded in posts.csv."""
+"""TikTok Spanish pool: Spanish candidates from tiktok_es, posted only on Spanish slots."""
 
 from datetime import datetime
 from pathlib import Path
@@ -12,7 +12,7 @@ from antisearch_mill.produce import produce_one
 from antisearch_mill.oracle import Verdict
 from antisearch_mill.publisher.guard import PostLog, PostRow
 from antisearch_mill.publisher.pools import (
-    TIKTOK_ES_POOL, job_language, pool_jobs, read_pool, tiktok_es_every, tiktok_spanish_turn,
+    TIKTOK_ES_POOL, job_language, pool_jobs, read_pool, tiktok_es_enabled, tiktok_es_every,
 )
 from antisearch_mill.publisher.verdicts import VerdictStore
 from antisearch_mill.render import Layout
@@ -29,37 +29,33 @@ def test_tiktok_es_trial_csv_matches_pool():
     assert len(pool) >= 40
 
 
-@pytest.mark.parametrize("lifetime,every,expected", [
-    (0, 3, False), (1, 3, False), (2, 3, True), (3, 3, False), (5, 3, True), (2, 0, False),
-])
-def test_spanish_turn_is_every_nth_post(lifetime, every, expected, tmp_path):
-    log = PostLog(tmp_path / "posts.csv")
-    for i in range(lifetime):
-        log.append(PostRow(f"p-{i}", "tiktok", "published", at="2026-10-01T12:00:00+00:00"))
-    assert tiktok_spanish_turn(log, {"PUBLISHER_TIKTOK_ES_EVERY": str(every)}) is expected
-
-
-def test_pool_jobs_alternates_spanish_on_tiktok(tmp_path):
+def test_pool_jobs_list_spanish_after_english(tmp_path):
     log = PostLog(tmp_path / "posts.csv")
     store = VerdictStore(tmp_path / "verdicts.csv")
-    for i in range(2):
-        log.append(PostRow(f"p-{i}", "tiktok", "published", at="2026-10-01T12:00:00+00:00"))
-    jobs = pool_jobs("tiktok", POOLS, log, store, set(), 1, env={"PUBLISHER_TIKTOK_ES_EVERY": "3"})
-    assert len(jobs) == 1
-    assert jobs[0].id.startswith("es-")
-    assert jobs[0].category in {c for c, _ in read_pool(POOLS / f"{TIKTOK_ES_POOL}.txt")}
-    assert job_language(jobs[0]) == "es"
+    jobs = pool_jobs("tiktok", POOLS, log, store, set(), 2, env={})
+    langs = [job_language(j) for j in jobs]
+    assert langs == ["en", "en", "es", "es"]
+    es = {c for c, _ in read_pool(POOLS / f"{TIKTOK_ES_POOL}.txt")}
+    assert all(j.category in es and j.id.startswith("es-") for j in jobs[2:])
 
 
-def test_pool_jobs_english_when_not_spanish_turn(tmp_path):
+def test_spanish_kill_switch(tmp_path):
     log = PostLog(tmp_path / "posts.csv")
     store = VerdictStore(tmp_path / "verdicts.csv")
-    jobs = pool_jobs("tiktok", POOLS, log, store, set(), 1, env={"PUBLISHER_TIKTOK_ES_EVERY": "3"})
-    assert jobs[0].id.startswith("p-")
-    assert job_language(jobs[0]) == "en"
+    jobs = pool_jobs("tiktok", POOLS, log, store, set(), 2, env={"PUBLISHER_TIKTOK_ES_EVERY": "0"})
+    assert [job_language(j) for j in jobs] == ["en", "en"]
+    assert not tiktok_es_enabled({"PUBLISHER_TIKTOK_ES_EVERY": "0"})
+    assert tiktok_es_enabled({}) and tiktok_es_enabled({"PUBLISHER_TIKTOK_ES_EVERY": "3"})
 
 
-def test_tiktok_es_every_defaults_to_three():
+def test_other_networks_never_get_spanish(tmp_path):
+    log = PostLog(tmp_path / "posts.csv")
+    store = VerdictStore(tmp_path / "verdicts.csv")
+    jobs = pool_jobs("instagram", POOLS, log, store, set(), 3, env={})
+    assert all(job_language(j) == "en" for j in jobs)
+
+
+def test_tiktok_es_every_defaults_to_on():
     assert tiktok_es_every({}) == 3
     assert tiktok_es_every({"PUBLISHER_TIKTOK_ES_EVERY": "0"}) == 0
 

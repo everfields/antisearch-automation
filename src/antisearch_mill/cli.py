@@ -423,7 +423,7 @@ def cmd_due(args, settings: Settings) -> int:
             print("  x         off (Buffer only; the paid API stays off)")
             continue
         try:
-            full = slots_for(net, env)
+            full = slots_for(net, env, day)
         except ValueError as exc:
             print(f"due: {exc}", file=sys.stderr)
             return 2
@@ -568,7 +568,7 @@ def cmd_networks(args, settings: Settings) -> int:
         creds = "present" if not missing else "missing " + ",".join(missing)
         print(f"{i}. {name:<9} route {route_for(name, env)}; credentials {creds}; "
               f"live-approved: {'yes' if name in approved else 'no'}")
-        slots = slot_times(day, slots_for(name, env))
+        slots = slot_times(day, slots_for(name, env, day))
         print(f"   slots ET:     {', '.join(f'{s:%H:%M}' for s in slots) or 'off'}")
         print(f"   today Madrid: {', '.join(f'{s.astimezone(madrid):%H:%M}' for s in slots) or 'off'}")
         vertical, unowned = runway(name, Path(args.pools), store, log=log)

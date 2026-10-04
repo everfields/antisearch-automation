@@ -59,7 +59,7 @@ def day_plan(day: date, env: Mapping[str, str]) -> dict[tuple[str, time], dateti
     taken: set[datetime] = set()
     for net in _networks(env):
         try:
-            slots = slots_for(net, dict(env))
+            slots = slots_for(net, dict(env), day)
         except ValueError:
             continue
         prev = None
