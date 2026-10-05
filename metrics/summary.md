@@ -1,27 +1,27 @@
-# Social metrics — 2026-10-04 18:41 UTC
+# Social metrics — 2026-10-05 00:00 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d +1)
-- account likes: 32, posts: 32
+- account likes: 32, posts: 34
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `eye cream` → skinceuticals a.g.e. advanced eye | 270 | 1 | 0 | 0 | 0 | 0.4% |
-| `toner` → laneige cream skin cerapeptide toner | 266 | 1 | 0 | 0 | 0 | 0.4% |
 | `a view` → mount everest from gokyo ri | 258 | 0 | 0 | 0 | 0 | 0.0% |
-| `exfoliator` → paula’s choice skin perfecting 2% bha liquid | 24 | 0 | 0 | 0 | 0 | 0.0% |
+| `nail polish` → essie gel couture | 90 | 0 | 0 | 0 | 0 | 0.0% |
+| `exfoliator` → paula’s choice skin perfecting 2% bha liquid | 86 | 0 | 0 | 0 | 0 | 0.0% |
+| `álbum de bad bunny` → debí tirar más fotos | 35 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `toner` → laneige cream skin cerapeptide toner | 0.4% | 266 |
-| `eye cream` → skinceuticals a.g.e. advanced eye | 0.4% | 270 |
 | `a view` → mount everest from gokyo ri | 0.0% | 258 |
-| `exfoliator` → paula’s choice skin perfecting 2% bha liquid | 0.0% | 24 |
+| `exfoliator` → paula’s choice skin perfecting 2% bha liquid | 0.0% | 86 |
+| `álbum de bad bunny` → debí tirar más fotos | 0.0% | 35 |
+| `nail polish` → essie gel couture | 0.0% | 90 |
 
 ### last 7d (43 post(s))
 
@@ -37,9 +37,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- |
 | `a promise` → a kept promise | 1.6% | 250 |
 | `a promise` → a kept promise | 1.6% | 250 |
-| `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
-| `vitamin c serum` → skinceuticals c e ferulic | 1.2% | 256 |
 | `hair dryer` → dyson supersonic r | 1.0% | 205 |
+| `hair dryer` → dyson supersonic r | 1.0% | 205 |
+| `a letter` → e | 0.8% | 256 |
 
 ## instagram
 
@@ -49,9 +49,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 no posts in this window
 
-### last 7d (31 post(s))
+### last 7d (29 post(s))
 
-**27 published post(s) have no numbers yet** (shown as –)
+**25 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -59,7 +59,7 @@ no posts in this window
 | `restaurant in paris` → plénitude | 6 | 0 | 0 | 0 | 0 | 0.0% |
 | `hotel in tokyo` → aman tokyo | 4 | 0 | 0 | 0 | 0 | 0.0% |
 | `restaurant in mexico city` → quintonil | 1 | 0 | 0 | 0 | 0 | 0.0% |
-| `hotel` → rosewood hong kong | – | – | – | – | – | – |
+| `restaurant in tokyo` → sézanne | – | – | – | – | – | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ no posts in this window
 
 | IG creative | posts | mean views | mean likes | mean shares | mean saves | mean eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| 0-current | 3 | – | – | – | – | – |
+| 0-current | 1 | – | – | – | – | – |
 | 1-short-score | 1 | – | – | – | – | – |
 | 2-medium-monolith | 1 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0% |
 | 3-computation | 4 | 10.3 | 0.0 | 0.0 | 0.0 | 0.0% |
@@ -84,18 +84,18 @@ no posts in this window
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `book` → don quixote | – | 0 | 0 | – | – | – |
 | `ceo` → jensen huang | – | 0 | 0 | – | – | – |
+| `weakness` → compassion | – | 0 | 0 | – | – | – |
 
 ### last 7d (15 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `overrated` → fame | 17 | 0 | 0 | 0 | – | 0.0% |
-| `ai model` → claude opus 5.5 | – | 0 | 1 | – | – | – |
 | `search engine` → kagi | – | 0 | 1 | – | – | – |
 | `invention` → printing press | – | 0 | 0 | – | – | – |
 | `programming language` → python | – | 0 | 0 | – | – | – |
+| `phone` → iphone 17 pro max | – | 0 | 0 | – | – | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
