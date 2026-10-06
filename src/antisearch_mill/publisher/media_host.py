@@ -4,6 +4,12 @@ Buffer (and Meta) fetch media from a URL instead of accepting an upload, and the
 URL must stay reachable until the post publishes. The clip is committed through
 the GitHub contents API to `PUBLISHER_MEDIA_REPO` and served from
 `PUBLISHER_PUBLIC_BASE_URL`; the host waits until Pages actually serves it.
+
+The wait backs off (10 s, x1.5, at most 60 s between checks) for up to PAGES_BUDGET_S (10 min)
+per run, shared by every clip of the run so the 25-minute job never times out. If Pages still
+does not serve the clip (an Actions/Pages incident), PagesNotServed is raised: the runner logs
+the attempt as a retryable failure and the next run tries the job again (up to MAX_PAGES_RETRIES
+times) instead of consuming it.
 Free, no card, first-party; the clips are about to be public anyway.
 """
 
@@ -18,16 +24,39 @@ from ..publish.http import HttpError, HttpResponse, Request, Transport
 from .base import Media, PublisherError
 
 API = "https://api.github.com"
-PAGES_POLLS = 30
-PAGES_POLL_S = 10.0
+PAGES_POLL_S = 10.0  # first gap between checks
+PAGES_BACKOFF = 1.5
+PAGES_POLL_MAX_S = 60.0
+PAGES_BUDGET_S = 600.0  # total wait per run (all clips together), well inside the 25-min job
+MAX_PAGES_RETRIES = 3  # runs that may retry a job after a Pages timeout before it stays failed
+NOT_SERVED = "not served by Pages"  # the marker of a retryable failure in posts.csv's detail
 ENV = ("PUBLISHER_MEDIA_REPO", "PUBLISHER_MEDIA_TOKEN", "PUBLISHER_PUBLIC_BASE_URL")
 
 
+class PagesNotServed(PublisherError):
+    """Pages did not serve the clip in time: a transient incident, so the job stays retryable."""
+
+    retryable = True
+
+
+class PagesBudget:
+    """Seconds of Pages waiting left in this run (shared by every host the run creates)."""
+
+    def __init__(self, seconds: float = PAGES_BUDGET_S):
+        self.left = seconds
+
+
+def is_retryable_failure(detail: str) -> bool:
+    return NOT_SERVED in (detail or "")
+
+
 class GitHubPagesHost:
-    def __init__(self, transport: Transport, env: Mapping[str, str], *, sleep: Callable[[float], None] = time.sleep):
+    def __init__(self, transport: Transport, env: Mapping[str, str], *, sleep: Callable[[float], None] = time.sleep,
+                 budget: PagesBudget | None = None):
         self.transport = transport
         self.env = env
         self.sleep = sleep
+        self.budget = budget if budget is not None else PagesBudget()
 
     @staticmethod
     def missing(env: Mapping[str, str]) -> list[str]:
@@ -61,13 +90,21 @@ class GitHubPagesHost:
             if not resp.ok:
                 raise HttpError(req, resp)
 
-        for i in range(PAGES_POLLS):
+        checks, waited, gap = 0, 0.0, PAGES_POLL_S
+        while True:
+            checks += 1
             probe = self.transport.send(Request("HEAD", url))
             if probe.status == 200:
                 return url
-            if i < PAGES_POLLS - 1:
-                self.sleep(PAGES_POLL_S)
-        raise PublisherError(f"media host: {url} not served by Pages after {PAGES_POLLS} checks")
+            if self.budget.left <= 0:
+                break
+            pause = min(gap, self.budget.left)
+            self.sleep(pause)
+            self.budget.left -= pause
+            waited += pause
+            gap = min(gap * PAGES_BACKOFF, PAGES_POLL_MAX_S)
+        raise PagesNotServed(f"media host: {url} {NOT_SERVED} after {checks} checks over {waited / 60:.1f} min; "
+                             "retryable on the next run")
 
     def dry_run_responder(self, req: Request) -> HttpResponse:
         if req.method == "GET" and urlsplit(req.url).netloc == urlsplit(API).netloc:

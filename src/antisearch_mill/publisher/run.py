@@ -29,7 +29,7 @@ from .guard import (
     taken_slots,
 )
 from .winners import resolve
-from .media_host import GitHubPagesHost
+from .media_host import MAX_PAGES_RETRIES, GitHubPagesHost, PagesBudget, is_retryable_failure
 from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
 from .registry import ADAPTERS
@@ -103,6 +103,7 @@ def run_posts(
     lookahead = LOOKAHEAD if jitter else timedelta(0)
     waited = timedelta(0)  # slept so far in this run: `now` is the run's start
     last_post: datetime | None = None
+    pages_budget = PagesBudget()  # one Pages wait budget for the whole run (25-min job)
 
     def once(job: Job, net: str, status: str, detail: str) -> None:
         if (net, status) not in reported:
@@ -216,7 +217,7 @@ def run_posts(
             out.append(Outcome(job.id, net, "skipped_pending_unverified",
                                detail="a previous live attempt never recorded an outcome; check the network, then fix the log"))
             continue
-        if prior and prior["status"] == FAILED and not retry_failed:
+        if prior and prior["status"] == FAILED and not retry_failed and not retryable(log, job.id, prior):
             out.append(Outcome(job.id, net, "skipped_failed_before", detail=prior["detail"]))
             continue
         if log.input_within(job.category, now, cooldown_days(env)):
@@ -403,7 +404,8 @@ def run_posts(
         if schedule_at is not None:
             due_at = schedule_at
         if live:
-            done = _post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at, state, flags, wait_s)
+            done = _post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at, state, flags, wait_s,
+                              pages_budget=pages_budget)
             if tag and done.status in DONE:
                 tag_log.append(schedule_at or now, net, tag, job.id)  # logged for the day it goes out
             out.append(done)
@@ -413,7 +415,8 @@ def run_posts(
         if (net == "instagram" and cls.route == "buffer" and produce is not None and due_at is None
                 and stories_enabled(env) and done.status in ("published", "dry_run_ok")):
             out.append(_story(job, clip, log, ledger, env, live=live, transport=live_transport, sleep=sleep,
-                              now=now, day=day, produce=produce, state=state, flags=flags))
+                              now=now, day=day, produce=produce, state=state, flags=flags,
+                              pages_budget=pages_budget))
     return out
 
 
@@ -424,7 +427,8 @@ def stories_enabled(env: Mapping[str, str]) -> bool:
 
 
 def _story(job: Job, clip: ClipRow, log: PostLog, ledger: Ledger, env, *, live: bool, transport, sleep,
-           now: datetime, day, produce, state: AntibanState, flags: Path) -> Outcome:
+           now: datetime, day, produce, state: AntibanState, flags: Path,
+           pages_budget: PagesBudget | None = None) -> Outcome:
     """The Stories card for the reel that just went out through Buffer: the same frozen verdict, never a
     second oracle run.
 
@@ -451,7 +455,7 @@ def _story(job: Job, clip: ClipRow, log: PostLog, ledger: Ledger, env, *, live: 
     story_job = dataclasses.replace(story_job, caption="-")
     if live:
         return _post_live(BufferInstagramStory, story_job, card, media, log, env, transport, sleep, now, None,
-                          state, flags, 0.0)
+                          state, flags, 0.0, pages_budget=pages_budget)
     return _post_dry(BufferInstagramStory, story_job, card, media, ledger, env,
                      BufferInstagramStory.missing(env), None, 0.0)
 
@@ -479,12 +483,23 @@ def x_text_problem(text: str) -> str | None:
     return None
 
 
-def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep, media: Media | None = None) -> GitHubPagesHost | None:
+def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep, media: Media | None = None,
+          budget: PagesBudget | None = None) -> GitHubPagesHost | None:
     if media is not None and media.kind == TEXT:
         return None
     if cls.needs_public_url and not GitHubPagesHost.missing(env):
-        return GitHubPagesHost(transport, env, sleep=sleep)
+        return GitHubPagesHost(transport, env, sleep=sleep, budget=budget)
     return None
+
+
+def retryable(log: PostLog, job_id: str, prior: Mapping[str, str]) -> bool:
+    """A failure from a Pages incident is not the job's fault: the next run tries it again, up to
+    MAX_PAGES_RETRIES retries, after which it stays failed (an honest, visible stop)."""
+    if not is_retryable_failure(prior.get("detail", "")):
+        return False
+    tries = sum(1 for r in log.rows() if r["job_id"] == job_id and r["status"] == FAILED
+                and is_retryable_failure(r.get("detail", "")))
+    return tries <= MAX_PAGES_RETRIES
 
 
 def order_by_slot_language(jobs: list[Job], slot_lang: Callable[[], str], out: list[Outcome]) -> list[Job]:
@@ -522,7 +537,8 @@ def clip_pause_style(clip: ClipRow) -> str:
 
 
 def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, transport, sleep,
-               now: datetime, due_at: datetime | None, state: AntibanState, flags: Path, wait_s: float) -> Outcome:
+               now: datetime, due_at: datetime | None, state: AntibanState, flags: Path, wait_s: float,
+               *, pages_budget: PagesBudget | None = None) -> Outcome:
     net = cls.name
     at = now.astimezone(timezone.utc).isoformat(timespec="seconds")
     due = due_at.astimezone(timezone.utc).isoformat(timespec="seconds") if due_at is not None else ""
@@ -538,7 +554,7 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     if wait_s > 0:
         sleep(wait_s)
     try:
-        host = _host(cls, env, transport, sleep, media)
+        host = _host(cls, env, transport, sleep, media, pages_budget)
         if host:
             media = dataclasses.replace(media, public_url=host.publish(media))
         media = _fresh_container(media, now, clip.clip_id)
