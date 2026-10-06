@@ -1,5 +1,7 @@
 # X (CoS + Soul, 2026-09-27). Verdicts for every line were frozen from the 30-call live test
 # on 2026-09-27, so each post shows exactly what was tested; nothing here is re-asked.
+# Refill 2026-10-06 (founder): all 17 above went out. The lines below the refill markers are
+# new, never asked: each is asked live once, the first time it posts (then frozen).
 # Plain lines fill 3 of every 4 X posts, in file order. ` | rotate` lines fill the fourth
 # (they replace the shared unowned words on X). Each input posts once, ever.
 # Main line: tools.
@@ -21,3 +23,65 @@ ceo | rotate
 overrated | rotate
 weakness | rotate
 writer | rotate
+# Refill 2026-10-06, main line: broader culture (books, writers, films, ideas, places, objects).
+novel
+poet
+board game
+philosopher
+silent film
+european capital
+painter
+typewriter
+short story
+documentary
+film director
+fairy tale
+record player
+composer
+port city
+graphic novel
+thought experiment
+piano
+memoir
+sitcom
+opera
+bicycle
+essay
+explorer
+science fiction novel
+college town
+comic book
+paradox
+notebook
+symphony
+musical
+magazine
+historian
+dictionary
+myth
+sculpture
+cookbook
+film score
+library
+card game
+biography
+proverb
+newspaper
+poem
+map
+# Refill 2026-10-06, rotating slot: big nouns and human nature.
+curiosity | rotate
+ambition | rotate
+genius | rotate
+nostalgia | rotate
+wisdom | rotate
+envy | rotate
+humor | rotate
+talent | rotate
+pride | rotate
+boredom | rotate
+kindness | rotate
+mystery | rotate
+loyalty | rotate
+imagination | rotate
+temptation | rotate

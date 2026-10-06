@@ -46,6 +46,19 @@ LIVE = {
 
 MAIN = ["ai model", "search engine", "programming language", "phone", "social network", "browser"]
 ROTATING = ["invention", "sin", "idea", "virtue", "empire", "fear", "book", "ceo", "overrated", "weakness", "writer"]
+# Refill 2026-10-06 (founder): the 17 seeded lines all went out; broader culture next.
+REFILL_MAIN = [
+    "novel", "poet", "board game", "philosopher", "silent film", "european capital", "painter", "typewriter",
+    "short story", "documentary", "film director", "fairy tale", "record player", "composer", "port city",
+    "graphic novel", "thought experiment", "piano", "memoir", "sitcom", "opera", "bicycle", "essay",
+    "explorer", "science fiction novel", "college town", "comic book", "paradox", "notebook", "symphony",
+    "musical", "magazine", "historian", "dictionary", "myth", "sculpture", "cookbook", "film score",
+    "library", "card game", "biography", "proverb", "newspaper", "poem", "map",
+]
+REFILL_ROTATING = [
+    "curiosity", "ambition", "genius", "nostalgia", "wisdom", "envy", "humor", "talent", "pride", "boredom",
+    "kindness", "mystery", "loyalty", "imagination", "temptation",
+]
 DROPPED = {"century", "language", "investor", "scientist", "athlete", "founder", "decade", "city", "sport",
            "meme", "emoji", "password", "font"}
 
@@ -57,8 +70,9 @@ def _x():
 def test_x_pool_is_the_cos_mix():
     assert "x" in pool_networks(POOLS)
     main, rotating = _x()
-    assert main == MAIN  # plain lines: 3 of every 4 X posts, in this order
-    assert rotating == ROTATING  # ` | rotate` lines: the fourth
+    assert main == MAIN + REFILL_MAIN  # plain lines: 3 of every 4 X posts, in this order
+    assert rotating == ROTATING + REFILL_ROTATING  # ` | rotate` lines: the fourth
+    assert len(REFILL_MAIN) == 3 * len(REFILL_ROTATING)  # the refill keeps the 3:1 rhythm
     assert not (set(main) | set(rotating)) & DROPPED
 
 
@@ -66,7 +80,7 @@ def test_x_pool_meets_the_pool_bar():
     raw = [ln.split("|", 1)[0].strip() for ln in (POOLS / "x.txt").read_text(encoding="utf-8").splitlines()
            if ln.strip() and not ln.lstrip().startswith("#")]
     main, rotating = _x()
-    assert raw == main + rotating  # no duplicates
+    assert sorted(raw) == sorted(main + rotating) and len(set(raw)) == len(raw)  # no duplicates
     for line in raw:
         assert line == line.lower() and "@" not in line and "http" not in line and "www." not in line
         assert input_problem(line, {"PUBLISHER_AI_INPUTS": "on"}) is None, line  # AI lines need the switch
@@ -170,3 +184,17 @@ def test_live_run_waits_when_no_x_slot_is_due(tmp_path, monkeypatch):
     assert [o.status for o in out] == ["skipped_not_due"]
     assert "09:07" in out[0].detail
     assert transport.requests == []
+
+
+def test_the_refill_is_bare_new_and_never_asked():
+    """2026-10-06 refill: new inputs only (nothing posted or frozen on publisher-state then)."""
+    asked = {"writer", "book", "idea", "invention", "music", "opera house", "camera", "latte", "a book", "a song",
+             "a film", "conditioner", "serum", "toner", "hair oil", "sunscreen", "cleanser", "perfume"}
+    main, rotating = _x()
+    tiktok = [c for c, _ in read_pool(POOLS / "tiktok.txt")]
+    refill_tt = tiktok[tiktok.index("self tanner") + 1:]
+    assert len(refill_tt) == 60 and len(set(refill_tt)) == 60
+    for line in REFILL_MAIN + REFILL_ROTATING + refill_tt:
+        assert line == line.lower() and input_problem(line, {}) is None, line
+        assert not line.endswith("?") and line not in asked, line
+    assert not set(refill_tt) & (set(main) | set(rotating))
