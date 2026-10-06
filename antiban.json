@@ -57,7 +57,8 @@
       "book\ndon quixote",
       "ceo\njensen huang",
       "weakness\ncompassion",
-      "writer\nl\u00e1szl\u00f3 krasznahorkai"
+      "writer\nl\u00e1szl\u00f3 krasznahorkai",
+      "novel\nwar and peace"
     ]
   },
   "clips": {
@@ -174,7 +175,8 @@
       "p-book-03a44e7b",
       "p-ceo-0b997309",
       "p-weakness-bfaeee3b",
-      "p-writer-1f5dcc56"
+      "p-writer-1f5dcc56",
+      "p-novel-d64a4264"
     ]
   },
   "first_post": {
