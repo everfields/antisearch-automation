@@ -1,29 +1,29 @@
-# Social metrics — 2026-10-05 22:05 UTC
+# Social metrics — 2026-10-06 06:34 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d +0)
-- account likes: 36, posts: 39
+- account likes: 38, posts: 41
 
 ### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `rosalía álbum` → motomami | 265 | 0 | 0 | 0 | 0 | 0.0% |
-| `álbum de bad bunny` → debí tirar más fotos | 258 | 0 | 0 | 0 | 0 | 0.0% |
+| `eyeliner` → stila stay all day waterproof liquid eyeliner | 264 | 2 | 0 | 0 | 0 | 0.8% |
 | `canción de reggaetón` → gasolina — daddy yankee | 246 | 0 | 0 | 0 | 0 | 0.0% |
-| `eyeliner` → stila stay all day waterproof liquid eyeliner | 158 | 0 | 0 | 0 | 0 | 0.0% |
-| `a meal` → sushi omakase | 17 | 0 | 0 | 0 | 0 | 0.0% |
+| `a meal` → sushi omakase | 123 | 0 | 0 | 0 | 0 | 0.0% |
+| `blush` → rare beauty soft pinch liquid blush | 105 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `álbum de bad bunny` → debí tirar más fotos | 0.0% | 258 |
+| `eyeliner` → stila stay all day waterproof liquid eyeliner | 0.8% | 264 |
 | `canción de reggaetón` → gasolina — daddy yankee | 0.0% | 246 |
-| `a meal` → sushi omakase | 0.0% | 17 |
-| `eyeliner` → stila stay all day waterproof liquid eyeliner | 0.0% | 158 |
+| `a meal` → sushi omakase | 0.0% | 123 |
 | `rosalía álbum` → motomami | 0.0% | 265 |
+| `blush` → rare beauty soft pinch liquid blush | 0.0% | 105 |
 
 ### last 7d (45 post(s))
 
@@ -51,29 +51,25 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 no posts in this window
 
-### last 7d (23 post(s))
+### last 7d (21 post(s))
 
-**22 published post(s) have no numbers yet** (shown as –)
+**21 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hotel in tokyo` → aman tokyo | 4 | 0 | 0 | 0 | 0 | 0.0% |
-| `a season` → autumn | – | – | – | – | – | – |
 | `hotel in paris` → cheval blanc paris | – | – | – | – | – | – |
 | `hotel in bali` → capella ubud | – | – | – | – | – | – |
 | `beach in europe` → spiaggia dei conigli, lampedusa | – | – | – | – | – | – |
-
-| top by engagement rate | eng. rate | views |
-| --- | --- | --- |
-| `hotel in tokyo` → aman tokyo | 0.0% | 4 |
+| `an hour` → golden hour | – | – | – | – | – | – |
+| `city for a weekend` → paris | – | – | – | – | – | – |
 
 | IG creative | posts | mean views | mean likes | mean shares | mean saves | mean eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | 0-current | 0 | – | – | – | – | – |
 | 1-short-score | 0 | – | – | – | – | – |
 | 2-medium-monolith | 0 | – | – | – | – | – |
-| 3-computation | 1 | 4.0 | 0.0 | 0.0 | 0.0 | 0.0% |
-| 0-current-cover | 22 | – | – | – | – | – |
+| 3-computation | 0 | – | – | – | – | – |
+| 0-current-cover | 21 | – | – | – | – | – |
 
 ## x
 
