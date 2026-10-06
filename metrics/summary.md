@@ -1,31 +1,30 @@
-# Social metrics — 2026-10-06 06:34 UTC
+# Social metrics — 2026-10-06 16:02 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d +0)
-- account likes: 38, posts: 41
+- account likes: 39, posts: 43
 
 ### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `rosalía álbum` → motomami | 265 | 0 | 0 | 0 | 0 | 0.0% |
-| `eyeliner` → stila stay all day waterproof liquid eyeliner | 264 | 2 | 0 | 0 | 0 | 0.8% |
-| `canción de reggaetón` → gasolina — daddy yankee | 246 | 0 | 0 | 0 | 0 | 0.0% |
-| `a meal` → sushi omakase | 123 | 0 | 0 | 0 | 0 | 0.0% |
-| `blush` → rare beauty soft pinch liquid blush | 105 | 0 | 0 | 0 | 0 | 0.0% |
+| `a meal` → sushi omakase | 266 | 1 | 0 | 0 | 0 | 0.4% |
+| `eyeliner` → stila stay all day waterproof liquid eyeliner | 266 | 2 | 0 | 0 | 0 | 0.8% |
+| `blush` → rare beauty soft pinch liquid blush | 233 | 0 | 0 | 0 | 0 | 0.0% |
+| `canción de pop latino` → la tortura — shakira y alejandro sanz | 19 | 0 | 0 | 0 | 0 | 0.0% |
+| `bronzer` → nars laguna bronzing powder | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `eyeliner` → stila stay all day waterproof liquid eyeliner | 0.8% | 264 |
-| `canción de reggaetón` → gasolina — daddy yankee | 0.0% | 246 |
-| `a meal` → sushi omakase | 0.0% | 123 |
-| `rosalía álbum` → motomami | 0.0% | 265 |
-| `blush` → rare beauty soft pinch liquid blush | 0.0% | 105 |
+| `eyeliner` → stila stay all day waterproof liquid eyeliner | 0.8% | 266 |
+| `a meal` → sushi omakase | 0.4% | 266 |
+| `blush` → rare beauty soft pinch liquid blush | 0.0% | 233 |
+| `canción de pop latino` → la tortura — shakira y alejandro sanz | 0.0% | 19 |
 
-### last 7d (45 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -40,7 +39,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `a promise` → a kept promise | 1.6% | 250 |
 | `a promise` → a kept promise | 1.6% | 250 |
 | `nail polish` → essie gel couture | 1.2% | 254 |
-| `hair dryer` → dyson supersonic r | 1.0% | 205 |
+| `nail polish` → essie gel couture | 1.2% | 254 |
 | `hair dryer` → dyson supersonic r | 1.0% | 205 |
 
 ## instagram
@@ -79,20 +78,28 @@ no posts in this window
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `writer` → lászló krasznahorkai | – | 0 | 0 | – | – | – |
+| `novel` → war and peace | – | 0 | 0 | – | – | – |
 
-### last 7d (13 post(s))
+### last 7d (14 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `programming language` → python | – | 0 | 0 | – | – | – |
-| `phone` → iphone 17 pro max | – | 0 | 0 | – | – | – |
-| `social network` → instagram | – | 0 | 0 | – | – | – |
-| `sin` → lust | – | 0 | 0 | – | – | – |
-| `browser` → brave | – | 0 | 0 | – | – | – |
+| `idea` → the scientific method | 15 | 0 | 0 | 0 | – | 0.0% |
+| `browser` → brave | 13 | 0 | 0 | 0 | – | 0.0% |
+| `virtue` → compassion | 13 | 0 | 0 | 0 | – | 0.0% |
+| `sin` → lust | 12 | 0 | 0 | 0 | – | 0.0% |
+| `empire` → roman empire | 11 | 0 | 0 | 0 | – | 0.0% |
+
+| top by engagement rate | eng. rate | views |
+| --- | --- | --- |
+| `programming language` → python | 0.0% | 5 |
+| `phone` → iphone 17 pro max | 0.0% | 5 |
+| `social network` → instagram | 0.0% | 9 |
+| `sin` → lust | 0.0% | 12 |
+| `browser` → brave | 0.0% | 13 |
 
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
 | video | 0 | – | – | – | – |
-| text | 13 | – | 0.0 | 0.0 | – |
+| text | 14 | 9.3 | 0.0 | 0.0 | 0.0% |
 
