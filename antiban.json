@@ -60,7 +60,8 @@
       "writer\nl\u00e1szl\u00f3 krasznahorkai",
       "novel\nwar and peace",
       "poet\nanne carson",
-      "curiosity\nscientific inquiry"
+      "curiosity\nscientific inquiry",
+      "board game\nbrass: birmingham"
     ]
   },
   "clips": {
@@ -188,7 +189,8 @@
       "p-writer-1f5dcc56",
       "p-novel-d64a4264",
       "p-poet-70a047f4",
-      "p-curiosity-a726b609"
+      "p-curiosity-a726b609",
+      "p-board-game-d8d488a7"
     ]
   },
   "first_post": {
