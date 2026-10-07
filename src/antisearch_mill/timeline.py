@@ -547,8 +547,12 @@ def build_timeline(
     typing: str = "legacy",
     pause_mode: str = "blink",
     ig_calc: bool = False,
+    outro: bool = True,
 ) -> Timeline:
     """`wait="fixed"` ignores `pause_s`: the wait is WAIT_BLINKS blinks in every clip.
+
+    `outro=False` ends a calc clip on its verdict, with no antisearch.ai end screen (TikTok,
+    2026-10-07: no on-screen URL, and the cover is the verdict, never the end screen).
 
     `typing` picks the fixed-wait `app` rhythm; every other path keeps its own.
     """
@@ -570,7 +574,8 @@ def build_timeline(
             tl = _word_timeline(category, verdict, fps=fps, pause_s=pause_s)
         if pause_mode == "calc":
             tl = _apply_calc_holds(tl, category)
-            tl = _apply_calc_outro(tl)
+            if outro:
+                tl = _apply_calc_outro(tl)
         return tl
     if style == "app":
         if wait == "fixed":
@@ -580,6 +585,7 @@ def build_timeline(
         if pause_mode == "calc":
             tl = _apply_calc_holds(tl, category)
             tl = _carry_input_through_dismiss(tl, category)
-            tl = _apply_calc_outro(tl)
+            if outro:
+                tl = _apply_calc_outro(tl)
         return tl
     raise ValueError(f"unknown clip style {style!r}; use word or app")

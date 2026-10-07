@@ -18,7 +18,7 @@ from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sou
 from .creatives import CREATIVES, STORY, finish, id_tag
 from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
 from .calc_pause import (
-    ALTERNATE_PAUSE, CALC_KILL_SWITCH, CALC_PAUSE, DEFAULT_PAUSE, IG_NETWORK, CalcVariant, calc_variant, clip_pause, resolve_pause_mode,
+    ALTERNATE_PAUSE, CALC_KILL_SWITCH, CALC_PAUSE, DEFAULT_PAUSE, IG_NETWORK, TIKTOK_NETWORK, CalcVariant, calc_variant, clip_pause, resolve_pause_mode,
     variant_id_tag,
 )
 from .timeline import (
@@ -55,6 +55,7 @@ def clip_id_for(
     creative: str = "",
     pause_mode: str = "",
     calc_variant_tag: str = "",
+    outro: bool = True,
 ) -> str:
     body = f"{verdict.category}\0{verdict.verdict}\0{verdict.source}\0{render_style_name(style)}\0{pause_s:.3f}"
     # Silent clips keep the historical hash. Pulse is part of the id only when it is actually muxed.
@@ -73,6 +74,8 @@ def clip_id_for(
         body += f"\0pause:{pause_mode}"
     if calc_variant_tag:
         body += f"\0calcvar:{calc_variant_tag}"
+    if pause_mode == CALC_PAUSE and not outro:
+        body += "\0outro:none"
     digest = hashlib.sha256(body.encode()).hexdigest()[:8]
     return f"{job_id}-{digest}"
 
@@ -255,9 +258,11 @@ def produce_one(
     if CALC_KILL_SWITCH and pause_mode == CALC_PAUSE:
         pause_mode = DEFAULT_PAUSE  # hotfix: calc overlap bug, render blink everywhere until fixed
     calc_var = calc_variant(job.id) if network == IG_NETWORK and pause_mode == CALC_PAUSE else None
+    # TikTok (2026-10-07): no antisearch.ai end screen on calc clips; they end, and are covered, on the verdict.
+    outro = network != TIKTOK_NETWORK
     clip_id = clip_id_for(
         job.id, verdict, pause, style=style, audio=audio_tag, frame=frame_tag, fixed_wait=fixed, typing=rhythm,
-        creative=creative, pause_mode=pause_mode, calc_variant_tag=variant_id_tag(calc_var),
+        creative=creative, pause_mode=pause_mode, calc_variant_tag=variant_id_tag(calc_var), outro=outro,
     )
     style_name = render_style_name(style)
     clip_path = ledger.clips_dir / f"{clip_id}.mp4"
@@ -269,7 +274,7 @@ def produce_one(
         timeline = build_timeline(
             verdict.category, verdict.verdict, fps=layout.fps, pause_s=pause, style=style,
             wait="fixed" if fixed else "latency", typing=rhythm, pause_mode=pause_mode,
-            ig_calc=ig_calc,
+            ig_calc=ig_calc, outro=outro or ig_calc,
         )
         comment = f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}"
         if use_audio:
@@ -309,7 +314,7 @@ def produce_one(
                 if classic != clip_path:
                     classic.unlink(missing_ok=True)
         info = probe(clip_path)
-        problems = validate_master(info, layout, style_name, calc_outro=pause_mode == CALC_PAUSE)
+        problems = validate_master(info, layout, style_name, calc_outro=pause_mode == CALC_PAUSE and (outro or ig_calc))
         if problems:
             raise RenderError("; ".join(problems))
         end = info.duration_s if creative == STORY else timeline.duration_s

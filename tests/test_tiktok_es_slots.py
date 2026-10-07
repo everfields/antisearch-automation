@@ -22,9 +22,8 @@ def _plan(day: date, env=REACH):
 
 
 def test_daily_schedule_in_madrid():
-    assert _plan(date(2026, 10, 5)) == [
-        ("14:07", "es"), ("17:07", "es"), ("19:07", "en"), ("21:07", "es"),
-        ("23:07", "en"), ("01:07", "en"), ("03:07", "en")]
+    # 2026-10-07: 4 a day (was 7), see test_tiktok_no_outro.py.
+    assert _plan(date(2026, 10, 5)) == [("14:07", "es"), ("18:07", "es"), ("21:07", "en"), ("01:07", "en")]
     assert _plan(date(2027, 1, 12)) == _plan(date(2026, 10, 5))  # winter: both sides on standard time
 
 
@@ -48,7 +47,7 @@ def test_spanish_never_outside_spain_awake_hours():
             langs.append(lang)
             if lang == "es":
                 assert 13 <= t.astimezone(MADRID).hour <= 23, (d, t)
-        assert langs.count("es") == 3 and langs.count("en") == 4, d
+        assert langs.count("es") == 2 and langs.count("en") == 2, d
         d += timedelta(days=1)
 
 
@@ -68,11 +67,10 @@ def _jobs(ledger):  # noqa: F811
 
 @pytest.mark.parametrize("now,expected", [
     (datetime(2026, 10, 5, 8, 10, tzinfo=ET), "es-cosa"),      # 14:10 Madrid: the pinned Spanish slot
-    (datetime(2026, 10, 5, 11, 10, tzinfo=ET), "es-cosa"),     # 17:10 Madrid
-    (datetime(2026, 10, 5, 13, 10, tzinfo=ET), "p-en-thing"),  # 19:10 Madrid: English slot
-    (datetime(2026, 10, 5, 15, 10, tzinfo=ET), "es-cosa"),     # 21:10 Madrid
+    (datetime(2026, 10, 5, 12, 10, tzinfo=ET), "es-cosa"),     # 18:10 Madrid
+    (datetime(2026, 10, 5, 15, 10, tzinfo=ET), "p-en-thing"),  # 21:10 Madrid: English slot
     (datetime(2026, 10, 5, 19, 10, tzinfo=ET), "p-en-thing"),  # 01:10 Madrid: never Spanish at night
-    (datetime(2026, 10, 6, 0, 30, tzinfo=ET), "p-en-thing"),   # catch-up of the 21:07 ET slot: English
+    (datetime(2026, 10, 5, 23, 30, tzinfo=ET), "p-en-thing"),  # catch-up of the 19:07 ET slot: English
 ])
 def test_runner_posts_the_slots_language(ledger, log, now, expected):  # noqa: F811
     out = go(_jobs(ledger), ledger, log, {"tiktok": fake_adapter("tiktok")}, env=ENV, now=now)
@@ -83,23 +81,23 @@ def test_runner_posts_the_slots_language(ledger, log, now, expected):  # noqa: F
 
 
 def test_catch_up_keeps_the_spanish_slot_language(ledger, log):  # noqa: F811
-    """The 15:07 ET (21:07 Madrid) slot was missed whole: no run until after its window closed."""
-    env = {**ENV, "PUBLISHER_SLOTS_TIKTOK": "08:07,11:07,15:07"}  # 15:07 is the day's last slot here
-    # 15:07 + 3h grace = 18:07; a run at 19:00 is a catch-up of 15:07, still Spanish.
+    """The 12:07 ET (18:07 Madrid) slot was missed whole: no run until after its window closed."""
+    env = {**ENV, "PUBLISHER_SLOTS_TIKTOK": "08:07,12:07"}  # 12:07 is the day's last slot here
+    # 12:07 + 3h grace = 15:07; a run at 16:00 is a catch-up of 12:07, still Spanish.
     out = go(_jobs(ledger), ledger, log, {"tiktok": fake_adapter("tiktok")}, env=env,
-             now=datetime(2026, 10, 5, 19, 0, tzinfo=ET))
+             now=datetime(2026, 10, 5, 16, 0, tzinfo=ET))
     assert [o.job_id for o in out if o.status == "published"] == ["es-cosa"]
 
 
 def test_spanish_slot_falls_back_to_english_when_no_spanish_row(ledger, log):  # noqa: F811
     clip(ledger, "p-en-thing")
     out = go([Job("p-en-thing", "en thing", ("tiktok",), notes="pool:vertical")], ledger, log,
-             {"tiktok": fake_adapter("tiktok")}, env=ENV, now=datetime(2026, 10, 5, 11, 10, tzinfo=ET))
+             {"tiktok": fake_adapter("tiktok")}, env=ENV, now=datetime(2026, 10, 5, 12, 10, tzinfo=ET))
     assert [o.job_id for o in out if o.status == "published"] == ["p-en-thing"]
 
 
 def test_kill_switch_posts_english_on_spanish_slots(ledger, log):  # noqa: F811
     env = {**ENV, "PUBLISHER_TIKTOK_ES_EVERY": "0"}
     out = go(_jobs(ledger), ledger, log, {"tiktok": fake_adapter("tiktok")}, env=env,
-             now=datetime(2026, 10, 5, 11, 10, tzinfo=ET))
+             now=datetime(2026, 10, 5, 12, 10, tzinfo=ET))
     assert [o.job_id for o in out if o.status == "published"] == ["p-en-thing"]

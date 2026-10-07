@@ -23,7 +23,8 @@ from .antiban import (
 from .fresh import looks_like_mp4, remux_fresh
 from ..creatives import CLEAN_COVER, CURRENT, STORY, id_tag, ig_creative, rotation_enabled
 from .guard import (
-    DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, WINNER, WITHHELD, PostLog, PostRow,
+    DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, TIKTOK_MAX_PER_24H, TIKTOK_MIN_SPACING,
+    WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now,
     posting_day, serving_open, serving_slot, slot_index_at, slot_language, slot_of, slot_times, slots_for,
     taken_slots,
@@ -260,6 +261,10 @@ def run_posts(
             once(job, net, "skipped_min_gap", f"{net} post at {near.astimezone(now.tzinfo):%Y-%m-%d %H:%M %Z}; "
                                               f"{MIN_GAP.seconds // 60} min between posts")
             continue
+        crowded = tiktok_crowded(log, when) if net == "tiktok" else None
+        if crowded:
+            once(job, net, "skipped_tiktok_volume", crowded)
+            continue
         creative = ""
         if net == "instagram":
             creative = ig_creative(day, slot_index(net, slots)) if rotation_enabled(env) else CLEAN_COVER
@@ -489,6 +494,21 @@ def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep, media: M
         return None
     if cls.needs_public_url and not GitHubPagesHost.missing(env):
         return GitHubPagesHost(transport, env, sleep=sleep, budget=budget)
+    return None
+
+
+def tiktok_crowded(log: PostLog, when: datetime) -> str | None:
+    """Why a TikTok post at `when` would be one too many, or None. TikTok gave 0 views to every
+    post with 6+ TikTok posts in the 24h before it (2026-10-06/07): never more than
+    TIKTOK_MAX_PER_24H in any 24 hours, never two within TIKTOK_MIN_SPACING (catch-ups too)."""
+    times = log.post_times("tiktok")
+    recent = [t for t in times if when - timedelta(hours=24) < t <= when + TIKTOK_MIN_SPACING]
+    close = [t for t in recent if abs(when - t) < TIKTOK_MIN_SPACING]
+    if close:
+        return (f"TikTok post at {max(close).astimezone(when.tzinfo):%Y-%m-%d %H:%M %Z}; "
+                f"{TIKTOK_MIN_SPACING.seconds // 60} min between TikTok posts")
+    if sum(1 for t in recent if t <= when) >= TIKTOK_MAX_PER_24H:
+        return f"{TIKTOK_MAX_PER_24H} TikTok posts in the last 24 hours already"
     return None
 
 

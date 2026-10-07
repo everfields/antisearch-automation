@@ -41,7 +41,13 @@ X_MAX_PER_DAY = 2  # CoS + Soul, 2026-09-27: 1-2 X posts a day during the format
 IG_MAX_PER_DAY = 8
 # Founder, 2026-10-03: TikTok 6/day on the reach cadence (was 4); other presets stay at 5.
 # Founder, 2026-10-05: plus one Spanish slot at 14:07 Madrid (reach cadence) = 7.
-TT_MAX_PER_DAY = 7
+# 2026-10-07: back to 4. Every TikTok post with 6+ TikTok posts in the 24h before it got 0 views
+# (from 2026-10-06 03:37 Madrid, when the pinger and the 14:07 slot took it to 7-8 a day);
+# with at most 5 before it, they all got their ~250. So: 4 a day, at most 4 in any 24 hours,
+# and at least TIKTOK_MIN_SPACING between two TikTok posts (catch-ups included).
+TT_MAX_PER_DAY = 4
+TIKTOK_MAX_PER_24H = 4
+TIKTOK_MIN_SPACING = timedelta(hours=2, minutes=30)
 DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY, "tiktok": TT_MAX_PER_DAY}
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 # GitHub's schedule drops most wakes (28 Sep: 1 scheduled run in 8 h). Once a slot's window has passed with
@@ -52,34 +58,35 @@ CATCHUP_WINDOW = timedelta(hours=6)
 # Business networks lean to the US morning, leisure networks to the afternoon and night (ET).
 # `PUBLISHER_CADENCE` picks a preset; `PUBLISHER_SLOTS_<NETWORK>` overrides one network.
 CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
-    "carlos": {  # 5 per network per day (X: 2, see X_MAX_PER_DAY)
+    "carlos": {  # 5 per network per day (X: 2, see X_MAX_PER_DAY; TikTok: 4)
         "bluesky": ("09:07", "11:07", "13:07", "16:07", "19:07"),
         "x": ("09:07", "16:07"),
         "linkedin": ("09:07", "11:07", "13:07", "15:07", "17:07"),
         "instagram": ("12:07", "16:07", "19:07", "21:07", "23:07"),
-        "tiktok": ("14:07", "18:07", "20:07", "22:07", "00:07"),
+        "tiktok": ("14:07", "18:07", "21:07", "00:07"),  # 4, 3h+ apart (2026-10-07, TT_MAX_PER_DAY)
         "threads": ("12:07", "16:07", "19:07", "21:07", "23:07"),
         "mastodon": ("09:07", "11:07", "13:07", "16:07", "19:07"),
         "reddit": ("10:07", "13:07", "16:07", "19:07", "22:07"),
     },
-    "soul": {  # TikTok 5, X 2, Bluesky 3, Instagram 3, LinkedIn 1
+    "soul": {  # TikTok 4, X 2, Bluesky 3, Instagram 3, LinkedIn 1
         "bluesky": ("09:07", "13:07", "18:07"),
         "x": ("09:07", "16:07"),
         "linkedin": ("09:07",),
         "instagram": ("13:07", "19:07", "22:07"),
-        "tiktok": ("14:07", "18:07", "20:07", "22:07", "00:07"),
+        "tiktok": ("14:07", "18:07", "21:07", "00:07"),  # 4, 3h+ apart (2026-10-07, TT_MAX_PER_DAY)
         "threads": ("13:07", "19:07", "22:07"),
         "mastodon": ("09:07", "13:07", "18:07"),
         "reddit": ("13:07", "19:07"),
     },
 }
-# TikTok at 6 from day one (every 2 hours, 11:07-21:07 ET), Instagram at 7
+# TikTok: 12:07, 15:07, 19:07 ET plus the 14:07 Madrid slot = 4 a day, 3+ hours apart
+# (2026-10-07; was every 2 hours, 11:07-21:07 ET, see TT_MAX_PER_DAY). Instagram at 7
 # (every 2 hours, 10:07-22:07 ET: 7-19 PT). X, LinkedIn, and Bluesky stay on the
 # conservative `soul` slots (X stays off unless Buffer is the route).
 CADENCES["reach"] = {
     **CADENCES["soul"],
     "instagram": ("10:07", "12:07", "14:07", "16:07", "18:07", "20:07", "22:07"),
-    "tiktok": ("11:07", "13:07", "15:07", "17:07", "19:07", "21:07"),
+    "tiktok": ("12:07", "15:07", "19:07"),
 }
 DEFAULT_CADENCE = "carlos"
 
@@ -90,7 +97,7 @@ DEFAULT_CADENCE = "carlos"
 # days their Madrid time falls in TIKTOK_ES_MADRID_HOURS; every other slot is English.
 MADRID = "Europe/Madrid"
 TIKTOK_ES_MADRID_SLOT = time(14, 7)
-TIKTOK_ES_SLOTS_ET = (time(11, 7), time(15, 7))  # 17:07 and 21:07 Madrid in summer and winter
+TIKTOK_ES_SLOTS_ET = (time(12, 7),)  # 18:07 Madrid in summer and winter (17:07 in the DST-gap weeks)
 TIKTOK_ES_MADRID_HOURS = range(13, 24)  # 13:00-23:59 Madrid
 
 RANKED = re.compile(r"^(the\s+)?(best|top|greatest|#1)\b", re.I)

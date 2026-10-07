@@ -106,8 +106,8 @@ def test_midnight_slot_belongs_to_the_day_that_started_at_nine():
     assert slots[-1] == time(0, 7)
     last = slot_times(date(2026, 9, 25), slots)[-1]
     assert last == datetime(2026, 9, 26, 0, 7, tzinfo=ET)
-    assert slots_due(datetime(2026, 9, 26, 0, 10, tzinfo=ET), slots) == 5
-    assert open_now(datetime(2026, 9, 26, 0, 10, tzinfo=ET), slots, 4) == 1
+    assert slots_due(datetime(2026, 9, 26, 0, 10, tzinfo=ET), slots) == 4
+    assert open_now(datetime(2026, 9, 26, 0, 10, tzinfo=ET), slots, 3) == 1
     assert next_slot(datetime(2026, 9, 26, 0, 10, tzinfo=ET), slots) == datetime(2026, 9, 26, 14, 7, tzinfo=ET)
 
 
@@ -166,24 +166,25 @@ def test_slot_overrides_and_limits():
 def test_cadence_presets_carlos_and_soul():
     counts = {c: {n: len(slots_for(n, {"PUBLISHER_CADENCE": c})) for n in ("tiktok", "x", "bluesky", "instagram", "linkedin")}
               for c in ("carlos", "soul")}
-    assert counts["carlos"] == {"tiktok": 5, "x": 2, "bluesky": 5, "instagram": 5, "linkedin": 5}
-    assert counts["soul"] == {"tiktok": 5, "x": 2, "bluesky": 3, "instagram": 3, "linkedin": 1}
+    assert counts["carlos"] == {"tiktok": 4, "x": 2, "bluesky": 5, "instagram": 5, "linkedin": 5}
+    assert counts["soul"] == {"tiktok": 4, "x": 2, "bluesky": 3, "instagram": 3, "linkedin": 1}
     assert slots_for("bluesky", {}) == slots_for("bluesky", {"PUBLISHER_CADENCE": "carlos"})
 
 
-def test_reach_cadence_is_seven_ig_seven_tiktok_and_leaves_the_others():
+def test_reach_cadence_is_seven_ig_four_tiktok_and_leaves_the_others():
     env = {"PUBLISHER_CADENCE": "reach"}
     soul = {"PUBLISHER_CADENCE": "soul"}
     assert [f"{t:%H:%M}" for t in slots_for("instagram", env)] == [
         "10:07", "12:07", "14:07", "16:07", "18:07", "20:07", "22:07"]
-    # The Spanish 14:07 Madrid slot (08:07 ET on this date) opens the posting day, then the six ET slots.
+    # The Spanish 14:07 Madrid slot (08:07 ET on this date) opens the posting day, then three ET
+    # slots (2026-10-07: 6+ TikTok posts in 24h got 0 views, so 4 a day, 3+ hours apart).
     assert [f"{t:%H:%M}" for t in slots_for("tiktok", env, date(2026, 10, 5))] == [
-        "08:07", "11:07", "13:07", "15:07", "17:07", "19:07", "21:07"]
+        "08:07", "12:07", "15:07", "19:07"]
     for net in ("x", "linkedin", "bluesky", "threads", "mastodon", "reddit"):
         assert slots_for(net, env) == slots_for(net, soul)
-    # Instagram 7 under its cap of 8, TikTok 7 under its cap of 7, both 90+ minutes apart.
+    # Instagram 7 under its cap of 8, TikTok 4 at its cap of 4.
     assert len(slots_for("instagram", env)) == 7
-    assert len(slots_for("tiktok", env, date(2026, 10, 5))) == 7
+    assert len(slots_for("tiktok", env, date(2026, 10, 5))) == 4
 
 
 def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five():
@@ -191,9 +192,9 @@ def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five
     assert len(slots_for("instagram", {"PUBLISHER_CADENCE": "reach", "PUBLISHER_SLOTS_INSTAGRAM": eight})) == 8
     with pytest.raises(ValueError, match="cap is 8"):
         slots_for("instagram", {"PUBLISHER_SLOTS_INSTAGRAM": eight + ",02:07"})
-    assert len(slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,12:07,14:07,16:07,18:07,20:07,22:07"})) == 7
-    with pytest.raises(ValueError, match="cap is 7"):
-        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,12:07,14:07,16:07,18:07,20:07,22:07,00:07"})
+    assert len(slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,13:07,16:07,19:07"})) == 4
+    with pytest.raises(ValueError, match="cap is 4"):
+        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,13:07,16:07,19:07,22:07"})
 
 
 def test_reach_slot_stays_open_until_the_next_one_or_three_hours():
@@ -207,7 +208,7 @@ def test_reach_slot_stays_open_until_the_next_one_or_three_hours():
     assert open_now(datetime(2026, 9, 26, 19, 10, tzinfo=ET), ig, 0) == 1
     tt = slots_for("tiktok", {"PUBLISHER_CADENCE": "reach"}, date(2026, 9, 26))
     # Last slot of the day gets 3h, not the whole night until the next posting day.
-    assert open_now(datetime(2026, 9, 26, 23, 30, tzinfo=ET), tt, 3) == 1  # 21:07 still inside 3h
+    assert open_now(datetime(2026, 9, 26, 21, 30, tzinfo=ET), tt, 3) == 1  # 19:07 still inside 3h
     assert open_now(datetime(2026, 9, 27, 7, 30, tzinfo=ET), tt, 0) == 0
     nxt = slots_for("tiktok", {"PUBLISHER_CADENCE": "reach"}, date(2026, 9, 27))
     assert open_now(datetime(2026, 9, 27, 8, 30, tzinfo=ET), nxt, 0) == 1  # the 14:07 Madrid slot
@@ -263,7 +264,7 @@ def test_reach_posts_seven_ig_on_day_one_and_a_late_run_posts_once(ledger, log):
     tt_jobs = [job(f"tt-{i}", ("tiktok",)) for i in range(3)]
     for j in tt_jobs:
         clip(ledger, j.id)
-    late = datetime(2026, 9, 26, 14, 7, tzinfo=ET)  # 60 min after TikTok 13:07
+    late = datetime(2026, 9, 26, 13, 7, tzinfo=ET)  # 60 min after TikTok 12:07
     once = go(tt_jobs, ledger, log, {"tiktok": fake_adapter("tiktok")}, env=env, now=late)
     assert [o.status for o in once if o.status == "published"] == ["published"]
     assert [o.status for o in once if o.status != "published"] == ["skipped_not_due"]
