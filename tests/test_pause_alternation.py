@@ -89,14 +89,17 @@ def test_next_single_pause_is_always_the_opposite():
 
 
 def test_live_post_records_the_clip_pause(ledger, log):  # noqa: F811 - pytest fixtures
+    """The clip's style is read from its sidecar. Since 2026-10-07 a calc clip never goes out on
+    TikTok (blink only): the runner refuses it and logs nothing."""
+    from antisearch_mill.publisher.run import clip_pause_style
+
     t = fake_adapter("tiktok")
     row = clip(ledger, "a-1")
     (ledger.clips_dir / "a-1.json").write_text(json.dumps({"timeline": {"pause": "calc"}}), encoding="utf-8")
-    assert go([job("a-1", ("tiktok",))], ledger, log, {"tiktok": t})[0].status == "published"
-    rows = [r for r in log.rows() if r["job_id"] == "a-1"]
-    assert {r["pause"] for r in rows} == {"calc"}
+    assert clip_pause_style(row) == CALC_PAUSE
+    assert go([job("a-1", ("tiktok",))], ledger, log, {"tiktok": t})[0].status == "skipped_tiktok_blink_only"
+    assert [r for r in log.rows() if r["job_id"] == "a-1"] == []
     assert row.clip_path.endswith("a-1.mp4")
-    assert last_single_clip_pause(log) == CALC_PAUSE
 
 
 def test_live_post_without_calc_records_blink(ledger, log):  # noqa: F811

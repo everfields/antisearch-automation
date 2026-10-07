@@ -221,12 +221,10 @@ def cmd_post(args, settings: Settings) -> int:
         jobs += pool_jobs(net, pools_dir, log, store, claimed, MAX_PER_NETWORK_PER_DAY, env=env)
 
     if saga_jobs:
-        from .saga import SAGA_NETWORK, alternate_saga, next_tiktok_format
-
-        last = log.last_job(SAGA_NETWORK)
-        jobs = alternate_saga(jobs, set(saga_jobs), last)
-        print(f"saga: alternating with single clips on {SAGA_NETWORK}; last={last or '-'} "
-              f"next={next_tiktok_format(set(saga_jobs), last)}")
+        # Founder, 2026-10-07: TikTok publishes only the original blink clip; saga clips (TikTok
+        # only, antisearch.ai outro) are off. The saga code and queues stay.
+        jobs = [j for j in jobs if j.id not in saga_jobs]
+        print(f"saga: off on TikTok (blink only since 2026-10-07); {len(saga_jobs)} saga row(s) not posted")
 
     if args.oracle == "fixture":
         oracle = _oracle(args, settings)

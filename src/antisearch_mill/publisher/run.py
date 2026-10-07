@@ -291,7 +291,7 @@ def run_posts(
 
         clip = ledger.clip_for_job(job.id)
         stale = (clip is None or not Path(clip.clip_path).is_file() or (live and clip.oracle_source != "live")
-                 or id_tag(clip.creative) != id_tag(creative))
+                 or id_tag(clip.creative) != id_tag(creative) or not tiktok_clip_ok(net, clip))
         if stale and produce:
             try:
                 clip = produce(job)
@@ -300,6 +300,10 @@ def run_posts(
                 continue
         if clip is None:
             out.append(Outcome(job.id, net, "failed", detail="no clip for this job"))
+            continue
+        if not tiktok_clip_ok(net, clip):
+            out.append(Outcome(job.id, net, "skipped_tiktok_blink_only",
+                               detail="TikTok posts only the original blink clip (no calc, no saga, no end screen)"))
             continue
         if job.caption.strip() == HOLD_FOR_TAG:
             if not from_pool:
@@ -495,6 +499,19 @@ def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep, media: M
     if cls.needs_public_url and not GitHubPagesHost.missing(env):
         return GitHubPagesHost(transport, env, sleep=sleep, budget=budget)
     return None
+
+
+def tiktok_clip_ok(net: str, clip: ClipRow | None) -> bool:
+    """Founder, 2026-10-07: TikTok publishes only the original blink format. A calc clip (formula,
+    antisearch.ai end screen) or a saga clip (antisearch.ai outro) never goes out on TikTok."""
+    from .. import SAGA_RENDER_STYLE
+    from ..calc_pause import CALC_PAUSE
+
+    if net != "tiktok" or clip is None or clip.render_style == "text":
+        return True
+    if clip.render_style == SAGA_RENDER_STYLE:
+        return False
+    return clip_pause_style(clip) != CALC_PAUSE
 
 
 def tiktok_crowded(log: PostLog, when: datetime) -> str | None:

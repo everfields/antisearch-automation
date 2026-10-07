@@ -2,7 +2,7 @@
 at most 4 TikTok posts in any 24 hours, 2.5+ hours apart (6+ in the prior 24h got 0 views)."""
 
 import json
-import subprocess
+from pathlib import Path
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -47,7 +47,7 @@ def test_calc_timeline_without_outro_ends_on_the_verdict():
 
 @pytest.mark.ffmpeg
 @pytest.mark.parametrize("network,outro", [("tiktok", False), ("instagram", True)])
-def test_tiktok_calc_clip_has_no_end_screen(tmp_path, monkeypatch, network, outro):
+def test_only_instagram_calc_clips_have_the_end_screen(tmp_path, monkeypatch, network, outro):
     monkeypatch.setenv("PUBLISHER_CLIP_PAUSE", "calc")
     monkeypatch.setenv("PUBLISHER_CLIP_STYLE", "app")
     monkeypatch.setenv("PUBLISHER_CLIP_FRAME", "phone")
@@ -101,3 +101,56 @@ def test_never_more_than_four_in_24h_nor_closer_than_150_min(tmp_path):
     assert "min between" in tiktok_crowded(_log(tmp_path / "c", [now - timedelta(hours=2)]), now)
     assert tiktok_crowded(_log(tmp_path / "d", [now - timedelta(hours=2, minutes=31)]), now) is None
     assert tiktok_crowded(_log(tmp_path / "e", [now - timedelta(hours=25)] * 1), now) is None
+
+
+@pytest.mark.ffmpeg
+@pytest.mark.parametrize("pause", ["calc", "alternate", "blink", ""])
+def test_tiktok_always_renders_the_original_blink_clip(tmp_path, monkeypatch, pause):
+    """Founder, 2026-10-07: calc is deprecated on TikTok, whatever PUBLISHER_CLIP_PAUSE says."""
+    monkeypatch.setenv("PUBLISHER_CLIP_PAUSE", pause)
+    monkeypatch.setenv("PUBLISHER_CLIP_STYLE", "app")
+    monkeypatch.setenv("PUBLISHER_CLIP_FRAME", "phone")
+    ledger = Ledger(tmp_path)
+    job = Job(id="tt-blink-1", category="search engine", platforms=("tiktok",))
+    result = produce_one(job, _Fix(), ledger, font_path=resolve_font(), layout=Layout(width=1080, height=1920, fps=30))
+    assert result.status == "produced", result.detail
+    side = json.loads((ledger.clips_dir / f"{result.clip_id}.json").read_text())["timeline"]
+    assert side.get("pause", "blink") == "blink"
+    assert side["segments_frames"]["verdict"] == side["frames"] - side["verdict_frame"]  # ends on the verdict
+    assert OUTRO not in json.dumps(side)
+    row = ledger.clip_for_job(job.id)
+    from antisearch_mill.publisher.run import clip_pause_style, tiktok_clip_ok
+    assert clip_pause_style(row) == "blink" and tiktok_clip_ok("tiktok", row)
+    # The cover Buffer gets (thumbnailOffset, the last frames) is the verdict screen.
+    media = Media.video(Path(row.clip_path), 1080, 1920, row.duration_s, public_url="https://x/c.mp4")
+    offset = _thumbnail_on_verdict(media)["metadata"]["thumbnailOffset"] / 1000
+    assert side["verdict_frame"] / side["fps"] <= offset <= side["frames"] / side["fps"]
+
+
+def test_a_calc_or_saga_clip_never_goes_out_on_tiktok(tmp_path):
+    from dataclasses import replace
+
+    from antisearch_mill import SAGA_RENDER_STYLE
+    from antisearch_mill.publisher.run import tiktok_clip_ok
+    from test_publisher_run import clip as make_clip
+
+    ledger = Ledger(tmp_path / "out")
+    row = make_clip(ledger, "tt-1")
+    assert tiktok_clip_ok("tiktok", row)  # no sidecar: the blink default
+    Path(row.clip_path).with_suffix(".json").write_text(json.dumps({"timeline": {"pause": "calc"}}))
+    assert not tiktok_clip_ok("tiktok", row)
+    assert tiktok_clip_ok("instagram", row)  # Instagram untouched
+    assert not tiktok_clip_ok("tiktok", replace(row, render_style=SAGA_RENDER_STYLE))
+
+
+def test_the_runner_refuses_a_calc_clip_on_tiktok(tmp_path):
+    from test_publisher_run import LIVE_ENV, clip as make_clip, fake_adapter, go
+
+    ledger = Ledger(tmp_path / "out")
+    log = PostLog(tmp_path / "state" / "posts.csv")
+    row = make_clip(ledger, "tt-calc")
+    Path(row.clip_path).with_suffix(".json").write_text(json.dumps({"timeline": {"pause": "calc"}}))
+    env = {**LIVE_ENV, "PUBLISHER_LIVE_NETWORKS": "tiktok", "PUBLISHER_CADENCE": "reach"}
+    out = go([Job("tt-calc", "thing", ("tiktok",))], ledger, log, {"tiktok": fake_adapter("tiktok")}, env=env,
+             now=datetime(2026, 10, 8, 12, 10, tzinfo=ET))
+    assert [o.status for o in out] == ["skipped_tiktok_blink_only"]

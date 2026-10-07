@@ -257,6 +257,11 @@ def produce_one(
         ) if network == IG_NETWORK else raw_pause
     if CALC_KILL_SWITCH and pause_mode == CALC_PAUSE:
         pause_mode = DEFAULT_PAUSE  # hotfix: calc overlap bug, render blink everywhere until fixed
+    if network == TIKTOK_NETWORK:
+        # Founder, 2026-10-07: calc is deprecated on TikTok. TikTok renders only the original
+        # blink clip (no antisearch.ai end screen, the verdict is the cover), whatever
+        # PUBLISHER_CLIP_PAUSE says. The calc code stays for Instagram.
+        pause_mode = DEFAULT_PAUSE
     calc_var = calc_variant(job.id) if network == IG_NETWORK and pause_mode == CALC_PAUSE else None
     # TikTok (2026-10-07): no antisearch.ai end screen on calc clips; they end, and are covered, on the verdict.
     outro = network != TIKTOK_NETWORK
