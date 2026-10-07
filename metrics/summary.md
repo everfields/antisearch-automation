@@ -1,26 +1,25 @@
-# Social metrics — 2026-10-06 22:42 UTC
+# Social metrics — 2026-10-07 06:12 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d +0)
-- account likes: 39, posts: 46
+- account likes: 40, posts: 48
 
 ### last 24h (7 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `blush` → rare beauty soft pinch liquid blush | 233 | 0 | 0 | 0 | 0 | 0.0% |
-| `canción de pop latino` → la tortura — shakira y alejandro sanz | 107 | 0 | 0 | 0 | 0 | 0.0% |
-| `bronzer` → nars laguna bronzing powder | 0 | 0 | 0 | 0 | 0 | – |
+| `canción de pop latino` → la tortura — shakira y alejandro sanz | 160 | 1 | 0 | 0 | 0 | 0.6% |
 | `artista urbano español` → c. tangana | 0 | 0 | 0 | 0 | 0 | – |
 | `makeup remover` → bioderma sensibio h2o | 0 | 0 | 0 | 0 | 0 | – |
+| `canción para el verano` → despacito — luis fonsi ft. daddy yankee | 0 | 0 | 0 | 0 | 0 | – |
+| `setting spray` → charlotte tilbury airbrush flawless setting spray | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `blush` → rare beauty soft pinch liquid blush | 0.0% | 233 |
-| `canción de pop latino` → la tortura — shakira y alejandro sanz | 0.0% | 107 |
+| `canción de pop latino` → la tortura — shakira y alejandro sanz | 0.6% | 160 |
 
 ### last 7d (53 post(s))
 
@@ -48,17 +47,17 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 no posts in this window
 
-### last 7d (19 post(s))
+### last 7d (18 post(s))
 
-**19 published post(s) have no numbers yet** (shown as –)
+**18 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `beach in europe` → spiaggia dei conigli, lampedusa | – | – | – | – | – | – |
 | `an hour` → golden hour | – | – | – | – | – | – |
 | `city for a weekend` → paris | – | – | – | – | – | – |
 | `museum in new york` → the metropolitan museum of art | – | – | – | – | – | – |
 | `a name` → alexander | – | – | – | – | – | – |
+| `a secret` → a surprise party | – | – | – | – | – | – |
 
 | IG creative | posts | mean views | mean likes | mean shares | mean saves | mean eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -66,7 +65,7 @@ no posts in this window
 | 1-short-score | 0 | – | – | – | – | – |
 | 2-medium-monolith | 0 | – | – | – | – | – |
 | 3-computation | 0 | – | – | – | – | – |
-| 0-current-cover | 19 | – | – | – | – | – |
+| 0-current-cover | 18 | – | – | – | – | – |
 
 ## x
 
