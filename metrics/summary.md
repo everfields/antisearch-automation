@@ -1,33 +1,35 @@
-# Social metrics — 2026-10-08 10:45 UTC
+# Social metrics — 2026-10-08 18:55 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d +0)
-- account likes: 40, posts: 51
+- account likes: 42, posts: 47
 
 ### last 24h (3 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `canción de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 181 | 0 | 0 | 0 | 0 | 0.0% |
+| `canción de flamenco urbano` → malamente — rosalía | 27 | 0 | 0 | 0 | 0 | 0.0% |
 | `sleep` → deep sleep | 2 | 0 | 0 | 0 | 0 | 0.0% |
-| `canción de quevedo` → columbia | 0 | 0 | 0 | 0 | 0 | – |
-| `álbum de karol g` → mañana será bonito | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `sleep` → deep sleep | 0.0% | 2 |
+| `canción de flamenco urbano` → malamente — rosalía | 0.0% | 27 |
+| `canción de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 0.0% | 181 |
 
 ### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hair mask` → k18 leave-in molecular repair hair mask | 418 | 1 | 0 | 0 | 0 | 0.2% |
-| `hair mask` → k18 leave-in molecular repair hair mask | 418 | 1 | 0 | 0 | – | 0.2% |
 | `hair straightener` → ghd chronos | 408 | 2 | 0 | 0 | 0 | 0.5% |
 | `hair straightener` → ghd chronos | 408 | 2 | 0 | 0 | – | 0.5% |
 | `eye cream` → skinceuticals a.g.e. advanced eye | 270 | 1 | 0 | 0 | 0 | 0.4% |
+| `eye cream` → skinceuticals a.g.e. advanced eye | 270 | 1 | 0 | 0 | – | 0.4% |
+| `a film` → the godfather | 267 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
@@ -45,17 +47,17 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 no posts in this window
 
-### last 7d (11 post(s))
+### last 7d (10 post(s))
 
-**11 published post(s) have no numbers yet** (shown as –)
+**10 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a habit` → daily exercise | – | – | – | – | – | – |
 | `a memory` → a moment with someone you love | – | – | – | – | – | – |
 | `rooftop in barcelona` → skybar at grand hotel central | – | – | – | – | – | – |
 | `pizza in naples` → 10 diego vitagliano pizzeria | – | – | – | – | – | – |
 | `an answer` → the truth | – | – | – | – | – | – |
+| `a dream` → lucid dream | – | – | – | – | – | – |
 
 | IG creative | posts | mean views | mean likes | mean shares | mean saves | mean eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -63,7 +65,7 @@ no posts in this window
 | 1-short-score | 0 | – | – | – | – | – |
 | 2-medium-monolith | 0 | – | – | – | – | – |
 | 3-computation | 0 | – | – | – | – | – |
-| 0-current-cover | 11 | – | – | – | – | – |
+| 0-current-cover | 10 | – | – | – | – | – |
 
 ## x
 
@@ -73,29 +75,21 @@ no posts in this window
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `curiosity` → scientific inquiry | – | 0 | 0 | – | – | – |
 | `board game` → brass: birmingham | – | 0 | 0 | – | – | – |
+| `philosopher` → martha nussbaum | – | 0 | 0 | – | – | – |
 
 ### last 7d (13 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `idea` → the scientific method | 15 | 0 | 0 | 0 | – | 0.0% |
-| `browser` → brave | 13 | 0 | 0 | 0 | – | 0.0% |
-| `virtue` → compassion | 13 | 0 | 0 | 0 | – | 0.0% |
-| `empire` → roman empire | 11 | 0 | 0 | 0 | – | 0.0% |
-| `fear` → complacency | 10 | 0 | 0 | 0 | – | 0.0% |
-
-| top by engagement rate | eng. rate | views |
-| --- | --- | --- |
-| `browser` → brave | 0.0% | 13 |
-| `idea` → the scientific method | 0.0% | 15 |
-| `virtue` → compassion | 0.0% | 13 |
-| `empire` → roman empire | 0.0% | 11 |
-| `fear` → complacency | 0.0% | 10 |
+| `idea` → the scientific method | – | 0 | 0 | – | – | – |
+| `virtue` → compassion | – | 0 | 0 | – | – | – |
+| `empire` → roman empire | – | 0 | 0 | – | – | – |
+| `fear` → complacency | – | 0 | 0 | – | – | – |
+| `book` → don quixote | – | 0 | 0 | – | – | – |
 
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
 | video | 0 | – | – | – | – |
-| text | 13 | 10.0 | 0.0 | 0.0 | 0.0% |
+| text | 13 | – | 0.0 | 0.0 | – |
 
