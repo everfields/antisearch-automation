@@ -296,3 +296,9 @@ p-sleep,tiktok,pending,p-sleep-2053ec06,deep sleep,,,,2026-10-07T23:56:49+00:00,
 p-sleep,tiktok,published,p-sleep-2053ec06,deep sleep,6ac6dc7c365feab0d7344476,buffer:6ac6dc7c365feab0d7344476,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-07T23:56:49+00:00,sleep,,video,,,en,blink
 es-canci-n-de-bizarrap,tiktok,pending,es-canci-n-de-bizarrap-5d9885eb,"quevedo: bzrp music sessions, vol. 52",,,,2026-10-08T12:27:12+00:00,canción de bizarrap,,video,,,es,blink
 es-canci-n-de-bizarrap,tiktok,published,es-canci-n-de-bizarrap-5d9885eb,"quevedo: bzrp music sessions, vol. 52",6ac78cbe444a36d3be1fb133,buffer:6ac78cbe444a36d3be1fb133,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-08T12:27:12+00:00,canción de bizarrap,,video,,,es,blink
+es-canci-n-de-flamenco-urbano,tiktok,pending,es-canci-n-de-flamenco-urbano-46c9866b,malamente — rosalía,,,,2026-10-08T18:43:47+00:00,canción de flamenco urbano,,video,,,es,blink
+es-canci-n-de-flamenco-urbano,tiktok,published,es-canci-n-de-flamenco-urbano-46c9866b,malamente — rosalía,6ac7e4c35b76911adddd1169,buffer:6ac7e4c35b76911adddd1169,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-08T18:43:47+00:00,canción de flamenco urbano,,video,,,es,blink
+p-philosopher,x,pending,p-philosopher-ece77a7b,martha nussbaum,,,,2026-10-08T18:43:47+00:00,philosopher,"philosopher
+martha nussbaum",text,,,en,
+p-philosopher,x,published,p-philosopher-ece77a7b,martha nussbaum,6ac7e4e4f4c7c23129819cbd,https://twitter.com/antisearch_ai/status/2108267669677904229,,2026-10-08T18:43:47+00:00,philosopher,"philosopher
+martha nussbaum",text,,,en,
