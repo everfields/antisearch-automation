@@ -1,31 +1,34 @@
-# Social metrics — 2026-10-07 20:40 UTC
+# Social metrics — 2026-10-08 01:06 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **1** (24h +0, 7d +0)
-- account likes: 40, posts: 50
+- account likes: 40, posts: 51
 
-### last 24h (5 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `makeup remover` → bioderma sensibio h2o | 0 | 0 | 0 | 0 | 0 | – |
+| `sleep` → deep sleep | 2 | 0 | 0 | 0 | 0 | 0.0% |
 | `hand cream` → l’occitane shea butter hand cream | 0 | 0 | 0 | 0 | 0 | – |
-| `breakfast` → eggs benedict | 0 | 0 | 0 | 0 | 0 | – |
-| `canción de quevedo` → columbia | 0 | 0 | 0 | 0 | 0 | – |
+| `canción de quevedo` → columbia | 0 | – | – | – | – | – |
 | `álbum de karol g` → mañana será bonito | 0 | 0 | 0 | 0 | 0 | – |
 
-### last 7d (57 post(s))
+| top by engagement rate | eng. rate | views |
+| --- | --- | --- |
+| `sleep` → deep sleep | 0.0% | 2 |
+
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 521 | 3 | 0 | 0 | 1 | 0.8% |
-| `shampoo for curly hair` → kérastase curl manifesto bain hydratation douceur | 521 | 3 | 0 | 0 | – | 0.6% |
 | `hair mask` → k18 leave-in molecular repair hair mask | 418 | 1 | 0 | 0 | 0 | 0.2% |
 | `hair mask` → k18 leave-in molecular repair hair mask | 418 | 1 | 0 | 0 | – | 0.2% |
 | `hair straightener` → ghd chronos | 408 | 2 | 0 | 0 | 0 | 0.5% |
+| `hair straightener` → ghd chronos | 408 | 2 | 0 | 0 | – | 0.5% |
+| `eye cream` → skinceuticals a.g.e. advanced eye | 270 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
@@ -43,17 +46,17 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 no posts in this window
 
-### last 7d (15 post(s))
+### last 7d (12 post(s))
 
-**15 published post(s) have no numbers yet** (shown as –)
+**12 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a name` → alexander | – | – | – | – | – | – |
-| `a secret` → a surprise party | – | – | – | – | – | – |
-| `bar in london` → the connaught bar | – | – | – | – | – | – |
 | `cocktail bar in new york` → superbueno | – | – | – | – | – | – |
 | `a habit` → daily exercise | – | – | – | – | – | – |
+| `a memory` → a moment with someone you love | – | – | – | – | – | – |
+| `rooftop in barcelona` → skybar at grand hotel central | – | – | – | – | – | – |
+| `pizza in naples` → 10 diego vitagliano pizzeria | – | – | – | – | – | – |
 
 | IG creative | posts | mean views | mean likes | mean shares | mean saves | mean eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -61,7 +64,7 @@ no posts in this window
 | 1-short-score | 0 | – | – | – | – | – |
 | 2-medium-monolith | 0 | – | – | – | – | – |
 | 3-computation | 0 | – | – | – | – | – |
-| 0-current-cover | 15 | – | – | – | – | – |
+| 0-current-cover | 12 | – | – | – | – | – |
 
 ## x
 
