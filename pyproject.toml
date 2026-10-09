@@ -31,5 +31,6 @@ pythonpath = ["src"]
 markers = [
   "ffmpeg: needs ffmpeg/ffprobe on PATH",
   "calc_kill_switch: run with the production calc kill switch as shipped",
+  "paused: run with the shipped code-level network pause (guard.PAUSED_NETWORKS)",
   "network: hits the live antisearch.ai oracle (opt-in via MILL_TEST_NETWORK=1)",
 ]

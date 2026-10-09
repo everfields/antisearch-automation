@@ -23,6 +23,7 @@ from .antiban import (
 from .fresh import looks_like_mp4, remux_fresh
 from ..creatives import CLEAN_COVER, CURRENT, STORY, id_tag, ig_creative, rotation_enabled
 from .guard import (
+    pause_reason, paused_networks,
     DONE, FAILED, HOLD_FOR_TAG, MIN_GAP, PENDING, PER_RUN_PER_NETWORK, TIKTOK_MAX_PER_24H, TIKTOK_MIN_SPACING,
     WINNER, WITHHELD, PostLog, PostRow,
     approved_networks, caption_problem, effective_caption, frozen_by, input_problem, next_slot, open_now,
@@ -191,6 +192,11 @@ def run_posts(
 
     for job in jobs:
         if only and job.id not in only:
+            continue
+        if live and paused_networks() & set(job.platforms):
+            if not networks or paused_networks() & set(job.platforms) & set(networks):
+                for net in sorted(paused_networks() & set(job.platforms)):
+                    once(job, net, f"skipped_{net}_paused", pause_reason(net))
             continue
         if len(job.platforms) == 1 and job.platforms[0] == X_NETWORK:
             xcls = adapters.get(X_NETWORK)
@@ -577,6 +583,8 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
                now: datetime, due_at: datetime | None, state: AntibanState, flags: Path, wait_s: float,
                *, pages_budget: PagesBudget | None = None) -> Outcome:
     net = cls.name
+    if net in paused_networks():  # belt and braces: nothing reaches a paused network's API
+        return Outcome(job.id, net, f"skipped_{net}_paused", detail=pause_reason(net))
     at = now.astimezone(timezone.utc).isoformat(timespec="seconds")
     due = due_at.astimezone(timezone.utc).isoformat(timespec="seconds") if due_at is not None else ""
     shown = effective_caption(job.caption)

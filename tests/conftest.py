@@ -17,6 +17,16 @@ requires_ffmpeg = pytest.mark.skipif(not HAS_FFMPEG, reason="ffmpeg/ffprobe not 
 
 
 @pytest.fixture(autouse=True)
+def _no_code_pause(request, monkeypatch):
+    """The X pause (guard.PAUSED_NETWORKS, 2026-10-09) is off in tests unless a test asks for it
+    with @pytest.mark.paused, so the X behaviour stays covered for the day X comes back."""
+    from antisearch_mill.publisher import guard
+
+    if not request.node.get_closest_marker("paused"):
+        monkeypatch.setattr(guard, "PAUSED_NETWORKS", frozenset())
+
+
+@pytest.fixture(autouse=True)
 def _no_real_credentials(monkeypatch):
     """Tests never see the developer's real tokens."""
     from antisearch_mill.publisher import ADAPTERS

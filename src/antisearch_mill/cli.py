@@ -403,7 +403,10 @@ def cmd_due(args, settings: Settings) -> int:
     from .publisher.antiban import (
         X_NETWORK, AntibanState, daily_slot_count, jitter_enabled, ramp_days, ramp_enabled, ramp_start,
     )
-    from .publisher.guard import approved_networks, now_et, open_now, posting_day, slots_due, slots_for, taken_slots
+    from .publisher.guard import (
+        approved_networks, now_et, open_now, pause_reason, paused_networks, posting_day, slots_due, slots_for,
+        taken_slots,
+    )
     from datetime import timedelta
 
     from .publisher.jitter import LOOKAHEAD, slot_offsets
@@ -417,6 +420,9 @@ def cmd_due(args, settings: Settings) -> int:
     state.apply_reach(log.path.parent / "metrics.csv", now, log.path.parent / "flags")
     due = []
     for net in sorted(approved_networks(env)):
+        if net in paused_networks():
+            print(f"  {net:<9} paused: {pause_reason(net)}")
+            continue
         if net == X_NETWORK and route_for(net, env) != "buffer":
             print("  x         off (Buffer only; the paid API stays off)")
             continue

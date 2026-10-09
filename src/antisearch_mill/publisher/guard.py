@@ -198,6 +198,22 @@ def frozen_by(network: str, live_networks: set[str]) -> str | None:
     return held if held and held in live_networks else None
 
 
+# Founder, 2026-10-09: X suspended @antisearch_ai. A code-level pause that wins over
+# PUBLISHER_LIVE_NETWORKS (a repo variable we cannot edit) and over manual-post rows: a paused
+# network never posts live (logged skipped_<net>_paused), `mill due` ignores it and the metrics
+# collector skips it. To resume X: set PAUSED_NETWORKS = frozenset() (one line) and push.
+PAUSED_NETWORKS: frozenset[str] = frozenset({"x"})
+PAUSE_WHY = {"x": "X is paused in code (account suspended, 2026-10-09); see guard.PAUSED_NETWORKS"}
+
+
+def paused_networks() -> frozenset[str]:
+    return PAUSED_NETWORKS
+
+
+def pause_reason(network: str) -> str:
+    return PAUSE_WHY.get(network, f"{network} is paused in code; see guard.PAUSED_NETWORKS")
+
+
 def approved_networks(env: dict[str, str]) -> set[str]:
     raw = env.get("PUBLISHER_LIVE_NETWORKS") or ""
     return {n.strip().lower() for n in re.split(r"[,\s|]+", raw) if n.strip()}

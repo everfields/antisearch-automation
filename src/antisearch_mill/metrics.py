@@ -32,6 +32,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Callable, Mapping
 
+from .publisher.guard import paused_networks
+
 NETWORKS = ("tiktok", "instagram", "x")
 POST_FIELDS = ("ts_utc", "network", "post_id", "url", "input", "verdict", "slug", "posted_at", "format",
                "views", "likes", "comments", "shares", "saves", "source", "join")
@@ -575,7 +577,10 @@ def collect(state: Path, env: Mapping[str, str], *, now: datetime, http: Http | 
     tt_start = len(col.posts)
     collect_tiktok(http, handle, now, col)
     join_tiktok(col.posts[tt_start:], [r for r in refs if r.network == "tiktok"], links)
-    collect_x(http, [r for r in refs if r.network == "x"], col)
+    if "x" in paused_networks():  # account suspended (2026-10-09): no X reads, no red run
+        col.notes.append("x: paused in code (account suspended); not collected")
+    else:
+        collect_x(http, [r for r in refs if r.network == "x"], col)
     merge_buffer(col, refs, buf)
     if not any(a.network == "instagram" for a in col.accounts):
         col.accounts.append(Account("instagram", env.get("METRICS_INSTAGRAM_HANDLE", ""), source="unavailable",
@@ -587,7 +592,7 @@ def collect(state: Path, env: Mapping[str, str], *, now: datetime, http: Http | 
                   if r["network"] == "instagram" and r["source"].startswith("buffer@")
                   and (d := _parse_dt(r["ts_utc"])) and now - d <= BUFFER_FRESH]
     for net in NETWORKS:
-        if net in have or not any(r.network == net for r in refs):
+        if net in have or net in paused_networks() or not any(r.network == net for r in refs):
             continue
         if net == "instagram" and earlier_ig:
             col.notes.append("instagram: no new Buffer read this run; last Buffer numbers are under 26h old")
