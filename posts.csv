@@ -322,3 +322,5 @@ p-european-capital,x,pending,p-european-capital-96da73ad,paris,,,,2026-10-09T20:
 paris",text,,,en,
 p-european-capital,x,failed,p-european-capital-96da73ad,paris,,,PublisherError: buffer: twitter rejected it: None,2026-10-09T20:26:39+00:00,european capital,"european capital
 paris",text,,,en,
+p-razor,tiktok,pending,p-razor-ac77ae51,henson al13,,,,2026-10-09T22:55:22+00:00,razor,,video,,,en,blink
+p-razor,tiktok,published,p-razor-ac77ae51,henson al13,6ac9711bf91f772d457526ba,buffer:6ac9711bf91f772d457526ba,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-09T22:55:22+00:00,razor,,video,,,en,blink
