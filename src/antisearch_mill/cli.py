@@ -799,7 +799,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("dm-list", help="yesterday's posted verdicts with an official account -> <state>/manual/dm-list-DAY.md")
     sp.add_argument("--state", default="state/posts.csv", help="publisher-state posts.csv (default: state/posts.csv)")
-    sp.add_argument("--day", default="", help="posting day YYYY-MM-DD (default: yesterday's, 09:00-09:00 ET)")
+    sp.add_argument("--day", default="", help="posting day YYYY-MM-DD (default: yesterday's, 06:00-06:00 ET)")
     sp.add_argument("--allowlist", default="queue/tags/allowlist.json")
     sp.add_argument("--handles", default="queue/winners/handles.json")
     sp.set_defaults(func=cmd_dm_list)

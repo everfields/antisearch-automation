@@ -82,10 +82,10 @@ def go(jobs, ledger, log, adapters, env=LIVE_ENV, live=True, now=EVENING, **kw):
 
 # --- slots and posting days (America/New_York, DST from the tz database) ------------
 
-def test_posting_day_starts_at_eight_et():
-    # 08:00 since 2026-10-05 (was 09:00): the 14:07 Madrid TikTok slot (08:07 ET) opens the day.
-    assert posting_day(datetime(2026, 9, 25, 7, 59, tzinfo=ET)) == date(2026, 9, 24)
-    assert posting_day(datetime(2026, 9, 25, 8, 0, tzinfo=ET)) == date(2026, 9, 25)
+def test_posting_day_starts_at_six_et():
+    # 06:00 since 2026-10-09 (09:00, then 08:00): TikTok's 13:07 Madrid slot (07:07 ET) opens the day.
+    assert posting_day(datetime(2026, 9, 25, 5, 59, tzinfo=ET)) == date(2026, 9, 24)
+    assert posting_day(datetime(2026, 9, 25, 6, 0, tzinfo=ET)) == date(2026, 9, 25)
     assert posting_day(datetime(2026, 9, 26, 0, 30, tzinfo=ET)) == date(2026, 9, 25)
     assert posting_day(datetime(2026, 9, 25, 13, 0, tzinfo=ZoneInfo("UTC"))) == date(2026, 9, 25)
 
@@ -155,7 +155,7 @@ def test_slot_overrides_and_limits():
         slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "09:07,11:07,13:07,15:07,17:07,19:07"})
     with pytest.raises(ValueError, match="HH:MM"):
         slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "9am"})
-    with pytest.raises(ValueError, match=":07 cron tick"):
+    with pytest.raises(ValueError, match=":07 or :37"):
         slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "09:00"})
     with pytest.raises(ValueError, match="closer than 90"):
         slots_for("bluesky", {"PUBLISHER_SLOTS_BLUESKY": "09:07,10:07"})
@@ -179,7 +179,7 @@ def test_reach_cadence_is_seven_ig_four_tiktok_and_leaves_the_others():
     # The Spanish 14:07 Madrid slot (08:07 ET on this date) opens the posting day, then three ET
     # slots (2026-10-07: 6+ TikTok posts in 24h got 0 views, so 4 a day, 3+ hours apart).
     assert [f"{t:%H:%M}" for t in slots_for("tiktok", env, date(2026, 10, 5))] == [
-        "08:07", "12:07", "15:07", "19:07"]
+        "07:07", "10:37", "14:07", "18:07"]  # 13:07, 16:37, 20:07, 00:07 Madrid (2026-10-09)
     for net in ("x", "linkedin", "bluesky", "threads", "mastodon", "reddit"):
         assert slots_for(net, env) == slots_for(net, soul)
     # Instagram 7 under its cap of 8, TikTok 4 at its cap of 4.
@@ -208,20 +208,21 @@ def test_reach_slot_stays_open_until_the_next_one_or_three_hours():
     assert open_now(datetime(2026, 9, 26, 19, 10, tzinfo=ET), ig, 0) == 1
     tt = slots_for("tiktok", {"PUBLISHER_CADENCE": "reach"}, date(2026, 9, 26))
     # Last slot of the day gets 3h, not the whole night until the next posting day.
-    assert open_now(datetime(2026, 9, 26, 21, 30, tzinfo=ET), tt, 3) == 1  # 19:07 still inside 3h
-    assert open_now(datetime(2026, 9, 27, 7, 30, tzinfo=ET), tt, 0) == 0
+    assert open_now(datetime(2026, 9, 26, 20, 30, tzinfo=ET), tt, 3) == 1  # 18:07 still inside 3h
+    assert open_now(datetime(2026, 9, 27, 5, 30, tzinfo=ET), tt, 0) == 0
     nxt = slots_for("tiktok", {"PUBLISHER_CADENCE": "reach"}, date(2026, 9, 27))
-    assert open_now(datetime(2026, 9, 27, 8, 30, tzinfo=ET), nxt, 0) == 1  # the 14:07 Madrid slot
+    assert open_now(datetime(2026, 9, 27, 7, 30, tzinfo=ET), nxt, 0) == 1  # the 13:07 Madrid slot
 
 
 def test_business_morning_leisure_night_off_the_hour():
     for c in ("carlos", "soul", "reach"):
         env = {"PUBLISHER_CADENCE": c}
-        assert all(t.minute == 7 for n in ("bluesky", "linkedin", "instagram", "tiktok")
+        assert all(t.minute in (7, 37) for n in ("bluesky", "linkedin", "instagram", "tiktok")
                    for t in slots_for(n, env, date(2026, 10, 5)))
         assert slots_for("linkedin", env)[0] == time(9, 7)
-        assert all(t.hour >= 10 or t.hour < 9 for n in ("instagram", "tiktok")
-                   for t in slots_for(n, env, date(2026, 10, 5)))
+        # Reach TikTok is on European hours (13:07 Madrid = 07:07 ET) since 2026-10-09.
+        nets = ("instagram",) if c == "reach" else ("instagram", "tiktok")
+        assert all(t.hour >= 10 or t.hour < 9 for n in nets for t in slots_for(n, env, date(2026, 10, 5)))
 
 
 # --- cadence -------------------------------------------------------------------------
@@ -377,8 +378,8 @@ def test_ignore_slots_posts_now_but_keeps_the_cap(ledger, log):
 
 
 def test_cap_counts_the_et_posting_day(ledger, log):
-    log.append(PostRow("a-1", "bluesky", "pending", at="2026-09-25T11:30:00+00:00"))  # 07:30 ET: the 24th's day
-    log.append(PostRow("a-1", "bluesky", "published", at="2026-09-25T11:30:00+00:00"))
+    log.append(PostRow("a-1", "bluesky", "pending", at="2026-09-25T09:30:00+00:00"))  # 05:30 ET: the 24th's day
+    log.append(PostRow("a-1", "bluesky", "published", at="2026-09-25T09:30:00+00:00"))
     assert log.used_on(date(2026, 9, 24), "bluesky") == 1
     assert log.used_on(date(2026, 9, 25), "bluesky") == 0
 

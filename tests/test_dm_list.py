@@ -101,7 +101,7 @@ def _log(tmp_path) -> PostLog:
          "b2", "", ""),
         ("p-month", "tiktok", "published", "september", "a month", "2026-09-28T00:15:21+00:00", "b3", "", ""),
         ("ig-makeup", "instagram", "scheduled", "diverxo", "restaurant in madrid", "2026-09-28T07:03:23+00:00", "b4",
-         "", "2026-09-28T10:37:00+00:00"),
+         "", "2026-09-28T09:37:00+00:00"),
         ("p-gone", "instagram", "deleted", "cerave", "cleanser", "2026-09-27T15:00:00+00:00", "b5", "", ""),
         ("p-next", "instagram", "published", "cerave", "cleanser", "2026-09-28T14:10:00+00:00", "b6", "", ""),
         ("p-x", "x", "published", "rosewood hong kong", "hotel in hong kong", "2026-09-27T20:16:26+00:00", "b7",
@@ -119,7 +119,7 @@ def test_the_day_is_the_posting_day_and_a_verdict_is_listed_once(tmp_path):
     assert posted["rosewood hong kong"].networks == ["instagram", "x"]                                 # not tomorrow
     assert posted["rosewood hong kong"].links == ["instagram: https://www.instagram.com/reel/R1/",
                                                   "x: https://twitter.com/antisearch_ai/status/1"]
-    assert posted["diverxo"].links == ["instagram: Buffer b4 (no link yet)"]  # the 06:37 ET schedule is the 27th's
+    assert posted["diverxo"].links == ["instagram: Buffer b4 (no link yet)"]  # the 05:37 ET schedule is the 27th's
 
 
 def test_the_list_holds_handles_and_links_and_no_message_text(tmp_path):

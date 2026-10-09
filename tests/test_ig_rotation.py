@@ -117,7 +117,7 @@ def test_a_manual_row_takes_the_creative_of_the_slot_it_is_scheduled_in(ledger, 
 
 
 def test_a_make_up_row_outside_every_window_takes_the_first_free_slots_creative(ledger, log):
-    """27 Sep: the travel row (09:37, before the first slot) and four auto posts; a make-up at 06:37 ET next
+    """27 Sep: the travel row (09:37, before the first slot) and four auto posts; a make-up at 05:37 ET next
     morning belongs to 27 Sep's posting day and fills its earliest free slot, not the already served 22:07."""
     log.append(PostRow("ig-manual-travel", "instagram", "pending", at="2026-09-27T10:51:37+00:00",
                        due_at="2026-09-27T13:37:00+00:00"))
@@ -132,7 +132,7 @@ def test_a_make_up_row_outside_every_window_takes_the_first_free_slots_creative(
     run_posts([job("ig-makeup", ("instagram",))], ledger, log, now=datetime(2026, 9, 28, 3, 0, tzinfo=ET), live=True,
               ignore_slots=True, env=IG_ENV, adapters={"instagram": fake_adapter("instagram", state="scheduled")},
               produce=_producer(ledger, seen), sleep=lambda s: None,
-              schedule_at=datetime(2026, 9, 28, 6, 37, tzinfo=ET))
+              schedule_at=datetime(2026, 9, 28, 5, 37, tzinfo=ET))
     sunday = date(2026, 9, 27)
     assert seen == [("ig-makeup", ig_creative(sunday, 1))] == [("ig-makeup", COMPUTATION)]  # 12:07 was never served
     assert log.used_on(sunday, "instagram") == 6
