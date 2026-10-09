@@ -1,27 +1,29 @@
-# Social metrics — 2026-10-09 01:17 UTC
+# Social metrics — 2026-10-09 10:44 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **2** (24h +1, 7d +1)
-- account likes: 42, posts: 48
+- account likes: 43, posts: 49
 
-### last 24h (3 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `canción de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 267 | 0 | 0 | 0 | 0 | 0.0% |
-| `canción de flamenco urbano` → malamente — rosalía | 243 | 0 | 0 | 0 | 1 | 0.4% |
+| `canción de flamenco urbano` → malamente — rosalía | 256 | 0 | 0 | 0 | 1 | 0.4% |
+| `rain` → warm summer rain | 239 | 1 | 0 | 0 | 0 | 0.4% |
 | `deodorant` → dove advanced care | 10 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `canción de flamenco urbano` → malamente — rosalía | 0.4% | 243 |
+| `rain` → warm summer rain | 0.4% | 239 |
+| `canción de flamenco urbano` → malamente — rosalía | 0.4% | 256 |
 | `canción de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 0.0% | 267 |
 | `deodorant` → dove advanced care | 0.0% | 10 |
 
-### last 7d (51 post(s))
+### last 7d (52 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -35,9 +37,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- |
 | `nail polish` → essie gel couture | 1.2% | 254 |
 | `nail polish` → essie gel couture | 1.2% | 254 |
-| `a letter` → e | 0.8% | 256 |
-| `a letter` → e | 0.8% | 256 |
 | `eyeliner` → stila stay all day waterproof liquid eyeliner | 0.8% | 266 |
+| `eyeliner` → stila stay all day waterproof liquid eyeliner | 0.8% | 266 |
+| `rain` → warm summer rain | 0.4% | 239 |
 
 ## instagram
 
@@ -47,17 +49,17 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 no posts in this window
 
-### last 7d (7 post(s))
+### last 7d (6 post(s))
 
-**7 published post(s) have no numbers yet** (shown as –)
+**6 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `an answer` → the truth | – | – | – | – | – | – |
 | `a dream` → lucid dream | – | – | – | – | – | – |
 | `coffee in rome` → faro – luminari del caffè | – | – | – | – | – | – |
 | `bakery in paris` → du pain et des idées | – | – | – | – | – | – |
 | `a moment` → the present | – | – | – | – | – | – |
+| `a shape` → circle | – | – | – | – | – | – |
 
 | IG creative | posts | mean views | mean likes | mean shares | mean saves | mean eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -65,7 +67,7 @@ no posts in this window
 | 1-short-score | 0 | – | – | – | – | – |
 | 2-medium-monolith | 0 | – | – | – | – | – |
 | 3-computation | 0 | – | – | – | – | – |
-| 0-current-cover | 7 | – | – | – | – | – |
+| 0-current-cover | 6 | – | – | – | – | – |
 
 ## x
 
@@ -75,21 +77,34 @@ no posts in this window
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `philosopher` → martha nussbaum | – | 0 | 0 | – | – | – |
-| `silent film` → city lights | – | 0 | 0 | – | – | – |
+| `philosopher` → martha nussbaum | 1 | 0 | 0 | 0 | – | 0.0% |
+| `silent film` → city lights | 1 | 0 | 0 | 0 | – | 0.0% |
+
+| top by engagement rate | eng. rate | views |
+| --- | --- | --- |
+| `philosopher` → martha nussbaum | 0.0% | 1 |
+| `silent film` → city lights | 0.0% | 1 |
 
 ### last 7d (13 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `virtue` → compassion | – | 0 | 0 | – | – | – |
-| `empire` → roman empire | – | 0 | 0 | – | – | – |
-| `fear` → complacency | – | 0 | 0 | – | – | – |
-| `book` → don quixote | – | 0 | 0 | – | – | – |
-| `ceo` → jensen huang | – | 0 | 0 | – | – | – |
+| `virtue` → compassion | 13 | 0 | 0 | 0 | – | 0.0% |
+| `empire` → roman empire | 11 | 0 | 0 | 0 | – | 0.0% |
+| `fear` → complacency | 10 | 0 | 0 | 0 | – | 0.0% |
+| `book` → don quixote | 10 | 0 | 0 | 0 | – | 0.0% |
+| `ceo` → jensen huang | 7 | 0 | 0 | 0 | – | 0.0% |
+
+| top by engagement rate | eng. rate | views |
+| --- | --- | --- |
+| `virtue` → compassion | 0.0% | 13 |
+| `empire` → roman empire | 0.0% | 11 |
+| `fear` → complacency | 0.0% | 10 |
+| `book` → don quixote | 0.0% | 10 |
+| `ceo` → jensen huang | 0.0% | 7 |
 
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
 | video | 0 | – | – | – | – |
-| text | 13 | – | 0.0 | 0.0 | – |
+| text | 13 | 5.6 | 0.0 | 0.0 | 0.0% |
 
