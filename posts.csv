@@ -318,3 +318,7 @@ p-ambition,x,published,p-ambition-e66673e2,human flourishing,6ac900f0cb5a8140da1
 human flourishing",text,,,en,
 es-canci-n-para-el-gimnasio,tiktok,pending,es-canci-n-para-el-gimnasio-dbff873d,till i collapse — eminem,,,,2026-10-09T19:11:42+00:00,canción para el gimnasio,,video,,,es,blink
 es-canci-n-para-el-gimnasio,tiktok,published,es-canci-n-para-el-gimnasio-dbff873d,till i collapse — eminem,6ac93ccaf91f772d456d2d90,buffer:6ac93ccaf91f772d456d2d90,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-09T19:11:42+00:00,canción para el gimnasio,,video,,,es,blink
+p-european-capital,x,pending,p-european-capital-96da73ad,paris,,,,2026-10-09T20:26:39+00:00,european capital,"european capital
+paris",text,,,en,
+p-european-capital,x,failed,p-european-capital-96da73ad,paris,,,PublisherError: buffer: twitter rejected it: None,2026-10-09T20:26:39+00:00,european capital,"european capital
+paris",text,,,en,
