@@ -324,3 +324,5 @@ p-european-capital,x,failed,p-european-capital-96da73ad,paris,,,PublisherError: 
 paris",text,,,en,
 p-razor,tiktok,pending,p-razor-ac77ae51,henson al13,,,,2026-10-09T22:55:22+00:00,razor,,video,,,en,blink
 p-razor,tiktok,published,p-razor-ac77ae51,henson al13,6ac9711bf91f772d457526ba,buffer:6ac9711bf91f772d457526ba,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-09T22:55:22+00:00,razor,,video,,,en,blink
+es-canci-n-de-los-2000-en-espa-ol,tiktok,pending,es-canci-n-de-los-2000-en-espa-ol-70601c7c,la tortura — shakira y alejandro sanz,,,,2026-10-10T11:11:59+00:00,canción de los 2000 en español,,video,,,es,blink
+es-canci-n-de-los-2000-en-espa-ol,tiktok,published,es-canci-n-de-los-2000-en-espa-ol-70601c7c,la tortura — shakira y alejandro sanz,6aca1dc0d9cab260a7c0620a,buffer:6aca1dc0d9cab260a7c0620a,"handed to Buffer, status sending; the network link appears in Buffer once sent",2026-10-10T11:11:59+00:00,canción de los 2000 en español,,video,,,es,blink
