@@ -125,3 +125,5 @@ ts_utc,network,handle,followers,likes_total,posts,source,note
 2026-10-09T18:26:02+00:00,tiktok,@antisearch,2,44,50,tiktok-profile,
 2026-10-09T18:26:02+00:00,x,@antisearch_ai,,,,unavailable,X shows followers only to logged-in clients; not collected
 2026-10-09T18:26:02+00:00,instagram,,,,,unavailable,Instagram's public pages carry no counts when logged out
+2026-10-10T01:01:44+00:00,tiktok,@antisearch,2,45,52,tiktok-profile,
+2026-10-10T01:01:44+00:00,instagram,,,,,unavailable,Instagram's public pages carry no counts when logged out
