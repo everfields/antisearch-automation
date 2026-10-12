@@ -231,35 +231,65 @@ def safety_blocked(item: TrendItem) -> bool:
     return False
 
 
-def _wikidata_lookup(transport: Transport, term: str, lang: str) -> tuple[str, list[str]]:
-    """(description, instance-of Qids) or ('', [])."""
+TITLE_KIND = re.compile(
+    r"\b(gta|game pass|video game|videogame|fortnite|minecraft|call of duty|zelda|mario)\b", re.I)
+
+DESCRIPTOR = re.compile(
+    r"\b(leak|leaks|leaked|details|detail|trailer|trailers|news|rumou?rs?|updates?|patches?|dlc|"
+    r"release date|releases?|launch(?:ed)?|versus|vs\.?)\b",
+    re.I,
+)
+MAX_ENTITY_WORDS = 4
+
+
+def strip_descriptors(text: str) -> str:
+    t = DESCRIPTOR.sub(" ", text or "")
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def clean_entity_name(label: str) -> str:
+    """Lowercase bare entity name from Wikidata/Wikipedia; drop if too long or ranked."""
+    t = re.sub(r"\s*\([^)]*\)", "", (label or "").strip())
+    t = strip_descriptors(t)
+    t = normalize_category(t)
+    t = re.sub(r"\s+", " ", t).strip()
+    if not t or len(t.split()) > MAX_ENTITY_WORDS:
+        return ""
+    if re.search(r"\b(best|top|mejor|greatest)\b", t, re.I):
+        return ""
+    return t
+
+
+def _wikidata_lookup(transport: Transport, term: str, lang: str) -> tuple[str, str, list[str]]:
+    """(label, description, instance-of Qids) or ('', '', [])."""
     params = {"action": "wbsearchentities", "search": term, "language": lang, "limit": "3", "type": "item",
               "format": "json"}
     body = _get(transport, WIKIDATA, params)
     if not body:
-        return "", []
+        return "", "", []
     try:
         import json
 
         data = json.loads(body)
     except ValueError:
-        return "", []
+        return "", "", []
     hits = data.get("search") or []
     if not hits:
-        return "", []
+        return "", "", []
     hit = hits[0]
     qid = hit.get("id") or ""
+    label = (hit.get("label") or "").strip()
     desc = (hit.get("description") or "").strip()
     if not qid:
-        return desc, []
+        return label, desc, []
     ent_body = _get(transport, WIKIDATA, {"action": "wbgetentities", "ids": qid, "props": "claims|descriptions",
                                           "format": "json"})
     if not ent_body:
-        return desc, []
+        return label, desc, []
     try:
         ent = json.loads(ent_body).get("entities", {}).get(qid, {})
     except ValueError:
-        return desc, []
+        return label, desc, []
     if not desc:
         desc = (ent.get("descriptions", {}).get(lang, {}) or ent.get("descriptions", {}).get("en", {}) or {}).get("value", "")
     p31 = []
@@ -267,10 +297,10 @@ def _wikidata_lookup(transport: Transport, term: str, lang: str) -> tuple[str, l
         val = (claim.get("mainsnak") or {}).get("datavalue", {}).get("value", {})
         if val.get("id"):
             p31.append(val["id"])
-    return desc, p31
+    return label, desc, p31
 
 
-def _wiki_summary(transport: Transport, term: str, lang: str) -> str:
+def _wiki_page(transport: Transport, term: str, lang: str) -> tuple[str, str]:
     import json
     from urllib.parse import quote
 
@@ -278,25 +308,29 @@ def _wiki_summary(transport: Transport, term: str, lang: str) -> str:
     base = WIKI_SUMMARY_ES if lang == "es" else WIKI_SUMMARY
     body = _get(transport, base.format(title=quote(title, safe="")))
     if not body:
-        return ""
+        return "", ""
     try:
-        return (json.loads(body).get("description") or "").strip()
+        data = json.loads(body)
     except ValueError:
-        return ""
+        return "", ""
+    return (data.get("title") or "").strip(), (data.get("description") or "").strip()
 
 
-TITLE_KIND = re.compile(
-    r"\b(gta|game pass|video game|videogame|fortnite|minecraft|call of duty|zelda|mario)\b", re.I)
+def resolve_entity(transport: Transport, term: str, lang: str) -> tuple[str, str, list[str]]:
+    """Wikidata label (or Wikipedia title), description, and P31 ids for a trends query."""
+    for query in (term, strip_descriptors(term)):
+        if not query.strip():
+            continue
+        label, desc, p31 = _wikidata_lookup(transport, query, lang)
+        if label or desc or p31:
+            return label, desc, p31
+    title, desc = _wiki_page(transport, term, lang)
+    return title, desc, []
 
 
-def classify_term(transport: Transport, term: str, lang: str) -> str | None:
-    """music_artist | game | show | food | place, or None."""
+def _infer_kind(term: str, text: str, p31: list[str]) -> str | None:
     if TITLE_KIND.search(term):
         return "game"
-    desc, p31 = _wikidata_lookup(transport, term, lang)
-    if not desc:
-        desc = _wiki_summary(transport, term, lang)
-    text = f"{term} {desc}"
     if PERSON.search(text) and not (MUSICIAN.search(text) or ARTIST.search(text)):
         return None
     for q in p31:
@@ -313,9 +347,21 @@ def classify_term(transport: Transport, term: str, lang: str) -> str | None:
     return None
 
 
-def map_trend_input(term: str, kind: str, lang: str) -> str:
-    name = normalize_category(re.sub(r"\s*\([^)]*\)", "", term))
-    if not name or re.search(r"\b(best|top|mejor|greatest)\b", name, re.I):
+def classify_for_mapping(transport: Transport, term: str, lang: str) -> tuple[str, str] | None:
+    """(kind, clean entity name) when the term can be mapped; else None."""
+    label, desc, p31 = resolve_entity(transport, term, lang)
+    text = f"{term} {desc}"
+    kind = _infer_kind(term, text, p31)
+    if not kind:
+        return None
+    name = clean_entity_name(label)
+    if not name:
+        return None
+    return kind, name
+
+
+def map_trend_input(name: str, kind: str, lang: str) -> str:
+    if not name:
         return ""
     if lang == "es":
         templates = {
@@ -356,10 +402,11 @@ def pick_tiktok_trend(
     for item in items:
         if safety_blocked(item):
             continue
-        kind = classify_term(transport, item.title, lang)
-        if not kind:
+        mapped_pair = classify_for_mapping(transport, item.title, lang)
+        if not mapped_pair:
             continue
-        mapped = map_trend_input(item.title, kind, lang)
+        kind, name = mapped_pair
+        mapped = map_trend_input(name, kind, lang)
         if not mapped:
             continue
         if mapped in used_inputs:
