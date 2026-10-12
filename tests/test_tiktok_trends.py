@@ -9,11 +9,14 @@ from antisearch_mill.publish.http import HttpResponse, RecordingTransport
 from antisearch_mill.publisher.guard import PostLog, posting_day
 from antisearch_mill.publisher.tiktok_trends import (
     TrendItem,
+    classify_for_mapping,
+    clean_entity_name,
     fetch_trends,
     map_trend_input,
     pick_tiktok_trend,
     safety_blocked,
     spanish_trend_input,
+    strip_descriptors,
     trend_geo_for_slot,
 )
 from test_publisher_run import LIVE_ENV, clip, fake_adapter, go, ledger, log  # noqa: F401
@@ -90,16 +93,40 @@ def test_safety_filter_drops_tragic_political_and_match():
     assert not safety_blocked(safe)
 
 
-@pytest.mark.parametrize("kind,lang,term,expected", [
-    ("music_artist", "es", "Bad Bunny", "canción de bad bunny"),
-    ("music_artist", "en", "Taylor Swift", "taylor swift song"),
-    ("game", "en", "Minecraft", "game like minecraft"),
-    ("show", "es", "Stranger Things", "serie como stranger things"),
-    ("food", "en", "Nobu", "nobu restaurant"),
-    ("place", "es", "Menorca", "plan en menorca"),
+@pytest.mark.parametrize("kind,lang,name,expected", [
+    ("music_artist", "es", "bad bunny", "canción de bad bunny"),
+    ("music_artist", "en", "taylor swift", "taylor swift song"),
+    ("game", "en", "minecraft", "game like minecraft"),
+    ("show", "es", "stranger things", "serie como stranger things"),
+    ("food", "en", "nobu", "nobu restaurant"),
+    ("place", "es", "menorca", "plan en menorca"),
 ])
-def test_mapping_templates(kind, lang, term, expected):
-    assert map_trend_input(term, kind, lang) == expected
+def test_mapping_templates(kind, lang, name, expected):
+    assert map_trend_input(name, kind, lang) == expected
+
+
+def test_clean_entity_name_strips_descriptors_and_word_limit():
+    assert strip_descriptors("rockstar gta 6 leak details") == "rockstar gta 6"
+    assert clean_entity_name("GTA 6 leak details") == "gta 6"
+    assert clean_entity_name("The Rings of Power season two trailer news") == ""
+
+
+def test_gta_leak_query_maps_entity_label_not_raw_query():
+    gta_search = {"search": [{"id": "Q12345", "label": "GTA 6", "description": "upcoming video game"}]}
+    gta_entity = {"entities": {"Q12345": {"descriptions": {"en": {"value": "video game"}}, "claims": {}}}}
+
+    def respond(req):
+        if "wikidata.org" in req.url:
+            action = (req.params or {}).get("action", "")
+            if action == "wbsearchentities":
+                return HttpResponse.of_json(200, gta_search)
+            if action == "wbgetentities":
+                return HttpResponse.of_json(200, gta_entity)
+        return HttpResponse(404)
+
+    transport = RecordingTransport(respond)
+    assert classify_for_mapping(transport, "rockstar gta 6 leak details", "en") == ("game", "gta 6")
+    assert map_trend_input("gta 6", "game", "en") == "game like gta 6"
 
 
 def test_pick_skips_blocked_and_maps_safe_term(tmp_path):
