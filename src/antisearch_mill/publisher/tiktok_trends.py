@@ -17,7 +17,6 @@ from zoneinfo import ZoneInfo
 from ..oracle import normalize_category
 from ..publish.http import Request, Transport
 from .guard import MADRID, PostLog, input_problem
-from .pools import job_language
 from .trends import HT, UA
 
 GOOGLE_TRENDS = "https://trends.google.com/trending/rss?geo={geo}"
@@ -234,7 +233,8 @@ def safety_blocked(item: TrendItem) -> bool:
 
 def _wikidata_lookup(transport: Transport, term: str, lang: str) -> tuple[str, list[str]]:
     """(description, instance-of Qids) or ('', [])."""
-    params = {"action": "wbsearchentities", "search": term, "language": lang, "limit": "3", "type": "item"}
+    params = {"action": "wbsearchentities", "search": term, "language": lang, "limit": "3", "type": "item",
+              "format": "json"}
     body = _get(transport, WIKIDATA, params)
     if not body:
         return "", []
@@ -252,7 +252,8 @@ def _wikidata_lookup(transport: Transport, term: str, lang: str) -> tuple[str, l
     desc = (hit.get("description") or "").strip()
     if not qid:
         return desc, []
-    ent_body = _get(transport, WIKIDATA, {"action": "wbgetentities", "ids": qid, "props": "claims|descriptions"})
+    ent_body = _get(transport, WIKIDATA, {"action": "wbgetentities", "ids": qid, "props": "claims|descriptions",
+                                          "format": "json"})
     if not ent_body:
         return desc, []
     try:
@@ -284,8 +285,14 @@ def _wiki_summary(transport: Transport, term: str, lang: str) -> str:
         return ""
 
 
+TITLE_KIND = re.compile(
+    r"\b(gta|game pass|video game|videogame|fortnite|minecraft|call of duty|zelda|mario)\b", re.I)
+
+
 def classify_term(transport: Transport, term: str, lang: str) -> str | None:
     """music_artist | game | show | food | place, or None."""
+    if TITLE_KIND.search(term):
+        return "game"
     desc, p31 = _wikidata_lookup(transport, term, lang)
     if not desc:
         desc = _wiki_summary(transport, term, lang)
