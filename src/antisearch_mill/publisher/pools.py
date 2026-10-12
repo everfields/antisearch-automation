@@ -56,7 +56,9 @@ def tiktok_es_enabled(env: Mapping[str, str]) -> bool:
 
 def job_language(job: Job) -> str:
     """`es` when the job id marks a Spanish pool draw; else `en`."""
-    return "es" if job.id.startswith(ES_JOB_PREFIX) else "en"
+    if job.id.startswith(ES_JOB_PREFIX) or job.id.startswith("tt-es-"):
+        return "es"
+    return "en"
 
 
 def _lines(path: Path) -> list[tuple[str, str]]:

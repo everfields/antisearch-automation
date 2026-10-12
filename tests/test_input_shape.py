@@ -197,7 +197,8 @@ GUARD_REJECT_LINE = ("src/antisearch_mill/publisher/guard.py", "RANKED = re.comp
 # igcaption.py names #best only to refuse it in an Instagram caption (tests/test_igcaption.py).
 # Files that detect "best" questions in other people's posts (they read it, never template it into an input).
 DETECTOR_FILES = {"src/antisearch_mill/publisher/replies.py", "src/antisearch_mill/publisher/igcaption.py",
-                  "src/antisearch_mill/settle_pack.py", "src/antisearch_mill/bare_input.py"}
+                  "src/antisearch_mill/settle_pack.py", "src/antisearch_mill/bare_input.py",
+                  "src/antisearch_mill/publisher/tiktok_trends.py"}
 
 
 def test_source_never_templates_best_into_the_input():

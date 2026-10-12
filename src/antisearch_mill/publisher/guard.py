@@ -187,7 +187,9 @@ def input_problem(category: str, env: dict[str, str]) -> str | None:
     if language == "en" and not ENGLISH_CHARS.match(category):
         from .pools import spanish_pool_inputs
 
-        if category in spanish_pool_inputs():
+        from .tiktok_trends import spanish_trend_input
+
+        if category in spanish_pool_inputs() or spanish_trend_input(category):
             return None
         return "inputs are English by default (PUBLISHER_LANGUAGE=en): plain ascii words only"
     return None
@@ -483,6 +485,8 @@ class PostRow:
     creative: str = ""  # Instagram: which template went out (creatives.CREATIVES), for views per creative
     language: str = ""  # en | es: TikTok language bucket for views per language
     pause: str = ""  # blink | calc: the clip's wait style (TikTok alternates them); blank in old rows = blink
+    trend_source: str = ""  # e.g. google:ES for TikTok trend slots
+    trend_term: str = ""  # raw Google Trends title before mapping
 
 
 COLUMNS = [f.name for f in fields(PostRow)]
