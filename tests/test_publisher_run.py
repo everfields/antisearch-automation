@@ -171,7 +171,7 @@ def test_cadence_presets_carlos_and_soul():
     assert slots_for("bluesky", {}) == slots_for("bluesky", {"PUBLISHER_CADENCE": "carlos"})
 
 
-def test_reach_cadence_is_seven_ig_four_tiktok_and_leaves_the_others():
+def test_reach_cadence_is_seven_ig_six_tiktok_and_leaves_the_others():
     env = {"PUBLISHER_CADENCE": "reach"}
     soul = {"PUBLISHER_CADENCE": "soul"}
     assert [f"{t:%H:%M}" for t in slots_for("instagram", env)] == [
@@ -179,12 +179,12 @@ def test_reach_cadence_is_seven_ig_four_tiktok_and_leaves_the_others():
     # The Spanish 14:07 Madrid slot (08:07 ET on this date) opens the posting day, then three ET
     # slots (2026-10-07: 6+ TikTok posts in 24h got 0 views, so 4 a day, 3+ hours apart).
     assert [f"{t:%H:%M}" for t in slots_for("tiktok", env, date(2026, 10, 5))] == [
-        "07:07", "10:37", "14:07", "18:07"]  # 13:07, 16:37, 20:07, 00:07 Madrid (2026-10-09)
+        "07:07", "10:37", "14:07", "18:07", "21:07", "23:07"]  # 13:07, 16:37, 20:07, 00:07, 03:07, 05:07 Madrid (2026-10-12)
     for net in ("x", "linkedin", "bluesky", "threads", "mastodon", "reddit"):
         assert slots_for(net, env) == slots_for(net, soul)
-    # Instagram 7 under its cap of 8, TikTok 4 at its cap of 4.
+    # Instagram 7 under its cap of 8, TikTok 6 at its cap of 6 (2026-10-12).
     assert len(slots_for("instagram", env)) == 7
-    assert len(slots_for("tiktok", env, date(2026, 10, 5))) == 4
+    assert len(slots_for("tiktok", env, date(2026, 10, 5))) == 6
 
 
 def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five():
@@ -192,9 +192,9 @@ def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five
     assert len(slots_for("instagram", {"PUBLISHER_CADENCE": "reach", "PUBLISHER_SLOTS_INSTAGRAM": eight})) == 8
     with pytest.raises(ValueError, match="cap is 8"):
         slots_for("instagram", {"PUBLISHER_SLOTS_INSTAGRAM": eight + ",02:07"})
-    assert len(slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,13:07,16:07,19:07"})) == 4
-    with pytest.raises(ValueError, match="cap is 4"):
-        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,13:07,16:07,19:07,22:07"})
+    assert len(slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,13:07,16:07,19:07,21:07,23:07"})) == 6
+    with pytest.raises(ValueError, match="cap is 6"):
+        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "08:07,10:07,13:07,16:07,19:07,21:07,23:07"})
 
 
 def test_reach_slot_stays_open_until_the_next_one_or_three_hours():

@@ -20,7 +20,7 @@ import random
 from datetime import date, datetime, time, timedelta
 from typing import Iterator, Mapping
 
-from .guard import CADENCES, MIN_GAP, cadence, posting_day, slot_times, slots_for, tz
+from .guard import CADENCES, MIN_GAP, TIKTOK_MIN_SPACING, cadence, posting_day, slot_times, slots_for, tz
 
 MAX_OFFSET = 40  # minutes after the :07 slot
 LOOKAHEAD = timedelta(minutes=15)  # the cron interval
@@ -38,10 +38,12 @@ def _draws(day: date, network: str, slot: time) -> Iterator[int]:
 
 def _pick(day: date, network: str, slot: time, nominal: datetime, taken: set[datetime],
           after: datetime | None = None) -> int:
-    """A seeded offset on a free minute, and at least MIN_GAP after `after` (the network's previous slot)."""
+    """A seeded offset on a free minute, and at least MIN_GAP (TikTok: TIKTOK_MIN_SPACING) after
+    `after` (the network's previous slot), so a jittered slot is never skipped for spacing."""
+    gap = TIKTOK_MIN_SPACING if network == "tiktok" else MIN_GAP
     for off in _draws(day, network, slot):
         when = nominal + timedelta(minutes=off)
-        if when.minute not in _AVOID_MINUTES and when not in taken and (after is None or when - after >= MIN_GAP):
+        if when.minute not in _AVOID_MINUTES and when not in taken and (after is None or when - after >= gap):
             return off
     return 0
 

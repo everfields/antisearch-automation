@@ -1,5 +1,6 @@
 """Spanish TikTok by slot. Since 2026-10-09 (founder) TikTok's four reach slots are pinned to
-Madrid wall time: 13:07, 16:37, 20:07 Spanish, 00:07 English (18:07 New York, for the US).
+Madrid wall time: 13:07, 16:37, 20:07 Spanish, 00:07 English (18:07 New York, for the US);
+since 2026-10-12 also 03:07 and 05:07 English (21:07 and 23:07 New York): 6 a day, 2+ hours apart.
 Spanish never goes out outside 13:00-23:59 Madrid."""
 
 from datetime import date, datetime, timedelta
@@ -15,7 +16,7 @@ ET = ZoneInfo("America/New_York")
 MADRID = ZoneInfo("Europe/Madrid")
 REACH = {"PUBLISHER_CADENCE": "reach"}
 ENV = {**LIVE_ENV, **REACH, "PUBLISHER_LIVE_NETWORKS": "tiktok"}
-SCHEDULE = [("13:07", "es"), ("16:37", "es"), ("20:07", "es"), ("00:07", "en")]
+SCHEDULE = [("13:07", "es"), ("16:37", "es"), ("20:07", "es"), ("00:07", "en"), ("03:07", "en"), ("05:07", "en")]
 
 
 def _plan(day: date, env=REACH):
@@ -28,8 +29,8 @@ def test_daily_schedule_in_madrid():
     assert _plan(date(2027, 1, 12)) == SCHEDULE  # winter
     assert _plan(date(2026, 10, 27)) == SCHEDULE  # EU on winter time, US not yet
     assert _plan(date(2027, 3, 20)) == SCHEDULE  # US on summer time, EU not yet
-    assert [f"{t:%H:%M}" for t in madrid_slots_et(date(2026, 10, 9))] == ["07:07", "10:37", "14:07", "18:07"]
-    assert [f"{t:%H:%M}" for t in madrid_slots_et(date(2026, 10, 27))] == ["08:07", "11:37", "15:07", "19:07"]
+    assert [f"{t:%H:%M}" for t in madrid_slots_et(date(2026, 10, 9))] == ["07:07", "10:37", "14:07", "18:07", "21:07", "23:07"]
+    assert [f"{t:%H:%M}" for t in madrid_slots_et(date(2026, 10, 27))] == ["08:07", "11:37", "15:07", "19:07", "22:07", "00:07"]
 
 
 def test_every_day_of_two_years_keeps_the_madrid_schedule():
@@ -37,12 +38,12 @@ def test_every_day_of_two_years_keeps_the_madrid_schedule():
     while d < date(2028, 1, 1):
         times = slot_times(d, slots_for("tiktok", REACH, d))
         assert _plan(d) == SCHEDULE, d
-        assert all(b - a >= timedelta(hours=3) for a, b in zip(times, times[1:])), d
+        assert all(b - a >= timedelta(hours=2) for a, b in zip(times, times[1:])), d
         assert all(posting_day(t) == d for t in times), d
         for t in times:
             if slot_language("tiktok", t, REACH) == "es":
                 assert 13 <= t.astimezone(MADRID).hour <= 23, (d, t)
-            assert not 1 <= t.astimezone(MADRID).hour < 13, (d, t)  # no Madrid early morning
+            assert not 6 <= t.astimezone(MADRID).hour < 13, (d, t)  # nothing in the Madrid morning
         d += timedelta(days=1)
 
 
@@ -95,4 +96,25 @@ def test_kill_switch_posts_english_on_spanish_slots(ledger, log):  # noqa: F811
     env = {**ENV, "PUBLISHER_TIKTOK_ES_EVERY": "0"}
     out = go(_jobs(ledger), ledger, log, {"tiktok": fake_adapter("tiktok")}, env=env,
              now=datetime(2026, 10, 9, 10, 40, tzinfo=ET))
+    assert [o.job_id for o in out if o.status == "published"] == ["p-en-thing"]
+
+
+def test_jitter_keeps_tiktok_slots_two_hours_apart_so_none_is_skipped():
+    from antisearch_mill.publisher.jitter import slot_offsets
+    d = date(2026, 1, 1)
+    while d < date(2027, 1, 1):
+        slots = slots_for("tiktok", REACH, d)
+        offs = slot_offsets("tiktok", d, slots, REACH)
+        at = [n + o for n, o in zip(slot_times(d, slots), offs)]
+        assert all(b - a >= timedelta(hours=2) for a, b in zip(at, at[1:])), d
+        assert all(timedelta(0) <= o <= timedelta(minutes=40) for o in offs), d
+        d += timedelta(days=1)
+
+
+@pytest.mark.parametrize("now", [
+    datetime(2026, 10, 9, 21, 10, tzinfo=ET),  # 03:10 Madrid
+    datetime(2026, 10, 9, 23, 10, tzinfo=ET),  # 05:10 Madrid
+])
+def test_us_evening_slots_are_english(ledger, log, now):  # noqa: F811
+    out = go(_jobs(ledger), ledger, log, {"tiktok": fake_adapter("tiktok")}, env=ENV, now=now)
     assert [o.job_id for o in out if o.status == "published"] == ["p-en-thing"]

@@ -49,9 +49,12 @@ IG_MAX_PER_DAY = 8
 # (from 2026-10-06 03:37 Madrid, when the pinger and the 14:07 slot took it to 7-8 a day);
 # with at most 5 before it, they all got their ~250. So: 4 a day, at most 4 in any 24 hours,
 # and at least TIKTOK_MIN_SPACING between two TikTok posts (catch-ups included).
-TT_MAX_PER_DAY = 4
-TIKTOK_MAX_PER_24H = 4
-TIKTOK_MIN_SPACING = timedelta(hours=2, minutes=30)
+# 2026-10-12 (Carlos): 6 a day, two more English slots at US evening hours (03:07 and 05:07
+# Madrid = 21:07 and 23:07 New York), so at most 6 in any 24 hours and 2+ hours apart. The
+# jitter keeps two TikTok slots TIKTOK_MIN_SPACING apart after their offsets (jitter.py).
+TT_MAX_PER_DAY = 6
+TIKTOK_MAX_PER_24H = 6
+TIKTOK_MIN_SPACING = timedelta(hours=2)
 DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY, "tiktok": TT_MAX_PER_DAY}
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 # GitHub's schedule drops most wakes (28 Sep: 1 scheduled run in 8 h). Once a slot's window has passed with
@@ -95,8 +98,8 @@ CADENCES["reach"] = {
 DEFAULT_CADENCE = "carlos"
 
 # TikTok on the reach cadence (founder, 2026-10-09): European hours, pinned to Madrid wall time
-# (DST-safe: the ET time is recomputed per date), 3.5+ hours apart, no Madrid early morning.
-# Three Spanish, and 00:07 Madrid (18:07 New York) English for the US. Spanish never goes out
+# (DST-safe: the ET time is recomputed per date), 2+ hours apart, nothing 06:00-12:59 Madrid.
+# Three Spanish, and 00:07, 03:07, 05:07 Madrid (18:07, 21:07, 23:07 New York) English for the US. Spanish never goes out
 # outside TIKTOK_ES_MADRID_HOURS, whatever the slot list says.
 MADRID = "Europe/Madrid"
 TIKTOK_MADRID_SLOTS: tuple[tuple[time, str], ...] = (
@@ -104,6 +107,8 @@ TIKTOK_MADRID_SLOTS: tuple[tuple[time, str], ...] = (
     (time(16, 37), "es"),
     (time(20, 7), "es"),
     (time(0, 7), "en"),
+    (time(3, 7), "en"),  # 21:07 New York (2026-10-12)
+    (time(5, 7), "en"),  # 23:07 New York (2026-10-12)
 )
 TIKTOK_ES_MADRID_HOURS = range(13, 24)  # 13:00-23:59 Madrid
 

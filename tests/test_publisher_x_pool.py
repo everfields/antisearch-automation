@@ -192,7 +192,7 @@ def test_the_refill_is_bare_new_and_never_asked():
              "a film", "conditioner", "serum", "toner", "hair oil", "sunscreen", "cleanser", "perfume"}
     main, rotating = _x()
     tiktok = [c for c, _ in read_pool(POOLS / "tiktok.txt")]
-    refill_tt = tiktok[tiktok.index("self tanner") + 1:]
+    refill_tt = tiktok[tiktok.index("self tanner") + 1:tiktok.index("90s sitcom")]  # 2026-10-12 top-up after it
     assert len(refill_tt) == 60 and len(set(refill_tt)) == 60
     for line in REFILL_MAIN + REFILL_ROTATING + refill_tt:
         assert line == line.lower() and input_problem(line, {}) is None, line
