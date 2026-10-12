@@ -44,7 +44,7 @@ on:
   schedule:
     # Every 15 min from 13:00 through 05:59 UTC covers 09:00-01:59 EDT and 08:00-00:59 EST.
     # Wakes at :04/:19/:34/:49 (the top of the hour is GitHub's busiest); slots stay on :07.
-    - cron: "4,19,34,49 0-5,13-23 * * *"
+    - cron: "4,19,34,49 0-5,10-23 * * *"
 
 permissions:
   contents: write

@@ -307,7 +307,7 @@ def test_explicit_ramp_still_limits_reach_on_day_one(ledger, log):
 
 def test_publisher_cron_is_every_15_min_and_passes_the_ramp_variable():
     text = (ROOT / ".github" / "workflows" / "publisher.yml").read_text(encoding="utf-8")
-    assert 'cron: "4,19,34,49 0-5,13-23 * * *"' in text  # off the top of the hour
+    assert 'cron: "4,19,34,49 0-5,10-23 * * *"' in text  # off the top of the hour
     assert "types: [publisher-tick]" in text  # an external pinger wakes it like the cron
     assert "(github.event_name != 'workflow_dispatch' || inputs.tick) && vars.PUBLISHER_CRON == 'live'" in text
     assert '[ "$MANUAL" = "true" ] || [ "$LIVE" != "true" ]' in text  # every wake runs `mill due` first
