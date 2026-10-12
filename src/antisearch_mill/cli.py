@@ -256,12 +256,15 @@ def cmd_post(args, settings: Settings) -> int:
           f"queue={' '.join(queues)} "
           f"pools={pools_dir} state={log.path} now={now:%Y-%m-%d %H:%M %Z} posting-day={posting_day(now)}")
     try:
+        from .publish.http import RequestsTransport
+
         rows = run_posts(
             jobs, ledger, log, now=now, live=args.live, ignore_slots=args.ignore_slots,
             networks=_split(args.network), only=_split(args.only), kind=args.kind, retry_failed=args.retry_failed,
             produce=produce, env=env, adapters=adapters, winner_handles=load_handles(winners_dir / "handles.json"),
             tag_allowlist=load_allowlist(env.get("PUBLISHER_TAG_ALLOWLIST") or DEFAULT_ALLOWLIST),
             clock=now_et if args.live else None,
+            transport=RequestsTransport() if args.live else None,
         )
     except (FontNotFound, RenderError, ValueError) as exc:
         print(f"post error: {exc}", file=sys.stderr)

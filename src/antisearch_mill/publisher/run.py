@@ -267,7 +267,7 @@ def run_posts(
         if net == "tiktok" and from_pool:
             geo = trend_geo_for_slot(when, env)
             if geo:
-                pick = pick_tiktok_trend(geo, when, live_transport, env, log, used_inputs, cooldown_days(env))
+                pick = pick_tiktok_trend(geo, when, transport, env, log, used_inputs, cooldown_days(env))
                 if pick:
                     trend_source, trend_term = pick.source, pick.term
                     job = apply_tiktok_trend_job(job, pick)
