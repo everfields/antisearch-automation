@@ -1,27 +1,29 @@
-# Social metrics — 2026-10-12 00:38 UTC
+# Social metrics — 2026-10-12 11:06 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **2** (24h +0, 7d +1)
-- account likes: 50, posts: 58
+- followers: **3** (24h +1, 7d +2)
+- account likes: 51, posts: 59
 
-### last 24h (3 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `canción de trap español` → ready pa morir — yung beef | 250 | 1 | 0 | 0 | 0 | 0.4% |
-| `concierto en madrid` → noches del botánico | 242 | 0 | 0 | 0 | 0 | 0.0% |
-| `serie para maratonear` → breaking bad | 202 | 1 | 0 | 0 | 0 | 0.5% |
+| `serie para maratonear` → breaking bad | 260 | 1 | 0 | 0 | 0 | 0.4% |
+| `canción de trap español` → ready pa morir — yung beef | 253 | 1 | 0 | 0 | 0 | 0.4% |
+| `concierto en madrid` → noches del botánico | 243 | 0 | 0 | 0 | 0 | 0.0% |
+| `electric toothbrush` → oral-b io series 10 | 141 | 1 | 0 | 0 | 0 | 0.7% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `serie para maratonear` → breaking bad | 0.5% | 202 |
-| `canción de trap español` → ready pa morir — yung beef | 0.4% | 250 |
-| `concierto en madrid` → noches del botánico | 0.0% | 242 |
+| `electric toothbrush` → oral-b io series 10 | 0.7% | 141 |
+| `canción de trap español` → ready pa morir — yung beef | 0.4% | 253 |
+| `serie para maratonear` → breaking bad | 0.4% | 260 |
+| `concierto en madrid` → noches del botánico | 0.0% | 243 |
 
-### last 7d (44 post(s))
+### last 7d (46 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
