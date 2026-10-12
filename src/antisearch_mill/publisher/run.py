@@ -34,6 +34,7 @@ from .winners import resolve
 from .media_host import MAX_PAGES_RETRIES, GitHubPagesHost, PagesBudget, is_retryable_failure
 from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
+from .tiktok_trends import apply_tiktok_trend_job, pick_tiktok_trend, trend_geo_for_slot
 from .registry import ADAPTERS
 from .igcaption import build_ig_caption, ig_caption_mode, ig_caption_problem
 from .pools import job_language
@@ -262,6 +263,14 @@ def run_posts(
                 once(job, net, "skipped_one_per_run", f"one {net} post per run")
             continue
         when = go_out(net, slots)
+        trend_source, trend_term = "", ""
+        if net == "tiktok" and from_pool:
+            geo = trend_geo_for_slot(when, env)
+            if geo:
+                pick = pick_tiktok_trend(geo, when, transport, env, log, used_inputs, cooldown_days(env))
+                if pick:
+                    trend_source, trend_term = pick.source, pick.term
+                    job = apply_tiktok_trend_job(job, pick)
         near = log.nearest_post(net, when)
         if enforce_slots and near is not None and abs(when - near) < MIN_GAP:
             once(job, net, "skipped_min_gap", f"{net} post at {near.astimezone(now.tzinfo):%Y-%m-%d %H:%M %Z}; "
@@ -420,7 +429,7 @@ def run_posts(
             due_at = schedule_at
         if live:
             done = _post_live(cls, job, clip, media, log, env, live_transport, sleep, now, due_at, state, flags, wait_s,
-                              pages_budget=pages_budget)
+                              pages_budget=pages_budget, trend_source=trend_source, trend_term=trend_term)
             if tag and done.status in DONE:
                 tag_log.append(schedule_at or now, net, tag, job.id)  # logged for the day it goes out
             out.append(done)
@@ -581,7 +590,7 @@ def clip_pause_style(clip: ClipRow) -> str:
 
 def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, transport, sleep,
                now: datetime, due_at: datetime | None, state: AntibanState, flags: Path, wait_s: float,
-               *, pages_budget: PagesBudget | None = None) -> Outcome:
+               *, pages_budget: PagesBudget | None = None, trend_source: str = "", trend_term: str = "") -> Outcome:
     net = cls.name
     if net in paused_networks():  # belt and braces: nothing reaches a paused network's API
         return Outcome(job.id, net, f"skipped_{net}_paused", detail=pause_reason(net))
@@ -592,7 +601,7 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     pause = clip_pause_style(clip) if fmt == VIDEO else ""
     log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
                        format=fmt, due_at=due, creative=job.creative, language=job_language(job),
-                       pause=pause))
+                       pause=pause, trend_source=trend_source, trend_term=trend_term))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
@@ -608,13 +617,14 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
                            category=job.category, caption=shown, format=fmt, due_at=due, creative=job.creative,
-                           language=job_language(job), pause=pause))
+                           language=job_language(job), pause=pause, trend_source=trend_source, trend_term=trend_term))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
-                       job.category, shown, fmt, due, job.creative, language=job_language(job), pause=pause))
+                       job.category, shown, fmt, due, job.creative, language=job_language(job), pause=pause,
+                       trend_source=trend_source, trend_term=trend_term))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):
