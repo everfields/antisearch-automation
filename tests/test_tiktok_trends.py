@@ -61,6 +61,7 @@ WIKI_SEARCH = {
 WIKI_ENTITY = {
     "entities": {
         "Q566826": {
+            "labels": {"en": {"value": "Bad Bunny"}, "es": {"value": "Bad Bunny"}},
             "descriptions": {"en": {"value": "Puerto Rican rapper"}},
             "claims": {"P31": [{"mainsnak": {"datavalue": {"value": {"id": "Q5"}}}}]},
         },
@@ -198,3 +199,28 @@ def test_integration_trend_slot_uses_mapped_input(ledger, log, tmp_path):  # noq
     assert rows[-1]["category"] == "canción de bad bunny"
     assert rows[-1]["trend_term"] == "bad bunny"
     assert rows[-1]["trend_source"] == "google:ES"
+
+
+def test_spanish_trend_uses_spanish_wikidata_label_or_drops():
+    from antisearch_mill.publisher.tiktok_trends import classify_for_mapping, map_trend_input
+
+    def wikidata(es_label):
+        def respond(req):
+            p = req.params or {}
+            if p.get("action") == "wbsearchentities":
+                return HttpResponse.of_json(200, {"search": [
+                    {"id": "Q30", "label": "United States", "description": "country in North America"}]})
+            if p.get("action") == "wbgetentities":
+                labels = {"en": {"value": "United States"}}
+                if es_label:
+                    labels["es"] = {"value": es_label}
+                return HttpResponse.of_json(200, {"entities": {"Q30": {
+                    "labels": labels, "descriptions": {"es": {"value": "país de América del Norte"}},
+                    "claims": {"P31": [{"mainsnak": {"datavalue": {"value": {"id": "Q6256"}}}}]}}}})
+            return HttpResponse(404)
+        return RecordingTransport(respond)
+
+    kind, name = classify_for_mapping(wikidata("Estados Unidos"), "estados unidos", "es")
+    assert map_trend_input(name, kind, "es").lower() == "plan en estados unidos"
+    assert classify_for_mapping(wikidata(None), "estados unidos", "es") is None
+    assert classify_for_mapping(wikidata(None), "united states", "en")[1] == "united states"

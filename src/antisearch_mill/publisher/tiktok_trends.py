@@ -262,8 +262,8 @@ def clean_entity_name(label: str) -> str:
 
 def _wikidata_lookup(transport: Transport, term: str, lang: str) -> tuple[str, str, list[str]]:
     """(label, description, instance-of Qids) or ('', '', [])."""
-    params = {"action": "wbsearchentities", "search": term, "language": lang, "limit": "3", "type": "item",
-              "format": "json"}
+    params = {"action": "wbsearchentities", "search": term, "language": lang, "uselang": lang, "limit": "3",
+              "type": "item", "format": "json"}
     body = _get(transport, WIKIDATA, params)
     if not body:
         return "", "", []
@@ -282,14 +282,18 @@ def _wikidata_lookup(transport: Transport, term: str, lang: str) -> tuple[str, s
     desc = (hit.get("description") or "").strip()
     if not qid:
         return label, desc, []
-    ent_body = _get(transport, WIKIDATA, {"action": "wbgetentities", "ids": qid, "props": "claims|descriptions",
+    ent_body = _get(transport, WIKIDATA, {"action": "wbgetentities", "ids": qid, "props": "claims|descriptions|labels",
                                           "format": "json"})
     if not ent_body:
-        return label, desc, []
+        return (label if lang == "en" else ""), desc, []
     try:
         ent = json.loads(ent_body).get("entities", {}).get(qid, {})
     except ValueError:
-        return label, desc, []
+        return (label if lang == "en" else ""), desc, []
+    if lang != "en":
+        # Use the label in the slot language only (es for geo=ES); the search hit's label can be the
+        # English display label ("United States"). No label in that language -> no label (term dropped).
+        label = ((ent.get("labels") or {}).get(lang) or {}).get("value", "").strip()
     if not desc:
         desc = (ent.get("descriptions", {}).get(lang, {}) or ent.get("descriptions", {}).get("en", {}) or {}).get("value", "")
     p31 = []
