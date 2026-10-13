@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-13 10:48 UTC
+# Social metrics — 2026-10-13 19:22 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **4** (24h +2, 7d +3)
-- account likes: 52, posts: 64
+- followers: **4** (24h +1, 7d +3)
+- account likes: 54, posts: 67
 
-### last 24h (5 post(s))
+### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `canción para la ducha` → vivir mi vida — marc anthony | 258 | 1 | 0 | 0 | 0 | 0.4% |
-| `peli para llorar` → la tumba de las luciérnagas | 244 | 0 | 0 | 0 | 0 | 0.0% |
-| `plan en united states` → road trip por los parques nacionales | 182 | 0 | 0 | 0 | 0 | 0.0% |
-| `toothpaste` → colgate total active prevention | 152 | 0 | 0 | 0 | 0 | 0.0% |
-| `hairbrush` → mason pearson popular mixture | 130 | 0 | 0 | 0 | 0 | 0.0% |
+| `toothpaste` → colgate total active prevention | 272 | 0 | 0 | 0 | 0 | 0.0% |
+| `plan en united states` → road trip por los parques nacionales | 263 | 0 | 0 | 0 | 0 | 0.0% |
+| `hairbrush` → mason pearson popular mixture | 252 | 2 | 0 | 0 | 0 | 0.8% |
+| `libro para la playa` → la verdad sobre el caso harry quebert | 105 | 0 | 0 | 0 | 0 | 0.0% |
+| `plan para un domingo` → pícnic en la naturaleza | 100 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `canción para la ducha` → vivir mi vida — marc anthony | 0.4% | 258 |
-| `plan en united states` → road trip por los parques nacionales | 0.0% | 182 |
-| `peli para llorar` → la tumba de las luciérnagas | 0.0% | 244 |
-| `toothpaste` → colgate total active prevention | 0.0% | 152 |
-| `hairbrush` → mason pearson popular mixture | 0.0% | 130 |
+| `hairbrush` → mason pearson popular mixture | 0.8% | 252 |
+| `plan en united states` → road trip por los parques nacionales | 0.0% | 263 |
+| `toothpaste` → colgate total active prevention | 0.0% | 272 |
+| `serie como juego de tronos` → shōgun | 0.0% | 52 |
+| `plan para un domingo` → pícnic en la naturaleza | 0.0% | 100 |
 
-### last 7d (44 post(s))
+### last 7d (41 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -33,15 +33,15 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `festival de música en españa` → primavera sound barcelona | 274 | 1 | 0 | 0 | 1 | 0.7% |
 | `canción para el gimnasio` → till i collapse — eminem | 273 | 2 | 0 | 0 | – | 0.7% |
 | `canción para el gimnasio` → till i collapse — eminem | 272 | 2 | 0 | 0 | 0 | 0.7% |
-| `canción de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 267 | 0 | 0 | 0 | 0 | 0.0% |
+| `toothpaste` → colgate total active prevention | 272 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
+| `hairbrush` → mason pearson popular mixture | 0.8% | 252 |
 | `canción para el gimnasio` → till i collapse — eminem | 0.7% | 272 |
 | `canción para el gimnasio` → till i collapse — eminem | 0.7% | 273 |
 | `festival de música en españa` → primavera sound barcelona | 0.7% | 274 |
-| `rain` → warm summer rain | 0.4% | 239 |
 
 ## instagram
 
@@ -63,7 +63,7 @@ no posts in this window
 
 no posts in this window
 
-### last 7d (12 post(s))
+### last 7d (11 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -84,5 +84,5 @@ no posts in this window
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
 | video | 0 | – | – | – | – |
-| text | 12 | 1.0 | 0.0 | 0.0 | 0.0% |
+| text | 11 | 1.0 | 0.0 | 0.0 | 0.0% |
 
