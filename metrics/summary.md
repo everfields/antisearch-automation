@@ -1,44 +1,46 @@
-# Social metrics — 2026-10-13 02:38 UTC
+# Social metrics — 2026-10-13 10:48 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +2, 7d +3)
-- account likes: 52, posts: 63
+- account likes: 52, posts: 64
 
-### last 24h (4 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `canción para la ducha` → vivir mi vida — marc anthony | 258 | 1 | 0 | 0 | 0 | 0.4% |
-| `peli para llorar` → la tumba de las luciérnagas | 210 | 0 | 0 | 0 | 0 | 0.0% |
-| `plan en united states` → road trip por los parques nacionales | 126 | 0 | 0 | 0 | 0 | 0.0% |
-| `toothpaste` → colgate total active prevention | 73 | 0 | 0 | 0 | 0 | 0.0% |
+| `peli para llorar` → la tumba de las luciérnagas | 244 | 0 | 0 | 0 | 0 | 0.0% |
+| `plan en united states` → road trip por los parques nacionales | 182 | 0 | 0 | 0 | 0 | 0.0% |
+| `toothpaste` → colgate total active prevention | 152 | 0 | 0 | 0 | 0 | 0.0% |
+| `hairbrush` → mason pearson popular mixture | 130 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `canción para la ducha` → vivir mi vida — marc anthony | 0.4% | 258 |
-| `plan en united states` → road trip por los parques nacionales | 0.0% | 126 |
-| `peli para llorar` → la tumba de las luciérnagas | 0.0% | 210 |
-| `toothpaste` → colgate total active prevention | 0.0% | 73 |
+| `plan en united states` → road trip por los parques nacionales | 0.0% | 182 |
+| `peli para llorar` → la tumba de las luciérnagas | 0.0% | 244 |
+| `toothpaste` → colgate total active prevention | 0.0% | 152 |
+| `hairbrush` → mason pearson popular mixture | 0.0% | 130 |
 
-### last 7d (38 post(s))
+### last 7d (44 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `festival de música en españa` → primavera sound barcelona | 275 | 1 | 0 | 0 | – | 0.4% |
 | `festival de música en españa` → primavera sound barcelona | 274 | 1 | 0 | 0 | 1 | 0.7% |
+| `canción para el gimnasio` → till i collapse — eminem | 273 | 2 | 0 | 0 | – | 0.7% |
 | `canción para el gimnasio` → till i collapse — eminem | 272 | 2 | 0 | 0 | 0 | 0.7% |
 | `canción de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 267 | 0 | 0 | 0 | 0 | 0.0% |
-| `canción de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 267 | 0 | 0 | 0 | – | 0.0% |
-| `serie para maratonear` → breaking bad | 263 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `canción para el gimnasio` → till i collapse — eminem | 0.7% | 272 |
+| `canción para el gimnasio` → till i collapse — eminem | 0.7% | 273 |
 | `festival de música en españa` → primavera sound barcelona | 0.7% | 274 |
-| `rain` → warm summer rain | 0.4% | 239 |
 | `rain` → warm summer rain | 0.4% | 239 |
 
 ## instagram
