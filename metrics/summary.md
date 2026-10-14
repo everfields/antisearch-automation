@@ -1,29 +1,29 @@
-# Social metrics — 2026-10-14 14:34 UTC
+# Social metrics — 2026-10-14 19:30 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +3)
-- account likes: 56, posts: 71
+- account likes: 59, posts: 72
 
-### last 24h (6 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `plan para un domingo` → pícnic en la naturaleza | 220 | 0 | 0 | 0 | 0 | 0.0% |
-| `serie como juego de tronos` → shōgun | 184 | 0 | 0 | 0 | 0 | 0.0% |
-| `scalp serum` → the ordinary multi-peptide serum for hair density | 178 | 0 | 0 | 0 | 0 | 0.0% |
-| `show like the rookie` → rookie blue | 167 | 0 | 0 | 0 | 0 | 0.0% |
-| `lash serum` → latisse | 124 | 0 | 0 | 0 | 0 | 0.0% |
+| `scalp serum` → the ordinary multi-peptide serum for hair density | 239 | 0 | 0 | 0 | 0 | 0.0% |
+| `show like the rookie` → rookie blue | 239 | 0 | 0 | 0 | 0 | 0.0% |
+| `lash serum` → latisse | 222 | 1 | 0 | 0 | 0 | 0.5% |
+| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 119 | 0 | 0 | 0 | 0 | 0.0% |
+| `bar para una primera cita` → sips, barcelona | 116 | 0 | 0 | 0 | 1 | 0.9% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `bar para una primera cita` → sips, barcelona | 1.2% | 85 |
-| `serie como juego de tronos` → shōgun | 0.0% | 184 |
-| `plan para un domingo` → pícnic en la naturaleza | 0.0% | 220 |
-| `scalp serum` → the ordinary multi-peptide serum for hair density | 0.0% | 178 |
-| `lash serum` → latisse | 0.0% | 124 |
+| `bar para una primera cita` → sips, barcelona | 0.9% | 116 |
+| `lash serum` → latisse | 0.5% | 222 |
+| `scalp serum` → the ordinary multi-peptide serum for hair density | 0.0% | 239 |
+| `show like the rookie` → rookie blue | 0.0% | 239 |
+| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 0.0% | 119 |
 
 ### last 7d (44 post(s))
 
@@ -39,9 +39,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
-| `bar para una primera cita` → sips, barcelona | 1.2% | 85 |
-| `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 196 |
-| `hairbrush` → mason pearson popular mixture | 0.8% | 252 |
+| `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 197 |
+| `serie como juego de tronos` → shōgun | 0.9% | 221 |
+| `bar para una primera cita` → sips, barcelona | 0.9% | 116 |
 
 ## instagram
 
