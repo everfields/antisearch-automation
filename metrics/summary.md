@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-14 00:23 UTC
+# Social metrics — 2026-10-14 08:52 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +3)
-- account likes: 54, posts: 68
+- account likes: 55, posts: 70
 
-### last 24h (5 post(s))
+### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hairbrush` → mason pearson popular mixture | 252 | 2 | 0 | 0 | 0 | 0.8% |
-| `libro para la playa` → la verdad sobre el caso harry quebert | 144 | 0 | 0 | 0 | 0 | 0.0% |
-| `plan para un domingo` → pícnic en la naturaleza | 134 | 0 | 0 | 0 | 0 | 0.0% |
-| `serie como juego de tronos` → shōgun | 99 | 0 | 0 | 0 | 0 | 0.0% |
-| `scalp serum` → the ordinary multi-peptide serum for hair density | 10 | 0 | 0 | 0 | 0 | 0.0% |
+| `libro para la playa` → la verdad sobre el caso harry quebert | 172 | 1 | 0 | 0 | 0 | 0.6% |
+| `plan para un domingo` → pícnic en la naturaleza | 162 | 0 | 0 | 0 | 0 | 0.0% |
+| `serie como juego de tronos` → shōgun | 126 | 0 | 0 | 0 | 0 | 0.0% |
+| `show like the rookie` → rookie blue | 103 | 0 | 0 | 0 | 0 | 0.0% |
+| `scalp serum` → the ordinary multi-peptide serum for hair density | 96 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `hairbrush` → mason pearson popular mixture | 0.8% | 252 |
-| `serie como juego de tronos` → shōgun | 0.0% | 99 |
-| `plan para un domingo` → pícnic en la naturaleza | 0.0% | 134 |
-| `libro para la playa` → la verdad sobre el caso harry quebert | 0.0% | 144 |
-| `scalp serum` → the ordinary multi-peptide serum for hair density | 0.0% | 10 |
+| `libro para la playa` → la verdad sobre el caso harry quebert | 0.6% | 172 |
+| `serie como juego de tronos` → shōgun | 0.0% | 126 |
+| `plan para un domingo` → pícnic en la naturaleza | 0.0% | 162 |
+| `scalp serum` → the ordinary multi-peptide serum for hair density | 0.0% | 96 |
+| `lash serum` → latisse | 0.0% | 53 |
 
-### last 7d (38 post(s))
+### last 7d (45 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -38,10 +38,10 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
+| `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `hairbrush` → mason pearson popular mixture | 0.8% | 252 |
 | `canción para el gimnasio` → till i collapse — eminem | 0.7% | 272 |
 | `canción para el gimnasio` → till i collapse — eminem | 0.7% | 273 |
-| `festival de música en españa` → primavera sound barcelona | 0.7% | 274 |
 
 ## instagram
 
