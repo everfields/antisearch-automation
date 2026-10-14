@@ -34,7 +34,9 @@ from .winners import resolve
 from .media_host import MAX_PAGES_RETRIES, GitHubPagesHost, PagesBudget, is_retryable_failure
 from .places import LOCAL_MORNING_NETWORKS, local_morning_after, local_tz
 from .pools import POOL_NOTE
-from .tiktok_trends import apply_tiktok_trend_job, pick_tiktok_trend, trend_geo_for_slot
+from .tiktok_trends import (
+    TIKTOK_TREND_PREFIX, apply_tiktok_trend_job, pick_tiktok_trend, trend_geo_for_slot,
+)
 from .registry import ADAPTERS
 from .igcaption import build_ig_caption, ig_caption_mode, ig_caption_problem
 from .pools import job_language
@@ -263,14 +265,19 @@ def run_posts(
                 once(job, net, "skipped_one_per_run", f"one {net} post per run")
             continue
         when = go_out(net, slots)
+        pool_job = job
+        trend_geo = None
+        skipped_trend_mapped: set[str] = set()
         trend_source, trend_term = "", ""
         if net == "tiktok" and from_pool:
-            geo = trend_geo_for_slot(when, env)
-            if geo:
-                pick = pick_tiktok_trend(geo, when, transport, env, log, used_inputs, cooldown_days(env))
+            trend_geo = trend_geo_for_slot(when, env)
+            if trend_geo:
+                pick = pick_tiktok_trend(
+                    trend_geo, when, transport, env, log, used_inputs, cooldown_days(env),
+                )
                 if pick:
                     trend_source, trend_term = pick.source, pick.term
-                    job = apply_tiktok_trend_job(job, pick)
+                    job = apply_tiktok_trend_job(pool_job, pick)
         near = log.nearest_post(net, when)
         if enforce_slots and near is not None and abs(when - near) < MIN_GAP:
             once(job, net, "skipped_min_gap", f"{net} post at {near.astimezone(now.tzinfo):%Y-%m-%d %H:%M %Z}; "
@@ -308,10 +315,35 @@ def run_posts(
         stale = (clip is None or not Path(clip.clip_path).is_file() or (live and clip.oracle_source != "live")
                  or id_tag(clip.creative) != id_tag(creative) or not tiktok_clip_ok(net, clip))
         if stale and produce:
-            try:
-                clip = produce(job)
-            except Exception as exc:  # noqa: BLE001 - one bad row never stops the run
-                out.append(Outcome(job.id, net, "failed", detail=f"produce: {exc}"))
+            produce_error: Exception | None = None
+            for _ in range(11):
+                try:
+                    clip = produce(job)
+                    produce_error = None
+                    break
+                except Exception as exc:  # noqa: BLE001 - one bad row never stops the run
+                    produce_error = exc
+                    if not (from_pool and trend_geo and job.id.startswith(TIKTOK_TREND_PREFIX)):
+                        break
+                    skipped_trend_mapped.add(job.category)
+                    out.append(Outcome(job.id, net, "skipped_trend_input", detail=f"produce: {exc}"))
+                    pick = pick_tiktok_trend(
+                        trend_geo, when, transport, env, log, used_inputs, cooldown_days(env),
+                        skip_mapped=skipped_trend_mapped,
+                    )
+                    if pick:
+                        trend_source, trend_term = pick.source, pick.term
+                        job = apply_tiktok_trend_job(pool_job, pick)
+                        clip = None
+                        stale = True
+                        continue
+                    trend_source, trend_term = "", ""
+                    job = pool_job
+                    clip = None
+                    stale = True
+                    continue
+            if produce_error is not None:
+                out.append(Outcome(job.id, net, "failed", detail=f"produce: {produce_error}"))
                 continue
         if clip is None:
             out.append(Outcome(job.id, net, "failed", detail="no clip for this job"))

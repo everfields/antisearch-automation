@@ -110,6 +110,28 @@ def test_clean_entity_name_strips_descriptors_and_word_limit():
     assert strip_descriptors("rockstar gta 6 leak details") == "rockstar gta 6"
     assert clean_entity_name("GTA 6 leak details") == "gta 6"
     assert clean_entity_name("The Rings of Power season two trailer news") == ""
+    assert clean_entity_name("Manchester City Football Club") == "manchester city"
+    assert clean_entity_name("Real Madrid C.F.") == "real madrid"
+
+
+def test_football_club_entity_is_not_mapped():
+    city_search = {"search": [{"id": "Q50602", "label": "Manchester City F.C.", "description": "association football club"}]}
+    city_entity = {"entities": {"Q50602": {
+        "labels": {"en": {"value": "Manchester City Football Club"}},
+        "descriptions": {"en": {"value": "association football club in Manchester, England"}},
+        "claims": {"P31": [{"mainsnak": {"datavalue": {"value": {"id": "Q476028"}}}}]},
+    }}}
+
+    def respond(req):
+        if "wikidata.org" in req.url:
+            action = (req.params or {}).get("action", "")
+            if action == "wbsearchentities":
+                return HttpResponse.of_json(200, city_search)
+            if action == "wbgetentities":
+                return HttpResponse.of_json(200, city_entity)
+        return HttpResponse(404)
+
+    assert classify_for_mapping(RecordingTransport(respond), "manchester city", "en") is None
 
 
 def test_gta_leak_query_maps_entity_label_not_raw_query():

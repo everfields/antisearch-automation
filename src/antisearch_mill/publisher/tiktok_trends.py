@@ -240,6 +240,15 @@ DESCRIPTOR = re.compile(
     re.I,
 )
 MAX_ENTITY_WORDS = 4
+CLUB_SUFFIX = re.compile(
+    r"(?:\s+(?:football club|soccer club|f\.?\s*c\.?|c\.?\s*f\.?|cf|club de f[uú]tbol))+\s*$",
+    re.I,
+)
+FOOTBALL_CLUB_P31 = frozenset({"Q476028", "Q15944511"})  # association football club, sports team
+FOOTBALL_CLUB = re.compile(
+    r"\b(association football club|football club|club de f[uú]tbol|soccer club|equipo de f[uú]tbol)\b",
+    re.I,
+)
 
 
 def strip_descriptors(text: str) -> str:
@@ -247,10 +256,26 @@ def strip_descriptors(text: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
+def _strip_club_suffix(text: str) -> str:
+    t = (text or "").strip()
+    while True:
+        n = CLUB_SUFFIX.sub("", t).strip()
+        if n == t:
+            return t
+        t = n
+
+
+def _is_football_club(p31: list[str], text: str) -> bool:
+    if FOOTBALL_CLUB_P31.intersection(p31):
+        return True
+    return bool(FOOTBALL_CLUB.search(text))
+
+
 def clean_entity_name(label: str) -> str:
     """Lowercase bare entity name from Wikidata/Wikipedia; drop if too long or ranked."""
     t = re.sub(r"\s*\([^)]*\)", "", (label or "").strip())
     t = strip_descriptors(t)
+    t = _strip_club_suffix(t)
     t = normalize_category(t)
     t = re.sub(r"\s+", " ", t).strip()
     if not t or len(t.split()) > MAX_ENTITY_WORDS:
@@ -354,7 +379,9 @@ def _infer_kind(term: str, text: str, p31: list[str]) -> str | None:
 def classify_for_mapping(transport: Transport, term: str, lang: str) -> tuple[str, str] | None:
     """(kind, clean entity name) when the term can be mapped; else None."""
     label, desc, p31 = resolve_entity(transport, term, lang)
-    text = f"{term} {desc}"
+    text = f"{term} {label} {desc}"
+    if _is_football_club(p31, text):
+        return None
     kind = _infer_kind(term, text, p31)
     if not kind:
         return None
@@ -394,6 +421,8 @@ def pick_tiktok_trend(
     log: PostLog,
     used_inputs: set[str],
     cooldown_days: int,
+    *,
+    skip_mapped: set[str] | None = None,
 ) -> TrendPick | None:
     if transport is None:
         return None
@@ -403,6 +432,7 @@ def pick_tiktok_trend(
     except Exception:  # noqa: BLE001 - never fail the post
         return None
     source = f"google:{geo}"
+    skipped = skip_mapped or set()
     for item in items:
         if safety_blocked(item):
             continue
@@ -411,14 +441,13 @@ def pick_tiktok_trend(
             continue
         kind, name = mapped_pair
         mapped = map_trend_input(name, kind, lang)
-        if not mapped:
+        if not mapped or mapped in skipped:
             continue
         if mapped in used_inputs:
             continue
         if log.input_within(mapped, when, cooldown_days):
             continue
-        problem = input_problem(mapped, env)
-        if problem and not (lang == "es" and spanish_trend_input(mapped)):
+        if input_problem(mapped, env):
             continue
         slug = re.sub(r"[^a-z0-9]+", "-", mapped).strip("-")[:50]
         prefix = f"{TIKTOK_TREND_PREFIX}es-" if lang == "es" else f"{TIKTOK_TREND_PREFIX}"

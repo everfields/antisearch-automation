@@ -32,7 +32,8 @@ NOT_SUPERLATIVE = frozenset((
     " breast beast feast east northeast southeast midwest northwest southwest everest budapest bucharest"
     " celeste alkahest incest"
 ).split())
-EST = re.compile(r"\b([a-z]{2,}est)(s|ed|ing|ers?)?\b", re.I)
+# Whole tokens only: never treat "manchester" as "manchest" + "er".
+EST_TOKEN = re.compile(r"\b[a-z][a-z'-]*est\b", re.I)
 NUMBER_ONE = re.compile(r"#\s*1\b|\bno\.?\s*1\b|\bnumber\s*one\b|\bnumero uno\b", re.I)
 
 
@@ -42,8 +43,8 @@ def ranked_word(text: str) -> str | None:
     m = NUMBER_ONE.search(t)
     if m:
         return m.group(0).strip().lower()
-    for m in EST.finditer(t):
-        word = m.group(1).lower()
+    for m in EST_TOKEN.finditer(t):
+        word = m.group(0).lower()
         if word not in NOT_SUPERLATIVE and word != "best":
             return word
     return None
