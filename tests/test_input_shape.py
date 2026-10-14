@@ -76,9 +76,18 @@ def test_any_est_superlative_or_number_one_is_refused(phrase):
     "80s horror movie", "university to study electrical engineering", "tank top", "top hat", "forest", "priest",
     "budapest", "contest", "interests", "harvest moon", "easter egg", "requested song",
     "west coast", "harvest festival", "honest review app", "goat cheese", "rooftop bar", "laptop",
+    "manchester city", "manchester city football club", "plan en manchester city", "interest rate", "west ham",
+    "test drive", "forest hills",
 ])
 def test_the_lint_keeps_bare_words_that_only_look_ranked(phrase):
     assert superlative_problem(phrase) is None
+
+
+def test_manchester_is_not_treated_as_an_est_superlative():
+    from antisearch_mill.bare_input import ranked_word
+
+    assert ranked_word("manchester city football club") is None
+    assert superlative_problem("plan en manchester city") is None
 
 
 @pytest.mark.parametrize("question,bare", [
