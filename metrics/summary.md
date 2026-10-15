@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-15 04:53 UTC
+# Social metrics — 2026-10-15 11:45 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +3)
-- account likes: 60, posts: 74
+- account likes: 61, posts: 76
 
-### last 24h (5 post(s))
+### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `lash serum` → latisse | 227 | 1 | 0 | 0 | 0 | 0.4% |
-| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 219 | 1 | 0 | 0 | 0 | 0.5% |
-| `bar para una primera cita` → sips, barcelona | 175 | 0 | 0 | 0 | 1 | 0.6% |
-| `sitio para fotos` → unsplash | 95 | 0 | 0 | 0 | 0 | 0.0% |
-| `tinted moisturizer` → nars pure radiant tinted moisturizer | 13 | 0 | 0 | 0 | 0 | 0.0% |
+| `bar para una primera cita` → sips, barcelona | 254 | 0 | 0 | 0 | 1 | 0.4% |
+| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 249 | 1 | 0 | 0 | 0 | 0.4% |
+| `sitio para fotos` → unsplash | 184 | 0 | 0 | 0 | 0 | 0.0% |
+| `tinted moisturizer` → nars pure radiant tinted moisturizer | 74 | 0 | 0 | 0 | 0 | 0.0% |
+| `sheet mask` → sk-ii facial treatment mask | 69 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `bar para una primera cita` → sips, barcelona | 0.6% | 175 |
-| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 0.5% | 219 |
-| `lash serum` → latisse | 0.4% | 227 |
-| `sitio para fotos` → unsplash | 0.0% | 95 |
-| `tinted moisturizer` → nars pure radiant tinted moisturizer | 0.0% | 13 |
+| `regalo para mi madre` → álbum de fotos familiar personalizado | 9.1% | 11 |
+| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 0.4% | 249 |
+| `bar para una primera cita` → sips, barcelona | 0.4% | 254 |
+| `sitio para fotos` → unsplash | 0.0% | 184 |
+| `tinted moisturizer` → nars pure radiant tinted moisturizer | 0.0% | 74 |
 
-### last 7d (48 post(s))
+### last 7d (50 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,11 +37,11 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `regalo para mi madre` → álbum de fotos familiar personalizado | 9.1% | 11 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 197 |
 | `serie como juego de tronos` → shōgun | 0.9% | 221 |
-| `hairbrush` → mason pearson popular mixture | 0.8% | 252 |
 
 ## instagram
 
