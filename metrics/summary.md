@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-15 17:11 UTC
+# Social metrics — 2026-10-15 21:32 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +3)
-- account likes: 62, posts: 77
+- account likes: 65, posts: 78
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `tinted moisturizer` → nars pure radiant tinted moisturizer | 248 | 0 | 0 | 0 | 0 | 0.0% |
-| `sitio para fotos` → unsplash | 239 | 0 | 0 | 0 | 0 | 0.0% |
-| `sheet mask` → sk-ii facial treatment mask | 190 | 1 | 0 | 0 | 0 | 0.5% |
-| `regalo para mi madre` → álbum de fotos familiar personalizado | 185 | 1 | 0 | 0 | 0 | 0.5% |
-| `café para estudiar` → starbucks | 104 | 0 | 0 | 0 | 0 | 0.0% |
+| `sheet mask` → sk-ii facial treatment mask | 259 | 2 | 0 | 0 | 0 | 0.8% |
+| `regalo para mi madre` → álbum de fotos familiar personalizado | 252 | 1 | 0 | 0 | 0 | 0.4% |
+| `tinted moisturizer` → nars pure radiant tinted moisturizer | 249 | 0 | 0 | 0 | 0 | 0.0% |
+| `café para estudiar` → starbucks | 210 | 0 | 0 | 0 | 0 | 0.0% |
+| `anime para empezar` → death note | 105 | 2 | 0 | 0 | 1 | 2.9% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `regalo para mi madre` → álbum de fotos familiar personalizado | 0.5% | 185 |
-| `sheet mask` → sk-ii facial treatment mask | 0.5% | 190 |
-| `sitio para fotos` → unsplash | 0.0% | 239 |
-| `tinted moisturizer` → nars pure radiant tinted moisturizer | 0.0% | 248 |
-| `café para estudiar` → starbucks | 0.0% | 104 |
+| `anime para empezar` → death note | 2.9% | 105 |
+| `sheet mask` → sk-ii facial treatment mask | 0.8% | 259 |
+| `regalo para mi madre` → álbum de fotos familiar personalizado | 0.4% | 252 |
+| `tinted moisturizer` → nars pure radiant tinted moisturizer | 0.0% | 249 |
+| `café para estudiar` → starbucks | 0.0% | 210 |
 
-### last 7d (49 post(s))
+### last 7d (48 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,11 +37,11 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `anime para empezar` → death note | 2.9% | 105 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 197 |
 | `serie como juego de tronos` → shōgun | 0.9% | 221 |
-| `hairbrush` → mason pearson popular mixture | 0.8% | 252 |
 
 ## instagram
 
@@ -63,23 +63,14 @@ no posts in this window
 
 no posts in this window
 
-### last 7d (5 post(s))
+### last 7d (1 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `philosopher` → martha nussbaum | 1 | 0 | 0 | 0 | – | 0.0% |
-| `silent film` → city lights | 1 | 0 | 0 | 0 | – | 0.0% |
-| `philosopher` → martha nussbaum | – | 0 | 0 | – | – | – |
-| `silent film` → city lights | – | 0 | 0 | – | – | – |
 | `ambition` → human flourishing | – | 0 | 0 | – | – | – |
-
-| top by engagement rate | eng. rate | views |
-| --- | --- | --- |
-| `philosopher` → martha nussbaum | 0.0% | 1 |
-| `silent film` → city lights | 0.0% | 1 |
 
 | X format A/B | posts | mean views | mean likes | mean replies | mean eng. rate |
 | --- | --- | --- | --- | --- | --- |
 | video | 0 | – | – | – | – |
-| text | 5 | 1.0 | 0.0 | 0.0 | 0.0% |
+| text | 1 | – | 0.0 | 0.0 | – |
 
