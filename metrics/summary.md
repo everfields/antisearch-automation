@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-14 23:59 UTC
+# Social metrics — 2026-10-15 04:53 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +3)
-- account likes: 60, posts: 73
+- account likes: 60, posts: 74
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `show like the rookie` → rookie blue | 240 | 0 | 0 | 0 | 0 | 0.0% |
 | `lash serum` → latisse | 227 | 1 | 0 | 0 | 0 | 0.4% |
-| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 201 | 1 | 0 | 0 | 0 | 0.5% |
-| `bar para una primera cita` → sips, barcelona | 167 | 0 | 0 | 0 | 1 | 0.6% |
-| `sitio para fotos` → unsplash | 83 | 0 | 0 | 0 | 0 | 0.0% |
+| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 219 | 1 | 0 | 0 | 0 | 0.5% |
+| `bar para una primera cita` → sips, barcelona | 175 | 0 | 0 | 0 | 1 | 0.6% |
+| `sitio para fotos` → unsplash | 95 | 0 | 0 | 0 | 0 | 0.0% |
+| `tinted moisturizer` → nars pure radiant tinted moisturizer | 13 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `bar para una primera cita` → sips, barcelona | 0.6% | 167 |
-| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 0.5% | 201 |
+| `bar para una primera cita` → sips, barcelona | 0.6% | 175 |
+| `outfit para festival` → shorts, camiseta y zapatillas cómodas | 0.5% | 219 |
 | `lash serum` → latisse | 0.4% | 227 |
-| `show like the rookie` → rookie blue | 0.0% | 240 |
-| `sitio para fotos` → unsplash | 0.0% | 83 |
+| `sitio para fotos` → unsplash | 0.0% | 95 |
+| `tinted moisturizer` → nars pure radiant tinted moisturizer | 0.0% | 13 |
 
-### last 7d (44 post(s))
+### last 7d (48 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
