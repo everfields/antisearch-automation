@@ -1,25 +1,27 @@
-# Social metrics — 2026-10-16 16:48 UTC
+# Social metrics — 2026-10-16 21:24 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +2)
-- account likes: 67, posts: 81
+- account likes: 69, posts: 83
 
-### last 24h (4 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `anime para empezar` → death note | 267 | 2 | 0 | 0 | 1 | 1.1% |
 | `brow gel` → benefit 24-hr brow setter | 240 | 2 | 0 | 0 | 0 | 0.8% |
 | `lip gloss` → fenty beauty gloss bomb universal lip luminizer | 229 | 0 | 0 | 0 | 0 | 0.0% |
+| `playlist para estudiar` → deep focus | 120 | 1 | 0 | 0 | 0 | 0.8% |
+| `peli de miedo de los 90` → el silencio de los corderos | 9 | 1 | 0 | 0 | 0 | 11.1% |
 | `serie española de netflix` → la casa de papel | 5 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `anime para empezar` → death note | 1.1% | 267 |
+| `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
 | `brow gel` → benefit 24-hr brow setter | 0.8% | 240 |
+| `playlist para estudiar` → deep focus | 0.8% | 120 |
 | `lip gloss` → fenty beauty gloss bomb universal lip luminizer | 0.0% | 229 |
 | `serie española de netflix` → la casa de papel | 0.0% | 5 |
 
@@ -27,18 +29,18 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `canción para el gimnasio` → till i collapse — eminem | 273 | 2 | 0 | 0 | – | 0.7% |
-| `canción para el gimnasio` → till i collapse — eminem | 272 | 2 | 0 | 0 | 0 | 0.7% |
 | `toothpaste` → colgate total active prevention | 272 | 0 | 0 | 0 | 0 | 0.0% |
 | `toothpaste` → colgate total active prevention | 272 | 0 | 0 | 0 | – | 0.0% |
 | `anime para empezar` → death note | 267 | 2 | 0 | 0 | 1 | 1.1% |
+| `serie para maratonear` → breaking bad | 263 | 1 | 0 | 0 | 0 | 0.4% |
+| `plan en united states` → road trip por los parques nacionales | 263 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `anime para empezar` → death note | 1.1% | 267 |
-| `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 197 |
 | `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 197 |
 
 ## instagram
