@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-16 04:44 UTC
+# Social metrics — 2026-10-16 11:39 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +2)
-- account likes: 65, posts: 79
+- account likes: 67, posts: 81
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `sheet mask` → sk-ii facial treatment mask | 259 | 2 | 0 | 0 | 0 | 0.8% |
-| `regalo para mi madre` → álbum de fotos familiar personalizado | 252 | 1 | 0 | 0 | 0 | 0.4% |
-| `café para estudiar` → starbucks | 242 | 0 | 0 | 0 | 0 | 0.0% |
-| `anime para empezar` → death note | 178 | 2 | 0 | 0 | 1 | 1.7% |
-| `lip gloss` → fenty beauty gloss bomb universal lip luminizer | 20 | 0 | 0 | 0 | 0 | 0.0% |
+| `anime para empezar` → death note | 265 | 2 | 0 | 0 | 1 | 1.1% |
+| `café para estudiar` → starbucks | 243 | 0 | 0 | 0 | 0 | 0.0% |
+| `brow gel` → benefit 24-hr brow setter | 203 | 2 | 0 | 0 | 0 | 1.0% |
+| `lip gloss` → fenty beauty gloss bomb universal lip luminizer | 119 | 0 | 0 | 0 | 0 | 0.0% |
+| `serie española de netflix` → la casa de papel | 5 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `anime para empezar` → death note | 1.7% | 178 |
-| `sheet mask` → sk-ii facial treatment mask | 0.8% | 259 |
-| `regalo para mi madre` → álbum de fotos familiar personalizado | 0.4% | 252 |
-| `café para estudiar` → starbucks | 0.0% | 242 |
-| `lip gloss` → fenty beauty gloss bomb universal lip luminizer | 0.0% | 20 |
+| `anime para empezar` → death note | 1.1% | 265 |
+| `brow gel` → benefit 24-hr brow setter | 1.0% | 203 |
+| `café para estudiar` → starbucks | 0.0% | 243 |
+| `lip gloss` → fenty beauty gloss bomb universal lip luminizer | 0.0% | 119 |
+| `serie española de netflix` → la casa de papel | 0.0% | 5 |
 
-### last 7d (50 post(s))
+### last 7d (52 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,9 +37,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `anime para empezar` → death note | 1.7% | 178 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
 | `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
+| `anime para empezar` → death note | 1.1% | 265 |
 | `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 197 |
 | `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 197 |
 
