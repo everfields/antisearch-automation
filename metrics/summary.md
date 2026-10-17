@@ -1,27 +1,27 @@
-# Social metrics — 2026-10-17 15:45 UTC
+# Social metrics — 2026-10-17 20:45 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +2)
-- account likes: 72, posts: 86
+- account likes: 74, posts: 88
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `sea` → mediterranean sea | 259 | 0 | 0 | 0 | 0 | 0.0% |
-| `playlist para estudiar` → deep focus | 257 | 3 | 0 | 0 | 0 | 1.2% |
 | `self tanner` → st. tropez self tan express bronzing mousse | 253 | 1 | 0 | 0 | 0 | 0.4% |
-| `peli de miedo de los 80` → el resplandor | 141 | 1 | 0 | 0 | 0 | 0.7% |
-| `peli de miedo de los 90` → el silencio de los corderos | 9 | 1 | 0 | 0 | 0 | 11.1% |
+| `peli de miedo de los 80` → el resplandor | 241 | 2 | 0 | 0 | 0 | 0.8% |
+| `videojuego de mundo abierto` → the legend of zelda: tears of the kingdom | 175 | 1 | 0 | 0 | 0 | 0.6% |
+| `zapatillas para el día a día` → new balance 990v6 | 85 | 1 | 0 | 0 | 0 | 1.2% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
-| `playlist para estudiar` → deep focus | 1.2% | 257 |
-| `peli de miedo de los 80` → el resplandor | 0.7% | 141 |
+| `zapatillas para el día a día` → new balance 990v6 | 1.2% | 85 |
+| `peli de miedo de los 80` → el resplandor | 0.8% | 241 |
+| `videojuego de mundo abierto` → the legend of zelda: tears of the kingdom | 0.6% | 175 |
 | `self tanner` → st. tropez self tan express bronzing mousse | 0.4% | 253 |
 | `sea` → mediterranean sea | 0.0% | 259 |
 
@@ -38,10 +38,10 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
-| `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
-| `canción para llorar` → amor eterno — rocío dúrcal | 1.4% | 69 |
+| `zapatillas para el día a día` → new balance 990v6 | 1.2% | 85 |
 | `playlist para estudiar` → deep focus | 1.2% | 257 |
 | `anime para empezar` → death note | 1.1% | 267 |
+| `libro para la playa` → la verdad sobre el caso harry quebert | 1.0% | 197 |
 
 ## instagram
 
