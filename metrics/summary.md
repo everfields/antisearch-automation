@@ -1,11 +1,11 @@
-# Social metrics — 2026-10-17 10:58 UTC
+# Social metrics — 2026-10-17 15:45 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +2)
-- account likes: 72, posts: 85
+- account likes: 72, posts: 86
 
 ### last 24h (5 post(s))
 
@@ -13,19 +13,19 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- | --- | --- | --- | --- |
 | `sea` → mediterranean sea | 259 | 0 | 0 | 0 | 0 | 0.0% |
 | `playlist para estudiar` → deep focus | 257 | 3 | 0 | 0 | 0 | 1.2% |
-| `self tanner` → st. tropez self tan express bronzing mousse | 252 | 1 | 0 | 0 | 0 | 0.4% |
+| `self tanner` → st. tropez self tan express bronzing mousse | 253 | 1 | 0 | 0 | 0 | 0.4% |
+| `peli de miedo de los 80` → el resplandor | 141 | 1 | 0 | 0 | 0 | 0.7% |
 | `peli de miedo de los 90` → el silencio de los corderos | 9 | 1 | 0 | 0 | 0 | 11.1% |
-| `serie española de netflix` → la casa de papel | 5 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
 | `playlist para estudiar` → deep focus | 1.2% | 257 |
-| `self tanner` → st. tropez self tan express bronzing mousse | 0.4% | 252 |
-| `serie española de netflix` → la casa de papel | 0.0% | 5 |
+| `peli de miedo de los 80` → el resplandor | 0.7% | 141 |
+| `self tanner` → st. tropez self tan express bronzing mousse | 0.4% | 253 |
 | `sea` → mediterranean sea | 0.0% | 259 |
 
-### last 7d (56 post(s))
+### last 7d (53 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
