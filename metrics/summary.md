@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-16 21:24 UTC
+# Social metrics — 2026-10-17 04:42 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h +0, 7d +2)
-- account likes: 69, posts: 83
+- account likes: 70, posts: 85
 
-### last 24h (5 post(s))
+### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `playlist para estudiar` → deep focus | 250 | 2 | 0 | 0 | 0 | 0.8% |
 | `brow gel` → benefit 24-hr brow setter | 240 | 2 | 0 | 0 | 0 | 0.8% |
-| `lip gloss` → fenty beauty gloss bomb universal lip luminizer | 229 | 0 | 0 | 0 | 0 | 0.0% |
-| `playlist para estudiar` → deep focus | 120 | 1 | 0 | 0 | 0 | 0.8% |
+| `self tanner` → st. tropez self tan express bronzing mousse | 121 | 0 | 0 | 0 | 0 | 0.0% |
 | `peli de miedo de los 90` → el silencio de los corderos | 9 | 1 | 0 | 0 | 0 | 11.1% |
-| `serie española de netflix` → la casa de papel | 5 | 0 | 0 | 0 | 0 | 0.0% |
+| `sea` → mediterranean sea | 7 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
 | `brow gel` → benefit 24-hr brow setter | 0.8% | 240 |
-| `playlist para estudiar` → deep focus | 0.8% | 120 |
-| `lip gloss` → fenty beauty gloss bomb universal lip luminizer | 0.0% | 229 |
+| `playlist para estudiar` → deep focus | 0.8% | 250 |
 | `serie española de netflix` → la casa de papel | 0.0% | 5 |
+| `sea` → mediterranean sea | 0.0% | 7 |
 
-### last 7d (50 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
