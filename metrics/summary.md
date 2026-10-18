@@ -1,11 +1,11 @@
-# Social metrics — 2026-10-18 11:25 UTC
+# Social metrics — 2026-10-18 15:59 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **5** (24h +1, 7d +3)
-- account likes: 76, posts: 91
+- account likes: 76, posts: 92
 
 ### last 24h (6 post(s))
 
@@ -15,17 +15,17 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `videojuego de mundo abierto` → the legend of zelda: tears of the kingdom | 259 | 2 | 0 | 0 | 0 | 0.8% |
 | `curl cream` → ouai curl crème | 255 | 0 | 0 | 0 | 0 | 0.0% |
 | `heat protectant spray` → ghd bodyguard heat protect spray | 246 | 0 | 0 | 0 | 0 | 0.0% |
-| `peli de miedo de los 80` → el resplandor | 241 | 2 | 0 | 0 | 0 | 0.8% |
+| `zapatillas para el día a día` → new balance 990v6 | 240 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `peli de miedo de los 80` → el resplandor | 0.8% | 241 |
 | `videojuego de mundo abierto` → the legend of zelda: tears of the kingdom | 0.8% | 259 |
 | `zapatillas para el día a día` → new balance 990v6 | 0.4% | 240 |
 | `fire` → campfire | 0.4% | 260 |
 | `curl cream` → ouai curl crème | 0.0% | 255 |
+| `heat protectant spray` → ghd bodyguard heat protect spray | 0.0% | 246 |
 
-### last 7d (61 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
