@@ -1,4 +1,4 @@
-# TikTok EN = US consumer categories; live-oracle verdict must be a US-headquartered brand.
+# TikTok EN = bare US consumer categories; live-oracle verdict = US-headquartered brand (no brand names in inputs).
 # ~2 in 3 English pool posts (concept ~1 in 3 from tiktok_concept.txt). Oracle-checked 2026-10-19.
 wireless charger
 electric toothbrush
@@ -14,7 +14,7 @@ eye cream
 exfoliator
 nail polish
 blush
-razor
+disposable razor
 toothpaste
 tinted moisturizer
 lip gloss
@@ -36,27 +36,27 @@ natural deodorant
 scalp serum hair growth
 body wash sensitive skin
 gym shoes women
-american giant hoodie
+fleece hoodie
 insulated tumbler
 protein powder
 electrolyte powder
 peanut butter
 frozen pizza
-clif bar snack
+energy bar
 air fryer
 kitchen stand mixer
 blender smoothies
-jack black lip balm
-burts bees lip balm
+lightweight jacket women
 concealer for dark circles
 cream concealer full coverage
-summer fridays face mask
-glow recipe face mask
-alo yoga leggings
-la croix sparkling water
+hydrating face mask
+charcoal face mask
+joggers women
+flavored sparkling water
 seltzer water lime
-tabasco sauce
-cholula hot sauce
-ben and jerrys ice cream
-vanilla ice cream pint
-cuisinart toaster oven
+louisiana style hot sauce
+pint ice cream
+toaster oven
+running shorts
+bbq sauce
+medium roast coffee

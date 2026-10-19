@@ -13,7 +13,7 @@ from antisearch_mill.publisher.guard import PostLog
 from antisearch_mill.publisher.media_host import GitHubPagesHost
 from antisearch_mill.publisher.run import run_posts
 from antisearch_mill.publisher.tags import (
-    RECHECK_DAYS, TagLog, allowlisted, choose_tag, load_allowlist, tag_networks,
+    RECHECK_DAYS, TagLog, allowlisted, choose_tag, load_allowlist, pool_input_brand_problem, tag_networks,
 )
 from conftest import ROOT
 from test_publisher_run import clip
@@ -237,3 +237,16 @@ def test_an_x_post_with_a_mention_is_three_lines_of_text_and_mentions_off_keeps_
                                 off, now, {"p-browser": "brave"})
     assert out[0].status == "published" and "@" not in creates[0]["text"]
     assert TagLog(log.path.parent / "tags.csv").rows() == []
+
+
+def test_pool_inputs_must_not_name_brands():
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    for bad in (
+        "clif bar snack",
+        "tabasco sauce",
+        "american giant hoodie",
+        "la croix sparkling water",
+    ):
+        assert pool_input_brand_problem(bad, allow) is not None
+    for ok in ("energy bar", "louisiana style hot sauce", "fleece hoodie", "flavored sparkling water"):
+        assert pool_input_brand_problem(ok, allow) is None
