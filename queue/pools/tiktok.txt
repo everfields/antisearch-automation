@@ -1,62 +1,62 @@
-# TikTok EN = US consumer categories where the oracle verdict is a brand or branded product.
+# TikTok EN = US consumer categories; live-oracle verdict must be a US-headquartered brand.
 # ~2 in 3 English pool posts (concept ~1 in 3 from tiktok_concept.txt). Oracle-checked 2026-10-19.
 wireless charger
-running shoes
 electric toothbrush
-hair dryer
 cold brew at home
-cordless vacuum
-retinol serum
+retinol cream
 vitamin c serum
 moisturizer for dry skin
-cleanser
-lip balm
-mascara
-foundation
-concealer
-hair oil
-shampoo for curly hair
-conditioner
+gentle face wash
+color safe conditioner
 hair mask
-hair straightener
 curling iron
-body lotion
-face mask
 eye cream
-toner
 exfoliator
 nail polish
-eyeliner
 blush
-bronzer
-setting spray
-makeup remover
-hand cream
-deodorant
 razor
 toothpaste
-scalp serum
 tinted moisturizer
-sheet mask
 lip gloss
 brow gel
-curl cream
-heat protectant spray
-lip oil
+curl mousse
 leave-in conditioner
 clarifying shampoo
 pimple patches
-purple shampoo
-anti-frizz serum
-lip liner
 hyaluronic acid serum
 salicylic acid cleanser
-lash curler
+tweezers for brows
 primer
-shampoo for oily hair
-body wash
 cream contour
-scalp scrub
-gel nail kit
-lip mask
-volumizing mousse
+dip powder nail kit
+liquid eyeliner
+powder bronzer
+makeup remover wipes
+natural deodorant
+scalp serum hair growth
+body wash sensitive skin
+gym shoes women
+american giant hoodie
+insulated tumbler
+protein powder
+electrolyte powder
+peanut butter
+frozen pizza
+clif bar snack
+air fryer
+kitchen stand mixer
+blender smoothies
+jack black lip balm
+burts bees lip balm
+concealer for dark circles
+cream concealer full coverage
+summer fridays face mask
+glow recipe face mask
+alo yoga leggings
+la croix sparkling water
+seltzer water lime
+tabasco sauce
+cholula hot sauce
+ben and jerrys ice cream
+vanilla ice cream pint
+cuisinart toaster oven

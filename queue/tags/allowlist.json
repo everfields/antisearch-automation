@@ -94,8 +94,10 @@
     "kind": "brand",
     "aliases": [
       "nars pure radiant tinted moisturizer",
+      "nars pure radiant tinted moisturizer spf 30",
       "nars laguna bronzing powder",
-      "nars radiant creamy concealer"
+      "nars radiant creamy concealer",
+      "nars soft matte complete concealer"
     ],
     "tiktok": {
       "handle": "@narsissist",
@@ -110,7 +112,8 @@
     "aliases": [
       "skinceuticals c e ferulic",
       "skinceuticals a.g.e. advanced eye",
-      "skinceuticals h.a. intensifier multi-glycan"
+      "skinceuticals h.a. intensifier multi-glycan",
+      "skinceuticals retinol 0.3"
     ],
     "tiktok": {
       "handle": "@skinceuticals",
@@ -264,20 +267,6 @@
       "evidence": "fentybeauty.com footer links tiktok.com/@fentybeauty as the official Fenty Beauty account"
     }
   },
-  "dove": {
-    "kind": "brand",
-    "aliases": [
-      "dove advanced care",
-      "dove sensitive skin body wash"
-    ],
-    "tiktok": {
-      "handle": "@dove",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "dove.com/us social links include tiktok.com/@dove (Unilever US Dove brand account)"
-    }
-  },
   "clinique": {
     "kind": "brand",
     "aliases": [
@@ -330,44 +319,18 @@
       "evidence": "charlottetilbury.com/us footer links tiktok.com/@charlottetilbury"
     }
   },
-  "laneige": {
+  "colgate": {
     "kind": "brand",
     "aliases": [
-      "laneige cream skin cerapeptide toner",
-      "laneige lip sleeping mask"
+      "colgate total active prevention",
+      "colgate total"
     ],
     "tiktok": {
-      "handle": "@laneige_us",
+      "handle": "@colgate",
       "verified": true,
       "checked": "2026-10-19",
       "by": "cursor agent",
-      "evidence": "us.laneige.com footer links tiktok.com/@laneige_us (Laneige US official)"
-    }
-  },
-  "moroccanoil": {
-    "kind": "brand",
-    "aliases": [
-      "moroccanoil curl defining cream"
-    ],
-    "tiktok": {
-      "handle": "@moroccanoil",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "moroccanoil.com footer links tiktok.com/@moroccanoil"
-    }
-  },
-  "crest": {
-    "kind": "brand",
-    "aliases": [
-      "crest pro-health advanced"
-    ],
-    "tiktok": {
-      "handle": "@crest",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "crest.com footer links tiktok.com/@crest (P&G US Crest account)"
+      "evidence": "colgate.com footer links tiktok.com/@colgate (Colgate-Palmolive US official)"
     }
   },
   "dyson": {
@@ -384,78 +347,6 @@
       "evidence": "dyson.com social links include tiktok.com/@dyson; @dyson is the global official Dyson account with verified badge"
     }
   },
-  "asics": {
-    "kind": "brand",
-    "aliases": [
-      "asics superblast 2"
-    ],
-    "tiktok": {
-      "handle": "@asics",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "asics.com links tiktok.com/@asics as ASICS's official global account (verified badge on profile)"
-    }
-  },
-  "dior": {
-    "kind": "brand",
-    "aliases": [
-      "dior addict lip glow oil"
-    ],
-    "tiktok": {
-      "handle": "@dior",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "dior.com/en_us social links include tiktok.com/@dior (Parfums Christian Dior official, verified)"
-    }
-  },
-  "lancome": {
-    "kind": "brand",
-    "aliases": [
-      "lancôme lash idôle",
-      "lancome lash idole"
-    ],
-    "tiktok": {
-      "handle": "@lancome",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "lancome-usa.com social links include tiktok.com/@lancome (L'Oréal Lancôme USA official)"
-    }
-  },
-  "kerastase": {
-    "kind": "brand",
-    "aliases": [
-      "kérastase elixir ultime l'huile originale",
-      "kerastase elixir ultime l'huile originale",
-      "kérastase curl manifesto bain hydratation douceur",
-      "kerastase curl manifesto bain hydratation douceur",
-      "kérastase blond absolu bain ultra-violet",
-      "kérastase spécifique bain divalent"
-    ],
-    "tiktok": {
-      "handle": "@kerastase",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "kerastase-usa.com links tiktok.com/@kerastase (Kérastase official US account)"
-    }
-  },
-  "ghd": {
-    "kind": "brand",
-    "aliases": [
-      "ghd chronos",
-      "ghd bodyguard heat protect spray"
-    ],
-    "tiktok": {
-      "handle": "@ghd",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "ghdhair.com/us footer links tiktok.com/@ghd (ghd official global hair-tools account)"
-    }
-  },
   "benefit": {
     "kind": "brand",
     "aliases": [
@@ -467,6 +358,73 @@
       "checked": "2026-10-19",
       "by": "cursor agent",
       "evidence": "benefitcosmetics.com links tiktok.com/@benefitcosmetics (Benefit Cosmetics official)"
+    }
+  },
+  "tabasco": {
+    "kind": "brand",
+    "aliases": [
+      "tabasco family reserve",
+      "tabasco original red pepper sauce"
+    ],
+    "tiktok": {
+      "handle": "@tabascobrand",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tabasco.com links tiktok.com/@tabascobrand (McIlhenny Company / Tabasco official US)"
+    }
+  },
+  "anker": {
+    "kind": "brand",
+    "aliases": [
+      "anker maggo 3-in-1 foldable charging station",
+      "anker maggo 3-in-1 wireless charging station"
+    ],
+    "tiktok": {
+      "handle": "@ankerofficial",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "anker.com footer links tiktok.com/@ankerofficial (Anker Innovations US official)"
+    }
+  },
+  "clif bar": {
+    "kind": "brand",
+    "aliases": [
+      "clif bar crunchy peanut butter"
+    ],
+    "tiktok": {
+      "handle": "@clifbar",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "clifbar.com social links include tiktok.com/@clifbar (Clif Bar & Company US official)"
+    }
+  },
+  "tweezerman": {
+    "kind": "brand",
+    "aliases": [
+      "tweezerman slant tweezer"
+    ],
+    "tiktok": {
+      "handle": "@tweezerman_us",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tweezerman.com links tiktok.com/@tweezerman_us (Tweezerman US official)"
+    }
+  },
+  "the doux": {
+    "kind": "brand",
+    "aliases": [
+      "the doux mousse def texture foam"
+    ],
+    "tiktok": {
+      "handle": "@ilovethedoux",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "thedoux.com footer links tiktok.com/@ilovethedoux (The Doux US official)"
     }
   }
 }
