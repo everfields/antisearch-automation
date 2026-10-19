@@ -67,10 +67,11 @@ def normalize_verdict(raw: object) -> str:
 
 
 def _refuse_ranked(category: str) -> None:
-    """Every lane's last line: a ranked or question input never reaches the oracle (bare_input.py)."""
+    """Every lane's last line: a ranked or off-topic input never reaches the oracle."""
     from .bare_input import superlative_problem
+    from .publisher.input_topic import topic_problem
 
-    problem = superlative_problem(category)
+    problem = superlative_problem(category) or topic_problem(category)
     if problem:
         raise OracleError(problem)
 

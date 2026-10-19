@@ -47,11 +47,11 @@ def test_a_manual_x_row_is_skipped_too(tmp_path):
 
     ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "state" / "posts.csv")
     store = VerdictStore(tmp_path / "state" / "verdicts.csv")
-    store.put(Verdict("overrated", "fame", "fame", "live", "https://antisearch.ai/verdict", 2000, 1,
+    store.put(Verdict("hidden gem", "fame", "fame", "live", "https://antisearch.ai/verdict", 2000, 1,
                       "2026-10-09T09:18:00+00:00"))
     env = {**ENV, "PUBLISHER_LIVE_NETWORKS": "tiktok"}
     t = RecordingTransport(BufferX(None, env).dry_run_responder)
-    rows = [ManualRow("x-extra-overrated", "overrated", "x", datetime(2026, 10, 9, 20, 53, tzinfo=ET))]
+    rows = [ManualRow("x-extra-hidden-gem", "hidden gem", "x", datetime(2026, 10, 9, 20, 53, tzinfo=ET))]
     out = run_manual(rows, ledger, log, store, now=datetime(2026, 10, 9, 16, 40, tzinfo=ET), live=True, env=env,
                      produce=lambda job: clip(ledger, job.id, verdict="fame"), adapters={"x": BufferX},
                      transport=t, sleep=lambda _s: None)

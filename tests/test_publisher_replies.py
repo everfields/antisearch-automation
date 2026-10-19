@@ -20,7 +20,7 @@ NOW = datetime(2026, 9, 25, 16, 0, tzinfo=timezone.utc)
     ("what's the best a laptop?", "laptop"),
     ("I love this", None),
     ("what's the best way to get over a death?", "way to get over a death"),
-    ("what's the best election strategy?", "election strategy"),
+    ("what's the best election strategy?", None),
     ("what is the best champú?", None),
 ])
 def test_extract_input_is_the_bare_x(text, expected):
