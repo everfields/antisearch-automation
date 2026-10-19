@@ -179,7 +179,7 @@ def test_reach_cadence_is_seven_ig_six_tiktok_and_leaves_the_others():
     # The Spanish 14:07 Madrid slot (08:07 ET on this date) opens the posting day, then three ET
     # slots (2026-10-07: 6+ TikTok posts in 24h got 0 views, so 4 a day, 3+ hours apart).
     assert [f"{t:%H:%M}" for t in slots_for("tiktok", env, date(2026, 10, 5))] == [
-        "07:07", "10:37", "14:07", "18:07", "23:07"]  # 13:07, 16:37, 20:07, 00:07, 05:07 Madrid (2026-10-19)
+        "07:07", "10:07", "14:07", "18:07", "23:07"]  # 13:07, 16:07, 20:07, 00:07, 05:07 Madrid (2026-10-19)
     for net in ("x", "linkedin", "bluesky", "threads", "mastodon", "reddit"):
         assert slots_for(net, env) == slots_for(net, soul)
     # Instagram 7 under its cap of 8, TikTok 5 at its cap of 5 (2026-10-19).

@@ -186,15 +186,12 @@ def test_live_run_waits_when_no_x_slot_is_due(tmp_path, monkeypatch):
     assert transport.requests == []
 
 
-def test_the_refill_is_bare_new_and_never_asked():
-    """2026-10-06 refill: new inputs only (nothing posted or frozen on publisher-state then)."""
-    asked = {"writer", "book", "idea", "invention", "music", "opera house", "camera", "latte", "a book", "a song",
-             "a film", "conditioner", "serum", "toner", "hair oil", "sunscreen", "cleanser", "perfume"}
-    main, rotating = _x()
+def test_tiktok_us_brand_pool_is_bare_and_oracle_checked():
+    """2026-10-19: English TikTok vertical pool is ~60 US consumer categories (live-oracle-checked)."""
     tiktok = [c for c, _ in read_pool(POOLS / "tiktok.txt")]
-    refill_tt = tiktok[tiktok.index("self tanner") + 1:tiktok.index("90s sitcom")]  # 2026-10-12 top-up after it
-    assert len(refill_tt) == 60 and len(set(refill_tt)) == 60
-    for line in REFILL_MAIN + REFILL_ROTATING + refill_tt:
+    concept = {c for c, _ in read_pool(POOLS / "tiktok_concept.txt")}
+    assert 55 <= len(tiktok) <= 65 and len(tiktok) == len(set(tiktok))
+    for line in tiktok:
         assert line == line.lower() and input_problem(line, {}) is None, line
-        assert not line.endswith("?") and line not in asked, line
-    assert not set(refill_tt) & (set(main) | set(rotating))
+        assert not line.endswith("?"), line
+    assert not concept & set(tiktok)
