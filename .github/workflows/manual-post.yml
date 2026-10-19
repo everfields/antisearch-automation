@@ -36,7 +36,7 @@ jobs:
       PUBLISHER_LIVE_NETWORKS: ${{ vars.PUBLISHER_LIVE_NETWORKS }}
       PUBLISHER_CADENCE: ${{ vars.PUBLISHER_CADENCE }}
       PUBLISHER_IG_CAPTION: ${{ vars.PUBLISHER_IG_CAPTION }}
-      PUBLISHER_TAG_NETWORKS: ${{ vars.PUBLISHER_TAG_NETWORKS }}
+      PUBLISHER_TAG_NETWORKS: ${{ vars.PUBLISHER_TAG_NETWORKS || 'tiktok' }}
       PUBLISHER_JITTER: ${{ vars.PUBLISHER_JITTER }}
       PUBLISHER_AI_INPUTS: ${{ vars.PUBLISHER_AI_INPUTS }}
       # PUBLISHER_IG_ROTATION is not read here (founder, 2026-09-29): Instagram posts the clean creative only.
