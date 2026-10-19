@@ -45,7 +45,7 @@ LIVE = {
 
 
 MAIN = ["ai model", "search engine", "programming language", "phone", "social network", "browser"]
-ROTATING = ["invention", "sin", "idea", "virtue", "empire", "fear", "book", "ceo", "overrated", "weakness", "writer"]
+ROTATING = ["invention", "sin", "idea", "virtue", "empire", "fear", "book", "ceo", "hidden gem", "weakness", "writer"]
 # Refill 2026-10-06 (founder): the 17 seeded lines all went out; broader culture next.
 REFILL_MAIN = [
     "novel", "poet", "board game", "philosopher", "silent film", "european capital", "painter", "typewriter",

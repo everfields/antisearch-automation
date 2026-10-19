@@ -36,6 +36,9 @@ UNOWNED_EVERY = 4
 POOL_NOTE = "pool"
 ROTATE = "rotate"
 TIKTOK_ES_POOL = "tiktok_es"
+TIKTOK_CONCEPT_POOL = "tiktok_concept"
+TIKTOK_ES_CONCEPT_POOL = "tiktok_es_concept"
+CONCEPT_EVERY = 3  # one conceptual input about every third TikTok pool post
 ES_JOB_PREFIX = "es-"
 
 
@@ -101,7 +104,8 @@ def pool_networks(pools_dir: Path) -> list[str]:
 def spanish_pool_inputs(pools_dir: Path | None = None) -> frozenset[str]:
     """Bare inputs in queue/pools/tiktok_es.txt; the only Spanish allowed under PUBLISHER_LANGUAGE=en."""
     root = pools_dir or Path(__file__).resolve().parents[3] / "queue" / "pools"
-    return frozenset(c for c, _ in read_pool(root / f"{TIKTOK_ES_POOL}.txt"))
+    return frozenset(c for c, _ in read_pool(root / f"{TIKTOK_ES_POOL}.txt")) | frozenset(
+        c for c, _ in read_pool(root / f"{TIKTOK_ES_CONCEPT_POOL}.txt"))
 
 
 GRID_ROW = 3  # an Instagram profile grid row
@@ -162,8 +166,13 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
         verdict = store.get(category)
         return verdict is not None and verdict.verdict != "no"
 
+    concept_en_file = pools_dir / f"{TIKTOK_CONCEPT_POOL}.txt"
+    concept_es_file = pools_dir / f"{TIKTOK_ES_CONCEPT_POOL}.txt"
     vertical_en = [c for c in read_pool(en_file) if usable(c[0])]
+    concept_en = ([c for c in read_pool(concept_en_file) if usable(c[0])] if network == "tiktok" else [])
     vertical_es = [c for c in read_pool(es_file) if usable(c[0], lang="es")] if spanish_on else []
+    concept_es = ([c for c in read_pool(concept_es_file) if usable(c[0], lang="es")]
+                  if spanish_on and network == "tiktok" else [])
     if cluster:
         vertical_en = clustered(vertical_en)
         vertical_es = clustered(vertical_es)
@@ -176,22 +185,39 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
     for k in range(count):
         n = posted + k
         vertical = vertical_en
-        unowned_turn = (n // GRID_ROW) % UNOWNED_EVERY == 0 if cluster else n % UNOWNED_EVERY == 0
-        first, second = (unowned, vertical) if unowned_turn else (vertical, unowned)
-        source = first if first else second
-        if not source:
-            break
-        category, caption = source.pop(0)
-        kind = second_kind if source is unowned else "vertical"
+        concept_turn = network == "tiktok" and n % CONCEPT_EVERY == CONCEPT_EVERY - 1
+        if concept_turn and concept_en:
+            category, caption = concept_en.pop(0)
+            kind = "concept"
+        else:
+            unowned_turn = (n // GRID_ROW) % UNOWNED_EVERY == 0 if cluster else n % UNOWNED_EVERY == 0
+            first, second = (unowned, vertical) if unowned_turn else (vertical, unowned)
+            source = first if first else second
+            if not source:
+                break
+            category, caption = source.pop(0)
+            kind = second_kind if source is unowned else "vertical"
         claimed.add(category)
         jobs.append(Job(id=pool_id(category), category=category, platforms=(network,), caption=caption,
                         notes=f"{POOL_NOTE}:{kind}"))
     # Spanish candidates follow the English ones; the runner puts them first on a Spanish
     # slot (Spain-awake hours) and drops them on every other slot (run.order_by_slot_language).
+    es_jobs: list[Job] = []
     for category, caption in vertical_es[:count]:
         claimed.add(category)
-        jobs.append(Job(id=pool_id(category, lang="es"), category=category, platforms=(network,),
-                        caption=caption, notes=f"{POOL_NOTE}:vertical;lang:es"))
+        es_jobs.append(Job(id=pool_id(category, lang="es"), category=category, platforms=(network,),
+                           caption=caption, notes=f"{POOL_NOTE}:vertical;lang:es"))
+    if network == "tiktok":
+        for i, job in enumerate(es_jobs):
+            if i % CONCEPT_EVERY == CONCEPT_EVERY - 1 and concept_es:
+                category, caption = concept_es.pop(0)
+                claimed.add(category)
+                jobs.append(Job(id=pool_id(category, lang="es"), category=category, platforms=(network,),
+                                caption=caption, notes=f"{POOL_NOTE}:concept;lang:es"))
+            else:
+                jobs.append(job)
+    else:
+        jobs.extend(es_jobs)
     return jobs
 
 

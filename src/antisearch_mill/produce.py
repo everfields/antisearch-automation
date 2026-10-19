@@ -192,7 +192,9 @@ def produce_one(
     creative = job.creative if creative is None else creative
     if creative and creative not in CREATIVES:
         return ProduceResult(job.id, "failed", detail=f"unknown creative {creative!r}")
-    ranked = superlative_problem(job.category)
+    from .publisher.input_topic import topic_problem
+
+    ranked = superlative_problem(job.category) or topic_problem(job.category)
     if ranked:
         ledger.log("input.refused", job_id=job.id, category=job.category, error=ranked)
         return ProduceResult(job.id, "failed", detail=ranked)

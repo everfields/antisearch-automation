@@ -369,10 +369,10 @@ def test_the_extra_x_row_waits_for_the_main_line_slot_and_then_goes_out(tmp_path
 
     rows = read_manual(ROOT / "queue" / "manual" / "2026-09-27-x-extra.csv")
     assert [(r.id, r.category, r.network, r.due, r.exact) for r in rows] == [
-        ("x-extra-overrated", "overrated", "x", datetime(2026, 9, 27, 20, 53, tzinfo=ET), True)]
+        ("x-extra-hidden-gem", "hidden gem", "x", datetime(2026, 9, 27, 20, 53, tzinfo=ET), True)]
     ledger, log = Ledger(tmp_path / "out"), PostLog(tmp_path / "state" / "posts.csv")
     store = VerdictStore(tmp_path / "state" / "verdicts.csv")
-    store.put(Verdict("overrated", "fame", "fame", "live", "https://antisearch.ai/verdict", 2000, 1,
+    store.put(Verdict("hidden gem", "fame", "fame", "live", "https://antisearch.ai/verdict", 2000, 1,
                       "2026-09-27T09:18:00+00:00"))
     # this morning's X post (since deleted and reopened) is today's one used X post
     log.append(PostRow("p-ai-model", "x", "pending", at="2026-09-27T13:14:38+00:00", category="ai model"))

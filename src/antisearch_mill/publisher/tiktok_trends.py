@@ -1,4 +1,4 @@
-"""TikTok trend inputs for two Madrid slots: 20:07 Spanish (geo=ES) and 03:07 English (geo=US).
+"""TikTok trend inputs for two Madrid slots: 20:07 Spanish (geo=ES) and 05:07 English (geo=US).
 
 Google Trends RSS at post time; safety filter and Wikidata/Wikipedia classification; pool fallback.
 """
@@ -30,7 +30,7 @@ RECENT_HOURS = 3
 # Madrid wall times paired with Google Trends geo (only these two TikTok slots).
 TIKTOK_TREND_GEO: tuple[tuple[time, str], ...] = (
     (time(20, 7), "ES"),
-    (time(3, 7), "US"),
+    (time(5, 7), "US"),
 )
 
 TEAM_MATCH = re.compile(r"\s+[-–—]\s+|\s+vs\.?\s+", re.I)
@@ -392,23 +392,24 @@ def classify_for_mapping(transport: Transport, term: str, lang: str) -> tuple[st
 
 
 def map_trend_input(name: str, kind: str, lang: str) -> str:
+    """Generic bare shapes only: trend terms are never copied as IP titles (founder, 2026-10-19)."""
     if not name:
         return ""
     if lang == "es":
         templates = {
-            "music_artist": f"canción de {name}",
-            "game": f"juego como {name}",
-            "show": f"serie como {name}",
-            "food": f"restaurante de {name}",
-            "place": f"plan en {name}",
+            "music_artist": "canción de pop latino",
+            "game": "videojuego de mundo abierto",
+            "show": "serie para maratonear",
+            "food": "restaurante para una cita",
+            "place": "plan para un fin de semana",
         }
     else:
         templates = {
-            "music_artist": f"{name} song",
-            "game": f"game like {name}",
-            "show": f"show like {name}",
-            "food": f"{name} restaurant",
-            "place": f"trip to {name}",
+            "music_artist": "summer song",
+            "game": "cozy video game",
+            "show": "comfort show",
+            "food": "late night snack",
+            "place": "city for a weekend trip",
         }
     return templates.get(kind, "")
 

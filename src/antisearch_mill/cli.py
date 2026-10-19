@@ -440,8 +440,8 @@ def cmd_due(args, settings: Settings) -> int:
         )]
         used = log.used_on(day, net)
         offsets, ahead = (slot_offsets(net, day, slots, env), LOOKAHEAD) if jitter_enabled(env) else (None, timedelta(0))
-        held, loose = taken_slots(day, slots, log.slot_posts(day, net), offsets, ahead)
-        free = open_now(now, slots, loose, offsets, ahead, held)
+        held, loose = taken_slots(day, slots, log.slot_posts(day, net), offsets, ahead, net)
+        free = open_now(now, slots, loose, offsets, ahead, held, net)
         print(f"  {net:<9} slots passed {slots_due(now, slots)}/{len(slots)}, used {used} -> {free} due")
         if free > 0:
             due.append(net)

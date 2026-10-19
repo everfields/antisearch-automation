@@ -141,12 +141,12 @@ def run_posts(
 
     def use(net: str, slots: list) -> tuple[int, frozenset[int]]:
         """(today's posts that fill no particular slot, the slots today's posts fill)."""
-        held, loose = taken_slots(day, slots, log.slot_posts(day, net), offsets(net, slots), lookahead)
+        held, loose = taken_slots(day, slots, log.slot_posts(day, net), offsets(net, slots), lookahead, net)
         return loose, held
 
     def free_now(net: str, slots: list) -> int:
         sent, held = use(net, slots)
-        return open_now(now, slots, sent, offsets(net, slots), lookahead, held)
+        return open_now(now, slots, sent, offsets(net, slots), lookahead, held, net)
 
     def left(net: str) -> int:
         if net not in allowance:
@@ -162,11 +162,11 @@ def run_posts(
             return 0
         sent, held = use(net, slots)
         if enforce_slots and schedule_at is None:
-            i = serving_slot(now, slots, sent, offsets(net, slots), lookahead, held)
+            i = serving_slot(now, slots, sent, offsets(net, slots), lookahead, held, net)
             if i is not None:
                 return i
         this = (schedule_at or now, schedule_at is not None)
-        placed = slot_of(day, slots, [*log.slot_posts(day, net), this], offsets(net, slots), lookahead)
+        placed = slot_of(day, slots, [*log.slot_posts(day, net), this], offsets(net, slots), lookahead, net)
         mine = next(i for post, i in reversed(placed) if post == this)
         if mine is not None:
             return mine
@@ -180,7 +180,7 @@ def run_posts(
             return schedule_at
         if jitter and enforce_slots:
             sent, held = use(net, slots)
-            return max(now, serving_open(now, slots, sent, offsets(net, slots), lookahead, held) or now)
+            return max(now, serving_open(now, slots, sent, offsets(net, slots), lookahead, held, net) or now)
         return now
 
     def tiktok_slot_language() -> str:
@@ -442,7 +442,7 @@ def run_posts(
         if jitter and enforce_slots and live:
             at = clock() if clock else now + waited
             sent, held = use(net, slots)
-            target = serving_open(now, slots, sent, offsets(net, slots), lookahead, held) or at
+            target = serving_open(now, slots, sent, offsets(net, slots), lookahead, held, net) or at
             if last_post is not None:
                 target = max(target, last_post + MIN_SPACING)
             wait = min(max(target - at, timedelta(0)), lookahead + MIN_SPACING)

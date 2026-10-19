@@ -49,11 +49,11 @@ IG_MAX_PER_DAY = 8
 # (from 2026-10-06 03:37 Madrid, when the pinger and the 14:07 slot took it to 7-8 a day);
 # with at most 5 before it, they all got their ~250. So: 4 a day, at most 4 in any 24 hours,
 # and at least TIKTOK_MIN_SPACING between two TikTok posts (catch-ups included).
-# 2026-10-12 (Carlos): 6 a day, two more English slots at US evening hours (03:07 and 05:07
-# Madrid = 21:07 and 23:07 New York), so at most 6 in any 24 hours and 2+ hours apart. The
-# jitter keeps two TikTok slots TIKTOK_MIN_SPACING apart after their offsets (jitter.py).
-TT_MAX_PER_DAY = 6
-TIKTOK_MAX_PER_24H = 6
+# 2026-10-19 (founder): 5 Madrid slots (3 es, 2 en); 05:07 en is the US trend slot. At most 5 in
+# any 24 hours; no catch-up after a slot's own window (next slot / grace), and English slots
+# never catch up after 06:00 Madrid.
+TT_MAX_PER_DAY = 5
+TIKTOK_MAX_PER_24H = 5
 TIKTOK_MIN_SPACING = timedelta(hours=2)
 DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY, "tiktok": TT_MAX_PER_DAY}
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
@@ -99,17 +99,17 @@ DEFAULT_CADENCE = "carlos"
 
 # TikTok on the reach cadence (founder, 2026-10-09): European hours, pinned to Madrid wall time
 # (DST-safe: the ET time is recomputed per date), 2+ hours apart, nothing 06:00-12:59 Madrid.
-# Three Spanish, and 00:07, 03:07, 05:07 Madrid (18:07, 21:07, 23:07 New York) English for the US. Spanish never goes out
-# outside TIKTOK_ES_MADRID_HOURS, whatever the slot list says.
+# Three Spanish (20:07 is the ES trend slot), 00:07 and 05:07 English for the US (05:07 is the US
+# trend slot). Spanish never goes out outside TIKTOK_ES_MADRID_HOURS, whatever the slot list says.
 MADRID = "Europe/Madrid"
 TIKTOK_MADRID_SLOTS: tuple[tuple[time, str], ...] = (
     (time(13, 7), "es"),
     (time(16, 37), "es"),
     (time(20, 7), "es"),
     (time(0, 7), "en"),
-    (time(3, 7), "en"),  # 21:07 New York (2026-10-12)
-    (time(5, 7), "en"),  # 23:07 New York (2026-10-12)
+    (time(5, 7), "en"),  # 23:07 New York (2026-10-12); US trend slot since 2026-10-19
 )
+TIKTOK_EN_CATCHUP_END = time(6, 0)  # never catch up an English TikTok slot after this Madrid time
 TIKTOK_ES_MADRID_HOURS = range(13, 24)  # 13:00-23:59 Madrid
 
 RANKED = re.compile(r"^(the\s+)?(best|top|greatest|#1)\b", re.I)
@@ -176,9 +176,14 @@ def caption_problem(caption: str, bare_input: str, network: str = "") -> str | N
 
 def input_problem(category: str, env: dict[str, str]) -> str | None:
     """Inputs are bare, never serial, and English unless Carlos changes PUBLISHER_LANGUAGE."""
+    from .input_topic import topic_problem
+
     ranked = superlative_problem(category)
     if ranked:
         return ranked
+    topic = topic_problem(category)
+    if topic:
+        return topic
     if SERIAL.search(category):
         return "numbered / serial inputs are not allowed"
     if AI_CATEGORY.search(category) and (env.get("PUBLISHER_AI_INPUTS") or "").strip().lower() != "on":
@@ -322,7 +327,7 @@ def slots_due(moment: datetime, slots: list[time]) -> int:
     return sum(1 for s in slot_times(posting_day(moment), slots) if s <= moment)
 
 
-def _slot_deadline(times: list[datetime], index: int) -> datetime:
+def _slot_deadline(times: list[datetime], index: int, network: str = "") -> datetime:
     """When `times[index]` stops being servable: the next slot, or SLOT_GRACE, whichever is later.
 
     The last slot of the posting day has no later slot, so it gets SLOT_GRACE only.
@@ -331,8 +336,42 @@ def _slot_deadline(times: list[datetime], index: int) -> datetime:
     slot = times[index]
     floor = slot + SLOT_GRACE
     if index + 1 < len(times):
-        return max(floor, times[index + 1])
-    return floor
+        end = max(floor, times[index + 1])
+    else:
+        end = floor
+    if network == "tiktok" and _tiktok_slot_lang(slot) == "en":
+        madrid = ZoneInfo(MADRID)
+        local = slot.astimezone(madrid)
+        cap = datetime.combine(local.date(), TIKTOK_EN_CATCHUP_END, tzinfo=madrid)
+        if local.time() < TIKTOK_EN_CATCHUP_END:
+            end = min(end, cap)
+    return end
+
+
+def _tiktok_slot_lang(when: datetime) -> str:
+    madrid = when.astimezone(ZoneInfo(MADRID))
+    hhmm = madrid.time().replace(second=0, microsecond=0, tzinfo=None)
+    for clock, lang in TIKTOK_MADRID_SLOTS:
+        if hhmm == clock:
+            return lang
+    return "en"
+
+
+def _catchup_slot(moment: datetime, times: list[datetime], opens: list[datetime], used: int,
+                  offsets: list[timedelta] | None, lookahead: timedelta, held: frozenset[int],
+                  network: str) -> int | None:
+    """The missed slot a catch-up would fill, or None when catch-up is not allowed."""
+    if network == "tiktok":
+        return None  # TikTok: a missed slot is dropped once its window closes
+    came = [i for i in range(len(times)) if opens[i] <= moment + lookahead]
+    if not came:
+        return None
+    index = came[-1]
+    if index in held or index < used:
+        return None
+    if moment - times[index] >= CATCHUP_WINDOW:
+        return None
+    return index
 
 
 def slot_index_at(day: date, slots: list[time], when: datetime) -> int:
@@ -342,7 +381,7 @@ def slot_index_at(day: date, slots: list[time], when: datetime) -> int:
 
 def taken_slots(day: date, slots: list[time], posts: list[tuple[datetime, bool]],
                 offsets: list[timedelta] | None = None,
-                lookahead: timedelta = timedelta(0)) -> tuple[frozenset[int], int]:
+                lookahead: timedelta = timedelta(0), network: str = "") -> tuple[frozenset[int], int]:
     """(the slots the day's posts fill, posts that fill no particular slot).
 
     `posts` are (send time, scheduled in Buffer), taken in send-time order. Each post fills
@@ -354,13 +393,13 @@ def taken_slots(day: date, slots: list[time], posts: list[tuple[datetime, bool]]
     first slot, an --ignore-slots run) fills no particular slot; `open_now` has those fill
     the earliest free ones.
     """
-    placed = [i for _, i in slot_of(day, slots, posts, offsets, lookahead)]
+    placed = [i for _, i in slot_of(day, slots, posts, offsets, lookahead, network)]
     return frozenset(i for i in placed if i is not None), placed.count(None)
 
 
 def slot_of(day: date, slots: list[time], posts: list[tuple[datetime, bool]],
             offsets: list[timedelta] | None = None,
-            lookahead: timedelta = timedelta(0)) -> list[tuple[tuple[datetime, bool], int | None]]:
+            lookahead: timedelta = timedelta(0), network: str = "") -> list[tuple[tuple[datetime, bool], int | None]]:
     """(post, its slot) in send-time order under `taken_slots`' rule; None for a post outside every window."""
     times = slot_times(day, slots)
     opens = [s + (offsets[i] if offsets else timedelta(0)) for i, s in enumerate(times)]
@@ -368,11 +407,11 @@ def slot_of(day: date, slots: list[time], posts: list[tuple[datetime, bool]],
     placed: list[tuple[tuple[datetime, bool], int | None]] = []
     for when, scheduled in sorted(posts):
         fits = [i for i in range(len(times)) if i not in taken
-                and (times[i] if scheduled else opens[i] - lookahead) <= when < _slot_deadline(times, i)]
+                and (times[i] if scheduled else opens[i] - lookahead) <= when < _slot_deadline(times, i, network)]
         if not fits and not scheduled:
-            came = [i for i in range(len(times)) if opens[i] - lookahead <= when]
-            if came and came[-1] not in taken and when - times[came[-1]] < CATCHUP_WINDOW:
-                fits = [came[-1]]  # a catch-up: it fills the most recently missed slot
+            idx = _catchup_slot(when, times, opens, 0, offsets, lookahead, taken, network)
+            if idx is not None and idx not in taken:
+                fits = [idx]  # a catch-up: it fills the most recently missed slot
         placed.append(((when, scheduled), max(fits) if fits else None))
         if fits:
             taken.add(max(fits))
@@ -380,19 +419,20 @@ def slot_of(day: date, slots: list[time], posts: list[tuple[datetime, bool]],
 
 
 def _serving(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None,
-             lookahead: timedelta, held: frozenset[int]) -> tuple[list[datetime], list[int]]:
+             lookahead: timedelta, held: frozenset[int], network: str = "") -> tuple[list[datetime], list[int]]:
     times = slot_times(posting_day(moment), slots)
     opens = [s + (offsets[i] if offsets else timedelta(0)) for i, s in enumerate(times)]
     passed = [i for i in range(len(times)) if i not in held and opens[i] <= moment + lookahead]
-    open_ = [i for i in passed[used:] if moment < _slot_deadline(times, i)]
-    came = [i for i in range(len(times)) if opens[i] <= moment + lookahead]
-    if not open_ and came and came[-1] in passed[used:] and moment - times[came[-1]] < CATCHUP_WINDOW:
-        open_ = [came[-1]]  # CATCH-UP: the cron missed this slot's whole window; the next run still sends it
+    open_ = [i for i in passed[used:] if moment < _slot_deadline(times, i, network)]
+    if not open_:
+        idx = _catchup_slot(moment, times, opens, used, offsets, lookahead, held, network)
+        if idx is not None:
+            open_ = [idx]  # CATCH-UP: the cron missed this slot's whole window; the next run still sends it
     return opens, open_
 
 
 def open_now(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,
-             lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> int:
+             lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset(), network: str = "") -> int:
     """Unfilled slots that have come and have not expired.
 
     `held` are the slots the day's posts fill (see `taken_slots`); `used` more posts fill
@@ -402,21 +442,21 @@ def open_now(moment: datetime, slots: list[time], used: int, offsets: list[timed
     at its jittered time, counted from `moment + lookahead` so a run can wait for one due
     before the next wake; the deadline is unchanged.
     """
-    return len(_serving(moment, slots, used, offsets, lookahead, held)[1])
+    return len(_serving(moment, slots, used, offsets, lookahead, held, network)[1])
 
 
 def serving_slot(moment: datetime, slots: list[time], used: int, offsets: list[timedelta] | None = None,
-                 lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> int | None:
+                 lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset(), network: str = "") -> int | None:
     """The slot a post sent now fills: the latest open one (an earlier one still open was missed,
     and the 90-minute gap closes it), or None if none is open."""
-    open_ = _serving(moment, slots, used, offsets, lookahead, held)[1]
+    open_ = _serving(moment, slots, used, offsets, lookahead, held, network)[1]
     return open_[-1] if open_ else None
 
 
 def serving_open(moment: datetime, slots: list[time], used: int, offsets: list[timedelta],
-                 lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset()) -> datetime | None:
+                 lookahead: timedelta = timedelta(0), held: frozenset[int] = frozenset(), network: str = "") -> datetime | None:
     """When the slot a post would fill now opens (its jittered time), or None if none is open."""
-    opens, open_ = _serving(moment, slots, used, offsets, lookahead, held)
+    opens, open_ = _serving(moment, slots, used, offsets, lookahead, held, network)
     return opens[open_[-1]] if open_ else None
 
 

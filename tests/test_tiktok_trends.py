@@ -95,12 +95,12 @@ def test_safety_filter_drops_tragic_political_and_match():
 
 
 @pytest.mark.parametrize("kind,lang,name,expected", [
-    ("music_artist", "es", "bad bunny", "canción de bad bunny"),
-    ("music_artist", "en", "taylor swift", "taylor swift song"),
-    ("game", "en", "minecraft", "game like minecraft"),
-    ("show", "es", "stranger things", "serie como stranger things"),
-    ("food", "en", "nobu", "nobu restaurant"),
-    ("place", "es", "menorca", "plan en menorca"),
+    ("music_artist", "es", "bad bunny", "canción de pop latino"),
+    ("music_artist", "en", "taylor swift", "summer song"),
+    ("game", "en", "minecraft", "cozy video game"),
+    ("show", "es", "stranger things", "serie para maratonear"),
+    ("food", "en", "nobu", "late night snack"),
+    ("place", "es", "menorca", "plan para un fin de semana"),
 ])
 def test_mapping_templates(kind, lang, name, expected):
     assert map_trend_input(name, kind, lang) == expected
@@ -149,7 +149,7 @@ def test_gta_leak_query_maps_entity_label_not_raw_query():
 
     transport = RecordingTransport(respond)
     assert classify_for_mapping(transport, "rockstar gta 6 leak details", "en") == ("game", "gta 6")
-    assert map_trend_input("gta 6", "game", "en") == "game like gta 6"
+    assert map_trend_input("gta 6", "game", "en") == "cozy video game"
 
 
 def test_pick_skips_blocked_and_maps_safe_term(tmp_path):
@@ -158,7 +158,7 @@ def test_pick_skips_blocked_and_maps_safe_term(tmp_path):
     pick = pick_tiktok_trend("ES", when, trends_transport(), ENV, log, set(), 14)
     assert pick is not None
     assert pick.term == "bad bunny"
-    assert pick.mapped == "canción de bad bunny"
+    assert pick.mapped == "canción de pop latino"
     assert pick.source == "google:ES"
 
 
@@ -180,10 +180,10 @@ def test_fetch_failure_and_empty_fall_back_to_pool(ledger, log, tmp_path):  # no
     assert [o.job_id for o in out if o.status == "published"] == ["p-en-thing"]
 
 
-def test_slot_routing_only_20_07_es_and_03_07_en():
+def test_slot_routing_only_20_07_es_and_05_07_en():
     env = REACH
     es_slot = datetime(2026, 10, 12, 14, 10, tzinfo=ET)  # 20:10 Madrid
-    us_slot = datetime(2026, 10, 12, 21, 10, tzinfo=ET)  # 03:10 Madrid
+    us_slot = datetime(2026, 10, 12, 23, 10, tzinfo=ET)  # 05:10 Madrid
     other_es = datetime(2026, 10, 12, 10, 40, tzinfo=ET)  # 16:40 Madrid
     other_en = datetime(2026, 10, 12, 18, 10, tzinfo=ET)  # 00:10 Madrid
     assert trend_geo_for_slot(es_slot, env) == "ES"
@@ -218,7 +218,7 @@ def test_integration_trend_slot_uses_mapped_input(ledger, log, tmp_path):  # noq
     published = [o for o in out if o.status == "published"]
     assert published and published[0].job_id.startswith("tt-es-")
     rows = log.rows()
-    assert rows[-1]["category"] == "canción de bad bunny"
+    assert rows[-1]["category"] == "canción de pop latino"
     assert rows[-1]["trend_term"] == "bad bunny"
     assert rows[-1]["trend_source"] == "google:ES"
 
@@ -243,6 +243,6 @@ def test_spanish_trend_uses_spanish_wikidata_label_or_drops():
         return RecordingTransport(respond)
 
     kind, name = classify_for_mapping(wikidata("Estados Unidos"), "estados unidos", "es")
-    assert map_trend_input(name, kind, "es").lower() == "plan en estados unidos"
+    assert map_trend_input(name, kind, "es").lower() == "plan para un fin de semana"
     assert classify_for_mapping(wikidata(None), "estados unidos", "es") is None
     assert classify_for_mapping(wikidata(None), "united states", "en")[1] == "united states"

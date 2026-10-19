@@ -27,6 +27,109 @@
       "evidence": "tiktok.com/@k18hair profile data: uniqueId k18hair, nickname K18 Hair, verified true (fetched 2026-09-27); k18hair.com TikTok contest rules name @k18hair as the brand account"
     }
   },
+  "starbucks": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@starbucks",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@starbucks shows Starbucks as the official US brand account (2.1M followers); starbucks.com social links include TikTok"
+    }
+  },
+  "rare beauty": {
+    "kind": "brand",
+    "aliases": [
+      "rare beauty soft pinch liquid blush"
+    ],
+    "tiktok": {
+      "handle": "@rarebeauty",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@rarebeauty: Rare Beauty official account, verified badge, linked from rarebeauty.com"
+    }
+  },
+  "new balance": {
+    "kind": "brand",
+    "aliases": [
+      "new balance 990v6"
+    ],
+    "tiktok": {
+      "handle": "@newbalance",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@newbalance: New Balance official global account with verified badge; newbalance.com footer links TikTok"
+    }
+  },
+  "the ordinary": {
+    "kind": "brand",
+    "aliases": [
+      "the ordinary multi-peptide serum for hair density"
+    ],
+    "tiktok": {
+      "handle": "@theordinary",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@theordinary: DECIEM / The Ordinary official account, verified badge"
+    }
+  },
+  "oral-b": {
+    "kind": "brand",
+    "aliases": [
+      "oral-b io series 10"
+    ],
+    "tiktok": {
+      "handle": "@oralb",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@oralb: Oral-B official account, verified badge; oralb.com links TikTok"
+    }
+  },
+  "nars": {
+    "kind": "brand",
+    "aliases": [
+      "nars pure radiant tinted moisturizer",
+      "nars laguna bronzing powder"
+    ],
+    "tiktok": {
+      "handle": "@narsissist",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@narsissist: NARS Cosmetics official account (narsissist), verified badge; narscosmetics.com social links"
+    }
+  },
+  "skinceuticals": {
+    "kind": "brand",
+    "aliases": [
+      "skinceuticals c e ferulic",
+      "skinceuticals a.g.e. advanced eye"
+    ],
+    "tiktok": {
+      "handle": "@skinceuticals",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@skinceuticals: SkinCeuticals official L'Oréal brand account, verified badge"
+    }
+  },
+  "ouai": {
+    "kind": "brand",
+    "aliases": [
+      "ouai curl crème"
+    ],
+    "tiktok": {
+      "handle": "@theouai",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@theouai: OUAI Haircare official account, verified badge; theouai.com links TikTok"
+    }
+  },
   "hermès": {
     "kind": "brand",
     "aliases": [
