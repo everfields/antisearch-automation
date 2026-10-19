@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-19 04:56 UTC
+# Social metrics — 2026-10-19 13:40 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **5** (24h +0, 7d +3)
-- account likes: 79, posts: 96
+- followers: **5** (24h +0, 7d +2)
+- account likes: 79, posts: 97
 
 ### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `heat protectant spray` → ghd bodyguard heat protect spray | 246 | 0 | 0 | 0 | 0 | 0.0% |
-| `podcast para dormir` → durmiendo | 246 | 0 | 0 | 0 | 0 | 0.0% |
-| `viaje de fin de curso` → mallorca | 236 | 3 | 0 | 0 | 0 | 1.3% |
-| `plan de viernes noche` → cena con amigos | 85 | 0 | 0 | 0 | 0 | 0.0% |
-| `album to cry to` → carrie & lowell — sufjan stevens | 54 | 0 | 0 | 0 | 0 | 0.0% |
+| `album to cry to` → carrie & lowell — sufjan stevens | 251 | 0 | 0 | 0 | 0 | 0.0% |
+| `podcast para dormir` → durmiendo | 250 | 0 | 0 | 0 | 0 | 0.0% |
+| `viaje de fin de curso` → mallorca | 237 | 3 | 0 | 0 | 0 | 1.3% |
+| `water` → mountain valley spring water | 237 | 0 | 0 | 0 | 0 | 0.0% |
+| `lip oil` → clarins lip comfort oil | 206 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `viaje de fin de curso` → mallorca | 1.3% | 236 |
-| `heat protectant spray` → ghd bodyguard heat protect spray | 0.0% | 246 |
-| `podcast para dormir` → durmiendo | 0.0% | 246 |
+| `viaje de fin de curso` → mallorca | 1.3% | 237 |
+| `podcast para dormir` → durmiendo | 0.0% | 250 |
 | `plan de viernes noche` → cena con amigos | 0.0% | 85 |
-| `lip oil` → clarins lip comfort oil | 0.0% | 29 |
+| `lip oil` → clarins lip comfort oil | 0.0% | 206 |
+| `album to cry to` → carrie & lowell — sufjan stevens | 0.0% | 251 |
 
-### last 7d (62 post(s))
+### last 7d (61 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -39,7 +39,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- |
 | `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
 | `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
-| `viaje de fin de curso` → mallorca | 1.3% | 236 |
+| `viaje de fin de curso` → mallorca | 1.3% | 237 |
 | `playlist para estudiar` → deep focus | 1.2% | 257 |
 | `anime para empezar` → death note | 1.1% | 267 |
 
