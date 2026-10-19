@@ -15,6 +15,7 @@ from antisearch_mill.publisher.buffer import BufferX
 from antisearch_mill.publisher.guard import DONE, PostLog, input_problem, slots_for
 from antisearch_mill.publisher.media_host import GitHubPagesHost
 from antisearch_mill.publisher.pools import UNOWNED, pool_jobs, pool_networks, read_pool, read_rotation
+from antisearch_mill.publisher.tags import load_allowlist, pool_input_brand_problem
 from antisearch_mill.publisher.run import run_posts
 from antisearch_mill.publisher.verdicts import VerdictStore
 from conftest import ROOT
@@ -190,8 +191,10 @@ def test_tiktok_us_brand_pool_is_bare_and_oracle_checked():
     """2026-10-19: English TikTok vertical pool is ~60 US consumer categories (live-oracle-checked)."""
     tiktok = [c for c, _ in read_pool(POOLS / "tiktok.txt")]
     concept = {c for c, _ in read_pool(POOLS / "tiktok_concept.txt")}
+    allow = load_allowlist(POOLS.parent / "tags" / "allowlist.json")
     assert 55 <= len(tiktok) <= 65 and len(tiktok) == len(set(tiktok))
     for line in tiktok:
         assert line == line.lower() and input_problem(line, {}) is None, line
         assert not line.endswith("?"), line
+        assert pool_input_brand_problem(line, allow) is None, line
     assert not concept & set(tiktok)

@@ -360,20 +360,6 @@
       "evidence": "benefitcosmetics.com links tiktok.com/@benefitcosmetics (Benefit Cosmetics official)"
     }
   },
-  "tabasco": {
-    "kind": "brand",
-    "aliases": [
-      "tabasco family reserve",
-      "tabasco original red pepper sauce"
-    ],
-    "tiktok": {
-      "handle": "@tabascobrand",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "tabasco.com links tiktok.com/@tabascobrand (McIlhenny Company / Tabasco official US)"
-    }
-  },
   "anker": {
     "kind": "brand",
     "aliases": [
@@ -391,7 +377,8 @@
   "clif bar": {
     "kind": "brand",
     "aliases": [
-      "clif bar crunchy peanut butter"
+      "clif bar crunchy peanut butter",
+      "clif bar chocolate chip"
     ],
     "tiktok": {
       "handle": "@clifbar",

@@ -55,6 +55,42 @@ NEVER_TAG_OWNERS = ("bansk",)
 MARKETS_ALLOWED = {"instagram": ("us", "global")}
 DEFAULT_ALLOWLIST = "queue/tags/allowlist.json"
 
+# Extra brand phrases that must not appear in curated pool *inputs* (inputs are bare categories).
+_POOL_INPUT_BRAND_EXTRAS: tuple[str, ...] = (
+    "american giant", "jack black", "burts bees", "burt's bees", "summer fridays", "glow recipe",
+    "alo yoga", "la croix", "ben and jerry", "ben jerry", "ben and jerrys", "cuisinart", "cholula", "tabasco",
+    "clif bar", "kitchenaid", "vitamix", "ninja foodi", "oxo brew", "paulas choice", "paula's choice",
+    "rare beauty", "fenty beauty", "milk makeup", "the doux", "the ordinary", "charlotte tilbury",
+    "new balance", "oral b", "oral-b", "santa cruz organic", "motor city pizza", "liquid i.v",
+    "optimum nutrition", "american giant", "natasha denona", "westman atelier", "kiara sky",
+    "bio ionic", "pureology", "vanicream", "neutrogena", "salt and stone", "salt & stone",
+    "reigning champ", "american giant",
+)
+
+
+def pool_input_brand_problem(category: str, allowlist: Mapping[str, dict] | None = None) -> str | None:
+    """Inputs are bare categories: no allowlisted brand name or handle token may appear in the phrase."""
+    cat = normalize_category(category)
+    if not cat:
+        return None
+    table = allowlist if allowlist is not None else load_allowlist(DEFAULT_ALLOWLIST)
+    phrases: list[str] = []
+    for name, entry in table.items():
+        phrases.append(name)
+        for net in MENTION_NETWORKS:
+            raw = str((entry.get(net) or {}).get("handle") or "").strip().lstrip("@").lower()
+            if raw:
+                phrases.append(raw.replace("_", " ").replace(".", " "))
+    phrases.extend(_POOL_INPUT_BRAND_EXTRAS)
+    seen: set[str] = set()
+    for phrase in sorted({normalize_category(p) for p in phrases if p}, key=len, reverse=True):
+        if not phrase or phrase in seen:
+            continue
+        seen.add(phrase)
+        if re.search(rf"(?<![a-z0-9]){re.escape(phrase)}(?![a-z0-9])", cat):
+            return f"input names a brand ({phrase!r}); use a bare category"
+    return None
+
 
 @dataclass(frozen=True)
 class Tag:
