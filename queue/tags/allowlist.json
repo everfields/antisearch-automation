@@ -17,7 +17,8 @@
     "aliases": [
       "k18 hair",
       "k18 airwash",
-      "k18 airwash dry shampoo"
+      "k18 airwash dry shampoo",
+      "k18 leave-in molecular repair hair mask"
     ],
     "tiktok": {
       "handle": "@k18hair",
@@ -93,7 +94,8 @@
     "kind": "brand",
     "aliases": [
       "nars pure radiant tinted moisturizer",
-      "nars laguna bronzing powder"
+      "nars laguna bronzing powder",
+      "nars radiant creamy concealer"
     ],
     "tiktok": {
       "handle": "@narsissist",
@@ -107,7 +109,8 @@
     "kind": "brand",
     "aliases": [
       "skinceuticals c e ferulic",
-      "skinceuticals a.g.e. advanced eye"
+      "skinceuticals a.g.e. advanced eye",
+      "skinceuticals h.a. intensifier multi-glycan"
     ],
     "tiktok": {
       "handle": "@skinceuticals",
@@ -120,7 +123,8 @@
   "ouai": {
     "kind": "brand",
     "aliases": [
-      "ouai curl crème"
+      "ouai curl crème",
+      "ouai detox shampoo"
     ],
     "tiktok": {
       "handle": "@theouai",
@@ -230,6 +234,239 @@
       "checked": "2026-09-28",
       "by": "cursor agent",
       "evidence": "official: Wikidata Q209330 (Instagram, the social network) lists X username instagram; the X profile's website is help.instagram.com (about.instagram.com links no X account). Verified: X profile data via api.fxtwitter.com/instagram on 2026-09-28: verified true (organization, gold check), 27,495,392 followers."
+    }
+  },
+  "cerave": {
+    "kind": "brand",
+    "aliases": [
+      "cerave moisturizing cream",
+      "cerave hydrating facial cleanser",
+      "cerave renewing sa cleanser"
+    ],
+    "tiktok": {
+      "handle": "@cerave",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@cerave is CeraVe's official L'Oréal US skincare account (verified badge); cerave.com social footer links TikTok"
+    }
+  },
+  "fenty beauty": {
+    "kind": "brand",
+    "aliases": [
+      "fenty beauty gloss bomb universal lip luminizer"
+    ],
+    "tiktok": {
+      "handle": "@fentybeauty",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "fentybeauty.com footer links tiktok.com/@fentybeauty as the official Fenty Beauty account"
+    }
+  },
+  "dove": {
+    "kind": "brand",
+    "aliases": [
+      "dove advanced care",
+      "dove sensitive skin body wash"
+    ],
+    "tiktok": {
+      "handle": "@dove",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "dove.com/us social links include tiktok.com/@dove (Unilever US Dove brand account)"
+    }
+  },
+  "clinique": {
+    "kind": "brand",
+    "aliases": [
+      "clinique take the day off cleansing balm"
+    ],
+    "tiktok": {
+      "handle": "@clinique",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "clinique.com links tiktok.com/@clinique as the official Clinique account"
+    }
+  },
+  "hero": {
+    "kind": "brand",
+    "aliases": [
+      "hero mighty patch original"
+    ],
+    "tiktok": {
+      "handle": "@herocosmetics",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "herocosmetics.us footer links tiktok.com/@herocosmetics (Hero Cosmetics official)"
+    }
+  },
+  "milk makeup": {
+    "kind": "brand",
+    "aliases": [
+      "milk makeup hydro grip primer"
+    ],
+    "tiktok": {
+      "handle": "@milkmakeup",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "milkmakeup.com footer links tiktok.com/@milkmakeup"
+    }
+  },
+  "charlotte tilbury": {
+    "kind": "brand",
+    "aliases": [
+      "charlotte tilbury airbrush flawless setting spray"
+    ],
+    "tiktok": {
+      "handle": "@charlottetilbury",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "charlottetilbury.com/us footer links tiktok.com/@charlottetilbury"
+    }
+  },
+  "laneige": {
+    "kind": "brand",
+    "aliases": [
+      "laneige cream skin cerapeptide toner",
+      "laneige lip sleeping mask"
+    ],
+    "tiktok": {
+      "handle": "@laneige_us",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "us.laneige.com footer links tiktok.com/@laneige_us (Laneige US official)"
+    }
+  },
+  "moroccanoil": {
+    "kind": "brand",
+    "aliases": [
+      "moroccanoil curl defining cream"
+    ],
+    "tiktok": {
+      "handle": "@moroccanoil",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "moroccanoil.com footer links tiktok.com/@moroccanoil"
+    }
+  },
+  "crest": {
+    "kind": "brand",
+    "aliases": [
+      "crest pro-health advanced"
+    ],
+    "tiktok": {
+      "handle": "@crest",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "crest.com footer links tiktok.com/@crest (P&G US Crest account)"
+    }
+  },
+  "dyson": {
+    "kind": "brand",
+    "aliases": [
+      "dyson supersonic r",
+      "dyson gen5detect absolute"
+    ],
+    "tiktok": {
+      "handle": "@dyson",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "dyson.com social links include tiktok.com/@dyson; @dyson is the global official Dyson account with verified badge"
+    }
+  },
+  "asics": {
+    "kind": "brand",
+    "aliases": [
+      "asics superblast 2"
+    ],
+    "tiktok": {
+      "handle": "@asics",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "asics.com links tiktok.com/@asics as ASICS's official global account (verified badge on profile)"
+    }
+  },
+  "dior": {
+    "kind": "brand",
+    "aliases": [
+      "dior addict lip glow oil"
+    ],
+    "tiktok": {
+      "handle": "@dior",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "dior.com/en_us social links include tiktok.com/@dior (Parfums Christian Dior official, verified)"
+    }
+  },
+  "lancome": {
+    "kind": "brand",
+    "aliases": [
+      "lancôme lash idôle",
+      "lancome lash idole"
+    ],
+    "tiktok": {
+      "handle": "@lancome",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "lancome-usa.com social links include tiktok.com/@lancome (L'Oréal Lancôme USA official)"
+    }
+  },
+  "kerastase": {
+    "kind": "brand",
+    "aliases": [
+      "kérastase elixir ultime l'huile originale",
+      "kerastase elixir ultime l'huile originale",
+      "kérastase curl manifesto bain hydratation douceur",
+      "kerastase curl manifesto bain hydratation douceur",
+      "kérastase blond absolu bain ultra-violet",
+      "kérastase spécifique bain divalent"
+    ],
+    "tiktok": {
+      "handle": "@kerastase",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "kerastase-usa.com links tiktok.com/@kerastase (Kérastase official US account)"
+    }
+  },
+  "ghd": {
+    "kind": "brand",
+    "aliases": [
+      "ghd chronos",
+      "ghd bodyguard heat protect spray"
+    ],
+    "tiktok": {
+      "handle": "@ghd",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "ghdhair.com/us footer links tiktok.com/@ghd (ghd official global hair-tools account)"
+    }
+  },
+  "benefit": {
+    "kind": "brand",
+    "aliases": [
+      "benefit 24-hr brow setter"
+    ],
+    "tiktok": {
+      "handle": "@benefitcosmetics",
+      "verified": true,
+      "checked": "2026-10-19",
+      "by": "cursor agent",
+      "evidence": "benefitcosmetics.com links tiktok.com/@benefitcosmetics (Benefit Cosmetics official)"
     }
   }
 }

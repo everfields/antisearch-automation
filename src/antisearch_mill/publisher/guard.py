@@ -49,7 +49,7 @@ IG_MAX_PER_DAY = 8
 # (from 2026-10-06 03:37 Madrid, when the pinger and the 14:07 slot took it to 7-8 a day);
 # with at most 5 before it, they all got their ~250. So: 4 a day, at most 4 in any 24 hours,
 # and at least TIKTOK_MIN_SPACING between two TikTok posts (catch-ups included).
-# 2026-10-19 (founder): 5 Madrid slots (3 es, 2 en); 05:07 en is the US trend slot. At most 5 in
+# 2026-10-19 (founder): 5 Madrid slots (2 es, 3 en); 05:07 en is the US trend slot. At most 5 in
 # any 24 hours; no catch-up after a slot's own window (next slot / grace), and English slots
 # never catch up after 06:00 Madrid.
 TT_MAX_PER_DAY = 5
@@ -86,7 +86,7 @@ CADENCES: dict[str, dict[str, tuple[str, ...]]] = {
         "reddit": ("13:07", "19:07"),
     },
 }
-# TikTok: 4 a day at 13:07, 16:37, 20:07, 00:07 Madrid (TIKTOK_MADRID_SLOTS, 2026-10-09; see
+# TikTok: 5 a day at 13:07, 16:07, 20:07, 00:07, 05:07 Madrid (TIKTOK_MADRID_SLOTS; see
 # TT_MAX_PER_DAY for the volume finding). Instagram at 7
 # (every 2 hours, 10:07-22:07 ET: 7-19 PT). X, LinkedIn, and Bluesky stay on the
 # conservative `soul` slots (X stays off unless Buffer is the route).
@@ -99,12 +99,12 @@ DEFAULT_CADENCE = "carlos"
 
 # TikTok on the reach cadence (founder, 2026-10-09): European hours, pinned to Madrid wall time
 # (DST-safe: the ET time is recomputed per date), 2+ hours apart, nothing 06:00-12:59 Madrid.
-# Three Spanish (20:07 is the ES trend slot), 00:07 and 05:07 English for the US (05:07 is the US
+# Two Spanish (20:07 is the ES trend slot), 16:07 / 00:07 / 05:07 English for the US (05:07 is the US
 # trend slot). Spanish never goes out outside TIKTOK_ES_MADRID_HOURS, whatever the slot list says.
 MADRID = "Europe/Madrid"
 TIKTOK_MADRID_SLOTS: tuple[tuple[time, str], ...] = (
     (time(13, 7), "es"),
-    (time(16, 37), "es"),
+    (time(16, 7), "en"),
     (time(20, 7), "es"),
     (time(0, 7), "en"),
     (time(5, 7), "en"),  # 23:07 New York (2026-10-12); US trend slot since 2026-10-19

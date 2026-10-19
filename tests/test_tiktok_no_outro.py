@@ -82,7 +82,7 @@ def test_tiktok_schedule_is_five_a_day_two_hours_apart():
     day = date(2026, 10, 9)
     got = [(t.astimezone(MADRID).strftime("%H:%M"), slot_language("tiktok", t, REACH))
            for t in slot_times(day, slots_for("tiktok", REACH, day))]
-    assert got == [("13:07", "es"), ("16:37", "es"), ("20:07", "es"), ("00:07", "en"), ("05:07", "en")]  # 2026-10-19
+    assert got == [("13:07", "es"), ("16:07", "en"), ("20:07", "es"), ("00:07", "en"), ("05:07", "en")]  # 2026-10-19
 
 
 def _log(tmp_path, times):
