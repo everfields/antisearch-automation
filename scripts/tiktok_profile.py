@@ -66,6 +66,28 @@ def fetch_profile(handle: str, session: requests.Session | None = None) -> Profi
         return Profile(h, h, "", False, None, f"parse error: {exc}")
 
 
+def profile_from_record(handle: str, record: dict) -> Profile:
+    """Build a Profile from a stored snapshot (tests / offline audit)."""
+    h = handle.lstrip("@").strip()
+    return Profile(
+        h,
+        str(record.get("unique_id") or h),
+        str(record.get("nickname") or ""),
+        bool(record.get("verified")),
+        record.get("follower_count"),
+        record.get("error"),
+    )
+
+
+def assert_handle_matches_snapshot(handle: str, record: dict) -> None:
+    """Raise AssertionError if the snapshot says the account is missing or the id mismatches."""
+    p = profile_from_record(handle, record)
+    if p.error:
+        raise AssertionError(f"@{p.handle}: {p.error}")
+    if p.unique_id.lower() != p.handle.lower():
+        raise AssertionError(f"@{p.handle}: uniqueId {p.unique_id!r} != handle")
+
+
 def main(argv: list[str] | None = None) -> int:
     for arg in (argv or sys.argv[1:]):
         p = fetch_profile(arg)

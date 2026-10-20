@@ -1,0 +1,426 @@
+{
+  "belkin": {
+    "handle": "belkin",
+    "unique_id": "belkin",
+    "nickname": "Belkin",
+    "verified": true,
+    "follower_count": 205400,
+    "error": null
+  },
+  "benefitcosmetics": {
+    "handle": "benefitcosmetics",
+    "unique_id": "benefitcosmetics",
+    "nickname": "Benefit Cosmetics",
+    "verified": true,
+    "follower_count": 768300,
+    "error": null
+  },
+  "bioionic": {
+    "handle": "bioionic",
+    "unique_id": "bioionic",
+    "nickname": "Bio Ionic",
+    "verified": true,
+    "follower_count": 73500,
+    "error": null
+  },
+  "blueshognation": {
+    "handle": "blueshognation",
+    "unique_id": "blueshognation",
+    "nickname": "Blues Hog",
+    "verified": false,
+    "follower_count": 13400,
+    "error": null
+  },
+  "breville": {
+    "handle": "breville",
+    "unique_id": "breville",
+    "nickname": "Breville",
+    "verified": true,
+    "follower_count": 23400,
+    "error": null
+  },
+  "cerave": {
+    "handle": "cerave",
+    "unique_id": "cerave",
+    "nickname": "CeraVe",
+    "verified": true,
+    "follower_count": 2100000,
+    "error": null
+  },
+  "charlottetilbury": {
+    "handle": "charlottetilbury",
+    "unique_id": "charlottetilbury",
+    "nickname": "Charlotte Tilbury",
+    "verified": true,
+    "follower_count": 2100000,
+    "error": null
+  },
+  "clifbar": {
+    "handle": "clifbar",
+    "unique_id": "clifbar",
+    "nickname": "CLIF BAR",
+    "verified": true,
+    "follower_count": 61500,
+    "error": null
+  },
+  "clinique": {
+    "handle": "clinique",
+    "unique_id": "clinique",
+    "nickname": "Clinique",
+    "verified": true,
+    "follower_count": 290200,
+    "error": null
+  },
+  "colgate": {
+    "handle": "colgate",
+    "unique_id": "colgate",
+    "nickname": "Colgate",
+    "verified": true,
+    "follower_count": 1100000,
+    "error": null
+  },
+  "cosori_official": {
+    "handle": "cosori_official",
+    "unique_id": "cosori_official",
+    "nickname": "COSORI Kitchen",
+    "verified": true,
+    "follower_count": 227800,
+    "error": null
+  },
+  "drinkspindrift": {
+    "handle": "drinkspindrift",
+    "unique_id": "drinkspindrift",
+    "nickname": "Spindrift",
+    "verified": true,
+    "follower_count": 169400,
+    "error": null
+  },
+  "dyson": {
+    "handle": "dyson",
+    "unique_id": "dyson",
+    "nickname": "Dyson",
+    "verified": true,
+    "follower_count": 91500,
+    "error": null
+  },
+  "essie": {
+    "handle": "essie",
+    "unique_id": "essie",
+    "nickname": "essie",
+    "verified": true,
+    "follower_count": 232000,
+    "error": null
+  },
+  "fentybeauty": {
+    "handle": "fentybeauty",
+    "unique_id": "fentybeauty",
+    "nickname": "Fenty Beauty",
+    "verified": true,
+    "follower_count": 3600000,
+    "error": null
+  },
+  "gillette": {
+    "handle": "gillette",
+    "unique_id": "gillette",
+    "nickname": "Gillette",
+    "verified": true,
+    "follower_count": 91900,
+    "error": null
+  },
+  "hauslabs": {
+    "handle": "hauslabs",
+    "unique_id": "hauslabs",
+    "nickname": "Haus Labs",
+    "verified": true,
+    "follower_count": 871000,
+    "error": null
+  },
+  "herocosmetics": {
+    "handle": "herocosmetics",
+    "unique_id": "herocosmetics",
+    "nickname": "Hero Cosmetics",
+    "verified": true,
+    "follower_count": 422600,
+    "error": null
+  },
+  "ilovethedoux": {
+    "handle": "ilovethedoux",
+    "unique_id": "ilovethedoux",
+    "nickname": "The Doux Hair Care",
+    "verified": false,
+    "follower_count": 121000,
+    "error": null
+  },
+  "jenisicecreams": {
+    "handle": "jenisicecreams",
+    "unique_id": "jenisicecreams",
+    "nickname": "Jeni\u2019s Splendid Ice Creams",
+    "verified": true,
+    "follower_count": 236800,
+    "error": null
+  },
+  "k18hair": {
+    "handle": "k18hair",
+    "unique_id": "k18hair",
+    "nickname": "K18 Hair",
+    "verified": true,
+    "follower_count": 289800,
+    "error": null
+  },
+  "kiaraskynails": {
+    "handle": "kiaraskynails",
+    "unique_id": "kiaraskynails",
+    "nickname": "Kiara Sky Professional Nails",
+    "verified": false,
+    "follower_count": 936900,
+    "error": null
+  },
+  "kitchenaidusa": {
+    "handle": "kitchenaidusa",
+    "unique_id": "kitchenaidusa",
+    "nickname": "KitchenAid",
+    "verified": true,
+    "follower_count": 146400,
+    "error": null
+  },
+  "milkmakeup": {
+    "handle": "milkmakeup",
+    "unique_id": "milkmakeup",
+    "nickname": "milkmakeup",
+    "verified": true,
+    "follower_count": 1300000,
+    "error": null
+  },
+  "narscosmetics": {
+    "handle": "narscosmetics",
+    "unique_id": "narscosmetics",
+    "nickname": "NARS Cosmetics",
+    "verified": true,
+    "follower_count": 567300,
+    "error": null
+  },
+  "natashadenona": {
+    "handle": "natashadenona",
+    "unique_id": "natashadenona",
+    "nickname": "Natasha Denona",
+    "verified": true,
+    "follower_count": 665600,
+    "error": null
+  },
+  "neutrogena_us": {
+    "handle": "neutrogena_us",
+    "unique_id": "neutrogena_us",
+    "nickname": "Neutrogena",
+    "verified": true,
+    "follower_count": 306100,
+    "error": null
+  },
+  "newbalance": {
+    "handle": "newbalance",
+    "unique_id": "newbalance",
+    "nickname": "New Balance",
+    "verified": true,
+    "follower_count": 1000000,
+    "error": null
+  },
+  "ninjakitchen": {
+    "handle": "ninjakitchen",
+    "unique_id": "ninjakitchen",
+    "nickname": "Ninja Kitchen",
+    "verified": true,
+    "follower_count": 2100000,
+    "error": null
+  },
+  "officialvanicream": {
+    "handle": "officialvanicream",
+    "unique_id": "officialvanicream",
+    "nickname": "Vanicream\u2122 Sensitive Skin Care",
+    "verified": false,
+    "follower_count": 8539,
+    "error": null
+  },
+  "onyxcoffeelab": {
+    "handle": "onyxcoffeelab",
+    "unique_id": "onyxcoffeelab",
+    "nickname": "Onyx Coffee Lab",
+    "verified": false,
+    "follower_count": 26600,
+    "error": null
+  },
+  "optimumnutrition_us": {
+    "handle": "optimumnutrition_us",
+    "unique_id": "optimumnutrition_us",
+    "nickname": "Optimum Nutrition",
+    "verified": true,
+    "follower_count": 81300,
+    "error": null
+  },
+  "origins": {
+    "handle": "origins",
+    "unique_id": "origins",
+    "nickname": "Origins Skincare",
+    "verified": true,
+    "follower_count": 43400,
+    "error": null
+  },
+  "oxo_us": {
+    "handle": "oxo_us",
+    "unique_id": "oxo_us",
+    "nickname": "OXO",
+    "verified": true,
+    "follower_count": 15100,
+    "error": null
+  },
+  "patagonia": {
+    "handle": "patagonia",
+    "unique_id": "patagonia",
+    "nickname": "Patagonia",
+    "verified": true,
+    "follower_count": 249200,
+    "error": null
+  },
+  "paulaschoice": {
+    "handle": "paulaschoice",
+    "unique_id": "paulaschoice",
+    "nickname": "Paula's Choice",
+    "verified": true,
+    "follower_count": 190700,
+    "error": null
+  },
+  "pureology": {
+    "handle": "pureology",
+    "unique_id": "pureology",
+    "nickname": "Pureology",
+    "verified": true,
+    "follower_count": 70400,
+    "error": null
+  },
+  "rarebeauty": {
+    "handle": "rarebeauty",
+    "unique_id": "rarebeauty",
+    "nickname": "Rare Beauty",
+    "verified": true,
+    "follower_count": 5100000,
+    "error": null
+  },
+  "reebok": {
+    "handle": "reebok",
+    "unique_id": "reebok",
+    "nickname": "Reebok",
+    "verified": true,
+    "follower_count": 214900,
+    "error": null
+  },
+  "rogaineofficial": {
+    "handle": "rogaineofficial",
+    "unique_id": "rogaineofficial",
+    "nickname": "Rogaine",
+    "verified": true,
+    "follower_count": 12800,
+    "error": null
+  },
+  "saltandstone": {
+    "handle": "saltandstone",
+    "unique_id": "saltandstone",
+    "nickname": "SALT & STONE",
+    "verified": true,
+    "follower_count": 69500,
+    "error": null
+  },
+  "santacruzorganic": {
+    "handle": "santacruzorganic",
+    "unique_id": "santacruzorganic",
+    "nickname": "Santa Cruz Organic",
+    "verified": false,
+    "follower_count": 2608,
+    "error": null
+  },
+  "skinceuticals": {
+    "handle": "skinceuticals",
+    "unique_id": "skinceuticals",
+    "nickname": "SkinCeuticals",
+    "verified": true,
+    "follower_count": 87600,
+    "error": null
+  },
+  "skratchlabs": {
+    "handle": "skratchlabs",
+    "unique_id": "skratchlabs",
+    "nickname": "Skratch Labs",
+    "verified": false,
+    "follower_count": 6828,
+    "error": null
+  },
+  "starbucks": {
+    "handle": "starbucks",
+    "unique_id": "starbucks",
+    "nickname": "Starbucks",
+    "verified": true,
+    "follower_count": 3500000,
+    "error": null
+  },
+  "stilacosmetics": {
+    "handle": "stilacosmetics",
+    "unique_id": "stilacosmetics",
+    "nickname": "Stila Cosmetics",
+    "verified": true,
+    "follower_count": 121400,
+    "error": null
+  },
+  "summerfridays": {
+    "handle": "summerfridays",
+    "unique_id": "summerfridays",
+    "nickname": "Summer Fridays",
+    "verified": true,
+    "follower_count": 868200,
+    "error": null
+  },
+  "theordinary": {
+    "handle": "theordinary",
+    "unique_id": "theordinary",
+    "nickname": "The Ordinary",
+    "verified": true,
+    "follower_count": 2000000,
+    "error": null
+  },
+  "theouai": {
+    "handle": "theouai",
+    "unique_id": "theouai",
+    "nickname": "OUAI",
+    "verified": true,
+    "follower_count": 246200,
+    "error": null
+  },
+  "vitamix": {
+    "handle": "vitamix",
+    "unique_id": "vitamix",
+    "nickname": "Vitamix",
+    "verified": true,
+    "follower_count": 17000,
+    "error": null
+  },
+  "vuoriclothing": {
+    "handle": "vuoriclothing",
+    "unique_id": "vuoriclothing",
+    "nickname": "Vuori Clothing",
+    "verified": true,
+    "follower_count": 647300,
+    "error": null
+  },
+  "westmanatelier": {
+    "handle": "westmanatelier",
+    "unique_id": "westmanatelier",
+    "nickname": "Westman-Atelier",
+    "verified": true,
+    "follower_count": 119400,
+    "error": null
+  },
+  "yeti": {
+    "handle": "yeti",
+    "unique_id": "yeti",
+    "nickname": "YETI",
+    "verified": true,
+    "follower_count": 797300,
+    "error": null
+  }
+}

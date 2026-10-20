@@ -81,14 +81,7 @@
     "kind": "brand",
     "aliases": [
       "oral-b io series 10"
-    ],
-    "tiktok": {
-      "handle": "@oralb",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "tiktok.com/@oralb: Oral-B official account, verified badge; oralb.com links TikTok"
-    }
+    ]
   },
   "nars": {
     "kind": "brand",
@@ -100,11 +93,11 @@
       "nars soft matte complete concealer"
     ],
     "tiktok": {
-      "handle": "@narsissist",
+      "handle": "@narscosmetics",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "tiktok.com/@narsissist: NARS Cosmetics official account (narsissist), verified badge; narscosmetics.com social links"
+      "evidence": "tiktok.com/@narscosmetics page JSON verified:true, followerCount 567300, nickname NARS Cosmetics (replaces @narsissist personal account)"
     }
   },
   "skinceuticals": {
@@ -366,14 +359,7 @@
     "aliases": [
       "anker maggo 3-in-1 foldable charging station",
       "anker maggo 3-in-1 wireless charging station"
-    ],
-    "tiktok": {
-      "handle": "@ankerofficial",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "anker.com footer links tiktok.com/@ankerofficial (Anker Innovations US official)"
-    }
+    ]
   },
   "clif bar": {
     "kind": "brand",
@@ -393,14 +379,7 @@
     "kind": "brand",
     "aliases": [
       "tweezerman slant tweezer"
-    ],
-    "tiktok": {
-      "handle": "@tweezerman_us",
-      "verified": true,
-      "checked": "2026-10-19",
-      "by": "cursor agent",
-      "evidence": "tweezerman.com links tiktok.com/@tweezerman_us (Tweezerman US official)"
-    }
+    ]
   },
   "the doux": {
     "kind": "brand",
@@ -409,10 +388,11 @@
     ],
     "tiktok": {
       "handle": "@ilovethedoux",
-      "verified": true,
-      "checked": "2026-10-19",
+      "verified": false,
+      "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "thedoux.com footer links tiktok.com/@ilovethedoux (The Doux US official)"
+      "evidence": "thedoux.com footer links tiktok.com/@ilovethedoux; page JSON verified:false",
+      "official_evidence": "https://thedoux.com/"
     }
   },
   "belkin": {
@@ -531,10 +511,11 @@
     ],
     "tiktok": {
       "handle": "@kiaraskynails",
-      "verified": true,
+      "verified": false,
       "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "kiarasky.com links tiktok.com/@kiaraskynails; page JSON verified:false but 936900 followers, nickname Kiara Sky Professional Nails (official per brand site)"
+      "evidence": "kiarasky.com links tiktok.com/@kiaraskynails; page JSON verified:false, ~937k followers",
+      "official_evidence": "https://www.kiarasky.com/"
     }
   },
   "stila": {
@@ -640,10 +621,11 @@
     ],
     "tiktok": {
       "handle": "@skratchlabs",
-      "verified": true,
+      "verified": false,
       "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "skratchlabs.com links tiktok.com/@skratchlabs; page JSON verified:false, 6828 followers, nickname Skratch Labs"
+      "evidence": "skratchlabs.com links tiktok.com/@skratchlabs; page JSON verified:false",
+      "official_evidence": "https://www.skratchlabs.com/"
     }
   },
   "santa cruz organic": {
@@ -653,29 +635,31 @@
     ],
     "tiktok": {
       "handle": "@santacruzorganic",
-      "verified": true,
+      "verified": false,
       "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "santacruzorganic.com links tiktok.com/@santacruzorganic; page JSON verified:false, 2608 followers"
+      "evidence": "santacruzorganic.com links tiktok.com/@santacruzorganic; page JSON verified:false",
+      "official_evidence": "https://www.santacruzorganic.com/"
     }
   },
   "ninja": {
     "kind": "brand",
     "aliases": [
-      "ninja foodi dualzone",
-      "cosori turboblaze 6-quart"
+      "ninja foodi dualzone"
     ],
     "tiktok": {
       "handle": "@ninjakitchen",
       "verified": true,
       "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "tiktok.com/@ninjakitchen verified:true, 2.1M followers; cosori.com links @cosori_official (verified, 227900) — pool air fryer verdict is Ninja Foodi, tagged via SharkNinja @ninjakitchen"
+      "evidence": "tiktok.com/@ninjakitchen verified:true, ~2.1M followers (SharkNinja official)"
     }
   },
   "cosori": {
     "kind": "brand",
-    "aliases": [],
+    "aliases": [
+      "cosori turboblaze 6-quart"
+    ],
     "tiktok": {
       "handle": "@cosori_official",
       "verified": true,
@@ -782,14 +766,7 @@
     "kind": "brand",
     "aliases": [
       "crystal hot sauce"
-    ],
-    "tiktok": {
-      "handle": "@crystal.hot.sauce",
-      "verified": true,
-      "checked": "2026-10-20",
-      "by": "cursor agent",
-      "evidence": "tiktok.com/@crystal.hot.sauce nickname Crystal Hot Sauce, 1329 followers (matches brand; crystalhotsauce.com lists FB/IG/YT only, no TikTok link; @crystalhotsauce squatted)"
-    }
+    ]
   },
   "jeni's splendid ice creams": {
     "kind": "brand",
@@ -825,10 +802,11 @@
     ],
     "tiktok": {
       "handle": "@blueshognation",
-      "verified": true,
+      "verified": false,
       "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "blueshog.com links tiktok.com/@blueshognation; verified:false, 13400 followers, nickname Blues Hog"
+      "evidence": "blueshog.com links tiktok.com/@blueshognation; page JSON verified:false",
+      "official_evidence": "https://blueshog.com/"
     }
   },
   "onyx coffee lab": {
@@ -838,10 +816,11 @@
     ],
     "tiktok": {
       "handle": "@onyxcoffeelab",
-      "verified": true,
+      "verified": false,
       "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "onyxcoffeelab.com links tiktok.com/@onyxcoffeelab; verified:false, 26600 followers"
+      "evidence": "onyxcoffeelab.com links tiktok.com/@onyxcoffeelab; page JSON verified:false",
+      "official_evidence": "https://onyxcoffeelab.com/"
     }
   },
   "janji": {
@@ -849,14 +828,7 @@
     "aliases": [
       "janji 5\" afo middle short",
       "janji 5 inch afo middle short"
-    ],
-    "tiktok": {
-      "handle": "@runjanji",
-      "verified": true,
-      "checked": "2026-10-20",
-      "by": "cursor agent",
-      "evidence": "janji.com footer links instagram.com/runjanji; tiktok.com/@runjanji nickname Janji, 786 followers (no TikTok link on site; matched IG handle pattern)"
-    }
+    ]
   },
   "haus labs": {
     "kind": "brand",
@@ -875,13 +847,34 @@
     "kind": "brand",
     "aliases": [
       "skinbetter science alpharet overnight cream"
+    ]
+  },
+  "rogaine": {
+    "kind": "brand",
+    "aliases": [
+      "rogaine 5% minoxidil solution"
     ],
     "tiktok": {
-      "handle": "@skinbetterscience",
+      "handle": "@rogaineofficial",
       "verified": true,
       "checked": "2026-10-20",
       "by": "cursor agent",
-      "evidence": "tiktok.com/@skinbetterscience nickname skinbetter science, 7968 followers; skinbetter.com has no TikTok footer link; @skinbetter_sci 404. No TikTok verified badge on page."
+      "evidence": "tiktok.com/@rogaineofficial page JSON verified:true, followerCount ~12800, nickname Rogaine"
+    }
+  },
+  "vanicream": {
+    "kind": "brand",
+    "aliases": [
+      "vanicream gentle facial cleanser",
+      "vanicream gentle body wash"
+    ],
+    "tiktok": {
+      "handle": "@officialvanicream",
+      "verified": false,
+      "official_evidence": "https://www.facebook.com/officialvanicream",
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@officialvanicream nickname Vanicream™ Sensitive Skin Care, followerCount ~8539, verified:false; aligns with brand social @officialvanicream on Facebook/Instagram"
     }
   }
 }

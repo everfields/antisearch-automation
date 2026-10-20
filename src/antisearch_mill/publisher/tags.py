@@ -7,8 +7,9 @@ A post tags the verdict's official account only when all of these hold:
 - the verdict is in the curated allowlist (`queue/tags/allowlist.json`) as a
   `brand`, `product`, or `company`. Never a person, a private individual, or a
   minor: any other kind, or `sensitive`, is never tagged;
-- the network entry is `verified: true` with a `checked` date no older than
-  RECHECK_DAYS, which stands in for "verified at post time";
+- the network entry has TikTok's `verified: true`, **or** `official_evidence`
+  (a brand site / link-in-bio URL when the badge is false), plus a `checked`
+  date no older than RECHECK_DAYS;
 - the same handle was not tagged on that network in the last 7 days;
 - tags stay at or below half of the network's posts that day (its slot count).
 
@@ -141,8 +142,12 @@ def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today
     if handle and not handle.startswith("@"):
         handle = "@" + handle
     valid = X_HANDLE if network == X_NETWORK else HANDLE
-    if not account.get("verified") or not valid.match(handle):
+    official_evidence = str(account.get("official_evidence") or "").strip()
+    tiktok_verified = bool(account.get("verified"))
+    if not tiktok_verified and not official_evidence:
         return Tag("", f"{name} has no verified {network} handle on the allowlist")
+    if not valid.match(handle):
+        return Tag("", f"{name} has no valid {network} handle on the allowlist")
     ranked = ranked_word(handle.lstrip("@").replace("_", " ").replace(".", " "))
     if ranked:
         return Tag("", f"{handle} carries a superlative ({ranked!r}): never a tag")
