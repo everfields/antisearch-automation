@@ -1,0 +1,362 @@
+[
+  {
+    "input": "wireless charger",
+    "verdict": "anker maggo 3-in-1 wireless charging station",
+    "tag": "@ankerofficial",
+    "tag_reason": ""
+  },
+  {
+    "input": "electric toothbrush",
+    "verdict": "oral-b io series 10",
+    "tag": "@oralb",
+    "tag_reason": ""
+  },
+  {
+    "input": "cold brew at home",
+    "verdict": "oxo good grips cold brew coffee maker",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "retinol cream",
+    "verdict": "skinbetter science alpharet overnight cream",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "vitamin c serum",
+    "verdict": "skinceuticals c e ferulic",
+    "tag": "@skinceuticals",
+    "tag_reason": ""
+  },
+  {
+    "input": "moisturizer for dry skin",
+    "verdict": "cerave moisturizing cream",
+    "tag": "@cerave",
+    "tag_reason": ""
+  },
+  {
+    "input": "gentle face wash",
+    "verdict": "vanicream gentle facial cleanser",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "color safe conditioner",
+    "verdict": "pureology hydrate conditioner",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "hair mask",
+    "verdict": "k18 leave-in molecular repair hair mask",
+    "tag": "@k18hair",
+    "tag_reason": ""
+  },
+  {
+    "input": "curling iron",
+    "verdict": "bio ionic long barrel styler",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "eye cream",
+    "verdict": "skinceuticals a.g.e. advanced eye",
+    "tag": "@skinceuticals",
+    "tag_reason": ""
+  },
+  {
+    "input": "exfoliator",
+    "verdict": "paula\u2019s choice skin perfecting 2% bha liquid",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "nail polish",
+    "verdict": "essie gel couture",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "blush",
+    "verdict": "rare beauty soft pinch liquid blush",
+    "tag": "@rarebeauty",
+    "tag_reason": ""
+  },
+  {
+    "input": "disposable razor",
+    "verdict": "gillette sensor3 sensitive",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "toothpaste",
+    "verdict": "colgate total active prevention",
+    "tag": "@colgate",
+    "tag_reason": ""
+  },
+  {
+    "input": "tinted moisturizer",
+    "verdict": "nars pure radiant tinted moisturizer spf 30",
+    "tag": "@narsissist",
+    "tag_reason": ""
+  },
+  {
+    "input": "lip gloss",
+    "verdict": "fenty beauty gloss bomb",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "brow gel",
+    "verdict": "benefit 24-hr brow setter",
+    "tag": "@benefitcosmetics",
+    "tag_reason": ""
+  },
+  {
+    "input": "curl mousse",
+    "verdict": "the doux mousse def texture foam",
+    "tag": "@ilovethedoux",
+    "tag_reason": ""
+  },
+  {
+    "input": "leave-in conditioner",
+    "verdict": "pureology color fanatic leave-in conditioner",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "clarifying shampoo",
+    "verdict": "ouai detox shampoo",
+    "tag": "@theouai",
+    "tag_reason": ""
+  },
+  {
+    "input": "pimple patches",
+    "verdict": "hero mighty patch original",
+    "tag": "@herocosmetics",
+    "tag_reason": ""
+  },
+  {
+    "input": "hyaluronic acid serum",
+    "verdict": "skinceuticals h.a. intensifier multi-glycan",
+    "tag": "@skinceuticals",
+    "tag_reason": ""
+  },
+  {
+    "input": "salicylic acid cleanser",
+    "verdict": "cerave renewing sa cleanser",
+    "tag": "@cerave",
+    "tag_reason": ""
+  },
+  {
+    "input": "tweezers for brows",
+    "verdict": "tweezerman slant tweezer",
+    "tag": "@tweezerman_us",
+    "tag_reason": ""
+  },
+  {
+    "input": "primer",
+    "verdict": "milk makeup hydro grip primer",
+    "tag": "@milkmakeup",
+    "tag_reason": ""
+  },
+  {
+    "input": "cream contour",
+    "verdict": "westman atelier face trace contour stick",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "dip powder nail kit",
+    "verdict": "kiara sky dip powder starter kit",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "liquid eyeliner",
+    "verdict": "stila stay all day waterproof liquid eye liner",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "powder bronzer",
+    "verdict": "nars laguna bronzing powder",
+    "tag": "@narsissist",
+    "tag_reason": ""
+  },
+  {
+    "input": "makeup remover wipes",
+    "verdict": "neutrogena fragrance-free makeup remover wipes",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "natural deodorant",
+    "verdict": "salt & stone santal & vetiver deodorant",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "scalp serum hair growth",
+    "verdict": "rogaine 5% minoxidil solution",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "body wash sensitive skin",
+    "verdict": "vanicream gentle body wash",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "gym shoes women",
+    "verdict": "reebok nano x5",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "fleece hoodie",
+    "verdict": "patagonia r1 air full-zip hoody",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "insulated tumbler",
+    "verdict": "yeti rambler 20 oz tumbler",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "protein powder",
+    "verdict": "optimum nutrition gold standard 100% whey",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "electrolyte powder",
+    "verdict": "skratch labs sport hydration drink mix",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "peanut butter",
+    "verdict": "santa cruz organic dark roasted creamy peanut butter",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "frozen pizza",
+    "verdict": "roberta\u2019s famous original",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "energy bar",
+    "verdict": "clif bar crunchy peanut butter",
+    "tag": "@clifbar",
+    "tag_reason": ""
+  },
+  {
+    "input": "air fryer",
+    "verdict": "ninja foodi dualzone",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "kitchen stand mixer",
+    "verdict": "kitchenaid 7-quart bowl-lift stand mixer",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "blender smoothies",
+    "verdict": "vitamix 5200",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "lightweight jacket women",
+    "verdict": "patagonia women's houdini jacket",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "concealer for dark circles",
+    "verdict": "natasha denona hy-glam concealer",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "cream concealer full coverage",
+    "verdict": "nars soft matte complete concealer",
+    "tag": "@narsissist",
+    "tag_reason": ""
+  },
+  {
+    "input": "hydrating face mask",
+    "verdict": "summer fridays jet lag mask",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "charcoal face mask",
+    "verdict": "origins clear improvement active charcoal mask",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "joggers women",
+    "verdict": "vuori performance jogger",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "flavored sparkling water",
+    "verdict": "spindrift",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "seltzer water lime",
+    "verdict": "spindrift lime",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "louisiana style hot sauce",
+    "verdict": "crystal hot sauce",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "pint ice cream",
+    "verdict": "jeni\u2019s brown butter almond brittle",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "toaster oven",
+    "verdict": "breville joule oven air fryer pro",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "running shorts",
+    "verdict": "janji 5\" afo middle short",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "bbq sauce",
+    "verdict": "blues hog original bbq sauce",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  },
+  {
+    "input": "medium roast coffee",
+    "verdict": "onyx coffee lab southern weather",
+    "tag": "",
+    "tag_reason": "verdict not on the tag allowlist"
+  }
+]
