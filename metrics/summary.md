@@ -1,37 +1,35 @@
-# Social metrics — 2026-10-20 00:27 UTC
+# Social metrics — 2026-10-20 08:43 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **5** (24h +0, 7d +1)
-- account likes: 80, posts: 99
+- account likes: 81, posts: 100
 
-### last 24h (4 post(s))
+### last 24h (3 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `water` → mountain valley spring water | 237 | 0 | 0 | 0 | 0 | 0.0% |
-| `lip oil` → clarins lip comfort oil | 206 | 0 | 0 | 0 | 0 | 0.0% |
-| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 130 | 0 | 0 | 0 | 0 | 0.0% |
-| `bocadillo` → bocadillo de jamón ibérico de bellota | 120 | 1 | 0 | 0 | 0 | 0.8% |
+| `bocadillo` → bocadillo de jamón ibérico de bellota | 252 | 1 | 0 | 0 | 0 | 0.4% |
+| `decade to be young in` → 1990s | 175 | 0 | 0 | 0 | 0 | 0.0% |
+| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 161 | 1 | 0 | 0 | 0 | 0.6% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `bocadillo` → bocadillo de jamón ibérico de bellota | 0.8% | 120 |
-| `lip oil` → clarins lip comfort oil | 0.0% | 206 |
-| `water` → mountain valley spring water | 0.0% | 237 |
-| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 0.0% | 130 |
+| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 0.6% | 161 |
+| `bocadillo` → bocadillo de jamón ibérico de bellota | 0.4% | 252 |
+| `decade to be young in` → 1990s | 0.0% | 175 |
 
-### last 7d (57 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `anime para empezar` → death note | 267 | 2 | 0 | 0 | 1 | 1.1% |
 | `anime para empezar` → death note | 267 | 2 | 0 | 0 | – | 0.7% |
 | `fire` → campfire | 260 | 1 | 0 | 0 | 0 | 0.4% |
+| `fire` → campfire | 260 | 1 | 0 | 0 | – | 0.4% |
 | `sheet mask` → sk-ii facial treatment mask | 259 | 2 | 0 | 0 | 0 | 0.8% |
-| `sea` → mediterranean sea | 259 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
