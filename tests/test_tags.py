@@ -240,10 +240,13 @@ def test_an_x_post_with_a_mention_is_three_lines_of_text_and_mentions_off_keeps_
 
 
 EN_POOL_NO_TIKTOK = frozenset({
-    "vanicream gentle facial cleanser",
-    "vanicream gentle body wash",
-    "rogaine 5% minoxidil solution",
+    "anker maggo 3-in-1 wireless charging station",
+    "oral-b io series 10",
+    "skinbetter science alpharet overnight cream",
+    "tweezerman slant tweezer",
     "roberta’s famous original",
+    "crystal hot sauce",
+    "janji 5\" afo middle short",
 })
 
 
@@ -261,7 +264,39 @@ def test_tiktok_en_pool_verdicts_have_allowlisted_tiktok_handles():
         else:
             assert tag.handle, (row["verdict"], tag.reason)
             tagged += 1
-    assert tagged == 56
+    assert tagged == 53
+
+
+def test_allowlist_tiktok_handles_match_recorded_profile_snapshots():
+    """Offline replay of 2026-10-20 profile fetches: handle exists and uniqueId matches."""
+    from scripts.tiktok_profile import assert_handle_matches_snapshot
+
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    snaps = json.loads(
+        (ROOT / "tests" / "fixtures" / "tiktok_profile_snapshots_2026-10-20.json").read_text(encoding="utf-8")
+    )
+    handles = sorted(
+        {
+            str((entry.get("tiktok") or {}).get("handle") or "").lstrip("@").lower()
+            for entry in allow.values()
+            if (entry.get("tiktok") or {}).get("handle")
+        }
+    )
+    assert handles, "expected tiktok handles on the allowlist"
+    for h in handles:
+        assert h in snaps, f"missing profile snapshot for @{h}"
+        assert_handle_matches_snapshot(h, snaps[h])
+
+
+def test_unverified_tiktok_without_official_evidence_is_not_tagged():
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    assert allowlisted("oral-b io series 10", "tiktok", allow, date(2026, 10, 20)).handle == ""
+
+
+def test_official_evidence_tags_when_tiktok_badge_is_false():
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    tag = allowlisted("vanicream gentle facial cleanser", "tiktok", allow, date(2026, 10, 20))
+    assert tag.handle == "@officialvanicream"
 
 
 def test_belkin_has_verified_tiktok_on_allowlist():

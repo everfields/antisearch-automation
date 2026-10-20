@@ -6,9 +6,11 @@ only if every rule below holds, otherwise it goes out untagged.
 - **Who:** brands, products, and companies only (`"kind": "brand" | "product" | "company"`).
   Never a person, a private individual, or a minor. If you are unsure, don't add it.
 - **Match:** the verdict equals the entry name or one of its `aliases` (lowercase).
-- **Verified:** a human opened the account on that network, saw the verified badge, and
-  set `verified: true`, `checked: YYYY-MM-DD`, `by: <who>`, and `evidence`. A check
-  older than 30 days stops the tag until someone re-checks.
+- **Verified:** set `verified` to match TikTok's badge on the profile page JSON. If the
+  badge is false but the brand's own site (or Linktree) links the handle, set
+  `verified: false` and add `official_evidence` with that URL. Always include
+  `checked`, `by`, and `evidence`. A check older than 30 days stops the tag until
+  someone re-checks.
 - **Networks:** `instagram`, `tiktok` and `x`.
 - **X** (founder, 2026-09-28): the entry's `x` block is the post's one mention, on its third
   line (`input`, `verdict`, `@handle`). It is used only when the account is the verdict itself,
