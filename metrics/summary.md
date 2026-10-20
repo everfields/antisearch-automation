@@ -1,4 +1,4 @@
-# Social metrics — 2026-10-20 08:43 UTC
+# Social metrics — 2026-10-20 14:23 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
@@ -7,21 +7,23 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 - followers: **5** (24h +0, 7d +1)
 - account likes: 81, posts: 100
 
-### last 24h (3 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `bocadillo` → bocadillo de jamón ibérico de bellota | 252 | 1 | 0 | 0 | 0 | 0.4% |
-| `decade to be young in` → 1990s | 175 | 0 | 0 | 0 | 0 | 0.0% |
-| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 161 | 1 | 0 | 0 | 0 | 0.6% |
+| `bocadillo` → bocadillo de jamón ibérico de bellota | 257 | 1 | 0 | 0 | 0 | 0.4% |
+| `decade to be young in` → 1990s | 249 | 0 | 0 | 0 | 0 | 0.0% |
+| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 218 | 2 | 0 | 0 | 0 | 0.9% |
+| `serie para un viernes` → severance | 114 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 0.6% | 161 |
-| `bocadillo` → bocadillo de jamón ibérico de bellota | 0.4% | 252 |
-| `decade to be young in` → 1990s | 0.0% | 175 |
+| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 0.9% | 218 |
+| `bocadillo` → bocadillo de jamón ibérico de bellota | 0.4% | 257 |
+| `decade to be young in` → 1990s | 0.0% | 249 |
+| `serie para un viernes` → severance | 0.0% | 114 |
 
-### last 7d (60 post(s))
+### last 7d (59 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
