@@ -1,29 +1,29 @@
-# Social metrics — 2026-10-20 14:23 UTC
+# Social metrics — 2026-10-20 19:24 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **5** (24h +0, 7d +1)
-- account likes: 81, posts: 100
+- account likes: 82, posts: 102
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `bocadillo` → bocadillo de jamón ibérico de bellota | 257 | 1 | 0 | 0 | 0 | 0.4% |
-| `decade to be young in` → 1990s | 249 | 0 | 0 | 0 | 0 | 0.0% |
-| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 218 | 2 | 0 | 0 | 0 | 0.9% |
-| `serie para un viernes` → severance | 114 | 0 | 0 | 0 | 0 | 0.0% |
+| `serie para un viernes` → severance | 251 | 0 | 0 | 0 | 0 | 0.0% |
+| `decade to be young in` → 1990s | 250 | 0 | 0 | 0 | 0 | 0.0% |
+| `cold brew at home` → oxo good grips cold brew coffee maker | 133 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `wireless charger` → belkin ultracharge 3-in-1 magnetic charging dock | 0.9% | 218 |
 | `bocadillo` → bocadillo de jamón ibérico de bellota | 0.4% | 257 |
-| `decade to be young in` → 1990s | 0.0% | 249 |
-| `serie para un viernes` → severance | 0.0% | 114 |
+| `decade to be young in` → 1990s | 0.0% | 250 |
+| `serie para un viernes` → severance | 0.0% | 251 |
+| `cold brew at home` → oxo good grips cold brew coffee maker | 0.0% | 133 |
 
-### last 7d (59 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
