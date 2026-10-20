@@ -239,6 +239,37 @@ def test_an_x_post_with_a_mention_is_three_lines_of_text_and_mentions_off_keeps_
     assert TagLog(log.path.parent / "tags.csv").rows() == []
 
 
+EN_POOL_NO_TIKTOK = frozenset({
+    "vanicream gentle facial cleanser",
+    "vanicream gentle body wash",
+    "rogaine 5% minoxidil solution",
+    "roberta’s famous original",
+})
+
+
+def test_tiktok_en_pool_verdicts_have_allowlisted_tiktok_handles():
+    """Frozen 2026-10-20 live-oracle verdicts: every brand verdict tags except documented gaps."""
+    rows = json.loads(
+        (ROOT / "tests" / "fixtures" / "tiktok_en_oracle_verdicts_2026-10-20.json").read_text(encoding="utf-8")
+    )
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    tagged = 0
+    for row in rows:
+        tag = allowlisted(row["verdict"], "tiktok", allow, date(2026, 10, 20))
+        if row["verdict"] in EN_POOL_NO_TIKTOK:
+            assert tag.handle == "", row["verdict"]
+        else:
+            assert tag.handle, (row["verdict"], tag.reason)
+            tagged += 1
+    assert tagged == 56
+
+
+def test_belkin_has_verified_tiktok_on_allowlist():
+    allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
+    tag = allowlisted("belkin ultracharge 3-in-1 25w", "tiktok", allow, date(2026, 10, 20))
+    assert tag.handle == "@belkin"
+
+
 def test_pool_inputs_must_not_name_brands():
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
     for bad in (

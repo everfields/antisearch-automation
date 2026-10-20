@@ -257,6 +257,7 @@
   "fenty beauty": {
     "kind": "brand",
     "aliases": [
+      "fenty beauty gloss bomb",
       "fenty beauty gloss bomb universal lip luminizer"
     ],
     "tiktok": {
@@ -412,6 +413,475 @@
       "checked": "2026-10-19",
       "by": "cursor agent",
       "evidence": "thedoux.com footer links tiktok.com/@ilovethedoux (The Doux US official)"
+    }
+  },
+  "belkin": {
+    "kind": "brand",
+    "aliases": [
+      "belkin ultracharge pro 3-in-1 25w",
+      "belkin ultracharge 3-in-1 25w"
+    ],
+    "tiktok": {
+      "handle": "@belkin",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@belkin page JSON verified:true, followerCount 205400, nickname Belkin; belkin.com footer links tiktok.com/@belkin"
+    }
+  },
+  "oxo": {
+    "kind": "brand",
+    "aliases": [
+      "oxo good grips cold brew coffee maker"
+    ],
+    "tiktok": {
+      "handle": "@oxo_us",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@oxo_us page JSON verified:true, followerCount 15100, nickname OXO (official US; @oxo is squatted, 29 followers, unverified)"
+    }
+  },
+  "pureology": {
+    "kind": "brand",
+    "aliases": [
+      "pureology hydrate conditioner",
+      "pureology color fanatic leave-in conditioner",
+      "pureology color fanatic leave-in spray"
+    ],
+    "tiktok": {
+      "handle": "@pureology",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@pureology verified:true, 70400 followers"
+    }
+  },
+  "bio ionic": {
+    "kind": "brand",
+    "aliases": [
+      "bio ionic long barrel styler 1.25-inch",
+      "bio ionic long barrel styler"
+    ],
+    "tiktok": {
+      "handle": "@bioionic",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@bioionic verified:true, 73500 followers"
+    }
+  },
+  "paula's choice": {
+    "kind": "brand",
+    "aliases": [
+      "paula’s choice skin perfecting 2% bha liquid",
+      "paulas choice skin perfecting 2% bha liquid"
+    ],
+    "tiktok": {
+      "handle": "@paulaschoice",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@paulaschoice verified:true, 190700 followers"
+    }
+  },
+  "essie": {
+    "kind": "brand",
+    "aliases": [
+      "essie gel couture"
+    ],
+    "tiktok": {
+      "handle": "@essie",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@essie verified:true, 231900 followers"
+    }
+  },
+  "gillette": {
+    "kind": "brand",
+    "aliases": [
+      "gillette sensor3 sensitive"
+    ],
+    "tiktok": {
+      "handle": "@gillette",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@gillette verified:true, 91900 followers"
+    }
+  },
+  "westman atelier": {
+    "kind": "brand",
+    "aliases": [
+      "westman atelier face trace contour stick"
+    ],
+    "tiktok": {
+      "handle": "@westmanatelier",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@westmanatelier verified:true, 119500 followers"
+    }
+  },
+  "kiara sky": {
+    "kind": "brand",
+    "aliases": [
+      "kiara sky dip powder starter kit"
+    ],
+    "tiktok": {
+      "handle": "@kiaraskynails",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "kiarasky.com links tiktok.com/@kiaraskynails; page JSON verified:false but 936900 followers, nickname Kiara Sky Professional Nails (official per brand site)"
+    }
+  },
+  "stila": {
+    "kind": "brand",
+    "aliases": [
+      "stila stay all day waterproof liquid eye liner"
+    ],
+    "tiktok": {
+      "handle": "@stilacosmetics",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@stilacosmetics verified:true, 121400 followers"
+    }
+  },
+  "neutrogena": {
+    "kind": "brand",
+    "aliases": [
+      "neutrogena fragrance-free makeup remover wipes"
+    ],
+    "tiktok": {
+      "handle": "@neutrogena_us",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@neutrogena_us verified:true, 306100 followers, nickname Neutrogena (@neutrogena squatted)"
+    }
+  },
+  "salt & stone": {
+    "kind": "brand",
+    "aliases": [
+      "salt & stone santal & vetiver deodorant",
+      "salt and stone santal & vetiver deodorant"
+    ],
+    "tiktok": {
+      "handle": "@saltandstone",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@saltandstone verified:true, 69400 followers"
+    }
+  },
+  "reebok": {
+    "kind": "brand",
+    "aliases": [
+      "reebok nano x5"
+    ],
+    "tiktok": {
+      "handle": "@reebok",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@reebok verified:true, 214900 followers"
+    }
+  },
+  "patagonia": {
+    "kind": "brand",
+    "aliases": [
+      "patagonia r1 air full-zip hoody",
+      "patagonia women's houdini jacket",
+      "patagonia women’s houdini jacket",
+      "patagonia strider pro 5-inch shorts",
+      "patagonia strider pro 5\" shorts"
+    ],
+    "tiktok": {
+      "handle": "@patagonia",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@patagonia verified:true, 249100 followers"
+    }
+  },
+  "yeti": {
+    "kind": "brand",
+    "aliases": [
+      "yeti rambler 20 oz tumbler"
+    ],
+    "tiktok": {
+      "handle": "@yeti",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@yeti verified:true, 797300 followers"
+    }
+  },
+  "optimum nutrition": {
+    "kind": "brand",
+    "aliases": [
+      "optimum nutrition gold standard 100% whey"
+    ],
+    "tiktok": {
+      "handle": "@optimumnutrition_us",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@optimumnutrition_us verified:true, 81300 followers (US; optimumnutrition.com lists @optimumnutrition_ie for IE only)"
+    }
+  },
+  "skratch labs": {
+    "kind": "brand",
+    "aliases": [
+      "skratch labs sport hydration drink mix"
+    ],
+    "tiktok": {
+      "handle": "@skratchlabs",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "skratchlabs.com links tiktok.com/@skratchlabs; page JSON verified:false, 6828 followers, nickname Skratch Labs"
+    }
+  },
+  "santa cruz organic": {
+    "kind": "brand",
+    "aliases": [
+      "santa cruz organic dark roasted creamy peanut butter"
+    ],
+    "tiktok": {
+      "handle": "@santacruzorganic",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "santacruzorganic.com links tiktok.com/@santacruzorganic; page JSON verified:false, 2608 followers"
+    }
+  },
+  "ninja": {
+    "kind": "brand",
+    "aliases": [
+      "ninja foodi dualzone",
+      "cosori turboblaze 6-quart"
+    ],
+    "tiktok": {
+      "handle": "@ninjakitchen",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@ninjakitchen verified:true, 2.1M followers; cosori.com links @cosori_official (verified, 227900) — pool air fryer verdict is Ninja Foodi, tagged via SharkNinja @ninjakitchen"
+    }
+  },
+  "cosori": {
+    "kind": "brand",
+    "aliases": [],
+    "tiktok": {
+      "handle": "@cosori_official",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "cosori.com footer links tiktok.com/@cosori_official; verified:true, 227900 followers"
+    }
+  },
+  "kitchenaid": {
+    "kind": "brand",
+    "aliases": [
+      "kitchenaid 7-quart bowl-lift stand mixer"
+    ],
+    "tiktok": {
+      "handle": "@kitchenaidusa",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@kitchenaidusa verified:true, 146400 followers (@kitchenaid squatted)"
+    }
+  },
+  "vitamix": {
+    "kind": "brand",
+    "aliases": [
+      "vitamix 5200",
+      "vitamix ascent x5"
+    ],
+    "tiktok": {
+      "handle": "@vitamix",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@vitamix verified:true, 17000 followers"
+    }
+  },
+  "natasha denona": {
+    "kind": "brand",
+    "aliases": [
+      "natasha denona hy-glam concealer"
+    ],
+    "tiktok": {
+      "handle": "@natashadenona",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@natashadenona verified:true, 665600 followers"
+    }
+  },
+  "summer fridays": {
+    "kind": "brand",
+    "aliases": [
+      "summer fridays jet lag mask"
+    ],
+    "tiktok": {
+      "handle": "@summerfridays",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@summerfridays verified:true, 868600 followers"
+    }
+  },
+  "origins": {
+    "kind": "brand",
+    "aliases": [
+      "origins clear improvement active charcoal mask"
+    ],
+    "tiktok": {
+      "handle": "@origins",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@origins verified:true, 43400 followers, nickname Origins Skincare"
+    }
+  },
+  "vuori": {
+    "kind": "brand",
+    "aliases": [
+      "vuori performance jogger"
+    ],
+    "tiktok": {
+      "handle": "@vuoriclothing",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "vuoriclothing.com links tiktok.com/@vuoriclothing; verified:true, 647300 followers"
+    }
+  },
+  "spindrift": {
+    "kind": "brand",
+    "aliases": [
+      "spindrift",
+      "spindrift lime",
+      "spindrift raspberry lime"
+    ],
+    "tiktok": {
+      "handle": "@drinkspindrift",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "drinkspindrift.com links tiktok.com/@drinkspindrift; verified:true, 169400 followers"
+    }
+  },
+  "crystal hot sauce": {
+    "kind": "brand",
+    "aliases": [
+      "crystal hot sauce"
+    ],
+    "tiktok": {
+      "handle": "@crystal.hot.sauce",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@crystal.hot.sauce nickname Crystal Hot Sauce, 1329 followers (matches brand; crystalhotsauce.com lists FB/IG/YT only, no TikTok link; @crystalhotsauce squatted)"
+    }
+  },
+  "jeni's splendid ice creams": {
+    "kind": "brand",
+    "aliases": [
+      "jeni’s brown butter almond brittle",
+      "jenis brown butter almond brittle"
+    ],
+    "tiktok": {
+      "handle": "@jenisicecreams",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "jenis.com links tiktok.com/@jenisicecreams; verified:true, 236700 followers"
+    }
+  },
+  "breville": {
+    "kind": "brand",
+    "aliases": [
+      "breville joule oven air fryer pro"
+    ],
+    "tiktok": {
+      "handle": "@breville",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@breville verified:true, 23400 followers"
+    }
+  },
+  "blues hog": {
+    "kind": "brand",
+    "aliases": [
+      "blues hog original bbq sauce"
+    ],
+    "tiktok": {
+      "handle": "@blueshognation",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "blueshog.com links tiktok.com/@blueshognation; verified:false, 13400 followers, nickname Blues Hog"
+    }
+  },
+  "onyx coffee lab": {
+    "kind": "brand",
+    "aliases": [
+      "onyx coffee lab southern weather"
+    ],
+    "tiktok": {
+      "handle": "@onyxcoffeelab",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "onyxcoffeelab.com links tiktok.com/@onyxcoffeelab; verified:false, 26600 followers"
+    }
+  },
+  "janji": {
+    "kind": "brand",
+    "aliases": [
+      "janji 5\" afo middle short",
+      "janji 5 inch afo middle short"
+    ],
+    "tiktok": {
+      "handle": "@runjanji",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "janji.com footer links instagram.com/runjanji; tiktok.com/@runjanji nickname Janji, 786 followers (no TikTok link on site; matched IG handle pattern)"
+    }
+  },
+  "haus labs": {
+    "kind": "brand",
+    "aliases": [
+      "haus labs triclone skin tech concealer"
+    ],
+    "tiktok": {
+      "handle": "@hauslabs",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "hauslabs.com links tiktok.com/@hauslabs; verified:true, 871000 followers"
+    }
+  },
+  "skinbetter science": {
+    "kind": "brand",
+    "aliases": [
+      "skinbetter science alpharet overnight cream"
+    ],
+    "tiktok": {
+      "handle": "@skinbetterscience",
+      "verified": true,
+      "checked": "2026-10-20",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@skinbetterscience nickname skinbetter science, 7968 followers; skinbetter.com has no TikTok footer link; @skinbetter_sci 404. No TikTok verified badge on page."
     }
   }
 }
