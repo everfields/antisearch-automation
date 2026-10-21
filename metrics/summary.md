@@ -1,29 +1,29 @@
-# Social metrics — 2026-10-21 17:24 UTC
+# Social metrics — 2026-10-21 21:50 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h -1, 7d +0)
-- account likes: 86, posts: 106
+- account likes: 87, posts: 107
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `retinol cream` → skinceuticals retinol 0.3 | 252 | 1 | 0 | 0 | 0 | 0.4% |
-| `tortilla de patatas` → bar néstor | 239 | 2 | 0 | 0 | 0 | 0.8% |
-| `streamer español` → ibai llanos | 194 | 1 | 0 | 0 | 0 | 0.5% |
-| `superpower to have` → omnipotence | 13 | 0 | 0 | 0 | 0 | 0.0% |
+| `streamer español` → ibai llanos | 246 | 1 | 0 | 0 | 0 | 0.4% |
+| `superpower to have` → omnipotence | 163 | 0 | 0 | 0 | 0 | 0.0% |
+| `youtuber español` → el rubius | 121 | 1 | 0 | 0 | 0 | 0.8% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `tortilla de patatas` → bar néstor | 0.8% | 239 |
-| `streamer español` → ibai llanos | 0.5% | 194 |
+| `youtuber español` → el rubius | 0.8% | 121 |
+| `streamer español` → ibai llanos | 0.4% | 246 |
 | `retinol cream` → skinceuticals retinol 0.3 | 0.4% | 252 |
-| `superpower to have` → omnipotence | 0.0% | 13 |
+| `superpower to have` → omnipotence | 0.0% | 163 |
 
-### last 7d (54 post(s))
+### last 7d (53 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
