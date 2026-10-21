@@ -1,29 +1,29 @@
-# Social metrics — 2026-10-21 12:04 UTC
+# Social metrics — 2026-10-21 17:24 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **5** (24h +0, 7d +1)
-- account likes: 84, posts: 105
+- followers: **4** (24h -1, 7d +0)
+- account likes: 86, posts: 106
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `cold brew at home` → oxo good grips cold brew coffee maker | 262 | 0 | 0 | 0 | 0 | 0.0% |
-| `tortilla de patatas` → bar néstor | 157 | 2 | 0 | 0 | 0 | 1.3% |
-| `retinol cream` → skinceuticals retinol 0.3 | 82 | 0 | 0 | 0 | 0 | 0.0% |
-| `streamer español` → ibai llanos | 5 | 0 | 0 | 0 | 0 | 0.0% |
+| `retinol cream` → skinceuticals retinol 0.3 | 252 | 1 | 0 | 0 | 0 | 0.4% |
+| `tortilla de patatas` → bar néstor | 239 | 2 | 0 | 0 | 0 | 0.8% |
+| `streamer español` → ibai llanos | 194 | 1 | 0 | 0 | 0 | 0.5% |
+| `superpower to have` → omnipotence | 13 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `tortilla de patatas` → bar néstor | 1.3% | 157 |
-| `cold brew at home` → oxo good grips cold brew coffee maker | 0.0% | 262 |
-| `retinol cream` → skinceuticals retinol 0.3 | 0.0% | 82 |
-| `streamer español` → ibai llanos | 0.0% | 5 |
+| `tortilla de patatas` → bar néstor | 0.8% | 239 |
+| `streamer español` → ibai llanos | 0.5% | 194 |
+| `retinol cream` → skinceuticals retinol 0.3 | 0.4% | 252 |
+| `superpower to have` → omnipotence | 0.0% | 13 |
 
-### last 7d (57 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,9 +37,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- |
 | `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
 | `peli de miedo de los 90` → el silencio de los corderos | 11.1% | 9 |
-| `tortilla de patatas` → bar néstor | 1.3% | 157 |
 | `viaje de fin de curso` → mallorca | 1.3% | 237 |
 | `viaje de fin de curso` → mallorca | 1.3% | 237 |
+| `playlist para estudiar` → deep focus | 1.2% | 258 |
 
 ## instagram
 
