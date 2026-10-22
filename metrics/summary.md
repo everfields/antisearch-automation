@@ -1,37 +1,37 @@
-# Social metrics — 2026-10-22 12:07 UTC
+# Social metrics — 2026-10-22 17:21 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h -1, 7d +0)
-- account likes: 89, posts: 109
+- account likes: 90, posts: 110
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `outfit para salir de fiesta` → conjunto negro monocromático | 288 | 1 | 0 | 0 | 0 | 0.3% |
 | `youtuber español` → el rubius | 262 | 2 | 0 | 0 | 0 | 0.8% |
-| `superpower to have` → omnipotence | 254 | 1 | 0 | 0 | 0 | 0.4% |
-| `gentle face wash` → vanicream gentle facial cleanser | 170 | 0 | 0 | 0 | 0 | 0.0% |
-| `outfit para salir de fiesta` → conjunto negro monocromático | 24 | 0 | 0 | 0 | 0 | 0.0% |
+| `gentle face wash` → vanicream gentle facial cleanser | 235 | 0 | 0 | 0 | 0 | 0.0% |
+| `color safe conditioner` → pureology hydrate conditioner | 118 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `youtuber español` → el rubius | 0.8% | 262 |
-| `superpower to have` → omnipotence | 0.4% | 254 |
-| `gentle face wash` → vanicream gentle facial cleanser | 0.0% | 170 |
-| `outfit para salir de fiesta` → conjunto negro monocromático | 0.0% | 24 |
+| `outfit para salir de fiesta` → conjunto negro monocromático | 0.3% | 288 |
+| `gentle face wash` → vanicream gentle facial cleanser | 0.0% | 235 |
+| `color safe conditioner` → pureology hydrate conditioner | 0.0% | 118 |
 
-### last 7d (53 post(s))
+### last 7d (52 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `outfit para salir de fiesta` → conjunto negro monocromático | 288 | 1 | 0 | 0 | 0 | 0.3% |
 | `anime para empezar` → death note | 267 | 2 | 0 | 0 | 1 | 1.1% |
 | `anime para empezar` → death note | 267 | 2 | 0 | 0 | – | 0.7% |
 | `cold brew at home` → oxo good grips cold brew coffee maker | 262 | 0 | 0 | 0 | 0 | 0.0% |
 | `youtuber español` → el rubius | 262 | 2 | 0 | 0 | 0 | 0.8% |
-| `fire` → campfire | 260 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
