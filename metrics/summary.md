@@ -1,29 +1,29 @@
-# Social metrics — 2026-10-21 21:50 UTC
+# Social metrics — 2026-10-22 05:04 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **4** (24h -1, 7d +0)
-- account likes: 87, posts: 107
+- account likes: 89, posts: 108
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `retinol cream` → skinceuticals retinol 0.3 | 252 | 1 | 0 | 0 | 0 | 0.4% |
+| `superpower to have` → omnipotence | 254 | 1 | 0 | 0 | 0 | 0.4% |
 | `streamer español` → ibai llanos | 246 | 1 | 0 | 0 | 0 | 0.4% |
-| `superpower to have` → omnipotence | 163 | 0 | 0 | 0 | 0 | 0.0% |
-| `youtuber español` → el rubius | 121 | 1 | 0 | 0 | 0 | 0.8% |
+| `youtuber español` → el rubius | 210 | 2 | 0 | 0 | 0 | 1.0% |
+| `gentle face wash` → vanicream gentle facial cleanser | 41 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `youtuber español` → el rubius | 0.8% | 121 |
+| `youtuber español` → el rubius | 1.0% | 210 |
 | `streamer español` → ibai llanos | 0.4% | 246 |
-| `retinol cream` → skinceuticals retinol 0.3 | 0.4% | 252 |
-| `superpower to have` → omnipotence | 0.0% | 163 |
+| `superpower to have` → omnipotence | 0.4% | 254 |
+| `gentle face wash` → vanicream gentle facial cleanser | 0.0% | 41 |
 
-### last 7d (53 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
