@@ -40,7 +40,8 @@ from .tiktok_trends import (
 from .registry import ADAPTERS
 from .igcaption import build_ig_caption, ig_caption_mode, ig_caption_problem
 from .pools import job_language
-from .tags import TAG_NETWORKS, X_HANDLE, TagLog, choose_tag, choose_x_mention
+from .tags import (TAG_NETWORKS, X_HANDLE, TagLog, caption_variant_of, choose_tag, choose_x_mention,
+                   tiktok_caption, tiktok_variant)
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
 
@@ -417,8 +418,16 @@ def run_posts(
                 out.append(Outcome(job.id, net, "rejected_x_text", detail=problem))
                 continue
             job = dataclasses.replace(job, caption=shown)
+        dedupe_key = shown
+        if net == "tiktok":
+            handle = tag if tag.startswith("@") else (shown if shown.startswith("@") and " " not in shown else "")
+            shown = tiktok_caption(job.category, clip.verdict, handle, tiktok_variant(log.rows()) if handle else "A")
+            if "#" in shown:
+                out.append(Outcome(job.id, net, "rejected_caption", detail=f"hashtags are not allowed: {shown!r}"))
+                continue
+            job = dataclasses.replace(job, caption=shown)
         # A tag's repeat is governed by the 7-day tag guard, not the lifetime caption dedupe.
-        if (not tag and state.seen_caption(net, shown, log)) or (net == X_NETWORK and state.near_caption(net, shown, log)):
+        if (not tag and state.seen_caption(net, dedupe_key, log)) or (net == X_NETWORK and state.near_caption(net, shown, log)):
             out.append(Outcome(job.id, net, "skipped_duplicate_caption", detail="that caption already went out on this network"))
             continue
         if state.seen_clip(net, clip.clip_id, log):
@@ -633,7 +642,8 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     pause = clip_pause_style(clip) if fmt == VIDEO else ""
     log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
                        format=fmt, due_at=due, creative=job.creative, language=job_language(job),
-                       pause=pause, trend_source=trend_source, trend_term=trend_term))
+                       pause=pause, trend_source=trend_source, trend_term=trend_term,
+                       caption_variant=caption_variant_of(net, shown)))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
@@ -649,14 +659,16 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
         detail = f"{exc.__class__.__name__}: {exc}"
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
                            category=job.category, caption=shown, format=fmt, due_at=due, creative=job.creative,
-                           language=job_language(job), pause=pause, trend_source=trend_source, trend_term=trend_term))
+                           language=job_language(job), pause=pause, trend_source=trend_source, trend_term=trend_term,
+                           caption_variant=caption_variant_of(net, shown)))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
     detail = "; ".join([result.note, *adapter.warnings]).strip("; ")
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
                        job.category, shown, fmt, due, job.creative, language=job_language(job), pause=pause,
-                       trend_source=trend_source, trend_term=trend_term))
+                       trend_source=trend_source, trend_term=trend_term,
+                       caption_variant=caption_variant_of(net, shown)))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):

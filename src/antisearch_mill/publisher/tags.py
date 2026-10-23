@@ -114,19 +114,66 @@ def load_allowlist(path: str | Path) -> dict[str, dict]:
     return {normalize_category(k): v for k, v in raw.items() if not k.startswith("_") and isinstance(v, dict)}
 
 
-def _entry(verdict: str, allowlist: Mapping[str, dict]) -> tuple[str, dict] | None:
+def _phrase_in(phrase: str, text: str) -> bool:
+    return bool(phrase) and re.search(rf"(?<![a-z0-9]){re.escape(phrase)}(?![a-z0-9])", text) is not None
+
+
+def _entry(verdict: str, allowlist: Mapping[str, dict], fuzzy: bool = True) -> tuple[str, dict] | None:
+    """Exact name/alias first; else the longest allowlisted name or alias found as whole words in the verdict.
+
+    "vanicream gentle facial cleanser" -> vanicream, "pureology hydrate conditioner" -> pureology,
+    "oxo good grips cold brew coffee maker" -> oxo. Names under 3 characters only match exactly.
+    """
     v = normalize_category(verdict)
+    if not v:
+        return None
+    longest: tuple[int, str, dict] | None = None
     for name, entry in allowlist.items():
-        if v == name or v in [normalize_category(a) for a in entry.get("aliases", [])]:
+        names = [name, *(normalize_category(a) for a in entry.get("aliases", []))]
+        if v in names:
             return name, entry
-    return None
+        if not fuzzy:
+            continue
+        for n in names:
+            if len(n) >= 3 and _phrase_in(n, v) and (longest is None or len(n) > longest[0]):
+                longest = (len(n), name, entry)
+    return (longest[1], longest[2]) if longest else None
+
+
+ARROW = "\u2192"
+TIKTOK_VARIANTS = ("A", "B")
+
+
+def tiktok_caption(category: str, verdict: str, handle: str = "", variant: str = "A") -> str:
+    """TikTok caption (founder, 2026-10-23), plain and lowercase, no hashtags:
+    non-brand `<input> → <verdict>`; brand A `<input> → <verdict> @handle`; brand B `<input> @handle`."""
+    inp = " ".join(category.strip().lower().split())
+    out = " ".join(verdict.strip().lower().split())
+    h = handle.strip().lower()
+    if h and variant == "B":
+        return f"{inp} {h}"
+    body = f"{inp} {ARROW} {out}"
+    return f"{body} {h}" if h else body
+
+
+def tiktok_variant(rows) -> str:
+    """Alternate A/B across brand TikTok posts by parity of brand posts already sent."""
+    n = sum(1 for r in rows if r.get("network") == "tiktok" and r.get("status") in ("published", "scheduled")
+            and "@" in (r.get("caption") or ""))
+    return TIKTOK_VARIANTS[n % 2]
+
+
+def caption_variant_of(network: str, caption: str) -> str:
+    if network != "tiktok" or "@" not in caption:
+        return ""
+    return "A" if ARROW in caption else "B"
 
 
 def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today: date) -> Tag:
     """The verified handle for this verdict on this network, or no tag and why."""
     if network not in MENTION_NETWORKS:
         return Tag("", f"{network} takes no tags")
-    found = _entry(verdict, allowlist)
+    found = _entry(verdict, allowlist, fuzzy=network != X_NETWORK)  # X: only the account IS the verdict
     if found is None:
         return Tag("", "verdict not on the tag allowlist")
     name, entry = found

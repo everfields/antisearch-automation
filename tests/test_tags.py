@@ -115,7 +115,7 @@ def test_live_tiktok_and_instagram_captions_are_only_the_handle_and_x_is_never_t
     out, creates, log = _live(tmp_path, jobs, env, now, verdicts)
     assert [o.status for o in out] == ["published", "published", "published"]
     by_channel = {c["channelId"]: c for c in creates}
-    assert by_channel["ch-tt"]["text"] == "@k18hair"
+    assert by_channel["ch-tt"]["text"] == "dry shampoo → k18 airwash dry shampoo @k18hair"
     # Buffer has no reel user tags: the mention rides the hashtag caption, last
     assert by_channel["ch-ig"]["text"] == "#hairmask #k18 @k18hair"
     for c in (by_channel["ch-tt"], by_channel["ch-ig"]):
@@ -130,7 +130,7 @@ def test_tags_off_means_empty_captions(tmp_path):
     now = datetime(2026, 9, 28, 13, 10, tzinfo=ET)
     jobs = [Job("p-dry-shampoo", "dry shampoo", ("tiktok",), notes="pool:vertical")]
     out, creates, log = _live(tmp_path, jobs, BUFFER_ENV, now, {"p-dry-shampoo": "k18"})
-    assert out[0].status == "published" and creates[0]["text"] == ""
+    assert out[0].status == "published" and creates[0]["text"] == "dry shampoo → k18"
     assert TagLog(log.path.parent / "tags.csv").rows() == []
 
 
@@ -139,13 +139,13 @@ def test_a_tag_can_repeat_after_seven_days_despite_the_caption_dedupe(tmp_path):
     first = datetime(2026, 9, 28, 13, 10, tzinfo=ET)
     out, creates, _log = _live(tmp_path, [Job("p-a", "dry shampoo", ("tiktok",), notes="pool:vertical")],
                                env, first, {"p-a": "k18"})
-    assert creates[0]["text"] == "@k18hair"
+    assert creates[0]["text"] == "dry shampoo → k18 @k18hair"  # variant A: first brand post
     soon, creates, _ = _live(tmp_path, [Job("p-b", "hair serum", ("tiktok",), notes="pool:vertical")],
                              env, first + timedelta(days=3), {"p-b": "k18"})
-    assert soon[0].status == "published" and creates[0]["text"] == ""  # within 7 days: untagged, still posts
+    assert soon[0].status == "published" and creates[0]["text"] == "hair serum → k18"  # within 7 days: untagged, still posts
     later, creates, _ = _live(tmp_path, [Job("p-c", "hair gel", ("tiktok",), notes="pool:vertical")],
                               env, first + timedelta(days=8), {"p-c": "k18"})
-    assert later[0].status == "published" and creates[0]["text"] == "@k18hair"
+    assert later[0].status == "published" and creates[0]["text"] == "hair gel @k18hair"  # variant B: second brand post
 
 
 def test_x_text_keeps_accents_and_refuses_emoji_links_and_mentions():

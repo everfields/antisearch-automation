@@ -120,7 +120,7 @@ def test_live_instagram_caption_is_hashtags_plus_one_us_mention_and_tiktok_is_un
     assert [o.status for o in out] == ["published", "published"]
     ig, tt = _creates(t)
     assert ig["text"] == "#hairmask #k18 @k18hair"
-    assert tt["text"] == ""  # TikTok unchanged (tags off there, no hashtags ever)
+    assert tt["text"] == "dry shampoo → k18"  # TikTok: input → verdict, tags off there, no hashtags ever
     rows = {r["job_id"]: r for r in log.rows() if r["status"] == "published"}
     assert rows["p-hair-mask"]["caption"] == "#hairmask #k18 @k18hair"
 
