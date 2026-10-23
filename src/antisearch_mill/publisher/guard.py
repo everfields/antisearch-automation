@@ -527,6 +527,7 @@ class PostRow:
     pause: str = ""  # blink | calc: the clip's wait style (TikTok alternates them); blank in old rows = blink
     trend_source: str = ""  # e.g. google:ES for TikTok trend slots
     trend_term: str = ""  # raw Google Trends title before mapping
+    caption_variant: str = ""  # TikTok brand-caption A/B: A = input → verdict @handle, B = input @handle
 
 
 COLUMNS = [f.name for f in fields(PostRow)]

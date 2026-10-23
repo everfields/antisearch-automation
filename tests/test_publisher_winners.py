@@ -96,7 +96,7 @@ def test_the_only_text_is_the_verified_handle(tmp_path):
              ledger, log, {"instagram": ig, "tiktok": tt})
     assert [o.status for o in out] == ["published", "published"]
     # Instagram and TikTok tag only from the tag allowlist (brands, products, companies); a country is none
-    assert ig.calls[0][2] == "#countryforhavingfun #spain" and tt.calls[0][2] == ""
+    assert ig.calls[0][2] == "#countryforhavingfun #spain" and tt.calls[0][2] == "place to party → spain"
 
 
 def test_a_public_figure_publishes_untagged_on_instagram_and_tiktok(tmp_path):
