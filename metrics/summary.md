@@ -1,11 +1,11 @@
-# Social metrics — 2026-10-22 21:46 UTC
+# Social metrics — 2026-10-23 05:04 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **6** (24h +2, 7d +2)
-- account likes: 90, posts: 111
+- account likes: 90, posts: 112
 
 ### last 24h (4 post(s))
 
@@ -13,25 +13,25 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- | --- | --- | --- | --- |
 | `outfit para salir de fiesta` → conjunto negro monocromático | 288 | 1 | 0 | 0 | 0 | 0.3% |
 | `color safe conditioner` → pureology hydrate conditioner | 237 | 0 | 0 | 0 | 0 | 0.0% |
-| `gentle face wash` → vanicream gentle facial cleanser | 235 | 0 | 0 | 0 | 0 | 0.0% |
-| `plan para un fin de semana` → escapada a la montaña | 107 | 1 | 0 | 0 | 0 | 0.9% |
+| `plan para un fin de semana` → escapada a la montaña | 185 | 1 | 0 | 0 | 0 | 0.5% |
+| `city to live in at 25` → new york city | 100 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `plan para un fin de semana` → escapada a la montaña | 0.9% | 107 |
+| `plan para un fin de semana` → escapada a la montaña | 0.5% | 185 |
 | `outfit para salir de fiesta` → conjunto negro monocromático | 0.3% | 288 |
-| `gentle face wash` → vanicream gentle facial cleanser | 0.0% | 235 |
 | `color safe conditioner` → pureology hydrate conditioner | 0.0% | 237 |
+| `city to live in at 25` → new york city | 0.0% | 100 |
 
-### last 7d (51 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `outfit para salir de fiesta` → conjunto negro monocromático | 288 | 1 | 0 | 0 | 0 | 0.3% |
 | `cold brew at home` → oxo good grips cold brew coffee maker | 262 | 0 | 0 | 0 | 0 | 0.0% |
 | `youtuber español` → el rubius | 262 | 2 | 0 | 0 | 0 | 0.8% |
+| `cold brew at home` → oxo good grips cold brew coffee maker | 262 | 0 | 0 | 0 | – | 0.0% |
 | `fire` → campfire | 260 | 1 | 0 | 0 | 0 | 0.4% |
-| `fire` → campfire | 260 | 1 | 0 | 0 | – | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
