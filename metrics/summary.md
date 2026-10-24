@@ -1,45 +1,45 @@
-# Social metrics — 2026-10-23 21:31 UTC
+# Social metrics — 2026-10-24 04:49 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **6** (24h +2, 7d +2)
-- account likes: 92, posts: 115
+- followers: **6** (24h +0, 7d +2)
+- account likes: 93, posts: 116
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `videojuego para jugar con amigos` → minecraft | 265 | 0 | 0 | 0 | 0 | 0.0% |
 | `peli para ver en pareja` → antes del amanecer | 247 | 2 | 0 | 0 | 0 | 0.8% |
-| `city to live in at 25` → new york city | 244 | 0 | 0 | 0 | 0 | 0.0% |
-| `disposable razor` → gillette sensor3 sensitive | 243 | 0 | 0 | 0 | 0 | 0.0% |
-| `videojuego para jugar con amigos` → minecraft | 96 | 0 | 0 | 0 | 0 | 0.0% |
+| `disposable razor` → gillette sensor3 sensitive | 244 | 0 | 0 | 0 | 0 | 0.0% |
+| `curl mousse` → the doux mousse def texture foam | 105 | 1 | 0 | 0 | 0 | 1.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `curl mousse` → the doux mousse def texture foam | 1.0% | 105 |
 | `peli para ver en pareja` → antes del amanecer | 0.8% | 247 |
-| `city to live in at 25` → new york city | 0.0% | 244 |
-| `disposable razor` → gillette sensor3 sensitive | 0.0% | 243 |
-| `videojuego para jugar con amigos` → minecraft | 0.0% | 96 |
+| `disposable razor` → gillette sensor3 sensitive | 0.0% | 244 |
+| `videojuego para jugar con amigos` → minecraft | 0.0% | 265 |
 
-### last 7d (50 post(s))
+### last 7d (52 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `outfit para salir de fiesta` → conjunto negro monocromático | 288 | 1 | 0 | 0 | 0 | 0.3% |
+| `videojuego para jugar con amigos` → minecraft | 265 | 0 | 0 | 0 | 0 | 0.0% |
 | `cold brew at home` → oxo good grips cold brew coffee maker | 262 | 0 | 0 | 0 | 0 | 0.0% |
 | `youtuber español` → el rubius | 262 | 2 | 0 | 0 | 0 | 0.8% |
 | `cold brew at home` → oxo good grips cold brew coffee maker | 262 | 0 | 0 | 0 | – | 0.0% |
-| `fire` → campfire | 260 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `viaje de fin de curso` → mallorca | 1.3% | 237 |
 | `viaje de fin de curso` → mallorca | 1.3% | 237 |
+| `curl mousse` → the doux mousse def texture foam | 1.0% | 105 |
 | `tortilla de patatas` → bar néstor | 0.8% | 239 |
-| `peli de miedo de los 80` → el resplandor | 0.8% | 241 |
-| `peli de miedo de los 80` → el resplandor | 0.8% | 241 |
+| `tortilla de patatas` → bar néstor | 0.8% | 239 |
 
 ## instagram
 
