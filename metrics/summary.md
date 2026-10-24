@@ -1,29 +1,27 @@
-# Social metrics — 2026-10-24 11:18 UTC
+# Social metrics — 2026-10-24 16:05 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **6** (24h +0, 7d +2)
-- account likes: 93, posts: 116
+- account likes: 93, posts: 117
 
-### last 24h (4 post(s))
+### last 24h (3 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `videojuego para jugar con amigos` → minecraft | 277 | 0 | 0 | 0 | 0 | 0.0% |
 | `curl mousse` → the doux mousse def texture foam | 251 | 1 | 0 | 0 | 0 | 0.4% |
-| `peli para ver en pareja` → antes del amanecer | 247 | 2 | 0 | 0 | 0 | 0.8% |
-| `disposable razor` → gillette sensor3 sensitive | 244 | 0 | 0 | 0 | 0 | 0.0% |
+| `sérum para la cara` → skinceuticals c e ferulic | 208 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `peli para ver en pareja` → antes del amanecer | 0.8% | 247 |
 | `curl mousse` → the doux mousse def texture foam | 0.4% | 251 |
-| `disposable razor` → gillette sensor3 sensitive | 0.0% | 244 |
 | `videojuego para jugar con amigos` → minecraft | 0.0% | 277 |
+| `sérum para la cara` → skinceuticals c e ferulic | 0.0% | 208 |
 
-### last 7d (52 post(s))
+### last 7d (51 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -39,7 +37,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `viaje de fin de curso` → mallorca | 1.3% | 237 |
 | `tortilla de patatas` → bar néstor | 0.8% | 239 |
 | `tortilla de patatas` → bar néstor | 0.8% | 239 |
-| `peli de miedo de los 80` → el resplandor | 0.8% | 241 |
+| `peli para ver en pareja` → antes del amanecer | 0.8% | 247 |
 
 ## instagram
 
