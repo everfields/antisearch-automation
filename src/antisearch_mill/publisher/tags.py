@@ -10,8 +10,9 @@ A post tags the verdict's official account only when all of these hold:
 - the network entry has TikTok's `verified: true`, **or** `official_evidence`
   (a brand site / link-in-bio URL when the badge is false), plus a `checked`
   date no older than RECHECK_DAYS;
-- the same handle was not tagged on that network in the last 7 days;
-- tags stay at or below half of the network's posts that day (its slot count).
+- Instagram only: the same handle was not tagged in the cooldown window, and tags stay at or
+  below half of the network's posts that day. TikTok has no cooldown or cap: every brand
+  verdict carries its @handle (founder, 2026-10-23). Names match accent-insensitively.
 
 If anything is unclear, there is no tag. The tag is the whole caption: `@handle`.
 Buffer's API has user tags for images only (`ImageMetadataInput.userTags`), not
@@ -29,6 +30,7 @@ from __future__ import annotations
 import csv
 import json
 import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -114,6 +116,12 @@ def load_allowlist(path: str | Path) -> dict[str, dict]:
     return {normalize_category(k): v for k, v in raw.items() if not k.startswith("_") and isinstance(v, dict)}
 
 
+def _fold(text: str) -> str:
+    """Accent-insensitive match key: "kérastase" -> "kerastase", "hermès" -> "hermes"."""
+    t = unicodedata.normalize("NFKD", normalize_category(text))
+    return "".join(c for c in t if not unicodedata.combining(c))
+
+
 def _phrase_in(phrase: str, text: str) -> bool:
     return bool(phrase) and re.search(rf"(?<![a-z0-9]){re.escape(phrase)}(?![a-z0-9])", text) is not None
 
@@ -124,12 +132,12 @@ def _entry(verdict: str, allowlist: Mapping[str, dict], fuzzy: bool = True) -> t
     "vanicream gentle facial cleanser" -> vanicream, "pureology hydrate conditioner" -> pureology,
     "oxo good grips cold brew coffee maker" -> oxo. Names under 3 characters only match exactly.
     """
-    v = normalize_category(verdict)
+    v = _fold(verdict)
     if not v:
         return None
     longest: tuple[int, str, dict] | None = None
     for name, entry in allowlist.items():
-        names = [name, *(normalize_category(a) for a in entry.get("aliases", []))]
+        names = [_fold(name), *(_fold(a) for a in entry.get("aliases", []))]
         if v in names:
             return name, entry
         if not fuzzy:
@@ -255,6 +263,10 @@ def choose_tag(verdict: str, network: str, env: Mapping[str, str], allowlist: Ma
     if network not in tag_networks(env):
         return Tag("", f"tags are off on {network} (PUBLISHER_TAG_NETWORKS)")
     tag = allowlisted(verdict, network, allowlist, posting_day(now))
+    if network == "tiktok":
+        # Founder, 2026-10-23: EVERY TikTok brand verdict carries the brand's @handle, English or
+        # Spanish lane alike. The 7-day cooldown and the half-of-the-day cap never suppress it.
+        return tag
     return _guarded(tag, network, log, now, slots_today) if tag.handle else tag
 
 

@@ -23,7 +23,7 @@
     "tiktok": {
       "handle": "@k18hair",
       "verified": true,
-      "checked": "2026-09-27",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@k18hair profile data: uniqueId k18hair, nickname K18 Hair, verified true (fetched 2026-09-27); k18hair.com TikTok contest rules name @k18hair as the brand account"
     }
@@ -33,7 +33,7 @@
     "tiktok": {
       "handle": "@starbucks",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@starbucks shows Starbucks as the official US brand account (2.1M followers); starbucks.com social links include TikTok"
     }
@@ -46,7 +46,7 @@
     "tiktok": {
       "handle": "@rarebeauty",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@rarebeauty: Rare Beauty official account, verified badge, linked from rarebeauty.com"
     }
@@ -59,7 +59,7 @@
     "tiktok": {
       "handle": "@newbalance",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@newbalance: New Balance official global account with verified badge; newbalance.com footer links TikTok"
     }
@@ -72,7 +72,7 @@
     "tiktok": {
       "handle": "@theordinary",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@theordinary: DECIEM / The Ordinary official account, verified badge"
     }
@@ -95,7 +95,7 @@
     "tiktok": {
       "handle": "@narscosmetics",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@narscosmetics page JSON verified:true, followerCount 567300, nickname NARS Cosmetics (replaces @narsissist personal account)"
     }
@@ -111,9 +111,10 @@
     "tiktok": {
       "handle": "@skinceuticals",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
-      "evidence": "tiktok.com/@skinceuticals: SkinCeuticals official L'Oréal brand account, verified badge"
+      "evidence": "tiktok.com/@skinceuticals: SkinCeuticals official L'Oréal brand account, verified badge; re-fetched twice 2026-10-25: uniqueId skinceuticals, nickname SkinCeuticals, verified true, ~88.1K followers",
+      "official_evidence": "https://www.tiktok.com/@skinceuticals"
     }
   },
   "ouai": {
@@ -125,7 +126,7 @@
     "tiktok": {
       "handle": "@theouai",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@theouai: OUAI Haircare official account, verified badge; theouai.com links TikTok"
     }
@@ -242,7 +243,7 @@
     "tiktok": {
       "handle": "@cerave",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@cerave is CeraVe's official L'Oréal US skincare account (verified badge); cerave.com social footer links TikTok"
     }
@@ -256,7 +257,7 @@
     "tiktok": {
       "handle": "@fentybeauty",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "fentybeauty.com footer links tiktok.com/@fentybeauty as the official Fenty Beauty account"
     }
@@ -269,7 +270,7 @@
     "tiktok": {
       "handle": "@clinique",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "clinique.com links tiktok.com/@clinique as the official Clinique account"
     }
@@ -282,7 +283,7 @@
     "tiktok": {
       "handle": "@herocosmetics",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "herocosmetics.us footer links tiktok.com/@herocosmetics (Hero Cosmetics official)"
     }
@@ -295,7 +296,7 @@
     "tiktok": {
       "handle": "@milkmakeup",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "milkmakeup.com footer links tiktok.com/@milkmakeup"
     }
@@ -308,7 +309,7 @@
     "tiktok": {
       "handle": "@charlottetilbury",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "charlottetilbury.com/us footer links tiktok.com/@charlottetilbury"
     }
@@ -322,7 +323,7 @@
     "tiktok": {
       "handle": "@colgate",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "colgate.com footer links tiktok.com/@colgate (Colgate-Palmolive US official)"
     }
@@ -336,7 +337,7 @@
     "tiktok": {
       "handle": "@dyson",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "dyson.com social links include tiktok.com/@dyson; @dyson is the global official Dyson account with verified badge"
     }
@@ -349,7 +350,7 @@
     "tiktok": {
       "handle": "@benefitcosmetics",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "benefitcosmetics.com links tiktok.com/@benefitcosmetics (Benefit Cosmetics official)"
     }
@@ -370,7 +371,7 @@
     "tiktok": {
       "handle": "@clifbar",
       "verified": true,
-      "checked": "2026-10-19",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "clifbar.com social links include tiktok.com/@clifbar (Clif Bar & Company US official)"
     }
@@ -389,7 +390,7 @@
     "tiktok": {
       "handle": "@ilovethedoux",
       "verified": false,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "thedoux.com footer links tiktok.com/@ilovethedoux; page JSON verified:false",
       "official_evidence": "https://thedoux.com/"
@@ -404,7 +405,7 @@
     "tiktok": {
       "handle": "@belkin",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@belkin page JSON verified:true, followerCount 205400, nickname Belkin; belkin.com footer links tiktok.com/@belkin"
     }
@@ -417,7 +418,7 @@
     "tiktok": {
       "handle": "@oxo_us",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@oxo_us page JSON verified:true, followerCount 15100, nickname OXO (official US; @oxo is squatted, 29 followers, unverified)"
     }
@@ -432,7 +433,7 @@
     "tiktok": {
       "handle": "@pureology",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@pureology verified:true, 70400 followers"
     }
@@ -446,7 +447,7 @@
     "tiktok": {
       "handle": "@bioionic",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@bioionic verified:true, 73500 followers"
     }
@@ -460,7 +461,7 @@
     "tiktok": {
       "handle": "@paulaschoice",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@paulaschoice verified:true, 190700 followers"
     }
@@ -473,7 +474,7 @@
     "tiktok": {
       "handle": "@essie",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@essie verified:true, 231900 followers"
     }
@@ -486,7 +487,7 @@
     "tiktok": {
       "handle": "@gillette",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@gillette verified:true, 91900 followers"
     }
@@ -499,7 +500,7 @@
     "tiktok": {
       "handle": "@westmanatelier",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@westmanatelier verified:true, 119500 followers"
     }
@@ -512,7 +513,7 @@
     "tiktok": {
       "handle": "@kiaraskynails",
       "verified": false,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "kiarasky.com links tiktok.com/@kiaraskynails; page JSON verified:false, ~937k followers",
       "official_evidence": "https://www.kiarasky.com/"
@@ -526,7 +527,7 @@
     "tiktok": {
       "handle": "@stilacosmetics",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@stilacosmetics verified:true, 121400 followers"
     }
@@ -539,7 +540,7 @@
     "tiktok": {
       "handle": "@neutrogena_us",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@neutrogena_us verified:true, 306100 followers, nickname Neutrogena (@neutrogena squatted)"
     }
@@ -553,7 +554,7 @@
     "tiktok": {
       "handle": "@saltandstone",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@saltandstone verified:true, 69400 followers"
     }
@@ -566,7 +567,7 @@
     "tiktok": {
       "handle": "@reebok",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@reebok verified:true, 214900 followers"
     }
@@ -583,7 +584,7 @@
     "tiktok": {
       "handle": "@patagonia",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@patagonia verified:true, 249100 followers"
     }
@@ -596,7 +597,7 @@
     "tiktok": {
       "handle": "@yeti",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@yeti verified:true, 797300 followers"
     }
@@ -609,7 +610,7 @@
     "tiktok": {
       "handle": "@optimumnutrition_us",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@optimumnutrition_us verified:true, 81300 followers (US; optimumnutrition.com lists @optimumnutrition_ie for IE only)"
     }
@@ -622,7 +623,7 @@
     "tiktok": {
       "handle": "@skratchlabs",
       "verified": false,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "skratchlabs.com links tiktok.com/@skratchlabs; page JSON verified:false",
       "official_evidence": "https://www.skratchlabs.com/"
@@ -636,7 +637,7 @@
     "tiktok": {
       "handle": "@santacruzorganic",
       "verified": false,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "santacruzorganic.com links tiktok.com/@santacruzorganic; page JSON verified:false",
       "official_evidence": "https://www.santacruzorganic.com/"
@@ -650,7 +651,7 @@
     "tiktok": {
       "handle": "@ninjakitchen",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@ninjakitchen verified:true, ~2.1M followers (SharkNinja official)"
     }
@@ -663,7 +664,7 @@
     "tiktok": {
       "handle": "@cosori_official",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "cosori.com footer links tiktok.com/@cosori_official; verified:true, 227900 followers"
     }
@@ -676,7 +677,7 @@
     "tiktok": {
       "handle": "@kitchenaidusa",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@kitchenaidusa verified:true, 146400 followers (@kitchenaid squatted)"
     }
@@ -690,7 +691,7 @@
     "tiktok": {
       "handle": "@vitamix",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@vitamix verified:true, 17000 followers"
     }
@@ -703,7 +704,7 @@
     "tiktok": {
       "handle": "@natashadenona",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@natashadenona verified:true, 665600 followers"
     }
@@ -716,7 +717,7 @@
     "tiktok": {
       "handle": "@summerfridays",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@summerfridays verified:true, 868600 followers"
     }
@@ -729,7 +730,7 @@
     "tiktok": {
       "handle": "@origins",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@origins verified:true, 43400 followers, nickname Origins Skincare"
     }
@@ -742,7 +743,7 @@
     "tiktok": {
       "handle": "@vuoriclothing",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "vuoriclothing.com links tiktok.com/@vuoriclothing; verified:true, 647300 followers"
     }
@@ -757,7 +758,7 @@
     "tiktok": {
       "handle": "@drinkspindrift",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "drinkspindrift.com links tiktok.com/@drinkspindrift; verified:true, 169400 followers"
     }
@@ -777,7 +778,7 @@
     "tiktok": {
       "handle": "@jenisicecreams",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "jenis.com links tiktok.com/@jenisicecreams; verified:true, 236700 followers"
     }
@@ -790,7 +791,7 @@
     "tiktok": {
       "handle": "@breville",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@breville verified:true, 23400 followers"
     }
@@ -803,7 +804,7 @@
     "tiktok": {
       "handle": "@blueshognation",
       "verified": false,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "blueshog.com links tiktok.com/@blueshognation; page JSON verified:false",
       "official_evidence": "https://blueshog.com/"
@@ -817,7 +818,7 @@
     "tiktok": {
       "handle": "@onyxcoffeelab",
       "verified": false,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "onyxcoffeelab.com links tiktok.com/@onyxcoffeelab; page JSON verified:false",
       "official_evidence": "https://onyxcoffeelab.com/"
@@ -838,7 +839,7 @@
     "tiktok": {
       "handle": "@hauslabs",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "hauslabs.com links tiktok.com/@hauslabs; verified:true, 871000 followers"
     }
@@ -857,7 +858,7 @@
     "tiktok": {
       "handle": "@rogaineofficial",
       "verified": true,
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@rogaineofficial page JSON verified:true, followerCount ~12800, nickname Rogaine"
     }
@@ -872,9 +873,39 @@
       "handle": "@officialvanicream",
       "verified": false,
       "official_evidence": "https://www.facebook.com/officialvanicream",
-      "checked": "2026-10-20",
+      "checked": "2026-10-25",
       "by": "cursor agent",
       "evidence": "tiktok.com/@officialvanicream nickname Vanicream™ Sensitive Skin Care, followerCount ~8539, verified:false; aligns with brand social @officialvanicream on Facebook/Instagram"
+    }
+  },
+  "minecraft": {
+    "kind": "brand",
+    "owner": "mojang",
+    "note": "Minecraft by Mojang Studios (Carlos, 2026-10-25)",
+    "tiktok": {
+      "handle": "@minecraft",
+      "verified": true,
+      "official_evidence": "https://www.tiktok.com/@minecraft",
+      "checked": "2026-10-25",
+      "by": "grok bot",
+      "evidence": "tiktok.com/@minecraft fetched twice 2026-10-25 (python requests + curl): uniqueId minecraft, nickname Minecraft, verified true, ~14.3M followers"
+    }
+  },
+  "kérastase": {
+    "kind": "brand",
+    "aliases": [
+      "kerastase",
+      "kérastase curl manifesto bain hydratation douceur",
+      "kerastase curl manifesto bain hydratation douceur"
+    ],
+    "note": "Kérastase (L'Oréal). The bare @kerastase is an unrelated 4-follower user, never tag it.",
+    "tiktok": {
+      "handle": "@kerastase.official",
+      "verified": true,
+      "official_evidence": "https://www.tiktok.com/@kerastase.official",
+      "checked": "2026-10-25",
+      "by": "grok bot",
+      "evidence": "tiktok.com/@kerastase.official fetched twice 2026-10-25: uniqueId kerastase.official, nickname Kérastase, verified true, ~503.8K followers; @kerastase is user14036448501, unverified, 4 followers"
     }
   }
 }

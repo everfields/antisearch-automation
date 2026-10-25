@@ -45,7 +45,7 @@ def test_seed_allowlist_is_japan_on_instagram_then_k18_on_tiktok():
     assert allowlisted("japan", "instagram", allow, DAY).handle == "@visitjapan.us"
     assert allowlisted("k18 airwash dry shampoo", "tiktok", allow, DAY).handle == "@k18hair"
     assert allowlisted("k18", "instagram", allow, DAY).handle == ""
-    assert allowlisted("k18", "tiktok", allow, date(2026, 9, 27) + timedelta(days=RECHECK_DAYS + 1)).handle == ""
+    assert allowlisted("k18", "tiktok", allow, date(2026, 10, 25) + timedelta(days=RECHECK_DAYS + 1)).handle == ""
 
 
 def test_only_verified_recent_brands_products_and_companies():
@@ -65,14 +65,17 @@ def test_same_handle_once_per_seven_days_and_at_most_half_the_day(tmp_path):
     assert choose_tag("k18", "tiktok", {}, ALLOW, log, now, 4).handle == ""  # breaker off
     assert choose_tag("k18", "tiktok", ON, ALLOW, log, now, 4).handle == "@k18hair"
     log.append(now, "tiktok", "@k18hair", "p-a")
-    assert "7 days" in choose_tag("k18", "tiktok", ON, ALLOW, log, now + timedelta(days=6, hours=23), 4).reason
-    assert choose_tag("k18", "tiktok", ON, ALLOW, log, now + timedelta(days=7), 4).handle == "@k18hair"
+    # TikTok (founder, 2026-10-23): every brand verdict carries the @, no cooldown, no cap
+    assert choose_tag("k18", "tiktok", ON, ALLOW, log, now + timedelta(days=6, hours=23), 4).handle == "@k18hair"
     assert choose_tag("k18", "instagram", ON, ALLOW, log, now, 4).handle == "@k18hair"  # per network
+    log.append(now, "instagram", "@k18hair", "p-ig")
+    assert "14 days" in choose_tag("k18", "instagram", ON, ALLOW, log, now + timedelta(days=6), 4).reason
+    log = TagLog(tmp_path / "tags-ig.csv")
     # half the day: 4 slots -> 2 tags; 1 slot -> none
     log.append(now, "instagram", "@other", "p-b")
     log.append(now, "instagram", "@third", "p-c")
     assert "half" in choose_tag("k18", "instagram", ON, ALLOW, log, now, 4).reason
-    assert choose_tag("k18", "tiktok", ON, ALLOW, TagLog(tmp_path / "t2.csv"), now, 1).handle == ""
+    assert choose_tag("k18", "tiktok", ON, ALLOW, TagLog(tmp_path / "t2.csv"), now, 1).handle == "@k18hair"
 
 
 BUFFER_ENV = {
@@ -142,10 +145,10 @@ def test_a_tag_can_repeat_after_seven_days_despite_the_caption_dedupe(tmp_path):
     assert creates[0]["text"] == "dry shampoo → k18 @k18hair"  # variant A: first brand post
     soon, creates, _ = _live(tmp_path, [Job("p-b", "hair serum", ("tiktok",), notes="pool:vertical")],
                              env, first + timedelta(days=3), {"p-b": "k18"})
-    assert soon[0].status == "published" and creates[0]["text"] == "hair serum → k18"  # within 7 days: untagged, still posts
+    assert soon[0].status == "published" and creates[0]["text"] == "hair serum @k18hair"  # TikTok: no cooldown on the @ (B)
     later, creates, _ = _live(tmp_path, [Job("p-c", "hair gel", ("tiktok",), notes="pool:vertical")],
                               env, first + timedelta(days=8), {"p-c": "k18"})
-    assert later[0].status == "published" and creates[0]["text"] == "hair gel @k18hair"  # variant B: second brand post
+    assert later[0].status == "published" and creates[0]["text"] == "hair gel → k18 @k18hair"  # variant A: third brand post
 
 
 def test_x_text_keeps_accents_and_refuses_emoji_links_and_mentions():

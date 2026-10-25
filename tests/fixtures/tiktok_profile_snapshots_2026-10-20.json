@@ -154,7 +154,7 @@
   "jenisicecreams": {
     "handle": "jenisicecreams",
     "unique_id": "jenisicecreams",
-    "nickname": "Jeni\u2019s Splendid Ice Creams",
+    "nickname": "Jeni’s Splendid Ice Creams",
     "verified": true,
     "follower_count": 236800,
     "error": null
@@ -234,7 +234,7 @@
   "officialvanicream": {
     "handle": "officialvanicream",
     "unique_id": "officialvanicream",
-    "nickname": "Vanicream\u2122 Sensitive Skin Care",
+    "nickname": "Vanicream™ Sensitive Skin Care",
     "verified": false,
     "follower_count": 8539,
     "error": null
@@ -421,6 +421,22 @@
     "nickname": "YETI",
     "verified": true,
     "follower_count": 797300,
+    "error": null
+  },
+  "minecraft": {
+    "handle": "minecraft",
+    "unique_id": "minecraft",
+    "nickname": "Minecraft",
+    "verified": true,
+    "follower_count": 14300000,
+    "error": null
+  },
+  "kerastase.official": {
+    "handle": "kerastase.official",
+    "unique_id": "kerastase.official",
+    "nickname": "Kérastase",
+    "verified": true,
+    "follower_count": 503800,
     "error": null
   }
 }
