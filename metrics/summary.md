@@ -1,29 +1,31 @@
-# Social metrics — 2026-10-25 11:48 UTC
+# Social metrics — 2026-10-25 16:36 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +1, 7d +2)
-- account likes: 96, posts: 121
+- account likes: 96, posts: 122
 
-### last 24h (4 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `age to be happy` → your current age | 258 | 1 | 0 | 0 | 0 | 0.4% |
-| `leave-in conditioner` → pureology color fanatic leave-in conditioner | 252 | 1 | 0 | 0 | 0 | 0.4% |
+| `leave-in conditioner` → pureology color fanatic leave-in conditioner | 254 | 1 | 0 | 0 | 0 | 0.4% |
 | `animal to be` → house cat | 246 | 1 | 0 | 0 | 0 | 0.4% |
 | `champú para pelo rizado` → kérastase curl manifesto bain hydratation douceur | 243 | 0 | 0 | 0 | 0 | 0.0% |
+| `snack para el metro` → almendras | 239 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `animal to be` → house cat | 0.4% | 246 |
-| `leave-in conditioner` → pureology color fanatic leave-in conditioner | 0.4% | 252 |
+| `leave-in conditioner` → pureology color fanatic leave-in conditioner | 0.4% | 254 |
 | `age to be happy` → your current age | 0.4% | 258 |
 | `champú para pelo rizado` → kérastase curl manifesto bain hydratation douceur | 0.0% | 243 |
+| `snack para el metro` → almendras | 0.0% | 239 |
 
-### last 7d (49 post(s))
+### last 7d (48 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
