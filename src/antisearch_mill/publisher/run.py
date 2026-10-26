@@ -293,6 +293,13 @@ def run_posts(
         if net == "instagram":
             creative = ig_creative(day, slot_index(net, slots)) if rotation_enabled(env) else CLEAN_COVER
             job = dataclasses.replace(job, creative=creative)
+        elif net == "tiktok":
+            from ..creatives import MIDTYPE
+            from .midtype import tiktok_creative
+
+            if tiktok_creative(day, slot_index(net, slots), env, log.rows()) == MIDTYPE:
+                creative = MIDTYPE
+            job = dataclasses.replace(job, creative=creative)
         problem = caption_problem(job.caption, job.category, net)
         if problem:
             out.append(Outcome(job.id, net, "rejected_caption", detail=problem))
@@ -567,6 +574,15 @@ def _host(cls: type[Adapter], env: Mapping[str, str], transport, sleep, media: M
     return None
 
 
+def creative_variant_of(net: str, job: Job) -> str:
+    """posts.csv `creative_variant` for the TikTok midtype test: midtype | original; blank elsewhere."""
+    if net != "tiktok":
+        return ""
+    from ..creatives import MIDTYPE
+
+    return MIDTYPE if job.creative == MIDTYPE else "original"
+
+
 def tiktok_clip_ok(net: str, clip: ClipRow | None) -> bool:
     """Founder, 2026-10-07: TikTok publishes only the original blink format. A calc clip (formula,
     antisearch.ai end screen) or a saga clip (antisearch.ai outro) never goes out on TikTok."""
@@ -653,7 +669,8 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     log.append(PostRow(job.id, net, PENDING, clip.clip_id, clip.verdict, at=at, category=job.category, caption=shown,
                        format=fmt, due_at=due, creative=job.creative, language=job_language(job),
                        pause=pause, trend_source=trend_source, trend_term=trend_term,
-                       caption_variant=caption_variant_of(net, shown)))
+                       caption_variant=caption_variant_of(net, shown),
+                       creative_variant=creative_variant_of(net, job)))
     adapter = cls(transport, env, sleep=sleep, idempotency_key=f"antisearch-{job.id}")
     if due_at is not None:
         adapter.due_at = due_at
@@ -670,7 +687,8 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
         log.append(PostRow(job.id, net, FAILED, clip.clip_id, clip.verdict, detail=detail[:500], at=at,
                            category=job.category, caption=shown, format=fmt, due_at=due, creative=job.creative,
                            language=job_language(job), pause=pause, trend_source=trend_source, trend_term=trend_term,
-                           caption_variant=caption_variant_of(net, shown)))
+                           caption_variant=caption_variant_of(net, shown),
+                       creative_variant=creative_variant_of(net, job)))
         if is_limit_error(detail):
             state.trip(net, now, detail[:500], flags)
         return Outcome(job.id, net, FAILED, detail=detail)
@@ -678,7 +696,8 @@ def _post_live(cls, job: Job, clip: ClipRow, media: Media, log: PostLog, env, tr
     log.append(PostRow(job.id, net, result.state, clip.clip_id, clip.verdict, result.remote_id, result.url, detail, at,
                        job.category, shown, fmt, due, job.creative, language=job_language(job), pause=pause,
                        trend_source=trend_source, trend_term=trend_term,
-                       caption_variant=caption_variant_of(net, shown)))
+                       caption_variant=caption_variant_of(net, shown),
+                       creative_variant=creative_variant_of(net, job)))
     if result.state in DONE:
         state.note_success(net, posting_day(now), caption=shown, clip_id=clip.clip_id)
     if is_limit_error(detail):

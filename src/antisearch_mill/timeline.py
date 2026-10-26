@@ -589,3 +589,44 @@ def build_timeline(
                 tl = _apply_calc_outro(tl)
         return tl
     raise ValueError(f"unknown clip style {style!r}; use word or app")
+
+
+# Mid-typing TikTok variant (Carlos + Soul, 2026-10-23): the clip opens with the input already
+# partly typed in the field (keyboard fully in, no slide-in, no empty-field intro), then runs
+# exactly like the original: the rest of the typing, Enter, the wait, the verdict.
+MIDTYPE_FRACTION = 0.30
+
+
+def midtype_chars(category: str, fraction: float = MIDTYPE_FRACTION) -> int:
+    """Characters already in the field on frame 0: about `fraction`, at least 1, never all."""
+    n = len(category)
+    if n <= 1:
+        return n
+    return min(n - 1, max(1, round(n * fraction)))
+
+
+def start_mid_typing(tl: Timeline, fraction: float = MIDTYPE_FRACTION) -> Timeline:
+    """Cut the head of a single-input `app` timeline so frame 0 is the frame the
+    `midtype_chars`-th character appears. Every later frame is the original's, shifted."""
+    if tl.style != "app" or tl.submit_frames:
+        raise ValueError("the mid-typing variant needs a single-input app clip")
+    typed = tl.typed
+    k = midtype_chars(typed, fraction)
+    cut = next(s.start for s in tl.states if s.kind == "typing" and len(s.text) == k)
+    if cut <= 0:
+        return tl
+
+    def shift(f: int) -> int:
+        return max(0, f - cut)
+
+    states = tuple(
+        State(shift(s.start), shift(s.end), s.kind, s.text, s.cursor) for s in tl.states if s.end > cut
+    )
+    keyboard = tuple(
+        KeySegment(shift(g.start), shift(g.end), g.k0 if g.start >= cut else _segment_k(g, cut), g.k1)
+        for g in tl.keyboard if g.end > cut
+    )
+    return replace(
+        tl, total_frames=tl.total_frames - cut, states=states, keyboard=keyboard,
+        submit_frame=shift(tl.submit_frame), verdict_frame=shift(tl.verdict_frame),
+    )

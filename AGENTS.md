@@ -74,3 +74,13 @@ How to measure repetition: `docs/proposals/2026-09-28-repetition-metric.md`.
 - An external pinger wakes the publisher like the cron: `workflow_dispatch` with `tick=true`
   (Carlos's box, :11/:26/:41/:56), or a `publisher-tick` `repository_dispatch`
   (docs/PUBLISHER_SETUP.md, "Reliable wakes"). A dispatch without `tick` is a manual run.
+## TikTok mid-typing test (Carlos + Soul, 2026-10-23)
+
+- Creative `midtype`: the clip opens with about 30% of the input already typed (at least one
+  letter) and the keyboard fully in, with no slide-in and no empty field. From there it is the
+  original clip frame for frame (`timeline.start_mid_typing`). Nothing else changes.
+- Fair fixed window (`publisher/midtype.py`): from `PUBLISHER_TT_MIDTYPE_START` (default 2026-10-27),
+  day 0 puts slots 13:07 and 16:07 Madrid on midtype and 20:07 and 00:07 on the original; day 1 swaps
+  them. 05:07 stays original. That gives 4 midtype and 4 matched originals, then original only once 4
+  midtype posts are out (`PUBLISHER_TT_MIDTYPE_POSTS` extends the test, `PUBLISHER_TT_MIDTYPE=off` stops it).
+- posts.csv `creative_variant` is `original` or `midtype` on every TikTok row.
