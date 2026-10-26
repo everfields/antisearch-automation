@@ -5,8 +5,9 @@ A post tags the verdict's official account only when all of these hold:
 - the network is Instagram or TikTok and is in `PUBLISHER_TAG_NETWORKS` (the
   breaker; empty by default, so nothing is tagged until a human turns it on);
 - the verdict is in the curated allowlist (`queue/tags/allowlist.json`) as a
-  `brand`, `product`, or `company`. Never a person, a private individual, or a
-  minor: any other kind, or `sensitive`, is never tagged;
+  `brand`, `product`, or `company`; on TikTok only, also a `person` or `group` marked
+  `public_figure: true` (founder, 2026-10-26: mega celebrities with a verified official
+  account). Never a private individual or a minor; `sensitive` is never tagged;
 - the network entry has TikTok's `verified: true`, **or** `official_evidence`
   (a brand site / link-in-bio URL when the badge is false), plus a `checked`
   date no older than RECHECK_DAYS;
@@ -45,6 +46,10 @@ X_NETWORK = "x"
 MENTION_NETWORKS = (*TAG_NETWORKS, X_NETWORK)
 X_HANDLE = re.compile(r"^@[A-Za-z0-9_]{1,15}$")
 TAG_KINDS = ("brand", "product", "company")
+# Founder, 2026-10-26 (celebrity lane): on TikTok only, a mega public figure or group with a verified
+# official account is tagged exactly like a brand. The entry needs `"public_figure": true`.
+# Instagram and X still never tag a person.
+TIKTOK_PUBLIC_KINDS = ("person", "group")
 RECHECK_DAYS = 30
 TAG_COOLDOWN = timedelta(days=7)
 # Instagram (Carlos, 2026-09-27): the mention rides the hashtag caption, only for a verified
@@ -190,7 +195,9 @@ def allowlisted(verdict: str, network: str, allowlist: Mapping[str, dict], today
     if (any(bad in n for n in names for bad in NEVER_TAG_NAMES)
             or str(entry.get("owner") or "").strip().lower() in NEVER_TAG_OWNERS):
         return Tag("", f"{name} is never tagged (amika or a Bansk brand)")
-    if entry.get("kind") not in TAG_KINDS or entry.get("sensitive"):
+    public = (network == "tiktok" and entry.get("kind") in TIKTOK_PUBLIC_KINDS
+              and entry.get("public_figure") is True)
+    if (entry.get("kind") not in TAG_KINDS and not public) or entry.get("sensitive"):
         return Tag("", f"{name} is not a brand, product, or company")
     account = entry.get(network) or {}
     handle = str(account.get("handle") or "").strip()

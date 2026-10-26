@@ -38,6 +38,8 @@ ROTATE = "rotate"
 TIKTOK_ES_POOL = "tiktok_es"
 TIKTOK_CONCEPT_POOL = "tiktok_concept"
 TIKTOK_ES_CONCEPT_POOL = "tiktok_es_concept"
+TIKTOK_CELEB_POOL = "tiktok_celeb"  # celebrity lane (publisher/celeb.py)
+TIKTOK_ES_CELEB_POOL = "tiktok_es_celeb"
 CONCEPT_EVERY = 3  # one conceptual input about every third TikTok pool post
 ES_JOB_PREFIX = "es-"
 
@@ -98,14 +100,15 @@ def pool_id(category: str, *, lang: str = "") -> str:
 
 
 def pool_networks(pools_dir: Path) -> list[str]:
-    return sorted(p.stem for p in pools_dir.glob("*.txt") if p.stem not in (UNOWNED, TIKTOK_ES_POOL))
+    return sorted(p.stem for p in pools_dir.glob("*.txt") if p.stem not in (UNOWNED, TIKTOK_ES_POOL, TIKTOK_CELEB_POOL, TIKTOK_ES_CELEB_POOL))
 
 
 def spanish_pool_inputs(pools_dir: Path | None = None) -> frozenset[str]:
     """Bare inputs in queue/pools/tiktok_es.txt; the only Spanish allowed under PUBLISHER_LANGUAGE=en."""
     root = pools_dir or Path(__file__).resolve().parents[3] / "queue" / "pools"
     return frozenset(c for c, _ in read_pool(root / f"{TIKTOK_ES_POOL}.txt")) | frozenset(
-        c for c, _ in read_pool(root / f"{TIKTOK_ES_CONCEPT_POOL}.txt"))
+        c for c, _ in read_pool(root / f"{TIKTOK_ES_CONCEPT_POOL}.txt")) | frozenset(
+        c for c, _ in read_pool(root / f"{TIKTOK_ES_CELEB_POOL}.txt"))
 
 
 GRID_ROW = 3  # an Instagram profile grid row
@@ -147,8 +150,13 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
     frozen = store.categories()
     en_file = pools_dir / f"{network}.txt"
     es_file = pools_dir / f"{TIKTOK_ES_POOL}.txt"
+    celeb_en_file = pools_dir / f"{TIKTOK_CELEB_POOL}.txt"
+    celeb_es_file = pools_dir / f"{TIKTOK_ES_CELEB_POOL}.txt"
     own_en = {c for c, f in _lines(en_file) if f != HOLD_FOR_TAG}
     own_es = {c for c, f in _lines(es_file) if f != HOLD_FOR_TAG} if network == "tiktok" else set()
+    if network == "tiktok":  # a celebrity verdict frozen ahead of time posts as frozen, never re-asked
+        own_en |= {c for c, f in _lines(celeb_en_file) if f != HOLD_FOR_TAG}
+        own_es |= {c for c, f in _lines(celeb_es_file) if f != HOLD_FOR_TAG}
     posted_inputs = log.used_inputs()
     spanish_on = network == "tiktok" and tiktok_es_enabled(env or {})
 
@@ -218,6 +226,19 @@ def pool_jobs(network: str, pools_dir: Path, log: PostLog, store: VerdictStore, 
                 jobs.append(job)
     else:
         jobs.extend(es_jobs)
+    if network == "tiktok":
+        # Celebrity lane: candidates ride at the end; run.order_celeb puts them first on the
+        # day's celebrity slot and drops them on every other slot (publisher/celeb.py).
+        for category, caption in [c for c in read_pool(celeb_en_file) if c[0] not in claimed and usable(c[0])][:count]:
+            claimed.add(category)
+            jobs.append(Job(id=pool_id(category), category=category, platforms=(network,), caption=caption,
+                            notes=f"{POOL_NOTE}:celeb"))
+        if spanish_on:
+            for category, caption in [c for c in read_pool(celeb_es_file)
+                                      if c[0] not in claimed and usable(c[0], lang="es")][:count]:
+                claimed.add(category)
+                jobs.append(Job(id=pool_id(category, lang="es"), category=category, platforms=(network,),
+                                caption=caption, notes=f"{POOL_NOTE}:celeb;lang:es"))
     return jobs
 
 

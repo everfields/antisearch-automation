@@ -38,7 +38,10 @@ How to measure repetition: `docs/proposals/2026-09-28-repetition-metric.md`.
   line carries its `@handle` (`search engine` / `kagi` / `@KagiHQ`).
 - **At most 1 mention per post.** The account must be the verdict itself, never its maker or
   owner. It must be in `queue/tags/allowlist.json` with a verified `x` block (evidence, checked
-  within 30 days). Never a person, never amika or any Bansk brand.
+  within 30 days). Never a person on Instagram or X, never amika or any Bansk brand. TikTok celebrity lane
+  (2026-10-26, publisher/celeb.py): one post a day from queue/pools/tiktok_celeb.txt / tiktok_es_celeb.txt
+  (bare inputs, no names, no superlatives) tags a verified public figure like a brand; an untagged verdict is
+  skipped (`skipped_celeb_untagged`). It starts 2026-10-29 and after the midtype window (PR #68).
 - **Never the same account within 14 days**, tracked in publisher-state `tags.csv`.
 - **Unchanged:** X cadence and random offset, no hashtags, links or emoji, no trend-lane,
   winner-lane or reply posts, and the near-duplicate guard.

@@ -4,7 +4,9 @@
 only if every rule below holds, otherwise it goes out untagged.
 
 - **Who:** brands, products, and companies only (`"kind": "brand" | "product" | "company"`).
-  Never a person, a private individual, or a minor. If you are unsure, don't add it.
+  Never a private individual or a minor. If you are unsure, don't add it. Exception (founder, 2026-10-26):
+  mega public figures and groups for the TikTok celebrity lane (`kind: person` or `group`, `public_figure: true`,
+  TikTok block only, verified official account checked twice with scripts/tiktok_profile.py and curl).
 - **Match:** the verdict equals the entry name or one of its `aliases` (lowercase).
 - **Verified:** set `verified` to match TikTok's badge on the profile page JSON. If the
   badge is false but the brand's own site (or Linktree) links the handle, set
@@ -65,7 +67,9 @@ in the last 7 days. Add each only after that check:
 | dyson airwrap co-anda2x | `@dysonhair` | Instagram returned "not found" for this handle; confirm Dyson's real hair account first |
 | skinceuticals c e ferulic | `@skinceuticals` | |
 
-People are never rows (LeBron James, Taylor Swift), whatever the verdict.
+People are never rows on Instagram or X, whatever the verdict. On TikTok only, a `person`/`group` row with
+`public_figure: true` tags like a brand (celebrity lane, src/antisearch_mill/publisher/celeb.py). No athletes,
+politicians or film/series accounts.
 
 **Reverse-oracle candidates** (`candidates-2026-09-27.csv`): large Instagram lifestyle
 accounts, each paired with a short input whose live verdict (one call each, frozen in

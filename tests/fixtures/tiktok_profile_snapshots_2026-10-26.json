@@ -1,0 +1,130 @@
+{
+  "beyonce": {
+    "handle": "beyonce",
+    "unique_id": "beyonce",
+    "nickname": "Beyoncé",
+    "verified": true,
+    "follower_count": 6900000,
+    "error": null
+  },
+  "taylorswift": {
+    "handle": "taylorswift",
+    "unique_id": "taylorswift",
+    "nickname": "Taylor Swift",
+    "verified": true,
+    "follower_count": 33400000,
+    "error": null
+  },
+  "badbunny": {
+    "handle": "badbunny",
+    "unique_id": "badbunny",
+    "nickname": "Bad Bunny",
+    "verified": true,
+    "follower_count": 41300000,
+    "error": null
+  },
+  "billieeilish": {
+    "handle": "billieeilish",
+    "unique_id": "billieeilish",
+    "nickname": "BILLIE EILISH",
+    "verified": true,
+    "follower_count": 74600000,
+    "error": null
+  },
+  "livbedumb": {
+    "handle": "livbedumb",
+    "unique_id": "livbedumb",
+    "nickname": "Olivia Rodrigo",
+    "verified": true,
+    "follower_count": 28300000,
+    "error": null
+  },
+  "britneyspears": {
+    "handle": "britneyspears",
+    "unique_id": "britneyspears",
+    "nickname": "Britney Spears",
+    "verified": true,
+    "follower_count": 10100000,
+    "error": null
+  },
+  "madonna": {
+    "handle": "madonna",
+    "unique_id": "madonna",
+    "nickname": "madonna",
+    "verified": true,
+    "follower_count": 5400000,
+    "error": null
+  },
+  "rihanna": {
+    "handle": "rihanna",
+    "unique_id": "rihanna",
+    "nickname": "Rihanna",
+    "verified": true,
+    "follower_count": 16800000,
+    "error": null
+  },
+  "mrbeast": {
+    "handle": "mrbeast",
+    "unique_id": "mrbeast",
+    "nickname": "MrBeast",
+    "verified": true,
+    "follower_count": 144900000,
+    "error": null
+  },
+  "kai_cenat": {
+    "handle": "kai_cenat",
+    "unique_id": "kai_cenat",
+    "nickname": "Kai Cenat",
+    "verified": true,
+    "follower_count": 25500000,
+    "error": null
+  },
+  "ishowspeed": {
+    "handle": "ishowspeed",
+    "unique_id": "ishowspeed",
+    "nickname": "IShowSpeed",
+    "verified": true,
+    "follower_count": 54500000,
+    "error": null
+  },
+  "playboicarti": {
+    "handle": "playboicarti",
+    "unique_id": "playboicarti",
+    "nickname": "playboicarti",
+    "verified": true,
+    "follower_count": 2500000,
+    "error": null
+  },
+  "rosalia": {
+    "handle": "rosalia",
+    "unique_id": "rosalia",
+    "nickname": "La Rosalia",
+    "verified": true,
+    "follower_count": 32700000,
+    "error": null
+  },
+  "bts_official_bighit": {
+    "handle": "bts_official_bighit",
+    "unique_id": "bts_official_bighit",
+    "nickname": "BTS",
+    "verified": true,
+    "follower_count": 81000000,
+    "error": null
+  },
+  "coldplay": {
+    "handle": "coldplay",
+    "unique_id": "coldplay",
+    "nickname": "coldplay",
+    "verified": true,
+    "follower_count": 8000000,
+    "error": null
+  },
+  "tomorrowland": {
+    "handle": "tomorrowland",
+    "unique_id": "tomorrowland",
+    "nickname": "Tomorrowland",
+    "verified": true,
+    "follower_count": 10000000,
+    "error": null
+  }
+}
