@@ -41,7 +41,8 @@ from .registry import ADAPTERS
 from .igcaption import build_ig_caption, ig_caption_mode, ig_caption_problem
 from .pools import job_language
 from .tags import (TAG_NETWORKS, X_HANDLE, TagLog, caption_variant_of, choose_tag, choose_x_mention,
-                   tiktok_caption, tiktok_variant)
+                   tag_networks, tiktok_caption, tiktok_variant)
+from .brand_guard import DEFAULT_BRANDS, brand_reason, guard_enabled, load_brands
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
 
@@ -421,6 +422,15 @@ def run_posts(
         dedupe_key = shown
         if net == "tiktok":
             handle = tag if tag.startswith("@") else (shown if shown.startswith("@") and " " not in shown else "")
+            if not handle and "tiktok" in tag_networks(env) and guard_enabled(env):
+                why = brand_reason(clip.verdict, load_brands(env.get("PUBLISHER_TIKTOK_BRANDS") or DEFAULT_BRANDS),
+                                   allowlist)
+                if why:
+                    # Founder, 2026-10-23: a brand verdict never posts untagged. Skip; the next input goes.
+                    out.append(Outcome(job.id, net, "skipped_brand_untagged",
+                                       detail=f"verdict {clip.verdict!r} looks like a brand ({why}) with no "
+                                              "allowlisted TikTok handle; add it to queue/tags/allowlist.json"))
+                    continue
             shown = tiktok_caption(job.category, clip.verdict, handle, tiktok_variant(log.rows()) if handle else "A")
             if "#" in shown:
                 out.append(Outcome(job.id, net, "rejected_caption", detail=f"hashtags are not allowed: {shown!r}"))

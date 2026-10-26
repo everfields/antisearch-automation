@@ -907,5 +907,128 @@
       "by": "grok bot",
       "evidence": "tiktok.com/@kerastase.official fetched twice 2026-10-25: uniqueId kerastase.official, nickname Kérastase, verified true, ~503.8K followers; @kerastase is user14036448501, unverified, 4 followers"
     }
+  },
+  "la roche-posay": {
+    "kind": "brand",
+    "aliases": [
+      "la roche posay",
+      "la roche-posay anthelios uvmune 400 spf50+",
+      "la roche-posay uvmune 400 invisible fluid spf50+"
+    ],
+    "tiktok": {
+      "handle": "@larocheposay",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@larocheposay profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId larocheposay, nickname La Roche-Posay, verified true, 795,600 followers",
+      "official_evidence": "https://www.tiktok.com/@larocheposay (TikTok verified badge; nickname 'La Roche-Posay' matches the brand)"
+    }
+  },
+  "aquaphor": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@aquaphor",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@aquaphor profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId aquaphor, nickname AquaphorUS, verified true, 336,800 followers",
+      "official_evidence": "https://www.tiktok.com/@aquaphor (TikTok verified badge; nickname 'AquaphorUS' matches the brand)"
+    }
+  },
+  "armani beauty": {
+    "kind": "brand",
+    "aliases": [
+      "armani",
+      "giorgio armani beauty"
+    ],
+    "tiktok": {
+      "handle": "@armanibeauty",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@armanibeauty profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId armanibeauty, nickname Armani beauty, verified true, 412,400 followers",
+      "official_evidence": "https://www.tiktok.com/@armanibeauty (TikTok verified badge; nickname 'Armani beauty' matches the brand)"
+    }
+  },
+  "oribe": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@oribe",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@oribe profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId oribe, nickname Oribe, verified true, 41,700 followers",
+      "official_evidence": "https://www.tiktok.com/@oribe (TikTok verified badge; nickname 'Oribe' matches the brand)"
+    }
+  },
+  "chanel": {
+    "kind": "brand",
+    "aliases": [
+      "bleu de chanel",
+      "bleu de chanel parfum"
+    ],
+    "tiktok": {
+      "handle": "@chanelofficial",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@chanelofficial profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId chanelofficial, nickname ChanelOfficial, verified true, 1,200,000 followers",
+      "official_evidence": "https://www.tiktok.com/@chanelofficial (TikTok verified badge; nickname 'ChanelOfficial' matches the brand)"
+    }
+  },
+  "laneige": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@laneige_us",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@laneige_us profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId laneige_us, nickname laneige_us, verified true, 1,300,000 followers",
+      "official_evidence": "https://www.tiktok.com/@laneige_us (TikTok verified badge; nickname 'laneige_us' matches the brand)"
+    }
+  },
+  "l'occitane": {
+    "kind": "brand",
+    "aliases": [
+      "l’occitane",
+      "loccitane",
+      "l'occitane en provence"
+    ],
+    "tiktok": {
+      "handle": "@loccitane",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@loccitane profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId loccitane, nickname LOCCITANE, verified true, 351,400 followers",
+      "official_evidence": "https://www.tiktok.com/@loccitane (TikTok verified badge; nickname 'LOCCITANE' matches the brand)"
+    }
+  },
+  "dove advanced care": {
+    "kind": "brand",
+    "aliases": [
+      "dove deodorant",
+      "dove beauty bar",
+      "dove body wash"
+    ],
+    "note": "named by product line, not bare 'dove', so a bird verdict never matches",
+    "tiktok": {
+      "handle": "@dove",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@dove profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId dove, nickname Dove Beauty & Personal Care, verified true, 1,000,000 followers",
+      "official_evidence": "https://www.tiktok.com/@dove (TikTok verified badge; nickname 'Dove Beauty & Personal Care' matches the brand)"
+    }
+  },
+  "clarins": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@clarinsusa",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@clarinsusa profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId clarinsusa, nickname Clarins USA, verified true, 315,100 followers",
+      "official_evidence": "https://www.tiktok.com/@clarinsusa (TikTok verified badge; nickname 'Clarins USA' matches the brand)"
+    }
   }
 }

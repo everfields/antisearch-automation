@@ -438,5 +438,77 @@
     "verified": true,
     "follower_count": 503800,
     "error": null
+  },
+  "larocheposay": {
+    "handle": "larocheposay",
+    "unique_id": "larocheposay",
+    "nickname": "La Roche-Posay",
+    "verified": true,
+    "follower_count": 795600,
+    "error": null
+  },
+  "aquaphor": {
+    "handle": "aquaphor",
+    "unique_id": "aquaphor",
+    "nickname": "AquaphorUS",
+    "verified": true,
+    "follower_count": 336800,
+    "error": null
+  },
+  "armanibeauty": {
+    "handle": "armanibeauty",
+    "unique_id": "armanibeauty",
+    "nickname": "Armani beauty",
+    "verified": true,
+    "follower_count": 412400,
+    "error": null
+  },
+  "oribe": {
+    "handle": "oribe",
+    "unique_id": "oribe",
+    "nickname": "Oribe",
+    "verified": true,
+    "follower_count": 41700,
+    "error": null
+  },
+  "chanelofficial": {
+    "handle": "chanelofficial",
+    "unique_id": "chanelofficial",
+    "nickname": "ChanelOfficial",
+    "verified": true,
+    "follower_count": 1200000,
+    "error": null
+  },
+  "laneige_us": {
+    "handle": "laneige_us",
+    "unique_id": "laneige_us",
+    "nickname": "laneige_us",
+    "verified": true,
+    "follower_count": 1300000,
+    "error": null
+  },
+  "loccitane": {
+    "handle": "loccitane",
+    "unique_id": "loccitane",
+    "nickname": "LOCCITANE",
+    "verified": true,
+    "follower_count": 351400,
+    "error": null
+  },
+  "dove": {
+    "handle": "dove",
+    "unique_id": "dove",
+    "nickname": "Dove Beauty & Personal Care",
+    "verified": true,
+    "follower_count": 1000000,
+    "error": null
+  },
+  "clarinsusa": {
+    "handle": "clarinsusa",
+    "unique_id": "clarinsusa",
+    "nickname": "Clarins USA",
+    "verified": true,
+    "follower_count": 315100,
+    "error": null
   }
 }

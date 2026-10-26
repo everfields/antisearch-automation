@@ -1,0 +1,26 @@
+# Brands seen as TikTok verdicts (posts.csv on publisher-state, to 2026-10-25) that have no
+# allowlisted TikTok handle yet. A TikTok verdict naming one of these is skipped, never posted
+# untagged (src/antisearch_mill/publisher/brand_guard.py). When a brand gets a verified handle in
+# allowlist.json, it may stay here: the allowlist is checked first.
+la roche-posay
+medik8
+aquaphor
+lancome
+armani
+oribe
+ghd
+chanel
+3m
+laneige
+bioderma
+l'occitane
+dove
+henson
+mason pearson
+latisse
+sk-ii
+st. tropez
+clarins
+mountain valley spring water
+unsplash
+roberta's

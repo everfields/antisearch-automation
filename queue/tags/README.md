@@ -73,3 +73,20 @@ accounts, each paired with a short input whose live verdict (one call each, froz
 yet. The verified badge and last-post date are still unconfirmed because Instagram blocked
 logged-out checks. They are awaiting review with Soul and the founder. Superseded by the
 programmatic run in `queue/reverse_oracle/` (run `2026-09-27-r1`), which includes them.
+
+**TikTok brand guard** (2026-10-26, after `protector solar` → `la roche-posay anthelios uvmune 400 spf50+`
+went out with no @ on 2026-10-25): a TikTok verdict with no allowlisted handle that looks like a
+brand or product is skipped (`skipped_brand_untagged`) and the next pool input goes instead; it never
+posts untagged. "Looks like a brand": names an allowlist brand with a TikTok block but no usable handle
+(or with no network block at all), names a brand in `brands.txt` (brands seen as verdicts with no verified
+handle yet), carries a model token (`spf50+`, `990v6`, `al13`), or is 3+ words with a product noun
+(`serum`, `crema`, `champú`...). Heuristic and tests: `src/antisearch_mill/publisher/brand_guard.py`,
+`tests/test_brand_guard.py`. To unblock a skipped input, add the brand's verified TikTok handle here.
+`PUBLISHER_TIKTOK_BRAND_GUARD=off` is the breaker.
+
+Added 2026-10-26 (each fetched twice, `scripts/tiktok_profile.py` and plain curl; verified badge, nickname
+matches): `la roche-posay` @larocheposay, `aquaphor` @aquaphor, `armani beauty` @armanibeauty, `oribe` @oribe,
+`chanel` @chanelofficial, `laneige` @laneige_us, `l'occitane` @loccitane, `dove advanced care` @dove,
+`clarins` @clarinsusa. Not added (no verified, nickname-matching account found): medik8, lancôme, ghd, 3m,
+bioderma (@biodermausa unverified), henson (@hensonshaving unverified), mason pearson (@masonpearson
+unverified), latisse, sk-ii, st. tropez (@sttropeztan unverified), mountain valley, unsplash, roberta's.
