@@ -1,29 +1,29 @@
-# Social metrics — 2026-10-26 13:20 UTC
+# Social metrics — 2026-10-26 20:37 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +2)
-- account likes: 101, posts: 126
+- account likes: 102, posts: 128
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `a tree` → coast redwood | 266 | 1 | 0 | 0 | 0 | 0.4% |
-| `protector solar` → la roche-posay anthelios uvmune 400 spf50+ | 257 | 1 | 0 | 0 | 0 | 0.4% |
-| `clarifying shampoo` → ouai detox shampoo | 255 | 3 | 0 | 0 | 0 | 1.2% |
-| `crema hidratante` → cerave crema hidratante | 86 | 0 | 0 | 0 | 0 | 0.0% |
+| `crema hidratante` → cerave crema hidratante | 257 | 0 | 0 | 0 | 0 | 0.0% |
+| `job to have in your 20s` → software engineer | 249 | 1 | 0 | 0 | 0 | 0.4% |
+| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 81 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `clarifying shampoo` → ouai detox shampoo | 1.2% | 255 |
-| `protector solar` → la roche-posay anthelios uvmune 400 spf50+ | 0.4% | 257 |
+| `job to have in your 20s` → software engineer | 0.4% | 249 |
 | `a tree` → coast redwood | 0.4% | 266 |
-| `crema hidratante` → cerave crema hidratante | 0.0% | 86 |
+| `crema hidratante` → cerave crema hidratante | 0.0% | 257 |
+| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 0.0% | 81 |
 
-### last 7d (47 post(s))
+### last 7d (45 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
