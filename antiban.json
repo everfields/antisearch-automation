@@ -57,7 +57,8 @@
       "animal to be \u2192 house cat",
       "snack para el metro \u2192 almendras",
       "clarifying shampoo \u2192 ouai detox shampoo @theouai",
-      "protector solar \u2192 la roche-posay anthelios uvmune 400 spf50+"
+      "protector solar \u2192 la roche-posay anthelios uvmune 400 spf50+",
+      "a tree \u2192 coast redwood"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -266,7 +267,8 @@
       "p-animal-to-be-111bfb34",
       "es-snack-para-el-metro-286b50ee",
       "p-clarifying-shampoo-f8277137",
-      "es-protector-solar-91faf6e8"
+      "es-protector-solar-91faf6e8",
+      "p-a-tree-c911a4b9"
     ],
     "x": [
       "p-a-feeling-725bad0d",
