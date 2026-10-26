@@ -528,6 +528,7 @@ class PostRow:
     trend_source: str = ""  # e.g. google:ES for TikTok trend slots
     trend_term: str = ""  # raw Google Trends title before mapping
     caption_variant: str = ""  # TikTok brand-caption A/B: A = input → verdict @handle, B = input @handle
+    creative_variant: str = ""  # TikTok creative test: original | midtype (publisher/midtype.py)
 
 
 COLUMNS = [f.name for f in fields(PostRow)]

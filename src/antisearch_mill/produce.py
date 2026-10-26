@@ -15,7 +15,7 @@ from .oracle import Oracle, OracleError, Verdict
 from .render import ClipInfo, Layout, RenderError, extract_poster, probe, render_clip
 from .audio import AUDIO_HEARTBEAT, AUDIO_KEYS, AUDIO_PULSE, audio_tag as make_audio_tag
 from .audio import clip_audio, clip_audio_bed, clip_audio_variant, clip_keys_sound, pulse_for_platforms
-from .creatives import CREATIVES, STORY, finish, id_tag
+from .creatives import CREATIVES, MIDTYPE, STORY, finish, id_tag
 from .phone import FRAME_PHONE, PhoneSpec, clip_frame, phone_background, phone_scale
 from .calc_pause import (
     ALTERNATE_PAUSE, CALC_KILL_SWITCH, CALC_PAUSE, DEFAULT_PAUSE, IG_NETWORK, TIKTOK_NETWORK, CalcVariant, calc_variant, clip_pause, resolve_pause_mode,
@@ -283,6 +283,10 @@ def produce_one(
             wait="fixed" if fixed else "latency", typing=rhythm, pause_mode=pause_mode,
             ig_calc=ig_calc, outro=outro or ig_calc,
         )
+        if creative == MIDTYPE:
+            from .timeline import start_mid_typing
+
+            timeline = start_mid_typing(timeline)
         comment = f"capture={CAPTURE_TAG};oracle={verdict.source};category={verdict.category}"
         if use_audio:
             comment += f";audio={audio_tag}"

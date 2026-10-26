@@ -31,8 +31,9 @@ MONOLITH = "2-medium-monolith"
 COMPUTATION = "3-computation"
 STORY = "story"
 CLEAN_COVER = "0-current-cover"
+MIDTYPE = "midtype"  # TikTok test: opens mid-typing (timeline.start_mid_typing); picture otherwise the current clip
 IG_ROTATION = (CURRENT, SHORT_SCORE, MONOLITH, COMPUTATION)
-CREATIVES = (*IG_ROTATION, CLEAN_COVER, STORY)
+CREATIVES = (*IG_ROTATION, CLEAN_COVER, STORY, MIDTYPE)
 MOTION = (MONOLITH, COMPUTATION)
 
 
@@ -58,7 +59,7 @@ def finish(creative: str, classic: Path, timeline: Timeline, out: Path, *, categ
 
     Every Instagram reel creative carries the output-only cover as its frame 0 (creatives/cover.py) and
     returns its time in seconds; the current clip (TikTok's too) is left as it is and returns None."""
-    if creative in ("", CURRENT):
+    if creative in ("", CURRENT, MIDTYPE):  # midtype is cut in its timeline, not here
         if classic != out:
             shutil.move(str(classic), out)
         return None
