@@ -82,10 +82,10 @@ def _model_token(tok: str) -> bool:
 
 def allowlist_brands(allowlist: Mapping[str, dict] | None) -> list[str]:
     """Names and aliases of allowlist brands that have a TikTok block (usable or not) or no network
-    block at all. Entries with only an Instagram/X block (japan, bali, kagi...) are left out."""
+    block at all; a celebrity (`person`/`group`) counts like a brand. Entries with only an Instagram/X block (japan, bali, kagi...) are left out."""
     out: list[str] = []
     for name, entry in (allowlist or {}).items():
-        if not isinstance(entry, dict) or entry.get("kind") not in ("brand", "product", "company"):
+        if not isinstance(entry, dict) or entry.get("kind") not in ("brand", "product", "company", "person", "group"):
             continue
         if entry.get("tiktok") or not any(entry.get(n) for n in ("instagram", "x", "tiktok")):
             out += [_fold(name), *(_fold(a) for a in entry.get("aliases", []))]

@@ -1,0 +1,27 @@
+# TikTok celebrity lane, English (founder, 2026-10-26; publisher/celeb.py). Bare inputs whose real
+# oracle verdict (one call each, 2026-10-26, dry-run verdict after '#') was a mega account with a
+# verified official TikTok. The publisher asks again at post time; an untagged verdict is skipped.
+pop star
+youtube creator
+k-pop group
+twitch streamer
+gen z icon
+breakup song
+electronic music festival
+fashion icon
+reggaeton artist
+teen heartbreak song
+irl stream
+pop artist
+boy band
+alt pop singer
+song for a crush
+pop princess
+rage rapper
+beauty mogul
+subathon
+pop icon
+tour to see live
+edm festival
+female pop singer
+festival headliner

@@ -1,5 +1,5 @@
 {
-  "_readme": "Tag allowlist for Instagram, TikTok and X mentions. See README.md in this folder. Only brands, products and companies; never people. A handle is tagged only with verified=true and a checked date in the last 30 days.",
+  "_readme": "Tag allowlist for Instagram, TikTok and X mentions. See README.md in this folder. Brands, products and companies; on TikTok only, also mega public figures or groups (kind person/group, public_figure true; founder 2026-10-26). A handle is tagged only with verified=true and a checked date in the last 30 days.",
   "japan": {
     "kind": "brand",
     "note": "Visit Japan: the destination brand of JNTO, Japan's official tourism board (CoS, 2026-09-27)",
@@ -1029,6 +1029,224 @@
       "by": "cursor agent",
       "evidence": "tiktok.com/@clarinsusa profile data fetched twice on 2026-10-26 (scripts/tiktok_profile.py and plain curl): uniqueId clarinsusa, nickname Clarins USA, verified true, 315,100 followers",
       "official_evidence": "https://www.tiktok.com/@clarinsusa (TikTok verified badge; nickname 'Clarins USA' matches the brand)"
+    }
+  },
+  "beyoncé": {
+    "kind": "person",
+    "public_figure": true,
+    "aliases": [
+      "beyonce"
+    ],
+    "tiktok": {
+      "handle": "@beyonce",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "6.9M",
+      "official_evidence": "https://www.tiktok.com/@beyonce",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@beyonce both return uniqueId beyonce, nickname 'Beyoncé', verified true, 6.9M followers"
+    }
+  },
+  "taylor swift": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@taylorswift",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "33.4M",
+      "official_evidence": "https://www.tiktok.com/@taylorswift",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@taylorswift both return uniqueId taylorswift, nickname 'Taylor Swift', verified true, 33.4M followers"
+    }
+  },
+  "bad bunny": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@badbunny",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "41.3M",
+      "official_evidence": "https://www.tiktok.com/@badbunny",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@badbunny both return uniqueId badbunny, nickname 'Bad Bunny', verified true, 41.3M followers"
+    }
+  },
+  "billie eilish": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@billieeilish",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "74.6M",
+      "official_evidence": "https://www.tiktok.com/@billieeilish",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@billieeilish both return uniqueId billieeilish, nickname 'BILLIE EILISH', verified true, 74.6M followers"
+    }
+  },
+  "olivia rodrigo": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@livbedumb",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "28.3M",
+      "official_evidence": "https://www.tiktok.com/@livbedumb",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@livbedumb both return uniqueId livbedumb, nickname 'Olivia Rodrigo', verified true, 28.3M followers"
+    }
+  },
+  "britney spears": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@britneyspears",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "10.1M",
+      "official_evidence": "https://www.tiktok.com/@britneyspears",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@britneyspears both return uniqueId britneyspears, nickname 'Britney Spears', verified true, 10.1M followers"
+    }
+  },
+  "madonna": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@madonna",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "5.4M",
+      "official_evidence": "https://www.tiktok.com/@madonna",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@madonna both return uniqueId madonna, nickname 'madonna', verified true, 5.4M followers"
+    }
+  },
+  "rihanna": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@rihanna",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "16.8M",
+      "official_evidence": "https://www.tiktok.com/@rihanna",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@rihanna both return uniqueId rihanna, nickname 'Rihanna', verified true, 16.8M followers"
+    }
+  },
+  "mrbeast": {
+    "kind": "person",
+    "public_figure": true,
+    "aliases": [
+      "mr beast",
+      "mr. beast"
+    ],
+    "tiktok": {
+      "handle": "@mrbeast",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "144.9M",
+      "official_evidence": "https://www.tiktok.com/@mrbeast",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@mrbeast both return uniqueId mrbeast, nickname 'MrBeast', verified true, 144.9M followers"
+    }
+  },
+  "kai cenat": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@kai_cenat",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "25.5M",
+      "official_evidence": "https://www.tiktok.com/@kai_cenat",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@kai_cenat both return uniqueId kai_cenat, nickname 'Kai Cenat', verified true, 25.5M followers"
+    }
+  },
+  "ishowspeed": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@ishowspeed",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "54.5M",
+      "official_evidence": "https://www.tiktok.com/@ishowspeed",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@ishowspeed both return uniqueId ishowspeed, nickname 'IShowSpeed', verified true, 54.5M followers"
+    }
+  },
+  "playboi carti": {
+    "kind": "person",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@playboicarti",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "2.5M",
+      "official_evidence": "https://www.tiktok.com/@playboicarti",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@playboicarti both return uniqueId playboicarti, nickname 'playboicarti', verified true, 2.5M followers"
+    }
+  },
+  "rosalía": {
+    "kind": "person",
+    "public_figure": true,
+    "aliases": [
+      "rosalia",
+      "la rosalía"
+    ],
+    "tiktok": {
+      "handle": "@rosalia",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "32.7M",
+      "official_evidence": "https://www.tiktok.com/@rosalia",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@rosalia both return uniqueId rosalia, nickname 'La Rosalia', verified true, 32.7M followers"
+    }
+  },
+  "bts": {
+    "kind": "group",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@bts_official_bighit",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "81.0M",
+      "official_evidence": "https://www.tiktok.com/@bts_official_bighit",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@bts_official_bighit both return uniqueId bts_official_bighit, nickname 'BTS', verified true, 81.0M followers"
+    }
+  },
+  "coldplay": {
+    "kind": "group",
+    "public_figure": true,
+    "tiktok": {
+      "handle": "@coldplay",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "8.0M",
+      "official_evidence": "https://www.tiktok.com/@coldplay",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@coldplay both return uniqueId coldplay, nickname 'coldplay', verified true, 8.0M followers"
+    }
+  },
+  "tomorrowland": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@tomorrowland",
+      "verified": true,
+      "checked": "2026-10-26",
+      "by": "grok bot (celebrity lane)",
+      "followers": "10.0M",
+      "official_evidence": "https://www.tiktok.com/@tomorrowland",
+      "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@tomorrowland both return uniqueId tomorrowland, nickname 'Tomorrowland', verified true, 10.0M followers"
     }
   }
 }

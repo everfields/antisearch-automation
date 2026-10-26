@@ -32,7 +32,7 @@ def test_tiktok_es_trial_csv_matches_pool():
 def test_pool_jobs_list_spanish_after_english(tmp_path):
     log = PostLog(tmp_path / "posts.csv")
     store = VerdictStore(tmp_path / "verdicts.csv")
-    jobs = pool_jobs("tiktok", POOLS, log, store, set(), 2, env={})
+    jobs = [j for j in pool_jobs("tiktok", POOLS, log, store, set(), 2, env={}) if "celeb" not in j.notes]
     langs = [job_language(j) for j in jobs]
     assert langs == ["en", "en", "es", "es"]
     es = {c for c, _ in read_pool(POOLS / f"{TIKTOK_ES_POOL}.txt")}
@@ -43,7 +43,7 @@ def test_spanish_kill_switch(tmp_path):
     log = PostLog(tmp_path / "posts.csv")
     store = VerdictStore(tmp_path / "verdicts.csv")
     jobs = pool_jobs("tiktok", POOLS, log, store, set(), 2, env={"PUBLISHER_TIKTOK_ES_EVERY": "0"})
-    assert [job_language(j) for j in jobs] == ["en", "en"]
+    assert [job_language(j) for j in jobs] == ["en"] * 4  # 2 regular + 2 celebrity, no Spanish
     assert not tiktok_es_enabled({"PUBLISHER_TIKTOK_ES_EVERY": "0"})
     assert tiktok_es_enabled({}) and tiktok_es_enabled({"PUBLISHER_TIKTOK_ES_EVERY": "3"})
 

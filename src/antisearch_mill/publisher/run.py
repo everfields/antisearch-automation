@@ -42,6 +42,7 @@ from .igcaption import build_ig_caption, ig_caption_mode, ig_caption_problem
 from .pools import job_language
 from .tags import (TAG_NETWORKS, X_HANDLE, TagLog, caption_variant_of, choose_tag, choose_x_mention,
                    tag_networks, tiktok_caption, tiktok_variant)
+from .celeb import is_celeb, order_celeb
 from .brand_guard import DEFAULT_BRANDS, brand_reason, guard_enabled, load_brands
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
@@ -194,6 +195,16 @@ def run_posts(
         return slot_language("tiktok", slot_times(day, slots)[i], env)
 
     jobs = order_by_slot_language(jobs, tiktok_slot_language, out)
+
+    def tiktok_celeb_turn() -> bool:
+        """True when the TikTok slot a post now would fill is today's celebrity slot (publisher/celeb.py)."""
+        from .celeb import is_celeb_turn
+
+        slots = slots_now("tiktok")
+        return bool(slots) and is_celeb_turn(day, slot_index("tiktok", slots), env, log.rows())
+
+    if any(is_celeb(j.notes) for j in jobs):
+        jobs = order_celeb(jobs, tiktok_celeb_turn())
 
     for job in jobs:
         if only and job.id not in only:
@@ -438,6 +449,12 @@ def run_posts(
                                        detail=f"verdict {clip.verdict!r} looks like a brand ({why}) with no "
                                               "allowlisted TikTok handle; add it to queue/tags/allowlist.json"))
                     continue
+            if not handle and is_celeb(job.notes):
+                # Celebrity lane: the point is the tag. A verdict without an allowlisted handle waits.
+                out.append(Outcome(job.id, net, "skipped_celeb_untagged",
+                                   detail=f"celebrity-lane verdict {clip.verdict!r} has no allowlisted TikTok "
+                                          "handle; add the official account to queue/tags/allowlist.json"))
+                continue
             shown = tiktok_caption(job.category, clip.verdict, handle, tiktok_variant(log.rows()) if handle else "A")
             if "#" in shown:
                 out.append(Outcome(job.id, net, "rejected_caption", detail=f"hashtags are not allowed: {shown!r}"))

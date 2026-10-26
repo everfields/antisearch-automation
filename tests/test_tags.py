@@ -275,9 +275,10 @@ def test_allowlist_tiktok_handles_match_recorded_profile_snapshots():
     from scripts.tiktok_profile import assert_handle_matches_snapshot
 
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
-    snaps = json.loads(
-        (ROOT / "tests" / "fixtures" / "tiktok_profile_snapshots_2026-10-20.json").read_text(encoding="utf-8")
-    )
+    snaps = {}
+    for day in ("2026-10-20", "2026-10-26"):  # 10-26: celebrity lane handles
+        snaps.update(json.loads(
+            (ROOT / "tests" / "fixtures" / f"tiktok_profile_snapshots_{day}.json").read_text(encoding="utf-8")))
     handles = sorted(
         {
             str((entry.get("tiktok") or {}).get("handle") or "").lstrip("@").lower()
