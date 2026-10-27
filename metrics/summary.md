@@ -1,29 +1,29 @@
-# Social metrics — 2026-10-27 00:36 UTC
+# Social metrics — 2026-10-27 09:11 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +2)
-- account likes: 105, posts: 128
+- account likes: 105, posts: 129
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a tree` → coast redwood | 266 | 1 | 0 | 0 | 0 | 0.4% |
 | `crema hidratante` → cerave crema hidratante | 257 | 0 | 0 | 0 | 0 | 0.0% |
+| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 249 | 3 | 0 | 0 | 0 | 1.2% |
 | `job to have in your 20s` → software engineer | 249 | 1 | 0 | 0 | 0 | 0.4% |
-| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 242 | 3 | 0 | 0 | 0 | 1.2% |
+| `a flower` → rose | 244 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 242 |
+| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 249 |
 | `job to have in your 20s` → software engineer | 0.4% | 249 |
-| `a tree` → coast redwood | 0.4% | 266 |
 | `crema hidratante` → cerave crema hidratante | 0.0% | 257 |
+| `a flower` → rose | 0.0% | 244 |
 
-### last 7d (45 post(s))
+### last 7d (44 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -35,7 +35,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 242 |
+| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 249 |
 | `clarifying shampoo` → ouai detox shampoo | 1.2% | 255 |
 | `tortilla de patatas` → bar néstor | 0.8% | 239 |
 | `tortilla de patatas` → bar néstor | 0.8% | 239 |
