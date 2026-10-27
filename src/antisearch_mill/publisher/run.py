@@ -282,7 +282,7 @@ def run_posts(
         trend_geo = None
         skipped_trend_mapped: set[str] = set()
         trend_source, trend_term = "", ""
-        if net == "tiktok" and from_pool:
+        if net == "tiktok" and from_pool and not is_celeb(job.notes):  # a celebrity input stays itself
             trend_geo = trend_geo_for_slot(when, env)
             if trend_geo:
                 pick = pick_tiktok_trend(
