@@ -55,6 +55,7 @@ def test_networks_lists_every_adapter(tmp_path, capsys):
 
 @requires_ffmpeg
 def test_post_dry_run_end_to_end(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("PUBLISHER_TT_MIDTYPE", "off")  # date-independent: the midtype test window is live 2026-10-27+
     queue = tmp_path / "q.csv"
     queue.write_text(
         "id,category,platforms,caption\n"

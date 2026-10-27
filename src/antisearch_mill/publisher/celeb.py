@@ -28,6 +28,11 @@ from . import midtype
 CELEB_NOTE = "pool:celeb"
 CELEB_SLOT_CYCLE = (1, 0, 3)
 DEFAULT_START = date(2026, 10, 29)
+# One-off early turns (founder, Carlos, 2026-10-28 00:01 Madrid: "Let's try some famous people
+# tonight in US", "uno o dos"): posting day -> slot indexes whose regular input is replaced by a
+# celebrity input, regardless of the start date and the midtype window. Slot 3 is the 00:07 en
+# slot and slot 4 the 05:07 en slot; both are `original` slots in the midtype test that day.
+FORCED_TURNS: dict[date, tuple[int, ...]] = {date(2026, 10, 27): (3, 4)}
 
 
 def enabled(env: Mapping[str, str]) -> bool:
@@ -58,6 +63,8 @@ def celeb_slot(day: date, env: Mapping[str, str]) -> int | None:
 def is_celeb_turn(day: date, slot_index: int, env: Mapping[str, str], rows: Iterable[Mapping[str, str]]) -> bool:
     if not enabled(env):
         return False
+    if slot_index in FORCED_TURNS.get(day, ()):
+        return True
     slot = celeb_slot(day, env)
     return slot is not None and slot == slot_index and midtype_done(env, list(rows))
 

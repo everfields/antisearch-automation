@@ -47,6 +47,7 @@ def test_dry_run_never_asks_and_replays_frozen_verdicts(tmp_path):
 
 @requires_ffmpeg
 def test_mill_post_dry_run_never_calls_the_real_oracle(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("PUBLISHER_TT_MIDTYPE", "off")  # date-independent: the midtype test window is live 2026-10-27+
     def boom(self, category):
         raise AssertionError("dry-run called the real oracle")
 

@@ -108,3 +108,13 @@ def test_live_celebrity_verdict_without_a_handle_is_skipped(tmp_path):
     out, creates, _ = _live(tmp_path, jobs, env, now, {"p-rapper": "kendrick lamar", "p-animal": "house cat"})
     assert ("p-rapper", "skipped_celeb_untagged") in [(o.job_id, o.status) for o in out]
     assert all("kendrick" not in (c.get("text") or "") for c in creates)
+
+
+def test_forced_turns_tonight_only():
+    from datetime import date
+    from antisearch_mill.publisher.celeb import is_celeb_turn
+    assert is_celeb_turn(date(2026, 10, 27), 3, {}, [])
+    assert is_celeb_turn(date(2026, 10, 27), 4, {}, [])
+    assert not is_celeb_turn(date(2026, 10, 27), 2, {}, [])
+    assert not is_celeb_turn(date(2026, 10, 27), 3, {"PUBLISHER_TT_CELEB": "off"}, [])
+    assert not is_celeb_turn(date(2026, 10, 28), 3, {}, [])
