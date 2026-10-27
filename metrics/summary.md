@@ -1,29 +1,35 @@
-# Social metrics — 2026-10-27 09:11 UTC
+# Social metrics — 2026-10-27 15:26 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +2)
-- account likes: 105, posts: 129
+- account likes: 105, posts: 130
 
-### last 24h (4 post(s))
+### last 24h (7 post(s))
+
+**1 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `crema hidratante` → cerave crema hidratante | 257 | 0 | 0 | 0 | 0 | 0.0% |
 | `aceite para el pelo` → kérastase elixir ultime l’huile originale | 249 | 3 | 0 | 0 | 0 | 1.2% |
 | `job to have in your 20s` → software engineer | 249 | 1 | 0 | 0 | 0 | 0.4% |
+| `job to have in your 20s` → software engineer | 249 | 1 | 0 | 0 | – | 0.4% |
+| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 249 | 3 | 0 | 0 | – | 1.2% |
 | `a flower` → rose | 244 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 249 |
+| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 249 |
 | `job to have in your 20s` → software engineer | 0.4% | 249 |
-| `crema hidratante` → cerave crema hidratante | 0.0% | 257 |
+| `job to have in your 20s` → software engineer | 0.4% | 249 |
 | `a flower` → rose | 0.0% | 244 |
 
-### last 7d (44 post(s))
+### last 7d (55 post(s))
+
+**1 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -36,10 +42,10 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 249 |
+| `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 249 |
+| `clarifying shampoo` → ouai detox shampoo | 1.2% | 255 |
 | `clarifying shampoo` → ouai detox shampoo | 1.2% | 255 |
 | `tortilla de patatas` → bar néstor | 0.8% | 239 |
-| `tortilla de patatas` → bar néstor | 0.8% | 239 |
-| `peli para ver en pareja` → antes del amanecer | 0.8% | 248 |
 
 ## instagram
 
