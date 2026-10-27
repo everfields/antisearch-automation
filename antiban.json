@@ -65,7 +65,8 @@
       "a flower \u2192 rose",
       "libro para el tren \u2192 asesinato en el orient express",
       "pimple patches @herocosmetics",
-      "mascarilla capilar \u2192 k18 leave-in molecular repair hair mask @k18hair"
+      "mascarilla capilar \u2192 k18 leave-in molecular repair hair mask @k18hair",
+      "hobby to pick up \u2192 gardening"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -282,7 +283,8 @@
       "p-a-flower-b7875caa",
       "es-libro-para-el-tren-5ec462e8",
       "p-pimple-patches-b78049bb",
-      "es-mascarilla-capilar-e1682daf"
+      "es-mascarilla-capilar-e1682daf",
+      "p-hobby-to-pick-up-171a553c"
     ],
     "x": [
       "p-a-feeling-725bad0d",
