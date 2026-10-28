@@ -1,31 +1,27 @@
-# Social metrics — 2026-10-28 13:14 UTC
+# Social metrics — 2026-10-28 20:23 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **7** (24h +0, 7d +2)
-- account likes: 112, posts: 134
+- followers: **7** (24h +0, 7d +3)
+- account likes: 113, posts: 135
 
-### last 24h (5 post(s))
+### last 24h (3 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `hobby to pick up` → gardening | 276 | 4 | 0 | 0 | 0 | 1.4% |
-| `mascarilla capilar` → k18 leave-in molecular repair hair mask | 255 | 2 | 0 | 0 | 0 | 0.8% |
-| `pimple patches` → hero mighty patch original | 242 | 1 | 1 | 0 | 0 | 0.8% |
-| `libro para el tren` → asesinato en el orient express | 239 | 0 | 0 | 0 | 0 | 0.0% |
-| `perfume para hombre` → bleu de chanel parfum | 40 | 0 | 0 | 0 | 0 | 0.0% |
+| `perfume para hombre` → bleu de chanel parfum | 244 | 0 | 0 | 0 | 0 | 0.0% |
+| `hyaluronic acid serum` → skinceuticals h.a. intensifier multi-glycan | 189 | 1 | 0 | 0 | 0 | 0.5% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `hobby to pick up` → gardening | 1.4% | 276 |
-| `pimple patches` → hero mighty patch original | 0.8% | 242 |
-| `mascarilla capilar` → k18 leave-in molecular repair hair mask | 0.8% | 255 |
-| `libro para el tren` → asesinato en el orient express | 0.0% | 239 |
-| `perfume para hombre` → bleu de chanel parfum | 0.0% | 40 |
+| `hyaluronic acid serum` → skinceuticals h.a. intensifier multi-glycan | 0.5% | 189 |
+| `perfume para hombre` → bleu de chanel parfum | 0.0% | 244 |
 
-### last 7d (53 post(s))
+### last 7d (50 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
