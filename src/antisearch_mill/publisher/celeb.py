@@ -31,8 +31,10 @@ DEFAULT_START = date(2026, 10, 29)
 # One-off early turns (founder, Carlos, 2026-10-28 00:01 Madrid: "Let's try some famous people
 # tonight in US", "uno o dos"): posting day -> slot indexes whose regular input is replaced by a
 # celebrity input, regardless of the start date and the midtype window. Slot 3 is the 00:07 en
-# slot and slot 4 the 05:07 en slot; both are `original` slots in the midtype test that day.
-FORCED_TURNS: dict[date, tuple[int, ...]] = {date(2026, 10, 27): (3, 4)}
+# slot and slot 4 the 05:07 en slot. Posting day 2026-10-27 never posted one (00:07 went before the
+# merge, 05:07 never ran), so it moves to posting day 2026-10-28: 00:07 and 05:07 Madrid on Oct 29
+# (19:07 and 00:07 New York). Only the input changes; the midtype creative of each slot is unchanged.
+FORCED_TURNS: dict[date, tuple[int, ...]] = {date(2026, 10, 28): (3, 4)}
 
 
 def enabled(env: Mapping[str, str]) -> bool:
