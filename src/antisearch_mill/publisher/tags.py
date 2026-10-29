@@ -159,21 +159,18 @@ TIKTOK_VARIANTS = ("A", "B")
 
 def tiktok_caption(category: str, verdict: str, handle: str = "", variant: str = "A") -> str:
     """TikTok caption (founder, 2026-10-23), plain and lowercase, no hashtags:
-    non-brand `<input> → <verdict>`; brand A `<input> → <verdict> @handle`; brand B `<input> @handle`."""
+    non-brand `<input> → <verdict>`; with a handle `<input> → <verdict> @handle`.
+    Variant B (`<input> @handle`) was dropped by the founder on 2026-10-29: `variant` is ignored."""
     inp = " ".join(category.strip().lower().split())
     out = " ".join(verdict.strip().lower().split())
     h = handle.strip().lower()
-    if h and variant == "B":
-        return f"{inp} {h}"
     body = f"{inp} {ARROW} {out}"
     return f"{body} {h}" if h else body
 
 
 def tiktok_variant(rows) -> str:
-    """Alternate A/B across brand TikTok posts by parity of brand posts already sent."""
-    n = sum(1 for r in rows if r.get("network") == "tiktok" and r.get("status") in ("published", "scheduled")
-            and "@" in (r.get("caption") or ""))
-    return TIKTOK_VARIANTS[n % 2]
+    """Always A since 2026-10-29 (founder dropped variant B); the A/B alternation is retired."""
+    return "A"
 
 
 def caption_variant_of(network: str, caption: str) -> str:
