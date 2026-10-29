@@ -1,6 +1,6 @@
 """Spanish TikTok by slot. Since 2026-10-09 (founder) TikTok reach slots are pinned to Madrid wall
 time. Since 2026-10-19: 13:07 and 20:07 Spanish, 16:07 / 00:07 / 05:07 English (05:07 is the US
-trend slot; 03:07 removed): 5 a day, 2+ hours apart. Spanish never goes out outside 13:00-23:59 Madrid."""
+trend slot; 03:07 removed): 5 a day. Since 2026-10-29 also 02:07, 03:37, 06:37 English (US night): 8 a day, 90+ min apart. Spanish never goes out outside 13:00-23:59 Madrid."""
 
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -15,7 +15,18 @@ ET = ZoneInfo("America/New_York")
 MADRID = ZoneInfo("Europe/Madrid")
 REACH = {"PUBLISHER_CADENCE": "reach"}
 ENV = {**LIVE_ENV, **REACH, "PUBLISHER_LIVE_NETWORKS": "tiktok"}
-SCHEDULE = [("13:07", "es"), ("16:07", "en"), ("20:07", "es"), ("00:07", "en"), ("05:07", "en")]
+SCHEDULE = [("13:07", "es"), ("16:07", "en"), ("20:07", "es"), ("00:07", "en"), ("02:07", "en"), ("03:37", "en"), ("05:07", "en"), ("06:37", "en")]  # +02:07/03:37/06:37 en (US night, 2026-10-29)
+
+
+def _spring_forward(day: date) -> bool:
+    """The posting day whose night is the EU spring-forward: 02:07 Madrid does not exist then."""
+    from datetime import time as _t
+    nxt = day + timedelta(days=1)
+    return datetime.combine(nxt, _t(2, 7), tzinfo=MADRID).astimezone(ZoneInfo("UTC")).astimezone(MADRID).hour != 2
+
+
+def _expected(day: date):
+    return [s for s in SCHEDULE if not (_spring_forward(day) and s[0] == "02:07")]
 
 
 def _plan(day: date, env=REACH):
@@ -28,21 +39,21 @@ def test_daily_schedule_in_madrid():
     assert _plan(date(2027, 1, 12)) == SCHEDULE  # winter
     assert _plan(date(2026, 10, 27)) == SCHEDULE  # EU on winter time, US not yet
     assert _plan(date(2027, 3, 20)) == SCHEDULE  # US on summer time, EU not yet
-    assert [f"{t:%H:%M}" for t in madrid_slots_et(date(2026, 10, 9))] == ["07:07", "10:07", "14:07", "18:07", "23:07"]
-    assert [f"{t:%H:%M}" for t in madrid_slots_et(date(2026, 10, 27))] == ["08:07", "11:07", "15:07", "19:07", "00:07"]
+    assert [f"{t:%H:%M}" for t in madrid_slots_et(date(2026, 10, 9))] == ["07:07", "10:07", "14:07", "18:07", "20:07", "21:37", "23:07", "00:37"]
+    assert [f"{t:%H:%M}" for t in madrid_slots_et(date(2026, 10, 27))] == ["08:07", "11:07", "15:07", "19:07", "21:07", "22:37", "00:07", "01:37"]
 
 
 def test_every_day_of_two_years_keeps_the_madrid_schedule():
     d = date(2026, 1, 1)
     while d < date(2028, 1, 1):
         times = slot_times(d, slots_for("tiktok", REACH, d))
-        assert _plan(d) == SCHEDULE, d
-        assert all(b - a >= timedelta(hours=2) for a, b in zip(times, times[1:])), d
+        assert _plan(d) == _expected(d), d
+        assert all(b - a >= timedelta(minutes=90) for a, b in zip(times, times[1:])), d
         assert all(posting_day(t) == d for t in times), d
         for t in times:
             if slot_language("tiktok", t, REACH) == "es":
                 assert 13 <= t.astimezone(MADRID).hour <= 23, (d, t)
-            assert not 6 <= t.astimezone(MADRID).hour < 13, (d, t)  # nothing in the Madrid morning
+            assert not 7 <= t.astimezone(MADRID).hour < 13, (d, t)  # nothing in the Madrid morning (06:37 is the last US-night slot)
         d += timedelta(days=1)
 
 
@@ -96,15 +107,15 @@ def test_kill_switch_posts_english_on_spanish_slots(ledger, log):  # noqa: F811
     assert [o.job_id for o in out if o.status == "published"] == ["p-en-thing"]
 
 
-def test_jitter_keeps_tiktok_slots_two_hours_apart_so_none_is_skipped():
+def test_jitter_keeps_tiktok_slots_90_min_apart_so_none_is_skipped():
     from antisearch_mill.publisher.jitter import slot_offsets
     d = date(2026, 1, 1)
     while d < date(2027, 1, 1):
         slots = slots_for("tiktok", REACH, d)
         offs = slot_offsets("tiktok", d, slots, REACH)
         at = [n + o for n, o in zip(slot_times(d, slots), offs)]
-        assert all(b - a >= timedelta(hours=2) for a, b in zip(at, at[1:])), d
-        assert all(timedelta(0) <= o <= timedelta(minutes=40) for o in offs), d
+        assert all(b - a >= timedelta(minutes=90) for a, b in zip(at, at[1:])), d
+        assert all(timedelta(0) <= o <= timedelta(minutes=60) for o in offs), d  # 40, rarely up to 60 (jitter.py)
         d += timedelta(days=1)
 
 

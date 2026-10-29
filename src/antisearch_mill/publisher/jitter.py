@@ -34,6 +34,10 @@ def _draws(day: date, network: str, slot: time) -> Iterator[int]:
     for _ in range(400):
         yield rng.randint(0, MAX_OFFSET)
     yield from range(MAX_OFFSET + 1)
+    # TikTok's US-night slots sit exactly TIKTOK_MIN_SPACING apart (2026-10-29): when the previous
+    # slot drew a late minute and the only fitting one is taken, go a little past MAX_OFFSET rather
+    # than fall back to 0 (which the spacing guard would then skip).
+    yield from range(MAX_OFFSET + 1, MAX_OFFSET + 21)
 
 
 def _pick(day: date, network: str, slot: time, nominal: datetime, taken: set[datetime],
