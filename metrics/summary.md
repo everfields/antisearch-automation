@@ -1,27 +1,29 @@
-# Social metrics — 2026-10-29 01:04 UTC
+# Social metrics — 2026-10-29 10:13 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +3)
-- account likes: 113, posts: 136
+- account likes: 114, posts: 137
 
-### last 24h (3 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `perfume de mujer` → chanel coco mademoiselle eau de parfum | 261 | 1 | 0 | 0 | 0 | 0.4% |
 | `perfume para hombre` → bleu de chanel parfum | 244 | 0 | 0 | 0 | 0 | 0.0% |
-| `hyaluronic acid serum` → skinceuticals h.a. intensifier multi-glycan | 239 | 1 | 0 | 0 | 0 | 0.4% |
-| `perfume de mujer` → chanel coco mademoiselle eau de parfum | 200 | 1 | 0 | 0 | 0 | 0.5% |
+| `hyaluronic acid serum` → skinceuticals h.a. intensifier multi-glycan | 240 | 1 | 0 | 0 | 0 | 0.4% |
+| `pop star` → beyoncé | 240 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `perfume de mujer` → chanel coco mademoiselle eau de parfum | 0.5% | 200 |
-| `hyaluronic acid serum` → skinceuticals h.a. intensifier multi-glycan | 0.4% | 239 |
+| `hyaluronic acid serum` → skinceuticals h.a. intensifier multi-glycan | 0.4% | 240 |
+| `pop star` → beyoncé | 0.4% | 240 |
+| `perfume de mujer` → chanel coco mademoiselle eau de parfum | 0.4% | 261 |
 | `perfume para hombre` → bleu de chanel parfum | 0.0% | 244 |
 
-### last 7d (49 post(s))
+### last 7d (50 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
