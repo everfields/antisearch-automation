@@ -1,37 +1,37 @@
-# Social metrics — 2026-10-29 10:13 UTC
+# Social metrics — 2026-10-29 18:33 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +3)
-- account likes: 114, posts: 137
+- account likes: 116, posts: 139
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `perfume de mujer` → chanel coco mademoiselle eau de parfum | 261 | 1 | 0 | 0 | 0 | 0.4% |
-| `perfume para hombre` → bleu de chanel parfum | 244 | 0 | 0 | 0 | 0 | 0.0% |
-| `hyaluronic acid serum` → skinceuticals h.a. intensifier multi-glycan | 240 | 1 | 0 | 0 | 0 | 0.4% |
-| `pop star` → beyoncé | 240 | 1 | 0 | 0 | 0 | 0.4% |
+| `canción para un desamor` → el triste — josé josé | 251 | 1 | 0 | 0 | 0 | 0.4% |
+| `pop star` → beyoncé | 245 | 1 | 0 | 0 | 0 | 0.4% |
+| `youtube creator` → mrbeast | 130 | 1 | 0 | 0 | 0 | 0.8% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `hyaluronic acid serum` → skinceuticals h.a. intensifier multi-glycan | 0.4% | 240 |
-| `pop star` → beyoncé | 0.4% | 240 |
+| `youtube creator` → mrbeast | 0.8% | 130 |
+| `pop star` → beyoncé | 0.4% | 245 |
+| `canción para un desamor` → el triste — josé josé | 0.4% | 251 |
 | `perfume de mujer` → chanel coco mademoiselle eau de parfum | 0.4% | 261 |
-| `perfume para hombre` → bleu de chanel parfum | 0.0% | 244 |
 
-### last 7d (50 post(s))
+### last 7d (48 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `outfit para salir de fiesta` → conjunto negro monocromático | 288 | 1 | 0 | 0 | 0 | 0.3% |
-| `outfit para salir de fiesta` → conjunto negro monocromático | 288 | 1 | 0 | 0 | – | 0.3% |
 | `videojuego para jugar con amigos` → minecraft | 279 | 0 | 0 | 0 | 0 | 0.0% |
 | `videojuego para jugar con amigos` → minecraft | 279 | 0 | 0 | 0 | – | 0.0% |
 | `hobby to pick up` → gardening | 276 | 4 | 0 | 0 | 0 | 1.4% |
+| `a tree` → coast redwood | 266 | 1 | 0 | 0 | 0 | 0.4% |
+| `a tree` → coast redwood | 266 | 1 | 0 | 0 | – | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
