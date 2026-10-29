@@ -60,3 +60,47 @@ toaster oven
 running shorts
 bbq sauce
 medium roast coffee
+# US-night additions (2026-10-29, founder: 6 EN TikTok slots a day for the US Central evening). Bare US
+# consumer categories: no brand, title, superlative, politics, sport, alcohol, health claim or minors.
+stand mixer
+cast iron skillet
+insulated water bottle
+travel mug
+robot vacuum
+cordless vacuum
+pressure cooker
+noise cancelling headphones
+wireless earbuds
+fitness tracker
+running shoes
+hiking boots
+carry on suitcase
+rain jacket
+puffer jacket
+yoga pants
+white sneakers
+sunglasses
+lip balm
+sunscreen for face
+deodorant
+body wash
+mascara
+perfume for women
+cologne for men
+coffee maker
+espresso machine
+breakfast cereal
+potato chips
+sparkling water
+pickup truck
+gaming console
+video doorbell
+smart speaker
+dog food
+cat litter
+mattress
+portable charger
+cooler for camping
+fried chicken sandwich
+donut shop
+taco chain
