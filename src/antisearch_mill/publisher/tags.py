@@ -159,13 +159,12 @@ TIKTOK_VARIANTS = ("A", "B")
 
 def tiktok_caption(category: str, verdict: str, handle: str = "", variant: str = "A") -> str:
     """TikTok caption (founder, 2026-10-23), plain and lowercase, no hashtags:
-    non-brand `<input> → <verdict>`; with a handle `<input> → <verdict> @handle`.
-    Variant B (`<input> @handle`) was dropped by the founder on 2026-10-29: `variant` is ignored."""
+    non-brand `<input> → <verdict>`; with a verified handle `<input> → @handle` (founder, 2026-10-29:
+    the @handle REPLACES the verdict text, never both). Variant B was dropped on 2026-10-29: `variant` is ignored."""
     inp = " ".join(category.strip().lower().split())
     out = " ".join(verdict.strip().lower().split())
     h = handle.strip().lower()
-    body = f"{inp} {ARROW} {out}"
-    return f"{body} {h}" if h else body
+    return f"{inp} {ARROW} {h}" if h else f"{inp} {ARROW} {out}"
 
 
 def tiktok_variant(rows) -> str:
