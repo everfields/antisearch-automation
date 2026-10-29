@@ -192,7 +192,8 @@ def test_tiktok_us_brand_pool_is_bare_and_oracle_checked():
     tiktok = [c for c, _ in read_pool(POOLS / "tiktok.txt")]
     concept = {c for c, _ in read_pool(POOLS / "tiktok_concept.txt")}
     allow = load_allowlist(POOLS.parent / "tags" / "allowlist.json")
-    assert 55 <= len(tiktok) <= 65 and len(tiktok) == len(set(tiktok))
+    # 2026-10-29: +42 US-night additions (6 English TikTok slots a day).
+    assert 95 <= len(tiktok) <= 110 and len(tiktok) == len(set(tiktok))
     for line in tiktok:
         assert line == line.lower() and input_problem(line, {}) is None, line
         assert not line.endswith("?"), line
