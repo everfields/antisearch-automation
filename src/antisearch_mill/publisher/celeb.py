@@ -3,7 +3,7 @@
 Reverse-engineered inputs: bare inputs (no superlative, never the person's name) whose real
 oracle verdict, in a one-call dry run, was a mega account (a person, group or entity with a
 verified official TikTok). The lane posts them so the caption can tag that account, exactly
-like a brand: `<input> → <verdict> @handle` or `<input> @handle`, alternating as today.
+like a brand: `<input> → <verdict> @handle` (variant B dropped 2026-10-29).
 
 - Pools: `queue/pools/tiktok_celeb.txt` (English) and `queue/pools/tiktok_es_celeb.txt` (Spanish).
 - One celebrity post a day, about 1 in 5 TikTok posts. The slot rotates by posting day over the

@@ -62,9 +62,9 @@ def test_a_person_needs_public_figure_and_tiktok():
     assert allowlisted("someone", "instagram", allow, DAY).handle == ""
 
 
-def test_captions_alternate_like_brands():
+def test_captions_always_arrow_like_brands():
     assert tiktok_caption("twitch streamer", "kai cenat", "@kai_cenat", "A") == "twitch streamer → kai cenat @kai_cenat"
-    assert tiktok_caption("twitch streamer", "kai cenat", "@kai_cenat", "B") == "twitch streamer @kai_cenat"
+    assert tiktok_caption("twitch streamer", "kai cenat", "@kai_cenat", "B") == "twitch streamer → kai cenat @kai_cenat"
 
 
 def test_brand_guard_treats_an_untaggable_celebrity_like_a_brand():

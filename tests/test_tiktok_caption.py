@@ -8,17 +8,19 @@ def test_format_a_b_and_non_brand():
     assert tiktok_caption("Gentle Face Wash", "Vanicream gentle facial cleanser", "@officialvanicream") == \
         "gentle face wash → vanicream gentle facial cleanser @officialvanicream"
     assert tiktok_caption("gentle face wash", "vanicream", "@officialvanicream", "B") == \
-        "gentle face wash @officialvanicream"
+        "gentle face wash → vanicream @officialvanicream"
+    assert tiktok_caption("pimple patches", "Hero Mighty Patch Original", "@herocosmetics") == \
+        "pimple patches → hero mighty patch original @herocosmetics"
     assert tiktok_caption("city to live in at 25", "New York City") == "city to live in at 25 → new york city"
     assert tiktok_caption("city", "nyc", "", "B") == "city → nyc"
 
 
-def test_variant_alternates_by_brand_post_parity():
+def test_variant_always_a_since_2026_10_29():
     rows = []
     assert tiktok_variant(rows) == "A"
     rows.append({"network": "tiktok", "status": "published", "caption": "x → y @a"})
     rows.append({"network": "tiktok", "status": "published", "caption": "z → w"})
-    assert tiktok_variant(rows) == "B"
+    assert tiktok_variant(rows) == "A"
     rows.append({"network": "tiktok", "status": "published", "caption": "x @b"})
     assert tiktok_variant(rows) == "A"
     assert caption_variant_of("tiktok", "x @b") == "B"
@@ -67,7 +69,7 @@ def test_the_three_missed_spanish_brand_posts_now_carry_the_handle(tmp_path):
         tag = choose_tag(verdict, "tiktok", ENV, ALLOW, log, datetime.fromisoformat(at), 1)
         assert tag.handle == handle, (verdict, tag.reason)
         assert tiktok_caption(category, verdict, tag.handle, "A") == f"{category} → {verdict} {handle}"
-        assert tiktok_caption(category, verdict, tag.handle, "B") == f"{category} {handle}"
+        assert tiktok_caption(category, verdict, tag.handle, "B") == f"{category} → {verdict} {handle}"
 
 
 def test_accent_insensitive_brand_match_both_ways():
