@@ -538,7 +538,7 @@ class PostRow:
     pause: str = ""  # blink | calc: the clip's wait style (TikTok alternates them); blank in old rows = blink
     trend_source: str = ""  # e.g. google:ES for TikTok trend slots
     trend_term: str = ""  # raw Google Trends title before mapping
-    caption_variant: str = ""  # TikTok brand caption: A = input → verdict @handle; B (input @handle) only in rows before 2026-10-29
+    caption_variant: str = ""  # TikTok brand caption: A = input → @handle (since 2026-10-29 the handle replaces the verdict); B (input @handle) only in rows before 2026-10-29
     creative_variant: str = ""  # TikTok creative test: original | midtype (publisher/midtype.py)
 
 

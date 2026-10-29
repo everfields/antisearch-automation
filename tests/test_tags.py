@@ -118,7 +118,7 @@ def test_live_tiktok_and_instagram_captions_are_only_the_handle_and_x_is_never_t
     out, creates, log = _live(tmp_path, jobs, env, now, verdicts)
     assert [o.status for o in out] == ["published", "published", "published"]
     by_channel = {c["channelId"]: c for c in creates}
-    assert by_channel["ch-tt"]["text"] == "dry shampoo → k18 airwash dry shampoo @k18hair"
+    assert by_channel["ch-tt"]["text"] == "dry shampoo → @k18hair"
     # Buffer has no reel user tags: the mention rides the hashtag caption, last
     assert by_channel["ch-ig"]["text"] == "#hairmask #k18 @k18hair"
     for c in (by_channel["ch-tt"], by_channel["ch-ig"]):
@@ -142,13 +142,13 @@ def test_a_tag_can_repeat_after_seven_days_despite_the_caption_dedupe(tmp_path):
     first = datetime(2026, 9, 28, 13, 10, tzinfo=ET)
     out, creates, _log = _live(tmp_path, [Job("p-a", "dry shampoo", ("tiktok",), notes="pool:vertical")],
                                env, first, {"p-a": "k18"})
-    assert creates[0]["text"] == "dry shampoo → k18 @k18hair"  # always A (2026-10-29)
+    assert creates[0]["text"] == "dry shampoo → @k18hair"  # always A (2026-10-29)
     soon, creates, _ = _live(tmp_path, [Job("p-b", "hair serum", ("tiktok",), notes="pool:vertical")],
                              env, first + timedelta(days=3), {"p-b": "k18"})
-    assert soon[0].status == "published" and creates[0]["text"] == "hair serum → k18 @k18hair"  # TikTok: no cooldown on the @; always A since 2026-10-29
+    assert soon[0].status == "published" and creates[0]["text"] == "hair serum → @k18hair"  # TikTok: no cooldown on the @; always A since 2026-10-29
     later, creates, _ = _live(tmp_path, [Job("p-c", "hair gel", ("tiktok",), notes="pool:vertical")],
                               env, first + timedelta(days=8), {"p-c": "k18"})
-    assert later[0].status == "published" and creates[0]["text"] == "hair gel → k18 @k18hair"  # always A
+    assert later[0].status == "published" and creates[0]["text"] == "hair gel → @k18hair"  # always A
 
 
 def test_x_text_keeps_accents_and_refuses_emoji_links_and_mentions():

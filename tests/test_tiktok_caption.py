@@ -6,11 +6,11 @@ ALLOW = load_allowlist("queue/tags/allowlist.json")
 
 def test_format_a_b_and_non_brand():
     assert tiktok_caption("Gentle Face Wash", "Vanicream gentle facial cleanser", "@officialvanicream") == \
-        "gentle face wash → vanicream gentle facial cleanser @officialvanicream"
+        "gentle face wash → @officialvanicream"
     assert tiktok_caption("gentle face wash", "vanicream", "@officialvanicream", "B") == \
-        "gentle face wash → vanicream @officialvanicream"
+        "gentle face wash → @officialvanicream"
     assert tiktok_caption("pimple patches", "Hero Mighty Patch Original", "@herocosmetics") == \
-        "pimple patches → hero mighty patch original @herocosmetics"
+        "pimple patches → @herocosmetics"
     assert tiktok_caption("city to live in at 25", "New York City") == "city to live in at 25 → new york city"
     assert tiktok_caption("city", "nyc", "", "B") == "city → nyc"
 
@@ -68,8 +68,8 @@ def test_the_three_missed_spanish_brand_posts_now_carry_the_handle(tmp_path):
     for category, verdict, at, handle in cases:
         tag = choose_tag(verdict, "tiktok", ENV, ALLOW, log, datetime.fromisoformat(at), 1)
         assert tag.handle == handle, (verdict, tag.reason)
-        assert tiktok_caption(category, verdict, tag.handle, "A") == f"{category} → {verdict} {handle}"
-        assert tiktok_caption(category, verdict, tag.handle, "B") == f"{category} → {verdict} {handle}"
+        assert tiktok_caption(category, verdict, tag.handle, "A") == f"{category} → {handle}"
+        assert tiktok_caption(category, verdict, tag.handle, "B") == f"{category} → {handle}"
 
 
 def test_accent_insensitive_brand_match_both_ways():
@@ -91,3 +91,16 @@ def test_tiktok_brand_tag_ignores_cooldown_and_daily_cap(tmp_path):
     assert choose_tag("cerave moisturizing cream", "tiktok", ENV, ALLOW, log, now, 0).handle == "@cerave"
     # non-brand verdicts still get no tag
     assert choose_tag("house cat", "tiktok", ENV, ALLOW, log, now, 4).handle == ""
+
+
+def test_handle_replaces_verdict_never_both():
+    # Founder, 2026-10-29: brand/celeb with a verified handle -> `<input> → @handle` only.
+    assert tiktok_caption("perfume de mujer", "Chanel Coco Mademoiselle Eau de Parfum", "@chanelofficial") == \
+        "perfume de mujer → @chanelofficial"
+    assert tiktok_caption("pop star", "Beyoncé", "@beyonce") == "pop star → @beyonce"
+    # Brand without a verified handle (no tag resolved) and plain verdicts stay `<input> → <verdict>`.
+    assert tiktok_caption("perfume de mujer", "Some Unverified Brand Parfum", "") == \
+        "perfume de mujer → some unverified brand parfum"
+    assert tiktok_caption("city to live in at 25", "New York City") == "city to live in at 25 → new york city"
+    for c in (tiktok_caption("pop star", "beyoncé", "@beyonce"),):
+        assert c.count("@") == 1 and "beyoncé" not in c and "#" not in c
