@@ -1,31 +1,31 @@
-# Social metrics — 2026-10-30 10:15 UTC
+# Social metrics — 2026-10-30 18:06 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +1)
-- account likes: 125, posts: 145
+- account likes: 125, posts: 147
 
 ### last 24h (8 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `superpoder para tener` → omnipotencia | 263 | 4 | 0 | 0 | 0 | 1.5% |
-| `youtube creator` → mrbeast | 255 | 2 | 0 | 0 | 0 | 0.8% |
-| `canción para un desamor` → el triste — josé josé | 251 | 1 | 0 | 0 | 0 | 0.4% |
-| `an animal` → dog | 245 | 1 | 0 | 0 | 0 | 0.4% |
-| `comfort show` → parks and recreation | 234 | 3 | 0 | 0 | 0 | 1.3% |
+| `an animal` → dog | 246 | 1 | 0 | 0 | 0 | 0.4% |
+| `comfort show` → parks and recreation | 236 | 3 | 0 | 0 | 0 | 1.3% |
+| `salicylic acid cleanser` → cerave renewing sa cleanser | 190 | 0 | 0 | 0 | 1 | 0.5% |
+| `artista para un verano` → bad bunny | 14 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `superpoder para tener` → omnipotencia | 1.5% | 263 |
-| `comfort show` → parks and recreation | 1.3% | 234 |
-| `salicylic acid cleanser` → cerave renewing sa cleanser | 0.8% | 122 |
-| `youtube creator` → mrbeast | 0.8% | 255 |
-| `an animal` → dog | 0.4% | 245 |
+| `comfort show` → parks and recreation | 1.3% | 236 |
+| `salicylic acid cleanser` → cerave renewing sa cleanser | 0.5% | 190 |
+| `an animal` → dog | 0.4% | 246 |
+| `weekend plan with friends` → dinner and board games | 0.0% | 10 |
 
-### last 7d (56 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -40,7 +40,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `superpoder para tener` → omnipotencia | 1.5% | 263 |
 | `hobby to pick up` → gardening | 1.4% | 277 |
 | `hobby to pick up` → gardening | 1.4% | 277 |
-| `comfort show` → parks and recreation | 1.3% | 234 |
+| `comfort show` → parks and recreation | 1.3% | 236 |
 | `aceite para el pelo` → kérastase elixir ultime l’huile originale | 1.2% | 250 |
 
 ## instagram
