@@ -179,13 +179,12 @@ def test_reach_cadence_is_seven_ig_six_tiktok_and_leaves_the_others():
     # The Spanish 14:07 Madrid slot (08:07 ET on this date) opens the posting day, then three ET
     # slots (2026-10-07: 6+ TikTok posts in 24h got 0 views, so 4 a day, 3+ hours apart).
     assert [f"{t:%H:%M}" for t in slots_for("tiktok", env, date(2026, 10, 5))] == [
-        "07:07", "10:07", "14:07", "18:07", "20:07", "21:37", "23:07", "00:37"]
-    # 13:07, 16:07, 20:07, 00:07, 05:07 Madrid (2026-10-19) + 02:07, 03:37, 06:37 for the US night (2026-10-29)
+        "07:07", "10:07", "14:07", "18:07", "23:07"]  # 13:07, 16:07, 20:07, 00:07, 05:07 Madrid (2026-10-19)
     for net in ("x", "linkedin", "bluesky", "threads", "mastodon", "reddit"):
         assert slots_for(net, env) == slots_for(net, soul)
-    # Instagram 7 under its cap of 8, TikTok 8 under its cap of 9 (2026-10-29).
+    # Instagram 7 under its cap of 8, TikTok 5 at its cap of 5 (2026-10-19).
     assert len(slots_for("instagram", env)) == 7
-    assert len(slots_for("tiktok", env, date(2026, 10, 5))) == 8
+    assert len(slots_for("tiktok", env, date(2026, 10, 5))) == 5
 
 
 def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five():
@@ -194,8 +193,8 @@ def test_instagram_takes_up_to_eight_slots_and_every_other_network_stays_at_five
     with pytest.raises(ValueError, match="cap is 8"):
         slots_for("instagram", {"PUBLISHER_SLOTS_INSTAGRAM": eight + ",02:07"})
     assert len(slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "10:07,13:07,16:07,19:07,21:07"})) == 5
-    with pytest.raises(ValueError, match="cap is 9"):
-        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "06:07,08:07,10:07,12:07,14:07,16:07,18:07,20:07,22:07,00:07"})
+    with pytest.raises(ValueError, match="cap is 5"):
+        slots_for("tiktok", {"PUBLISHER_SLOTS_TIKTOK": "08:07,10:07,13:07,16:07,19:07,21:07"})
 
 
 def test_reach_slot_stays_open_until_the_next_one_or_three_hours():
@@ -209,9 +208,8 @@ def test_reach_slot_stays_open_until_the_next_one_or_three_hours():
     assert open_now(datetime(2026, 9, 26, 19, 10, tzinfo=ET), ig, 0) == 1
     tt = slots_for("tiktok", {"PUBLISHER_CADENCE": "reach"}, date(2026, 9, 26))
     # Last slot of the day gets 3h, not the whole night until the next posting day.
-    # 20:30 ET is 02:30 Madrid: 18:07 ET (00:07 Madrid) is still inside 3h and 20:07 (02:07 Madrid) is open.
-    assert open_now(datetime(2026, 9, 26, 20, 30, tzinfo=ET), tt, 3) == 2
-    assert open_now(datetime(2026, 9, 27, 5, 30, tzinfo=ET), tt, 0, network="tiktok") == 0  # no TikTok catch-up
+    assert open_now(datetime(2026, 9, 26, 20, 30, tzinfo=ET), tt, 3) == 1  # 18:07 still inside 3h
+    assert open_now(datetime(2026, 9, 27, 5, 30, tzinfo=ET), tt, 0) == 0
     nxt = slots_for("tiktok", {"PUBLISHER_CADENCE": "reach"}, date(2026, 9, 27))
     assert open_now(datetime(2026, 9, 27, 7, 30, tzinfo=ET), nxt, 0) == 1  # the 13:07 Madrid slot
 

@@ -52,12 +52,9 @@ IG_MAX_PER_DAY = 8
 # 2026-10-19 (founder): 5 Madrid slots (2 es, 3 en); 05:07 en is the US trend slot. At most 5 in
 # any 24 hours; no catch-up after a slot's own window (next slot / grace), and English slots
 # never catch up after 06:00 Madrid.
-# 2026-10-29 (founder, final): +3 English slots in the Madrid night (02:07, 03:37, 06:37) aimed at
-# the US Central evening = 8 slots a day (6 en + 2 es). Cap 9 per day / 24h; spacing lowered to the
-# 90 min the new slots need (02:07 -> 03:37 -> 05:07 -> 06:37 are exactly 90 min apart).
-TT_MAX_PER_DAY = 9
-TIKTOK_MAX_PER_24H = 9
-TIKTOK_MIN_SPACING = timedelta(minutes=90)
+TT_MAX_PER_DAY = 5
+TIKTOK_MAX_PER_24H = 5
+TIKTOK_MIN_SPACING = timedelta(hours=2)
 DAILY_CAP = {"x": X_MAX_PER_DAY, "instagram": IG_MAX_PER_DAY, "tiktok": TT_MAX_PER_DAY}
 SLOT_GRACE = timedelta(hours=3)  # minimum a missed slot stays open; longer if the next slot is further away
 # GitHub's schedule drops most wakes (28 Sep: 1 scheduled run in 8 h). Once a slot's window has passed with
@@ -101,8 +98,7 @@ CADENCES["reach"] = {
 DEFAULT_CADENCE = "carlos"
 
 # TikTok on the reach cadence (founder, 2026-10-09): European hours, pinned to Madrid wall time
-# (DST-safe: the ET time is recomputed per date), 90+ min apart, nothing 07:00-12:59 Madrid
-# (06:37 en is the last US-night slot since 2026-10-29).
+# (DST-safe: the ET time is recomputed per date), 2+ hours apart, nothing 06:00-12:59 Madrid.
 # Two Spanish (20:07 is the ES trend slot), 16:07 / 00:07 / 05:07 English for the US (05:07 is the US
 # trend slot). Spanish never goes out outside TIKTOK_ES_MADRID_HOURS, whatever the slot list says.
 MADRID = "Europe/Madrid"
@@ -111,14 +107,9 @@ TIKTOK_MADRID_SLOTS: tuple[tuple[time, str], ...] = (
     (time(16, 7), "en"),
     (time(20, 7), "es"),
     (time(0, 7), "en"),
-    (time(2, 7), "en"),  # US Central evening (2026-10-29): 20:07 CDT / 19:07 CST
-    (time(3, 37), "en"),  # 21:37 CDT / 20:37 CST
     (time(5, 7), "en"),  # 23:07 New York (2026-10-12); US trend slot since 2026-10-19
-    (time(6, 37), "en"),  # 00:37 CDT / 23:37 CST
 )
-# Never catch up an English TikTok slot after this Madrid time (06:00 until 2026-10-29; 08:30 so the
-# jittered 06:37 slot can still post, and nothing goes out in the US small hours).
-TIKTOK_EN_CATCHUP_END = time(8, 30)
+TIKTOK_EN_CATCHUP_END = time(6, 0)  # never catch up an English TikTok slot after this Madrid time
 TIKTOK_ES_MADRID_HOURS = range(13, 24)  # 13:00-23:59 Madrid
 
 RANKED = re.compile(r"^(the\s+)?(best|top|greatest|#1)\b", re.I)
@@ -272,8 +263,6 @@ def madrid_slots_et(day: date) -> list[time]:
     for slot, _lang in TIKTOK_MADRID_SLOTS:
         for d in (day, day + timedelta(days=1)):
             local = datetime.combine(d, slot, tzinfo=ZoneInfo(MADRID)).astimezone(tz())
-            if local.astimezone(ZoneInfo(MADRID)).time().replace(tzinfo=None) != slot:
-                continue  # 02:07 does not exist on the EU spring-forward night: that slot is skipped once a year
             if posting_day(local) == day:
                 out.append(local.time().replace(tzinfo=None))
                 break

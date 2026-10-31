@@ -68,13 +68,13 @@ def test_only_instagram_calc_clips_have_the_end_screen(tmp_path, monkeypatch, ne
         assert row.duration_s < 7.0  # back to the blink-length clip (calc + outro was ~7.7 s)
 
 
-def test_tiktok_schedule_is_eight_a_day_90_min_apart():
-    assert TT_MAX_PER_DAY == 9 and TIKTOK_MAX_PER_24H == 9  # 2026-10-29
+def test_tiktok_schedule_is_five_a_day_two_hours_apart():
+    assert TT_MAX_PER_DAY == 5 and TIKTOK_MAX_PER_24H == 5
     d = date(2026, 1, 1)
     while d < date(2028, 1, 1):
         times = slot_times(d, slots_for("tiktok", REACH, d))
-        assert len(times) == (7 if _spring_forward(d) else 8), d
-        assert all(b - a >= timedelta(minutes=90) for a, b in zip(times, times[1:])), d
+        assert len(times) == 5, d
+        assert all(b - a >= timedelta(hours=2) for a, b in zip(times, times[1:])), d
         for t in times:
             if slot_language("tiktok", t, REACH) == "es":
                 assert 13 <= t.astimezone(MADRID).hour <= 23
@@ -82,13 +82,7 @@ def test_tiktok_schedule_is_eight_a_day_90_min_apart():
     day = date(2026, 10, 9)
     got = [(t.astimezone(MADRID).strftime("%H:%M"), slot_language("tiktok", t, REACH))
            for t in slot_times(day, slots_for("tiktok", REACH, day))]
-    assert got == [("13:07", "es"), ("16:07", "en"), ("20:07", "es"), ("00:07", "en"), ("02:07", "en"), ("03:37", "en"), ("05:07", "en"), ("06:37", "en")]  # 2026-10-29
-
-
-def _spring_forward(day):
-    from datetime import time as _t
-    nxt = day + timedelta(days=1)
-    return datetime.combine(nxt, _t(2, 7), tzinfo=MADRID).astimezone(ZoneInfo("UTC")).astimezone(MADRID).hour != 2
+    assert got == [("13:07", "es"), ("16:07", "en"), ("20:07", "es"), ("00:07", "en"), ("05:07", "en")]  # 2026-10-19
 
 
 def _log(tmp_path, times):
@@ -99,14 +93,14 @@ def _log(tmp_path, times):
     return log
 
 
-def test_never_more_than_nine_in_24h_nor_closer_than_90_min(tmp_path):
+def test_never_more_than_five_in_24h_nor_closer_than_120_min(tmp_path):
     now = datetime(2026, 10, 8, 19, 10, tzinfo=ET)
-    past = [now - timedelta(hours=h) for h in (2, 4, 6, 8, 10, 12, 14, 16, 18, 20)]
-    assert "24 hours" in tiktok_crowded(_log(tmp_path / "a", past), now)
-    assert tiktok_crowded(_log(tmp_path / "b", past[:8]), now) is None
-    assert "24 hours" in tiktok_crowded(_log(tmp_path / "f", past[:9]), now)
-    assert "min between" in tiktok_crowded(_log(tmp_path / "c", [now - timedelta(minutes=89)]), now)
-    assert tiktok_crowded(_log(tmp_path / "d", [now - timedelta(minutes=90)]), now) is None
+    four = [now - timedelta(hours=h) for h in (2.5, 5, 7, 11, 15, 20)]
+    assert "24 hours" in tiktok_crowded(_log(tmp_path / "a", four), now)
+    assert tiktok_crowded(_log(tmp_path / "b", four[:4]), now) is None
+    assert "24 hours" in tiktok_crowded(_log(tmp_path / "f", four[:5]), now)
+    assert "min between" in tiktok_crowded(_log(tmp_path / "c", [now - timedelta(hours=1, minutes=59)]), now)
+    assert tiktok_crowded(_log(tmp_path / "d", [now - timedelta(hours=2)]), now) is None
     assert tiktok_crowded(_log(tmp_path / "e", [now - timedelta(hours=25)] * 1), now) is None
 
 
