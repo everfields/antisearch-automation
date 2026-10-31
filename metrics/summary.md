@@ -1,4 +1,4 @@
-# Social metrics — 2026-10-31 12:50 UTC
+# Social metrics — 2026-10-31 19:23 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
@@ -7,23 +7,24 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 - followers: **7** (24h +0, 7d +1)
 - account likes: 126, posts: 153
 
-### last 24h (7 post(s))
+### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `weekend plan with friends` → dinner and board games | 10 | 0 | 0 | 0 | 0 | 0.0% |
 | `summer song` → summertime — dj jazzy jeff & the fresh prince | 1 | 0 | 0 | 0 | 0 | 0.0% |
 | `color to wear` → navy blue | 1 | 0 | 0 | 0 | 0 | 0.0% |
+| `cozy video game` → stardew valley | 1 | 0 | 0 | 0 | 0 | 0.0% |
+| `a stone` → diamond | 1 | 0 | 0 | 0 | 0 | 0.0% |
 | `a bird` → peregrine falcon | 0 | 0 | 0 | 0 | 0 | – |
-| `place to reset your head` → yosemite national park | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `weekend plan with friends` → dinner and board games | 0.0% | 10 |
 | `summer song` → summertime — dj jazzy jeff & the fresh prince | 0.0% | 1 |
 | `color to wear` → navy blue | 0.0% | 1 |
+| `cozy video game` → stardew valley | 0.0% | 1 |
+| `a stone` → diamond | 0.0% | 1 |
 
-### last 7d (62 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
