@@ -1248,5 +1248,75 @@
       "official_evidence": "https://www.tiktok.com/@tomorrowland",
       "evidence": "checked twice on 2026-10-26: scripts/tiktok_profile.py and a plain curl of https://www.tiktok.com/@tomorrowland both return uniqueId tomorrowland, nickname 'Tomorrowland', verified true, 10.0M followers"
     }
+  },
+  "gatorade": {
+    "kind": "brand",
+    "aliases": [
+      "gatorade thirst quencher"
+    ],
+    "tiktok": {
+      "handle": "@gatorade",
+      "verified": true,
+      "checked": "2026-10-31",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@gatorade public profile data (scripts/tiktok_profile.py, 2026-10-31): nickname 'Gatorade', verified true, 694.8K followers"
+    }
+  },
+  "red bull": {
+    "kind": "brand",
+    "aliases": [
+      "red bull original"
+    ],
+    "tiktok": {
+      "handle": "@redbull",
+      "verified": true,
+      "checked": "2026-10-31",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@redbull public profile data (scripts/tiktok_profile.py, 2026-10-31): nickname 'Red Bull', verified true, 23.5M followers"
+    }
+  },
+  "babbel": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@babbel",
+      "verified": true,
+      "checked": "2026-10-31",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@babbel public profile data (scripts/tiktok_profile.py, 2026-10-31): nickname 'Babbel', verified true, 587.9K followers"
+    }
+  },
+  "lego": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@lego",
+      "verified": true,
+      "checked": "2026-10-31",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@lego public profile data (scripts/tiktok_profile.py, 2026-10-31): nickname 'LEGO', verified true, 4.1M followers"
+    }
+  },
+  "e.l.f. cosmetics": {
+    "kind": "brand",
+    "aliases": [
+      "e.l.f.",
+      "elf cosmetics"
+    ],
+    "tiktok": {
+      "handle": "@elfyeah",
+      "verified": true,
+      "checked": "2026-10-31",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@elfyeah public profile data (scripts/tiktok_profile.py, 2026-10-31): nickname 'e.l.f. Cosmetics', verified true, 3.0M followers; @elfcosmetics does not exist on TikTok (404)"
+    }
+  },
+  "ryanair": {
+    "kind": "brand",
+    "tiktok": {
+      "handle": "@ryanair",
+      "verified": true,
+      "checked": "2026-10-31",
+      "by": "cursor agent",
+      "evidence": "tiktok.com/@ryanair public profile data (scripts/tiktok_profile.py, 2026-10-31): nickname 'Ryanair', verified true, 2.9M followers"
+    }
   }
 }

@@ -1,0 +1,50 @@
+{
+  "gatorade": {
+    "handle": "gatorade",
+    "unique_id": "gatorade",
+    "nickname": "Gatorade",
+    "verified": true,
+    "follower_count": 694800,
+    "error": null
+  },
+  "redbull": {
+    "handle": "redbull",
+    "unique_id": "redbull",
+    "nickname": "Red Bull",
+    "verified": true,
+    "follower_count": 23500000,
+    "error": null
+  },
+  "babbel": {
+    "handle": "babbel",
+    "unique_id": "babbel",
+    "nickname": "Babbel",
+    "verified": true,
+    "follower_count": 587900,
+    "error": null
+  },
+  "lego": {
+    "handle": "lego",
+    "unique_id": "lego",
+    "nickname": "LEGO",
+    "verified": true,
+    "follower_count": 4100000,
+    "error": null
+  },
+  "elfyeah": {
+    "handle": "elfyeah",
+    "unique_id": "elfyeah",
+    "nickname": "e.l.f. Cosmetics",
+    "verified": true,
+    "follower_count": 3000000,
+    "error": null
+  },
+  "ryanair": {
+    "handle": "ryanair",
+    "unique_id": "ryanair",
+    "nickname": "Ryanair",
+    "verified": true,
+    "follower_count": 2900000,
+    "error": null
+  }
+}

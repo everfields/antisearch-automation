@@ -1,5 +1,9 @@
 # TikTok EN = bare US consumer categories; live-oracle verdict = US-headquartered brand (no brand names in inputs).
 # ~2 in 3 English pool posts (concept ~1 in 3 from tiktok_concept.txt). Oracle-checked 2026-10-19.
+sports drink
+language app
+building toy
+drugstore makeup
 wireless charger
 electric toothbrush
 cold brew at home

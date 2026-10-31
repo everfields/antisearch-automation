@@ -276,7 +276,7 @@ def test_allowlist_tiktok_handles_match_recorded_profile_snapshots():
 
     allow = load_allowlist(ROOT / "queue" / "tags" / "allowlist.json")
     snaps = {}
-    for day in ("2026-10-20", "2026-10-26"):  # 10-26: celebrity lane handles
+    for day in ("2026-10-20", "2026-10-26", "2026-10-31"):  # 10-26: celebrity lane; 10-31: brand lane
         snaps.update(json.loads(
             (ROOT / "tests" / "fixtures" / f"tiktok_profile_snapshots_{day}.json").read_text(encoding="utf-8")))
     handles = sorted(
