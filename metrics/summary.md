@@ -1,31 +1,29 @@
-# Social metrics — 2026-10-30 22:29 UTC
+# Social metrics — 2026-10-31 05:58 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +1)
-- account likes: 126, posts: 147
+- account likes: 126, posts: 151
 
 ### last 24h (7 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `an animal` → dog | 246 | 1 | 0 | 0 | 0 | 0.4% |
-| `comfort show` → parks and recreation | 236 | 3 | 0 | 0 | 0 | 1.3% |
-| `salicylic acid cleanser` → cerave renewing sa cleanser | 232 | 1 | 0 | 0 | 1 | 0.9% |
 | `artista para un verano` → bad bunny | 14 | 0 | 0 | 0 | 0 | 0.0% |
 | `weekend plan with friends` → dinner and board games | 10 | 0 | 0 | 0 | 0 | 0.0% |
+| `skill to learn in 2026` → ai-assisted problem-solving | 1 | 0 | 0 | 0 | 0 | 0.0% |
+| `summer song` → summertime — dj jazzy jeff & the fresh prince | 0 | 0 | 0 | 0 | 0 | – |
+| `color to wear` → navy blue | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `comfort show` → parks and recreation | 1.3% | 236 |
-| `salicylic acid cleanser` → cerave renewing sa cleanser | 0.9% | 232 |
-| `an animal` → dog | 0.4% | 246 |
 | `skill to learn in 2026` → ai-assisted problem-solving | 0.0% | 1 |
 | `weekend plan with friends` → dinner and board games | 0.0% | 10 |
+| `artista para un verano` → bad bunny | 0.0% | 14 |
 
-### last 7d (50 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
