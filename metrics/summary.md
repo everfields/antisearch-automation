@@ -1,13 +1,13 @@
-# Social metrics — 2026-10-31 19:23 UTC
+# Social metrics — 2026-11-01 00:13 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **7** (24h +0, 7d +1)
+- followers: **7** (24h +0, 7d +0)
 - account likes: 126, posts: 153
 
-### last 24h (6 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `cozy video game` → stardew valley | 0.0% | 1 |
 | `a stone` → diamond | 0.0% | 1 |
 
-### last 7d (60 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
