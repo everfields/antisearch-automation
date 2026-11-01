@@ -1,25 +1,29 @@
-# Social metrics — 2026-11-01 06:27 UTC
+# Social metrics — 2026-11-01 16:09 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +0)
-- account likes: 126, posts: 155
+- account likes: 128, posts: 157
 
-### last 24h (2 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `k-pop group` → bts | 158 | 0 | 0 | 0 | 0 | 0.0% |
-| `city for a weekend trip` → paris | 15 | 0 | 0 | 0 | 0 | 0.0% |
+| `k-pop group` → bts | 251 | 1 | 0 | 0 | 0 | 0.4% |
+| `city for a weekend trip` → paris | 245 | 1 | 0 | 0 | 0 | 0.4% |
+| `vuelo barato` → google flights | 111 | 0 | 0 | 0 | 0 | 0.0% |
+| `twitch streamer` → kai cenat | 70 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `city for a weekend trip` → paris | 0.0% | 15 |
-| `k-pop group` → bts | 0.0% | 158 |
+| `city for a weekend trip` → paris | 0.4% | 245 |
+| `k-pop group` → bts | 0.4% | 251 |
+| `twitch streamer` → kai cenat | 0.0% | 70 |
+| `vuelo barato` → google flights | 0.0% | 111 |
 
-### last 7d (56 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
