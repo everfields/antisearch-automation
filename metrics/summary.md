@@ -1,29 +1,31 @@
-# Social metrics — 2026-11-01 16:09 UTC
+# Social metrics — 2026-11-01 22:12 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +0)
-- account likes: 128, posts: 157
+- account likes: 129, posts: 158
 
-### last 24h (4 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `k-pop group` → bts | 251 | 1 | 0 | 0 | 0 | 0.4% |
 | `city for a weekend trip` → paris | 245 | 1 | 0 | 0 | 0 | 0.4% |
-| `vuelo barato` → google flights | 111 | 0 | 0 | 0 | 0 | 0.0% |
-| `twitch streamer` → kai cenat | 70 | 0 | 0 | 0 | 0 | 0.0% |
+| `vuelo barato` → google flights | 240 | 0 | 0 | 0 | 0 | 0.0% |
+| `twitch streamer` → kai cenat | 199 | 0 | 0 | 0 | 0 | 0.0% |
+| `época para haber nacido` → década de 1990 | 139 | 1 | 0 | 0 | 0 | 0.7% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `época para haber nacido` → década de 1990 | 0.7% | 139 |
 | `city for a weekend trip` → paris | 0.4% | 245 |
 | `k-pop group` → bts | 0.4% | 251 |
-| `twitch streamer` → kai cenat | 0.0% | 70 |
-| `vuelo barato` → google flights | 0.0% | 111 |
+| `twitch streamer` → kai cenat | 0.0% | 199 |
+| `vuelo barato` → google flights | 0.0% | 240 |
 
-### last 7d (60 post(s))
+### last 7d (57 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
