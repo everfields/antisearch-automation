@@ -1,32 +1,29 @@
-# Social metrics — 2026-11-02 06:28 UTC
+# Social metrics — 2026-11-02 19:38 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +0)
-- account likes: 132, posts: 159
+- account likes: 135, posts: 162
 
 ### last 24h (4 post(s))
 
-**1 published post(s) have no numbers yet** (shown as –)
-
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `vuelo barato` → google flights | 240 | 0 | 0 | 0 | 0 | 0.0% |
-| `twitch streamer` → kai cenat | 199 | 0 | 0 | 0 | 0 | 0.0% |
-| `época para haber nacido` → década de 1990 | 139 | 1 | 0 | 0 | 0 | 0.7% |
-| `sports drink` → gatorade thirst quencher | – | – | – | – | – | – |
+| `grupo de k-pop` → bts | 249 | 1 | 0 | 0 | 0 | 0.4% |
+| `a door` → solid-core oak door | 241 | 0 | 0 | 0 | 0 | 0.0% |
+| `sports drink` → gatorade thirst quencher | 240 | 2 | 0 | 0 | 0 | 0.8% |
+| `ciudad para vivir a los 25` → madrid | 83 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `época para haber nacido` → década de 1990 | 0.7% | 139 |
-| `twitch streamer` → kai cenat | 0.0% | 199 |
-| `vuelo barato` → google flights | 0.0% | 240 |
+| `sports drink` → gatorade thirst quencher | 0.8% | 240 |
+| `grupo de k-pop` → bts | 0.4% | 249 |
+| `ciudad para vivir a los 25` → madrid | 0.0% | 83 |
+| `a door` → solid-core oak door | 0.0% | 241 |
 
-### last 7d (56 post(s))
-
-**1 published post(s) have no numbers yet** (shown as –)
+### last 7d (58 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -38,11 +35,11 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `época para haber nacido` → década de 1990 | 1.6% | 256 |
 | `superpoder para tener` → omnipotencia | 1.5% | 263 |
 | `superpoder para tener` → omnipotencia | 1.5% | 263 |
 | `hobby to pick up` → gardening | 1.4% | 277 |
 | `hobby to pick up` → gardening | 1.4% | 277 |
-| `comfort show` → parks and recreation | 1.3% | 236 |
 
 ## instagram
 
