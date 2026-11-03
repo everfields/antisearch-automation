@@ -1,39 +1,39 @@
-# Social metrics — 2026-11-03 11:04 UTC
+# Social metrics — 2026-11-03 19:39 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +0)
-- account likes: 135, posts: 164
+- account likes: 136, posts: 167
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | 0 | 0.0% |
-| `grupo de k-pop` → bts | 249 | 1 | 0 | 0 | 0 | 0.4% |
-| `a door` → solid-core oak door | 245 | 0 | 0 | 0 | 0 | 0.0% |
-| `meal to cook alone` → spaghetti aglio e olio | 242 | 0 | 0 | 0 | 0 | 0.0% |
-| `language app` → babbel | 230 | 0 | 0 | 0 | 0 | 0.0% |
+| `animal para ser` → gato doméstico | 245 | 0 | 0 | 0 | 0 | 0.0% |
+| `meal to cook alone` → spaghetti aglio e olio | 243 | 0 | 0 | 0 | 0 | 0.0% |
+| `city to visit once` → paris | 236 | 1 | 0 | 0 | 0 | 0.4% |
+| `language app` → babbel | 232 | 0 | 0 | 0 | 0 | 0.0% |
+| `edad para ser feliz` → ahora | 73 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `grupo de k-pop` → bts | 0.4% | 249 |
-| `ciudad para vivir a los 25` → madrid | 0.0% | 253 |
-| `a door` → solid-core oak door | 0.0% | 245 |
-| `meal to cook alone` → spaghetti aglio e olio | 0.0% | 242 |
-| `language app` → babbel | 0.0% | 230 |
+| `city to visit once` → paris | 0.4% | 236 |
+| `meal to cook alone` → spaghetti aglio e olio | 0.0% | 243 |
+| `language app` → babbel | 0.0% | 232 |
+| `edad para ser feliz` → ahora | 0.0% | 73 |
+| `animal para ser` → gato doméstico | 0.0% | 245 |
 
-### last 7d (56 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `hobby to pick up` → gardening | 277 | 4 | 0 | 0 | 0 | 1.4% |
 | `hobby to pick up` → gardening | 277 | 4 | 0 | 0 | – | 1.4% |
 | `superpoder para tener` → omnipotencia | 263 | 4 | 0 | 0 | 0 | 1.5% |
+| `perfume de mujer` → chanel coco mademoiselle eau de parfum | 263 | 1 | 0 | 0 | – | 0.4% |
 | `superpoder para tener` → omnipotencia | 263 | 4 | 0 | 0 | – | 1.5% |
-| `perfume de mujer` → chanel coco mademoiselle eau de parfum | 262 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
