@@ -1,29 +1,29 @@
-# Social metrics — 2026-11-02 19:38 UTC
+# Social metrics — 2026-11-03 02:57 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +0)
-- account likes: 135, posts: 162
+- account likes: 135, posts: 163
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `ciudad para vivir a los 25` → madrid | 250 | 0 | 0 | 0 | 0 | 0.0% |
 | `grupo de k-pop` → bts | 249 | 1 | 0 | 0 | 0 | 0.4% |
-| `a door` → solid-core oak door | 241 | 0 | 0 | 0 | 0 | 0.0% |
-| `sports drink` → gatorade thirst quencher | 240 | 2 | 0 | 0 | 0 | 0.8% |
-| `ciudad para vivir a los 25` → madrid | 83 | 0 | 0 | 0 | 0 | 0.0% |
+| `a door` → solid-core oak door | 245 | 0 | 0 | 0 | 0 | 0.0% |
+| `meal to cook alone` → spaghetti aglio e olio | 126 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `sports drink` → gatorade thirst quencher | 0.8% | 240 |
 | `grupo de k-pop` → bts | 0.4% | 249 |
-| `ciudad para vivir a los 25` → madrid | 0.0% | 83 |
-| `a door` → solid-core oak door | 0.0% | 241 |
+| `ciudad para vivir a los 25` → madrid | 0.0% | 250 |
+| `a door` → solid-core oak door | 0.0% | 245 |
+| `meal to cook alone` → spaghetti aglio e olio | 0.0% | 126 |
 
-### last 7d (58 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
