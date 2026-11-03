@@ -98,7 +98,8 @@
       "meal to cook alone \u2192 spaghetti aglio e olio",
       "language app \u2192 @babbel",
       "animal para ser \u2192 gato dom\u00e9stico",
-      "city to visit once \u2192 paris"
+      "city to visit once \u2192 paris",
+      "edad para ser feliz \u2192 ahora"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -348,7 +349,8 @@
       "p-meal-to-cook-alone-1cc0ff60",
       "p-language-app-edd62ba1",
       "es-animal-para-ser-00a26fb2",
-      "p-city-to-visit-once-a9839a6b"
+      "p-city-to-visit-once-a9839a6b",
+      "es-edad-para-ser-feliz-d7a448c3"
     ],
     "x": [
       "p-a-feeling-725bad0d",
