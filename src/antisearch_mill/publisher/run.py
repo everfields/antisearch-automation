@@ -43,6 +43,7 @@ from .pools import job_language
 from .tags import (TAG_NETWORKS, X_HANDLE, TagLog, caption_variant_of, choose_tag, choose_x_mention,
                    tag_networks, tiktok_caption, tiktok_variant)
 from .celeb import is_celeb, order_celeb
+from .debate import is_debate, is_debate_turn, order_debate
 from .brand_guard import DEFAULT_BRANDS, brand_reason, guard_enabled, load_brands
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
@@ -203,6 +204,13 @@ def run_posts(
         slots = slots_now("tiktok")
         return bool(slots) and is_celeb_turn(day, slot_index("tiktok", slots), env, log.rows())
 
+    def tiktok_debate_turn() -> bool:
+        """True when the TikTok slot a post now would fill is the debate slot (publisher/debate.py)."""
+        slots = slots_now("tiktok")
+        return bool(slots) and is_debate_turn(day, slot_index("tiktok", slots), env)
+
+    if any(is_debate(j.notes) for j in jobs):
+        jobs = order_debate(jobs, tiktok_debate_turn())
     if any(is_celeb(j.notes) for j in jobs):
         jobs = order_celeb(jobs, tiktok_celeb_turn())
 
