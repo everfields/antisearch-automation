@@ -1,4 +1,4 @@
-# Social metrics — 2026-11-04 07:18 UTC
+# Social metrics — 2026-11-04 11:14 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
@@ -14,15 +14,15 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `edad para ser feliz` → ahora | 246 | 1 | 0 | 0 | 0 | 0.4% |
 | `animal para ser` → gato doméstico | 245 | 0 | 0 | 0 | 0 | 0.0% |
 | `city to visit once` → paris | 238 | 1 | 0 | 0 | 0 | 0.4% |
+| `song for a breakup` → someone like you — adele | 235 | 0 | 0 | 0 | 0 | 0.0% |
 | `gen z icon` → billie eilish | 200 | 0 | 0 | 0 | 0 | 0.0% |
-| `song for a breakup` → someone like you — adele | 183 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `city to visit once` → paris | 0.4% | 238 |
 | `edad para ser feliz` → ahora | 0.4% | 246 |
 | `animal para ser` → gato doméstico | 0.0% | 245 |
-| `song for a breakup` → someone like you — adele | 0.0% | 183 |
+| `song for a breakup` → someone like you — adele | 0.0% | 235 |
 | `gen z icon` → billie eilish | 0.0% | 200 |
 
 ### last 7d (58 post(s))
