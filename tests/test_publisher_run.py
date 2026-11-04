@@ -716,3 +716,24 @@ def test_a_buffer_schedule_counts_on_its_send_day_whatever_is_logged_after_it(lo
     assert log.used_on(today, "instagram") == 1  # ig-retry only
     assert log.used_on(later, "instagram") == 3  # deleted, sent, by hand
     assert log.used_on(later) == 3 and log.used_on(later, "tiktok") == 0
+
+
+def test_tiktok_cap_counts_24_real_hours_across_dst(tmp_path):
+    """Nov 2 2026 (US DST ended Nov 1): the 05:07 Madrid slot was held on '5 in 24h' with only 4."""
+    from datetime import datetime as _dt, timezone as _tz
+    from zoneinfo import ZoneInfo as _Z
+    from antisearch_mill.publisher.guard import PostLog as _Log
+    from antisearch_mill.publisher.run import tiktok_crowded
+
+    p = tmp_path / "posts.csv"
+    rows = ["2026-11-01T04:27:58", "2026-11-01T12:17:58", "2026-11-01T15:38:07", "2026-11-01T19:08:12",
+            "2026-11-02T02:28:03"]
+    head = "job_id,network,status,clip_id,verdict,remote_id,url,detail,at,category,caption"
+    lines = [head] + [f"j{i},tiktok,pending,c{i},v,,,,{at}+00:00,c{i},"
+                      for i, at in enumerate(rows)] + [f"j{i},tiktok,published,c{i},v,r,u,d,{at}+00:00,c{i},"
+                                                      for i, at in enumerate(rows)]
+    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    log = _Log(p)
+    when = _dt(2026, 11, 2, 4, 49, tzinfo=_tz.utc).astimezone(_Z("America/New_York"))
+    assert tiktok_crowded(log, when) is None
+    assert tiktok_crowded(log, when.replace(minute=20)) is not None  # 04:20Z: the 04:27:58Z post is inside

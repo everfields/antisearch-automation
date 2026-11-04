@@ -43,6 +43,7 @@ from .pools import job_language
 from .tags import (TAG_NETWORKS, X_HANDLE, TagLog, caption_variant_of, choose_tag, choose_x_mention,
                    tag_networks, tiktok_caption, tiktok_variant)
 from .celeb import is_celeb, order_celeb
+from .debate import is_debate, is_debate_turn, order_debate
 from .brand_guard import DEFAULT_BRANDS, brand_reason, guard_enabled, load_brands
 from .jitter import LOOKAHEAD, MIN_SPACING, scheduled_offset, slot_offsets
 
@@ -203,6 +204,13 @@ def run_posts(
         slots = slots_now("tiktok")
         return bool(slots) and is_celeb_turn(day, slot_index("tiktok", slots), env, log.rows())
 
+    def tiktok_debate_turn() -> bool:
+        """True when the TikTok slot a post now would fill is the debate slot (publisher/debate.py)."""
+        slots = slots_now("tiktok")
+        return bool(slots) and is_debate_turn(day, slot_index("tiktok", slots), env)
+
+    if any(is_debate(j.notes) for j in jobs):
+        jobs = order_debate(jobs, tiktok_debate_turn())
     if any(is_celeb(j.notes) for j in jobs):
         jobs = order_celeb(jobs, tiktok_celeb_turn())
 
@@ -617,11 +625,15 @@ def tiktok_crowded(log: PostLog, when: datetime) -> str | None:
     """Why a TikTok post at `when` would be one too many, or None. TikTok gave 0 views to every
     post with 6+ TikTok posts in the 24h before it (2026-10-06/07): never more than
     TIKTOK_MAX_PER_24H in any 24 hours, never two within TIKTOK_MIN_SPACING (catch-ups too)."""
+    # Count in UTC: `when` carries America/New_York, and aware arithmetic in one zone is wall-clock
+    # arithmetic, so across a DST change "24 hours" was 25 (Nov 2 2026: the 05:07 slot was held on 4).
+    shown = when.tzinfo
+    when = when.astimezone(timezone.utc)
     times = log.post_times("tiktok")
     recent = [t for t in times if when - timedelta(hours=24) < t <= when + TIKTOK_MIN_SPACING]
     close = [t for t in recent if abs(when - t) < TIKTOK_MIN_SPACING]
     if close:
-        return (f"TikTok post at {max(close).astimezone(when.tzinfo):%Y-%m-%d %H:%M %Z}; "
+        return (f"TikTok post at {max(close).astimezone(shown):%Y-%m-%d %H:%M %Z}; "
                 f"{TIKTOK_MIN_SPACING.seconds // 60} min between TikTok posts")
     if sum(1 for t in recent if t <= when) >= TIKTOK_MAX_PER_24H:
         return f"{TIKTOK_MAX_PER_24H} TikTok posts in the last 24 hours already"
