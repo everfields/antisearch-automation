@@ -1,34 +1,31 @@
-# Social metrics — 2026-11-04 01:30 UTC
+# Social metrics — 2026-11-04 07:18 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +0)
-- account likes: 137, posts: 168
+- account likes: 137, posts: 169
 
 ### last 24h (5 post(s))
 
-**1 published post(s) have no numbers yet** (shown as –)
-
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `edad para ser feliz` → ahora | 246 | 1 | 0 | 0 | 0 | 0.4% |
 | `animal para ser` → gato doméstico | 245 | 0 | 0 | 0 | 0 | 0.0% |
-| `city to visit once` → paris | 236 | 1 | 0 | 0 | 0 | 0.4% |
-| `language app` → babbel | 232 | 0 | 0 | 0 | 0 | 0.0% |
-| `edad para ser feliz` → ahora | 73 | 0 | 0 | 0 | 0 | 0.0% |
-| `gen z icon` → billie eilish | – | – | – | – | – | – |
+| `city to visit once` → paris | 238 | 1 | 0 | 0 | 0 | 0.4% |
+| `gen z icon` → billie eilish | 200 | 0 | 0 | 0 | 0 | 0.0% |
+| `song for a breakup` → someone like you — adele | 183 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `city to visit once` → paris | 0.4% | 236 |
-| `language app` → babbel | 0.0% | 232 |
-| `edad para ser feliz` → ahora | 0.0% | 73 |
+| `city to visit once` → paris | 0.4% | 238 |
+| `edad para ser feliz` → ahora | 0.4% | 246 |
 | `animal para ser` → gato doméstico | 0.0% | 245 |
+| `song for a breakup` → someone like you — adele | 0.0% | 183 |
+| `gen z icon` → billie eilish | 0.0% | 200 |
 
-### last 7d (57 post(s))
-
-**1 published post(s) have no numbers yet** (shown as –)
+### last 7d (58 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
