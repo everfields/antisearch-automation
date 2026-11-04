@@ -625,11 +625,15 @@ def tiktok_crowded(log: PostLog, when: datetime) -> str | None:
     """Why a TikTok post at `when` would be one too many, or None. TikTok gave 0 views to every
     post with 6+ TikTok posts in the 24h before it (2026-10-06/07): never more than
     TIKTOK_MAX_PER_24H in any 24 hours, never two within TIKTOK_MIN_SPACING (catch-ups too)."""
+    # Count in UTC: `when` carries America/New_York, and aware arithmetic in one zone is wall-clock
+    # arithmetic, so across a DST change "24 hours" was 25 (Nov 2 2026: the 05:07 slot was held on 4).
+    shown = when.tzinfo
+    when = when.astimezone(timezone.utc)
     times = log.post_times("tiktok")
     recent = [t for t in times if when - timedelta(hours=24) < t <= when + TIKTOK_MIN_SPACING]
     close = [t for t in recent if abs(when - t) < TIKTOK_MIN_SPACING]
     if close:
-        return (f"TikTok post at {max(close).astimezone(when.tzinfo):%Y-%m-%d %H:%M %Z}; "
+        return (f"TikTok post at {max(close).astimezone(shown):%Y-%m-%d %H:%M %Z}; "
                 f"{TIKTOK_MIN_SPACING.seconds // 60} min between TikTok posts")
     if sum(1 for t in recent if t <= when) >= TIKTOK_MAX_PER_24H:
         return f"{TIKTOK_MAX_PER_24H} TikTok posts in the last 24 hours already"
