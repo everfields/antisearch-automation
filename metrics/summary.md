@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-05 01:31 UTC
+# Social metrics — 2026-11-05 11:14 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **7** (24h +0, 7d +0)
-- account likes: 137, posts: 173
+- followers: **8** (24h +1, 7d +1)
+- account likes: 138, posts: 173
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `song for a breakup` → someone like you — adele | 237 | 0 | 0 | 0 | 0 | 0.0% |
+| `a window` → triple-glazed casement window | 240 | 1 | 0 | 0 | 0 | 0.4% |
 | `carrera para estudiar` → ingeniería informática | 235 | 0 | 0 | 0 | 0 | 0.0% |
-| `viaje para hacer solo` → japón | 162 | 0 | 0 | 1 | 0 | 0.6% |
-| `a window` → triple-glazed casement window | 54 | 0 | 0 | 0 | 0 | 0.0% |
+| `viaje para hacer solo` → japón | 225 | 0 | 0 | 1 | 0 | 0.4% |
+| `building toy` → lego | 198 | 0 | 0 | 0 | 0 | 0.0% |
 | `electronic music festival` → tomorrowland | 50 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `viaje para hacer solo` → japón | 0.6% | 162 |
-| `song for a breakup` → someone like you — adele | 0.0% | 237 |
+| `viaje para hacer solo` → japón | 0.4% | 225 |
+| `a window` → triple-glazed casement window | 0.4% | 240 |
 | `electronic music festival` → tomorrowland | 0.0% | 50 |
 | `carrera para estudiar` → ingeniería informática | 0.0% | 235 |
-| `a window` → triple-glazed casement window | 0.0% | 54 |
+| `building toy` → lego | 0.0% | 198 |
 
-### last 7d (59 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
