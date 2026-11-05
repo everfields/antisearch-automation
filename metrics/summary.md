@@ -1,47 +1,47 @@
-# Social metrics — 2026-11-05 11:14 UTC
+# Social metrics — 2026-11-05 20:07 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +1, 7d +1)
-- account likes: 138, posts: 173
+- account likes: 140, posts: 177
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `a window` → triple-glazed casement window | 240 | 1 | 0 | 0 | 0 | 0.4% |
-| `carrera para estudiar` → ingeniería informática | 235 | 0 | 0 | 0 | 0 | 0.0% |
-| `viaje para hacer solo` → japón | 225 | 0 | 0 | 1 | 0 | 0.4% |
-| `building toy` → lego | 198 | 0 | 0 | 0 | 0 | 0.0% |
-| `electronic music festival` → tomorrowland | 50 | 0 | 0 | 0 | 0 | 0.0% |
+| `building toy` → lego | 239 | 0 | 0 | 0 | 0 | 0.0% |
+| `golfer` → tiger woods | 218 | 1 | 0 | 0 | 0 | 0.5% |
+| `creador de youtube` → mrbeast | 194 | 1 | 0 | 0 | 0 | 0.5% |
+| `rasgo de personalidad` → empatía | 76 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `viaje para hacer solo` → japón | 0.4% | 225 |
+| `creador de youtube` → mrbeast | 0.5% | 194 |
+| `golfer` → tiger woods | 0.5% | 218 |
 | `a window` → triple-glazed casement window | 0.4% | 240 |
-| `electronic music festival` → tomorrowland | 0.0% | 50 |
-| `carrera para estudiar` → ingeniería informática | 0.0% | 235 |
-| `building toy` → lego | 0.0% | 198 |
+| `building toy` → lego | 0.0% | 239 |
+| `rasgo de personalidad` → empatía | 0.0% | 76 |
 
-### last 7d (60 post(s))
+### last 7d (62 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `superpoder para tener` → omnipotencia | 263 | 4 | 0 | 0 | 0 | 1.5% |
-| `superpoder para tener` → omnipotencia | 263 | 4 | 0 | 0 | – | 1.5% |
 | `época para haber nacido` → década de 1990 | 256 | 4 | 0 | 0 | 0 | 1.6% |
 | `época para haber nacido` → década de 1990 | 256 | 4 | 0 | 0 | – | 1.6% |
-| `youtube creator` → mrbeast | 255 | 2 | 0 | 0 | 0 | 0.8% |
+| `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | 0 | 0.0% |
+| `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | – | 0.0% |
+| `k-pop group` → bts | 251 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `época para haber nacido` → década de 1990 | 1.6% | 256 |
 | `época para haber nacido` → década de 1990 | 1.6% | 256 |
-| `superpoder para tener` → omnipotencia | 1.5% | 263 |
-| `superpoder para tener` → omnipotencia | 1.5% | 263 |
 | `comfort show` → parks and recreation | 1.3% | 236 |
+| `comfort show` → parks and recreation | 1.3% | 237 |
+| `salicylic acid cleanser` → cerave renewing sa cleanser | 0.9% | 233 |
 
 ## instagram
 
