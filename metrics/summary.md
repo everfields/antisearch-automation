@@ -1,39 +1,39 @@
-# Social metrics — 2026-11-04 19:54 UTC
+# Social metrics — 2026-11-05 01:31 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **7** (24h +0, 7d +0)
-- account likes: 137, posts: 172
+- account likes: 137, posts: 173
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `song for a breakup` → someone like you — adele | 236 | 0 | 0 | 0 | 0 | 0.0% |
-| `carrera para estudiar` → ingeniería informática | 234 | 0 | 0 | 0 | 0 | 0.0% |
-| `gen z icon` → billie eilish | 200 | 0 | 0 | 0 | 0 | 0.0% |
+| `song for a breakup` → someone like you — adele | 237 | 0 | 0 | 0 | 0 | 0.0% |
+| `carrera para estudiar` → ingeniería informática | 235 | 0 | 0 | 0 | 0 | 0.0% |
+| `viaje para hacer solo` → japón | 162 | 0 | 0 | 1 | 0 | 0.6% |
+| `a window` → triple-glazed casement window | 54 | 0 | 0 | 0 | 0 | 0.0% |
 | `electronic music festival` → tomorrowland | 50 | 0 | 0 | 0 | 0 | 0.0% |
-| `viaje para hacer solo` → japón | 29 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `song for a breakup` → someone like you — adele | 0.0% | 236 |
-| `gen z icon` → billie eilish | 0.0% | 200 |
-| `viaje para hacer solo` → japón | 0.0% | 29 |
+| `viaje para hacer solo` → japón | 0.6% | 162 |
+| `song for a breakup` → someone like you — adele | 0.0% | 237 |
 | `electronic music festival` → tomorrowland | 0.0% | 50 |
-| `carrera para estudiar` → ingeniería informática | 0.0% | 234 |
+| `carrera para estudiar` → ingeniería informática | 0.0% | 235 |
+| `a window` → triple-glazed casement window | 0.0% | 54 |
 
-### last 7d (62 post(s))
+### last 7d (59 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `superpoder para tener` → omnipotencia | 263 | 4 | 0 | 0 | 0 | 1.5% |
-| `perfume de mujer` → chanel coco mademoiselle eau de parfum | 263 | 1 | 0 | 0 | – | 0.4% |
 | `superpoder para tener` → omnipotencia | 263 | 4 | 0 | 0 | – | 1.5% |
-| `perfume de mujer` → chanel coco mademoiselle eau de parfum | 262 | 1 | 0 | 0 | 0 | 0.4% |
 | `época para haber nacido` → década de 1990 | 256 | 4 | 0 | 0 | 0 | 1.6% |
+| `época para haber nacido` → década de 1990 | 256 | 4 | 0 | 0 | – | 1.6% |
+| `youtube creator` → mrbeast | 255 | 2 | 0 | 0 | 0 | 0.8% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
