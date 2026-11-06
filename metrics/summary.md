@@ -1,11 +1,11 @@
-# Social metrics — 2026-11-06 01:40 UTC
+# Social metrics — 2026-11-06 11:12 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +1, 7d +1)
-- account likes: 142, posts: 178
+- account likes: 143, posts: 179
 
 ### last 24h (5 post(s))
 
@@ -13,19 +13,19 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- | --- | --- | --- | --- |
 | `golfer` → tiger woods | 253 | 1 | 0 | 0 | 0 | 0.4% |
 | `creador de youtube` → mrbeast | 248 | 1 | 0 | 0 | 0 | 0.4% |
-| `building toy` → lego | 239 | 0 | 0 | 0 | 0 | 0.0% |
-| `rasgo de personalidad` → empatía | 200 | 1 | 0 | 0 | 0 | 0.5% |
-| `song for a road trip` → born to run — bruce springsteen | 80 | 1 | 0 | 0 | 0 | 1.2% |
+| `song for a road trip` → born to run — bruce springsteen | 241 | 2 | 0 | 0 | 0 | 0.8% |
+| `rasgo de personalidad` → empatía | 236 | 1 | 0 | 0 | 0 | 0.4% |
+| `drugstore makeup` → e.l.f. cosmetics | 196 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `song for a road trip` → born to run — bruce springsteen | 1.2% | 80 |
-| `rasgo de personalidad` → empatía | 0.5% | 200 |
+| `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
+| `rasgo de personalidad` → empatía | 0.4% | 236 |
 | `creador de youtube` → mrbeast | 0.4% | 248 |
 | `golfer` → tiger woods | 0.4% | 253 |
-| `building toy` → lego | 0.0% | 239 |
+| `drugstore makeup` → e.l.f. cosmetics | 0.0% | 196 |
 
-### last 7d (61 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -39,9 +39,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- |
 | `época para haber nacido` → década de 1990 | 1.6% | 256 |
 | `época para haber nacido` → década de 1990 | 1.6% | 256 |
-| `comfort show` → parks and recreation | 1.3% | 236 |
-| `comfort show` → parks and recreation | 1.3% | 237 |
-| `song for a road trip` → born to run — bruce springsteen | 1.2% | 80 |
+| `sports drink` → gatorade thirst quencher | 0.8% | 240 |
+| `sports drink` → gatorade thirst quencher | 0.8% | 240 |
+| `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
 
 ## instagram
 
