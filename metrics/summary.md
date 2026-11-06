@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-06 11:12 UTC
+# Social metrics — 2026-11-06 19:33 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
-- followers: **8** (24h +1, 7d +1)
-- account likes: 143, posts: 179
+- followers: **8** (24h +0, 7d +1)
+- account likes: 145, posts: 182
 
-### last 24h (5 post(s))
+### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `golfer` → tiger woods | 253 | 1 | 0 | 0 | 0 | 0.4% |
-| `creador de youtube` → mrbeast | 248 | 1 | 0 | 0 | 0 | 0.4% |
+| `década para ser joven` → los años 90 | 243 | 1 | 0 | 0 | 0 | 0.4% |
 | `song for a road trip` → born to run — bruce springsteen | 241 | 2 | 0 | 0 | 0 | 0.8% |
-| `rasgo de personalidad` → empatía | 236 | 1 | 0 | 0 | 0 | 0.4% |
-| `drugstore makeup` → e.l.f. cosmetics | 196 | 0 | 0 | 0 | 0 | 0.0% |
+| `rasgo de personalidad` → empatía | 237 | 1 | 0 | 0 | 0 | 0.4% |
+| `drugstore makeup` → e.l.f. cosmetics | 228 | 0 | 0 | 0 | 0 | 0.0% |
+| `pizza topping` → pepperoni | 103 | 1 | 0 | 0 | 0 | 1.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `pizza topping` → pepperoni | 1.0% | 103 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
-| `rasgo de personalidad` → empatía | 0.4% | 236 |
-| `creador de youtube` → mrbeast | 0.4% | 248 |
-| `golfer` → tiger woods | 0.4% | 253 |
-| `drugstore makeup` → e.l.f. cosmetics | 0.0% | 196 |
+| `rasgo de personalidad` → empatía | 0.4% | 237 |
+| `década para ser joven` → los años 90 | 0.4% | 243 |
+| `drugstore makeup` → e.l.f. cosmetics | 0.0% | 228 |
 
-### last 7d (54 post(s))
+### last 7d (58 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -39,9 +39,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- |
 | `época para haber nacido` → década de 1990 | 1.6% | 256 |
 | `época para haber nacido` → década de 1990 | 1.6% | 256 |
+| `pizza topping` → pepperoni | 1.0% | 103 |
 | `sports drink` → gatorade thirst quencher | 0.8% | 240 |
 | `sports drink` → gatorade thirst quencher | 0.8% | 240 |
-| `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
 
 ## instagram
 
