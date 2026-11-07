@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-07 00:59 UTC
+# Social metrics — 2026-11-07 10:29 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 145, posts: 183
+- account likes: 146, posts: 184
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `década para ser joven` → los años 90 | 251 | 1 | 0 | 0 | 0 | 0.4% |
-| `pizza topping` → pepperoni | 231 | 1 | 0 | 0 | 0 | 0.4% |
-| `drugstore makeup` → e.l.f. cosmetics | 229 | 0 | 0 | 0 | 0 | 0.0% |
-| `plan para un martes` → cine y cena | 183 | 0 | 0 | 0 | 0 | 0.0% |
+| `pizza topping` → pepperoni | 249 | 1 | 0 | 0 | 0 | 0.4% |
+| `song for the gym` → till i collapse — eminem | 241 | 1 | 0 | 0 | 0 | 0.4% |
+| `plan para un martes` → cine y cena | 236 | 0 | 0 | 0 | 0 | 0.0% |
 | `teen heartbreak song` → drivers license — olivia rodrigo | 5 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `pizza topping` → pepperoni | 0.4% | 231 |
+| `song for the gym` → till i collapse — eminem | 0.4% | 241 |
+| `pizza topping` → pepperoni | 0.4% | 249 |
 | `década para ser joven` → los años 90 | 0.4% | 251 |
-| `drugstore makeup` → e.l.f. cosmetics | 0.0% | 229 |
-| `plan para un martes` → cine y cena | 0.0% | 183 |
+| `plan para un martes` → cine y cena | 0.0% | 236 |
 | `teen heartbreak song` → drivers license — olivia rodrigo | 0.0% | 5 |
 
-### last 7d (58 post(s))
+### last 7d (50 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
