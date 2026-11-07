@@ -1,35 +1,31 @@
-# Social metrics — 2026-11-07 17:47 UTC
+# Social metrics — 2026-11-07 22:03 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 146, posts: 186
+- account likes: 146, posts: 187
 
-### last 24h (7 post(s))
-
-**2 published post(s) have no numbers yet** (shown as –)
+### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `song for the gym` → till i collapse — eminem | 241 | 1 | 0 | 0 | 0 | 0.4% |
-| `plan para un martes` → cine y cena | 236 | 0 | 0 | 0 | 0 | 0.0% |
-| `plan para un martes` → cine y cena | 204 | 0 | 0 | 0 | – | 0.0% |
+| `comida para compartir` → pizza | 249 | 0 | 0 | 1 | 0 | 0.4% |
+| `song for the gym` → till i collapse — eminem | 243 | 1 | 0 | 0 | 0 | 0.4% |
+| `basketball player` → michael jordan | 189 | 0 | 0 | 0 | 0 | 0.0% |
+| `lugar para desconectar` → formentera | 95 | 0 | 0 | 0 | 0 | 0.0% |
 | `teen heartbreak song` → drivers license — olivia rodrigo | 5 | 0 | 0 | 0 | 0 | 0.0% |
-| `teen heartbreak song` → drivers license — olivia rodrigo | 5 | 0 | 0 | 0 | – | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `song for the gym` → till i collapse — eminem | 0.4% | 241 |
-| `plan para un martes` → cine y cena | 0.0% | 236 |
+| `song for the gym` → till i collapse — eminem | 0.4% | 243 |
+| `comida para compartir` → pizza | 0.4% | 249 |
 | `teen heartbreak song` → drivers license — olivia rodrigo | 0.0% | 5 |
-| `plan para un martes` → cine y cena | 0.0% | 204 |
 | `teen heartbreak song` → drivers license — olivia rodrigo | 0.0% | 5 |
+| `lugar para desconectar` → formentera | 0.0% | 95 |
 
-### last 7d (63 post(s))
-
-**2 published post(s) have no numbers yet** (shown as –)
+### last 7d (64 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
