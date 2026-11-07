@@ -1,31 +1,35 @@
-# Social metrics — 2026-11-07 10:29 UTC
+# Social metrics — 2026-11-07 17:47 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 146, posts: 184
+- account likes: 146, posts: 186
 
-### last 24h (5 post(s))
+### last 24h (7 post(s))
+
+**2 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `década para ser joven` → los años 90 | 251 | 1 | 0 | 0 | 0 | 0.4% |
-| `pizza topping` → pepperoni | 249 | 1 | 0 | 0 | 0 | 0.4% |
 | `song for the gym` → till i collapse — eminem | 241 | 1 | 0 | 0 | 0 | 0.4% |
 | `plan para un martes` → cine y cena | 236 | 0 | 0 | 0 | 0 | 0.0% |
+| `plan para un martes` → cine y cena | 204 | 0 | 0 | 0 | – | 0.0% |
 | `teen heartbreak song` → drivers license — olivia rodrigo | 5 | 0 | 0 | 0 | 0 | 0.0% |
+| `teen heartbreak song` → drivers license — olivia rodrigo | 5 | 0 | 0 | 0 | – | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `song for the gym` → till i collapse — eminem | 0.4% | 241 |
-| `pizza topping` → pepperoni | 0.4% | 249 |
-| `década para ser joven` → los años 90 | 0.4% | 251 |
 | `plan para un martes` → cine y cena | 0.0% | 236 |
 | `teen heartbreak song` → drivers license — olivia rodrigo | 0.0% | 5 |
+| `plan para un martes` → cine y cena | 0.0% | 204 |
+| `teen heartbreak song` → drivers license — olivia rodrigo | 0.0% | 5 |
 
-### last 7d (50 post(s))
+### last 7d (63 post(s))
+
+**2 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
