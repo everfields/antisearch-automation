@@ -120,7 +120,8 @@
       "comida para compartir \u2192 pizza",
       "basketball player \u2192 michael jordan",
       "lugar para desconectar \u2192 formentera",
-      "a chair \u2192 herman miller aeron"
+      "a chair \u2192 herman miller aeron",
+      "a city \u2192 tokyo"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -392,7 +393,8 @@
       "es-comida-para-compartir-3ac89dfc",
       "p-basketball-player-48d2ad42",
       "es-lugar-para-desconectar-659264f1",
-      "p-a-chair-28d5f467"
+      "p-a-chair-28d5f467",
+      "p-a-city-71109cf4"
     ],
     "x": [
       "p-a-feeling-725bad0d",
