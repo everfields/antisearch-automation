@@ -1,39 +1,38 @@
-# Social metrics — 2026-11-07 22:03 UTC
+# Social metrics — 2026-11-08 06:21 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 146, posts: 187
+- account likes: 146, posts: 189
 
-### last 24h (6 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `basketball player` → michael jordan | 256 | 0 | 0 | 0 | 0 | 0.0% |
 | `comida para compartir` → pizza | 249 | 0 | 0 | 1 | 0 | 0.4% |
-| `song for the gym` → till i collapse — eminem | 243 | 1 | 0 | 0 | 0 | 0.4% |
-| `basketball player` → michael jordan | 189 | 0 | 0 | 0 | 0 | 0.0% |
-| `lugar para desconectar` → formentera | 95 | 0 | 0 | 0 | 0 | 0.0% |
-| `teen heartbreak song` → drivers license — olivia rodrigo | 5 | 0 | 0 | 0 | 0 | 0.0% |
+| `lugar para desconectar` → formentera | 199 | 0 | 0 | 0 | 0 | 0.0% |
+| `a chair` → herman miller aeron | 165 | 0 | 0 | 0 | 0 | 0.0% |
+| `a city` → tokyo | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `song for the gym` → till i collapse — eminem | 0.4% | 243 |
 | `comida para compartir` → pizza | 0.4% | 249 |
-| `teen heartbreak song` → drivers license — olivia rodrigo | 0.0% | 5 |
-| `teen heartbreak song` → drivers license — olivia rodrigo | 0.0% | 5 |
-| `lugar para desconectar` → formentera | 0.0% | 95 |
+| `lugar para desconectar` → formentera | 0.0% | 199 |
+| `basketball player` → michael jordan | 0.0% | 256 |
+| `a chair` → herman miller aeron | 0.0% | 165 |
 
-### last 7d (64 post(s))
+### last 7d (62 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `época para haber nacido` → década de 1990 | 256 | 4 | 0 | 0 | 0 | 1.6% |
 | `época para haber nacido` → década de 1990 | 256 | 4 | 0 | 0 | – | 1.6% |
+| `basketball player` → michael jordan | 256 | 0 | 0 | 0 | 0 | 0.0% |
 | `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | 0 | 0.0% |
 | `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | – | 0.0% |
-| `golfer` → tiger woods | 253 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
