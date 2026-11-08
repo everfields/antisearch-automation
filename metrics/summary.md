@@ -1,38 +1,38 @@
-# Social metrics — 2026-11-08 06:21 UTC
+# Social metrics — 2026-11-08 13:43 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 146, posts: 189
+- account likes: 147, posts: 190
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `lugar para desconectar` → formentera | 265 | 1 | 0 | 0 | 0 | 0.4% |
 | `basketball player` → michael jordan | 256 | 0 | 0 | 0 | 0 | 0.0% |
-| `comida para compartir` → pizza | 249 | 0 | 0 | 1 | 0 | 0.4% |
-| `lugar para desconectar` → formentera | 199 | 0 | 0 | 0 | 0 | 0.0% |
-| `a chair` → herman miller aeron | 165 | 0 | 0 | 0 | 0 | 0.0% |
+| `a chair` → herman miller aeron | 248 | 0 | 0 | 0 | 0 | 0.0% |
+| `festival de electrónica` → tomorrowland | 33 | 0 | 0 | 0 | 0 | 0.0% |
 | `a city` → tokyo | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `comida para compartir` → pizza | 0.4% | 249 |
-| `lugar para desconectar` → formentera | 0.0% | 199 |
+| `lugar para desconectar` → formentera | 0.4% | 265 |
 | `basketball player` → michael jordan | 0.0% | 256 |
-| `a chair` → herman miller aeron | 0.0% | 165 |
+| `a chair` → herman miller aeron | 0.0% | 248 |
+| `festival de electrónica` → tomorrowland | 0.0% | 33 |
 
-### last 7d (62 post(s))
+### last 7d (61 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `lugar para desconectar` → formentera | 265 | 1 | 0 | 0 | 0 | 0.4% |
 | `época para haber nacido` → década de 1990 | 256 | 4 | 0 | 0 | 0 | 1.6% |
 | `época para haber nacido` → década de 1990 | 256 | 4 | 0 | 0 | – | 1.6% |
 | `basketball player` → michael jordan | 256 | 0 | 0 | 0 | 0 | 0.0% |
 | `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | 0 | 0.0% |
-| `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | – | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
