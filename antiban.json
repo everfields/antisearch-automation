@@ -124,7 +124,8 @@
       "a city \u2192 tokyo",
       "festival de electr\u00f3nica \u2192 @tomorrowland",
       "sandwich \u2192 cubano",
-      "h\u00e1bito para empezar \u2192 caminata diaria de 30 minutos"
+      "h\u00e1bito para empezar \u2192 caminata diaria de 30 minutos",
+      "time to start over \u2192 now"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -400,7 +401,8 @@
       "p-a-city-71109cf4",
       "es-festival-de-electr-nica-7c9c9af4",
       "p-sandwich-51d81e08",
-      "es-h-bito-para-empezar-fff51a7f"
+      "es-h-bito-para-empezar-fff51a7f",
+      "p-time-to-start-over-ce8cf67e"
     ],
     "x": [
       "p-a-feeling-725bad0d",
