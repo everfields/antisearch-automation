@@ -126,7 +126,8 @@
       "sandwich \u2192 cubano",
       "h\u00e1bito para empezar \u2192 caminata diaria de 30 minutos",
       "time to start over \u2192 now",
-      "primer \u2192 bobbi brown vitamin enriched face base"
+      "primer \u2192 bobbi brown vitamin enriched face base",
+      "pregunta para hacer en una cita \u2192 \u00bftu idea de un d\u00eda perfecto?"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -404,7 +405,8 @@
       "p-sandwich-51d81e08",
       "es-h-bito-para-empezar-fff51a7f",
       "p-time-to-start-over-ce8cf67e",
-      "p-primer-478be51c"
+      "p-primer-478be51c",
+      "es-pregunta-para-hacer-en-una-cita-61929ac8"
     ],
     "x": [
       "p-a-feeling-725bad0d",
