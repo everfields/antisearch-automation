@@ -1,46 +1,47 @@
-# Social metrics — 2026-11-09 01:01 UTC
+# Social metrics — 2026-11-09 11:51 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 151, posts: 193
+- account likes: 152, posts: 194
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `hábito para empezar` → caminata diaria de 30 minutos | 256 | 1 | 0 | 0 | 0 | 0.4% |
 | `festival de electrónica` → tomorrowland | 235 | 1 | 0 | 0 | 0 | 0.4% |
-| `hábito para empezar` → caminata diaria de 30 minutos | 182 | 1 | 0 | 0 | 0 | 0.5% |
-| `time to start over` → now | 76 | 2 | 0 | 0 | 0 | 2.6% |
+| `time to start over` → now | 233 | 3 | 0 | 0 | 0 | 1.3% |
+| `primer` → bobbi brown vitamin enriched face base | 214 | 0 | 0 | 0 | 0 | 0.0% |
 | `sandwich` → cubano | 40 | 0 | 0 | 0 | 0 | 0.0% |
-| `a city` → tokyo | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `time to start over` → now | 2.6% | 76 |
-| `hábito para empezar` → caminata diaria de 30 minutos | 0.5% | 182 |
+| `time to start over` → now | 1.3% | 233 |
 | `festival de electrónica` → tomorrowland | 0.4% | 235 |
+| `hábito para empezar` → caminata diaria de 30 minutos | 0.4% | 256 |
 | `sandwich` → cubano | 0.0% | 40 |
+| `primer` → bobbi brown vitamin enriched face base | 0.0% | 214 |
 
-### last 7d (60 post(s))
+### last 7d (59 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `lugar para desconectar` → formentera | 265 | 1 | 0 | 0 | 0 | 0.4% |
 | `basketball player` → michael jordan | 256 | 0 | 0 | 0 | 0 | 0.0% |
+| `hábito para empezar` → caminata diaria de 30 minutos | 256 | 1 | 0 | 0 | 0 | 0.4% |
 | `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | 0 | 0.0% |
 | `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | – | 0.0% |
-| `golfer` → tiger woods | 253 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `time to start over` → now | 2.6% | 76 |
-| `sports drink` → gatorade thirst quencher | 0.8% | 240 |
-| `sports drink` → gatorade thirst quencher | 0.8% | 240 |
+| `time to start over` → now | 1.3% | 233 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
+| `viaje para hacer solo` → japón | 0.4% | 225 |
+| `viaje para hacer solo` → japón | 0.4% | 225 |
 
 ## instagram
 
