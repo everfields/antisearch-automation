@@ -1,46 +1,46 @@
-# Social metrics — 2026-11-09 11:51 UTC
+# Social metrics — 2026-11-09 22:33 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 152, posts: 194
+- account likes: 153, posts: 197
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hábito para empezar` → caminata diaria de 30 minutos | 256 | 1 | 0 | 0 | 0 | 0.4% |
-| `festival de electrónica` → tomorrowland | 235 | 1 | 0 | 0 | 0 | 0.4% |
-| `time to start over` → now | 233 | 3 | 0 | 0 | 0 | 1.3% |
-| `primer` → bobbi brown vitamin enriched face base | 214 | 0 | 0 | 0 | 0 | 0.0% |
-| `sandwich` → cubano | 40 | 0 | 0 | 0 | 0 | 0.0% |
+| `pregunta para hacer en una cita` → ¿tu idea de un día perfecto? | 258 | 0 | 0 | 0 | 0 | 0.0% |
+| `time to start over` → now | 235 | 3 | 0 | 0 | 0 | 1.3% |
+| `primer` → bobbi brown vitamin enriched face base | 220 | 0 | 0 | 0 | 0 | 0.0% |
+| `ice cream flavor` → pistachio | 184 | 0 | 0 | 0 | 0 | 0.0% |
+| `canción para bailar en casa` → dancing queen — abba | 157 | 1 | 0 | 0 | 0 | 0.6% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `time to start over` → now | 1.3% | 233 |
-| `festival de electrónica` → tomorrowland | 0.4% | 235 |
-| `hábito para empezar` → caminata diaria de 30 minutos | 0.4% | 256 |
-| `sandwich` → cubano | 0.0% | 40 |
-| `primer` → bobbi brown vitamin enriched face base | 0.0% | 214 |
+| `time to start over` → now | 1.3% | 235 |
+| `canción para bailar en casa` → dancing queen — abba | 0.6% | 157 |
+| `primer` → bobbi brown vitamin enriched face base | 0.0% | 220 |
+| `ice cream flavor` → pistachio | 0.0% | 184 |
+| `pregunta para hacer en una cita` → ¿tu idea de un día perfecto? | 0.0% | 258 |
 
-### last 7d (59 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `lugar para desconectar` → formentera | 265 | 1 | 0 | 0 | 0 | 0.4% |
+| `lugar para desconectar` → formentera | 265 | 1 | 0 | 0 | – | 0.4% |
+| `pregunta para hacer en una cita` → ¿tu idea de un día perfecto? | 258 | 0 | 0 | 0 | 0 | 0.0% |
 | `basketball player` → michael jordan | 256 | 0 | 0 | 0 | 0 | 0.0% |
 | `hábito para empezar` → caminata diaria de 30 minutos | 256 | 1 | 0 | 0 | 0 | 0.4% |
-| `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | 0 | 0.0% |
-| `ciudad para vivir a los 25` → madrid | 253 | 0 | 0 | 0 | – | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `time to start over` → now | 1.3% | 233 |
+| `time to start over` → now | 1.3% | 235 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
-| `viaje para hacer solo` → japón | 0.4% | 225 |
+| `canción para bailar en casa` → dancing queen — abba | 0.6% | 157 |
 | `viaje para hacer solo` → japón | 0.4% | 225 |
 
 ## instagram
