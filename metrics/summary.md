@@ -1,31 +1,30 @@
-# Social metrics — 2026-11-08 19:47 UTC
+# Social metrics — 2026-11-09 01:01 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 148, posts: 192
+- account likes: 151, posts: 193
 
-### last 24h (6 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `lugar para desconectar` → formentera | 265 | 1 | 0 | 0 | 0 | 0.4% |
-| `a chair` → herman miller aeron | 248 | 0 | 0 | 0 | 0 | 0.0% |
 | `festival de electrónica` → tomorrowland | 235 | 1 | 0 | 0 | 0 | 0.4% |
+| `hábito para empezar` → caminata diaria de 30 minutos | 182 | 1 | 0 | 0 | 0 | 0.5% |
+| `time to start over` → now | 76 | 2 | 0 | 0 | 0 | 2.6% |
 | `sandwich` → cubano | 40 | 0 | 0 | 0 | 0 | 0.0% |
-| `hábito para empezar` → caminata diaria de 30 minutos | 9 | 0 | 0 | 0 | 0 | 0.0% |
+| `a city` → tokyo | 0 | 0 | 0 | 0 | 0 | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `time to start over` → now | 2.6% | 76 |
+| `hábito para empezar` → caminata diaria de 30 minutos | 0.5% | 182 |
 | `festival de electrónica` → tomorrowland | 0.4% | 235 |
-| `lugar para desconectar` → formentera | 0.4% | 265 |
-| `a chair` → herman miller aeron | 0.0% | 248 |
-| `hábito para empezar` → caminata diaria de 30 minutos | 0.0% | 9 |
 | `sandwich` → cubano | 0.0% | 40 |
 
-### last 7d (59 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,11 +36,11 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `time to start over` → now | 2.6% | 76 |
 | `sports drink` → gatorade thirst quencher | 0.8% | 240 |
 | `sports drink` → gatorade thirst quencher | 0.8% | 240 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
-| `viaje para hacer solo` → japón | 0.4% | 225 |
 
 ## instagram
 
