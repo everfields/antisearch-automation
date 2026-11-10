@@ -131,7 +131,8 @@
       "ice cream flavor \u2192 pistachio",
       "canci\u00f3n para bailar en casa \u2192 dancing queen \u2014 abba",
       "place to cry \u2192 your bedroom",
-      "thing money can't buy \u2192 genuine love"
+      "thing money can't buy \u2192 genuine love",
+      "edad para enamorarse \u2192 cualquier edad"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -414,7 +415,8 @@
       "p-ice-cream-flavor-3a1e00b2",
       "es-canci-n-para-bailar-en-casa-a8a8cc44",
       "p-place-to-cry-a12fee2f",
-      "p-thing-money-can-t-buy-e8d2dd87"
+      "p-thing-money-can-t-buy-e8d2dd87",
+      "es-edad-para-enamorarse-5eb209c8"
     ],
     "x": [
       "p-a-feeling-725bad0d",
