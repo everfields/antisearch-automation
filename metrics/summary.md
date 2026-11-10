@@ -1,31 +1,33 @@
-# Social metrics — 2026-11-09 22:33 UTC
+# Social metrics — 2026-11-10 07:31 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 153, posts: 197
+- account likes: 157, posts: 199
 
 ### last 24h (5 post(s))
+
+**2 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `pregunta para hacer en una cita` → ¿tu idea de un día perfecto? | 258 | 0 | 0 | 0 | 0 | 0.0% |
-| `time to start over` → now | 235 | 3 | 0 | 0 | 0 | 1.3% |
-| `primer` → bobbi brown vitamin enriched face base | 220 | 0 | 0 | 0 | 0 | 0.0% |
 | `ice cream flavor` → pistachio | 184 | 0 | 0 | 0 | 0 | 0.0% |
 | `canción para bailar en casa` → dancing queen — abba | 157 | 1 | 0 | 0 | 0 | 0.6% |
+| `place to cry` → your bedroom | – | – | – | – | – | – |
+| `thing money can't buy` → genuine love | – | – | – | – | – | – |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `time to start over` → now | 1.3% | 235 |
 | `canción para bailar en casa` → dancing queen — abba | 0.6% | 157 |
-| `primer` → bobbi brown vitamin enriched face base | 0.0% | 220 |
 | `ice cream flavor` → pistachio | 0.0% | 184 |
 | `pregunta para hacer en una cita` → ¿tu idea de un día perfecto? | 0.0% | 258 |
 
-### last 7d (60 post(s))
+### last 7d (58 post(s))
+
+**2 published post(s) have no numbers yet** (shown as –)
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
