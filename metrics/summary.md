@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-10 17:10 UTC
+# Social metrics — 2026-11-10 23:34 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 160, posts: 201
+- account likes: 163, posts: 202
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `canción para bailar en casa` → dancing queen — abba | 254 | 1 | 0 | 0 | 0 | 0.4% |
+| `pancake topping` → pure maple syrup | 249 | 1 | 0 | 0 | 0 | 0.4% |
 | `place to cry` → your bedroom | 248 | 2 | 0 | 0 | 0 | 0.8% |
-| `edad para enamorarse` → cualquier edad | 237 | 3 | 0 | 0 | 1 | 1.7% |
+| `edad para enamorarse` → cualquier edad | 240 | 3 | 0 | 0 | 1 | 1.7% |
 | `thing money can't buy` → genuine love | 223 | 2 | 0 | 0 | 0 | 0.9% |
-| `pancake topping` → pure maple syrup | 89 | 0 | 0 | 0 | 0 | 0.0% |
+| `momento del día` → atardecer | 180 | 2 | 0 | 0 | 0 | 1.1% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `edad para enamorarse` → cualquier edad | 1.7% | 237 |
+| `edad para enamorarse` → cualquier edad | 1.7% | 240 |
+| `momento del día` → atardecer | 1.1% | 180 |
 | `thing money can't buy` → genuine love | 0.9% | 223 |
 | `place to cry` → your bedroom | 0.8% | 248 |
-| `canción para bailar en casa` → dancing queen — abba | 0.4% | 254 |
-| `pancake topping` → pure maple syrup | 0.0% | 89 |
+| `pancake topping` → pure maple syrup | 0.4% | 249 |
 
-### last 7d (56 post(s))
+### last 7d (58 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,10 +37,10 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `edad para enamorarse` → cualquier edad | 1.7% | 237 |
+| `edad para enamorarse` → cualquier edad | 1.7% | 240 |
 | `time to start over` → now | 1.3% | 235 |
+| `momento del día` → atardecer | 1.1% | 180 |
 | `thing money can't buy` → genuine love | 0.9% | 223 |
-| `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
 
 ## instagram
