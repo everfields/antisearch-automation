@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-11 06:48 UTC
+# Social metrics — 2026-11-11 17:16 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +1)
-- account likes: 164, posts: 204
+- account likes: 167, posts: 206
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `pancake topping` → pure maple syrup | 249 | 1 | 0 | 0 | 0 | 0.4% |
-| `momento del día` → atardecer | 244 | 2 | 0 | 0 | 0 | 0.8% |
-| `edad para enamorarse` → cualquier edad | 240 | 3 | 0 | 0 | 1 | 1.7% |
-| `cream contour` → makeup by mario softsculpt shaping stick | 194 | 1 | 0 | 0 | 1 | 1.0% |
-| `age to stop caring` → never | 89 | 0 | 0 | 0 | 0 | 0.0% |
+| `cream contour` → makeup by mario softsculpt shaping stick | 255 | 1 | 0 | 0 | 1 | 0.8% |
+| `momento del día` → atardecer | 249 | 2 | 0 | 0 | 0 | 0.8% |
+| `age to stop caring` → never | 234 | 3 | 0 | 0 | 0 | 1.3% |
+| `artista de flamenco pop` → rosalía | 227 | 0 | 0 | 0 | 0 | 0.0% |
+| `pasta shape` → rigatoni | 59 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `edad para enamorarse` → cualquier edad | 1.7% | 240 |
-| `cream contour` → makeup by mario softsculpt shaping stick | 1.0% | 194 |
-| `momento del día` → atardecer | 0.8% | 244 |
-| `pancake topping` → pure maple syrup | 0.4% | 249 |
-| `age to stop caring` → never | 0.0% | 89 |
+| `age to stop caring` → never | 1.3% | 234 |
+| `momento del día` → atardecer | 0.8% | 249 |
+| `cream contour` → makeup by mario softsculpt shaping stick | 0.8% | 255 |
+| `pasta shape` → rigatoni | 0.0% | 59 |
+| `artista de flamenco pop` → rosalía | 0.0% | 227 |
 
-### last 7d (58 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,10 +37,10 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `edad para enamorarse` → cualquier edad | 1.7% | 240 |
+| `edad para enamorarse` → cualquier edad | 1.7% | 241 |
+| `age to stop caring` → never | 1.3% | 234 |
 | `time to start over` → now | 1.3% | 235 |
-| `cream contour` → makeup by mario softsculpt shaping stick | 1.0% | 194 |
-| `thing money can't buy` → genuine love | 0.9% | 223 |
+| `thing money can't buy` → genuine love | 0.9% | 225 |
 | `song for a road trip` → born to run — bruce springsteen | 0.8% | 241 |
 
 ## instagram
