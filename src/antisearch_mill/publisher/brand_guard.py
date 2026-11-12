@@ -50,6 +50,7 @@ PRODUCT_NOUNS = {
     "crema", "champu", "mascarilla", "protector", "solar", "tonico", "limpiador", "hidratante",
     "colorete", "corrector", "iluminador", "perfume", "plancha", "secador", "cepillo", "aceite",
     "labial", "pestanas", "maquillaje",
+    "stick", "contour",
 }
 _DECADE_OR_ORDINAL = re.compile(r"^\d+(s|st|nd|rd|th|am|pm|h)$")
 

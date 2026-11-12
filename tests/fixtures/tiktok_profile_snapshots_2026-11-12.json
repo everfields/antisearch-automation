@@ -1,0 +1,34 @@
+{
+  "makeupbymario": {
+    "handle": "makeupbymario",
+    "unique_id": "makeupbymario",
+    "nickname": "Makeup By Mario",
+    "verified": true,
+    "follower_count": 2100000,
+    "error": null
+  },
+  "livingproofinc": {
+    "handle": "livingproofinc",
+    "unique_id": "livingproofinc",
+    "nickname": "Living Proof, Inc.",
+    "verified": true,
+    "follower_count": 104900,
+    "error": null
+  },
+  "acquadiparma": {
+    "handle": "acquadiparma",
+    "unique_id": "acquadiparma",
+    "nickname": "Acqua di Parma",
+    "verified": true,
+    "follower_count": 17000,
+    "error": null
+  },
+  "native": {
+    "handle": "native",
+    "unique_id": "native",
+    "nickname": "Native",
+    "verified": true,
+    "follower_count": 163000,
+    "error": null
+  }
+}
