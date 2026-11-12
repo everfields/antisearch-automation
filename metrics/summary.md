@@ -1,29 +1,29 @@
-# Social metrics — 2026-11-12 11:31 UTC
+# Social metrics — 2026-11-12 20:09 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 170, posts: 208
+- account likes: 172, posts: 211
 
 ### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `canción para cocinar` → la vida es un carnaval — celia cruz | 260 | 3 | 0 | 0 | 0 | 1.2% |
-| `last thing before sleep` → a goodnight kiss | 247 | 0 | 0 | 0 | 0 | 0.0% |
-| `pasta shape` → rigatoni | 237 | 0 | 0 | 0 | 0 | 0.0% |
-| `artista de flamenco pop` → rosalía | 230 | 0 | 0 | 0 | 0 | 0.0% |
+| `last thing before sleep` → a goodnight kiss | 250 | 0 | 0 | 0 | 0 | 0.0% |
+| `regalo que no cuesta dinero` → tiempo de calidad | 213 | 3 | 0 | 0 | 1 | 1.9% |
+| `superpower` → omnipotence | 201 | 0 | 0 | 0 | 0 | 0.0% |
+| `colorete` → rare beauty soft pinch liquid blush | 86 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `canción para cocinar` → la vida es un carnaval — celia cruz | 1.2% | 260 |
-| `pasta shape` → rigatoni | 0.0% | 237 |
-| `artista de flamenco pop` → rosalía | 0.0% | 230 |
-| `last thing before sleep` → a goodnight kiss | 0.0% | 247 |
+| `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
+| `last thing before sleep` → a goodnight kiss | 0.0% | 250 |
+| `colorete` → rare beauty soft pinch liquid blush | 0.0% | 86 |
+| `superpower` → omnipotence | 0.0% | 201 |
 
-### last 7d (58 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -35,11 +35,11 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
 | `edad para enamorarse` → cualquier edad | 1.7% | 241 |
 | `time to start over` → now | 1.3% | 235 |
 | `age to stop caring` → never | 1.3% | 235 |
 | `time to start over` → now | 1.3% | 235 |
-| `canción para cocinar` → la vida es un carnaval — celia cruz | 1.2% | 260 |
 
 ## instagram
 
