@@ -41,7 +41,8 @@
   "rare beauty": {
     "kind": "brand",
     "aliases": [
-      "rare beauty soft pinch liquid blush"
+      "rare beauty soft pinch liquid blush",
+      "rare beauty positive light silky touch highlighter"
     ],
     "tiktok": {
       "handle": "@rarebeauty",
@@ -913,7 +914,8 @@
     "aliases": [
       "la roche posay",
       "la roche-posay anthelios uvmune 400 spf50+",
-      "la roche-posay uvmune 400 invisible fluid spf50+"
+      "la roche-posay uvmune 400 invisible fluid spf50+",
+      "la roche-posay cicaplast lèvres"
     ],
     "tiktok": {
       "handle": "@larocheposay",
@@ -939,7 +941,8 @@
     "kind": "brand",
     "aliases": [
       "armani",
-      "giorgio armani beauty"
+      "giorgio armani beauty",
+      "giorgio armani luminous silk"
     ],
     "tiktok": {
       "handle": "@armanibeauty",
@@ -978,6 +981,9 @@
   },
   "laneige": {
     "kind": "brand",
+    "aliases": [
+      "laneige cream skin cerapeptide refiner"
+    ],
     "tiktok": {
       "handle": "@laneige_us",
       "verified": true,
@@ -992,7 +998,8 @@
     "aliases": [
       "l’occitane",
       "loccitane",
-      "l'occitane en provence"
+      "l'occitane en provence",
+      "l’occitane crema de manos karité 20%"
     ],
     "tiktok": {
       "handle": "@loccitane",
@@ -1317,6 +1324,68 @@
       "checked": "2026-10-31",
       "by": "cursor agent",
       "evidence": "tiktok.com/@ryanair public profile data (scripts/tiktok_profile.py, 2026-10-31): nickname 'Ryanair', verified true, 2.9M followers"
+    }
+  },
+  "makeup by mario": {
+    "kind": "brand",
+    "aliases": [
+      "makeup by mario softsculpt shaping stick"
+    ],
+    "tiktok": {
+      "handle": "@makeupbymario",
+      "verified": true,
+      "checked": "2026-11-12",
+      "by": "grok bot",
+      "followers": "2.1M",
+      "official_evidence": "https://www.makeupbymario.com/ (footer links tiktok.com/@makeupbymario); https://www.tiktok.com/@makeupbymario",
+      "evidence": "fetched twice 2026-11-12 (scripts/tiktok_profile.py and a second profile-page fetch): uniqueId makeupbymario, nickname 'Makeup By Mario', verified true, 2.1M followers; makeupbymario.com links tiktok.com/@makeupbymario"
+    }
+  },
+  "living proof": {
+    "kind": "brand",
+    "aliases": [
+      "living proof perfect hair day advanced clean dry shampoo"
+    ],
+    "note": "The bare @livingproof is an unrelated 62-follower user (uniqueId livingproof, nickname user24354940612), never tag it.",
+    "tiktok": {
+      "handle": "@livingproofinc",
+      "verified": true,
+      "checked": "2026-11-12",
+      "by": "grok bot",
+      "followers": "104.9K",
+      "official_evidence": "https://www.livingproof.com/ (links tiktok.com/@livingproofinc); https://www.tiktok.com/@livingproofinc",
+      "evidence": "fetched twice 2026-11-12 (scripts/tiktok_profile.py and a second profile-page fetch): uniqueId livingproofinc, nickname 'Living Proof, Inc.', verified true, 104.9K followers; livingproof.com links tiktok.com/@livingproofinc; @livingproof is squatted (62 followers, unverified)"
+    }
+  },
+  "acqua di parma": {
+    "kind": "brand",
+    "aliases": [
+      "acqua di parma colonia"
+    ],
+    "tiktok": {
+      "handle": "@acquadiparma",
+      "verified": true,
+      "checked": "2026-11-12",
+      "by": "grok bot",
+      "followers": "17K",
+      "official_evidence": "https://www.tiktok.com/@acquadiparma (verified badge; nickname 'Acqua di Parma'; profile bioLink https://www.acquadiparma.com)",
+      "evidence": "fetched twice 2026-11-12 (scripts/tiktok_profile.py and a second profile-page fetch): uniqueId acquadiparma, nickname 'Acqua di Parma', verified true, 17K followers; profile bioLink is https://www.acquadiparma.com (the brand site itself 403'd from this crawler)"
+    }
+  },
+  "native deodorant": {
+    "kind": "brand",
+    "aliases": [
+      "native coconut & vanilla deodorant"
+    ],
+    "note": "named by product line, not bare 'native', so an unrelated 'native' verdict never matches",
+    "tiktok": {
+      "handle": "@native",
+      "verified": true,
+      "checked": "2026-11-12",
+      "by": "grok bot",
+      "followers": "163K",
+      "official_evidence": "https://www.nativecos.com/ (links tiktok.com/@native); nativecos.com press pages say 'Follow @native on TikTok'",
+      "evidence": "fetched twice 2026-11-12 (scripts/tiktok_profile.py and a second profile-page fetch): uniqueId native, nickname 'Native', verified true, 163K followers; nativecos.com links tiktok.com/@native"
     }
   }
 }

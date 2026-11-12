@@ -75,3 +75,13 @@ def test_live_run_brand_with_handle_still_posts_and_breaker_turns_guard_off(tmp_
     out, creates, _ = _live(tmp_path / "a", jobs, {**BUFFER_ENV, **ON, "PUBLISHER_TIKTOK_BRAND_GUARD": "off"}, now,
                             {"p-mascara": "lancôme lash idôle"})
     assert out[0].status == "published" and creates[0]["text"] == "mascara → lancôme lash idôle"
+
+
+def test_shaping_stick_and_contour_are_product_nouns():
+    """2026-11-11: cream contour → makeup by mario softsculpt shaping stick went out untagged
+    because 'stick'/'contour' were not product nouns and the brand was not allowlisted."""
+    from datetime import date
+    assert brand_reason("makeup by mario softsculpt shaping stick")
+    assert brand_reason("acme cream contour stick")
+    tag = allowlisted("makeup by mario softsculpt shaping stick", "tiktok", ALLOW, date(2026, 11, 12))
+    assert tag.handle == "@makeupbymario", tag.reason

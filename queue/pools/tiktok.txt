@@ -1,5 +1,8 @@
 # TikTok EN = bare US consumer categories; live-oracle verdict = US-headquartered brand (no brand names in inputs).
 # ~2 in 3 English pool posts (concept ~1 in 3 from tiktok_concept.txt). Oracle-checked 2026-10-19.
+insulated tumbler
+joggers women
+hydrating face mask
 sports drink
 language app
 building toy
@@ -41,7 +44,6 @@ scalp serum hair growth
 body wash sensitive skin
 gym shoes women
 fleece hoodie
-insulated tumbler
 protein powder
 electrolyte powder
 peanut butter
@@ -53,9 +55,7 @@ blender smoothies
 lightweight jacket women
 concealer for dark circles
 cream concealer full coverage
-hydrating face mask
 charcoal face mask
-joggers women
 flavored sparkling water
 seltzer water lime
 louisiana style hot sauce
