@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-13 11:16 UTC
+# Social metrics — 2026-11-13 19:53 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 173, posts: 213
+- account likes: 178, posts: 216
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `colorete` → rare beauty soft pinch liquid blush | 256 | 1 | 0 | 0 | 0 | 0.4% |
-| `superpower` → omnipotence | 245 | – | – | – | – | 0.0% |
-| `insulated tumbler` → yeti rambler 20 oz tumbler | 241 | 0 | 0 | 0 | 0 | 0.0% |
-| `regalo que no cuesta dinero` → tiempo de calidad | 213 | 3 | 0 | 0 | 1 | 1.9% |
-| `a country` → switzerland | 213 | 0 | 0 | 0 | 0 | 0.0% |
+| `insulated tumbler` → yeti rambler 20 oz tumbler | 244 | 0 | 0 | 0 | 0 | 0.0% |
+| `crema de manos` → l’occitane crema de manos karité 20% | 226 | – | – | – | – | 0.0% |
+| `day of the week` → saturday | 224 | 4 | 0 | 0 | 0 | 1.8% |
+| `a country` → switzerland | 217 | – | – | – | – | 0.0% |
+| `tónico facial` → laneige cream skin cerapeptide toner & moisturizer | 75 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
-| `colorete` → rare beauty soft pinch liquid blush | 0.4% | 256 |
-| `superpower` → omnipotence | 0.0% | 245 |
-| `insulated tumbler` → yeti rambler 20 oz tumbler | 0.0% | 241 |
-| `a country` → switzerland | 0.0% | 213 |
+| `day of the week` → saturday | 1.8% | 224 |
+| `insulated tumbler` → yeti rambler 20 oz tumbler | 0.0% | 244 |
+| `a country` → switzerland | 0.0% | 217 |
+| `tónico facial` → laneige cream skin cerapeptide toner & moisturizer | 0.0% | 75 |
+| `crema de manos` → l’occitane crema de manos karité 20% | 0.0% | 226 |
 
-### last 7d (57 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -38,10 +38,10 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
+| `day of the week` → saturday | 1.8% | 224 |
 | `edad para enamorarse` → cualquier edad | 1.7% | 241 |
 | `time to start over` → now | 1.3% | 235 |
 | `age to stop caring` → never | 1.3% | 235 |
-| `time to start over` → now | 1.3% | 235 |
 
 ## instagram
 
