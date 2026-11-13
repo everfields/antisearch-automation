@@ -1,29 +1,31 @@
-# Social metrics — 2026-11-13 01:58 UTC
+# Social metrics — 2026-11-13 11:16 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 173, posts: 212
+- account likes: 173, posts: 213
 
-### last 24h (4 post(s))
+### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `colorete` → rare beauty soft pinch liquid blush | 256 | 1 | 0 | 0 | 0 | 0.4% |
-| `superpower` → omnipotence | 245 | 0 | 0 | 0 | 0 | 0.0% |
+| `superpower` → omnipotence | 245 | – | – | – | – | 0.0% |
+| `insulated tumbler` → yeti rambler 20 oz tumbler | 241 | 0 | 0 | 0 | 0 | 0.0% |
 | `regalo que no cuesta dinero` → tiempo de calidad | 213 | 3 | 0 | 0 | 1 | 1.9% |
-| `insulated tumbler` → yeti rambler 20 oz tumbler | 93 | 0 | 0 | 0 | 0 | 0.0% |
+| `a country` → switzerland | 213 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
 | `colorete` → rare beauty soft pinch liquid blush | 0.4% | 256 |
 | `superpower` → omnipotence | 0.0% | 245 |
-| `insulated tumbler` → yeti rambler 20 oz tumbler | 0.0% | 93 |
+| `insulated tumbler` → yeti rambler 20 oz tumbler | 0.0% | 241 |
+| `a country` → switzerland | 0.0% | 213 |
 
-### last 7d (58 post(s))
+### last 7d (57 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
