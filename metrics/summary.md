@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-14 01:29 UTC
+# Social metrics — 2026-11-14 10:41 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 180, posts: 217
+- account likes: 180, posts: 218
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `tónico facial` → laneige cream skin cerapeptide toner & moisturizer | 235 | 0 | 0 | 0 | 0 | 0.0% |
+| `state to road trip through` → california | 257 | 1 | 0 | 0 | 0 | 0.4% |
+| `joggers women` → vuori performance jogger | 250 | 0 | 0 | 0 | 0 | 0.0% |
+| `tónico facial` → laneige cream skin cerapeptide toner & moisturizer | 236 | 0 | 0 | 0 | 0 | 0.0% |
 | `crema de manos` → l’occitane crema de manos karité 20% | 227 | 2 | 0 | 0 | 0 | 0.9% |
 | `day of the week` → saturday | 224 | 4 | 0 | 0 | 0 | 1.8% |
-| `a country` → switzerland | 217 | 0 | 0 | 0 | 0 | 0.0% |
-| `state to road trip through` → california | 147 | 1 | 0 | 0 | 0 | 0.7% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `day of the week` → saturday | 1.8% | 224 |
 | `crema de manos` → l’occitane crema de manos karité 20% | 0.9% | 227 |
-| `state to road trip through` → california | 0.7% | 147 |
-| `a country` → switzerland | 0.0% | 217 |
-| `tónico facial` → laneige cream skin cerapeptide toner & moisturizer | 0.0% | 235 |
+| `state to road trip through` → california | 0.4% | 257 |
+| `tónico facial` → laneige cream skin cerapeptide toner & moisturizer | 0.0% | 236 |
+| `joggers women` → vuori performance jogger | 0.0% | 250 |
 
-### last 7d (58 post(s))
+### last 7d (57 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
