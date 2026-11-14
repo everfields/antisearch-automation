@@ -1,39 +1,39 @@
-# Social metrics — 2026-11-14 10:41 UTC
+# Social metrics — 2026-11-14 18:19 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 180, posts: 218
+- account likes: 183, posts: 220
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `state to road trip through` → california | 257 | 1 | 0 | 0 | 0 | 0.4% |
-| `joggers women` → vuori performance jogger | 250 | 0 | 0 | 0 | 0 | 0.0% |
+| `state to road trip through` → california | 260 | 1 | 0 | 0 | 0 | 0.4% |
+| `joggers women` → vuori performance jogger | 251 | 0 | 0 | 0 | 0 | 0.0% |
+| `perfume de verano` → chanel allure homme sport | 247 | 2 | 0 | 0 | 0 | 0.8% |
 | `tónico facial` → laneige cream skin cerapeptide toner & moisturizer | 236 | 0 | 0 | 0 | 0 | 0.0% |
-| `crema de manos` → l’occitane crema de manos karité 20% | 227 | 2 | 0 | 0 | 0 | 0.9% |
-| `day of the week` → saturday | 224 | 4 | 0 | 0 | 0 | 1.8% |
+| `cookie` → chocolate chip | 196 | 1 | 0 | 0 | 0 | 0.5% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `day of the week` → saturday | 1.8% | 224 |
-| `crema de manos` → l’occitane crema de manos karité 20% | 0.9% | 227 |
-| `state to road trip through` → california | 0.4% | 257 |
+| `perfume de verano` → chanel allure homme sport | 0.8% | 247 |
+| `cookie` → chocolate chip | 0.5% | 196 |
+| `state to road trip through` → california | 0.4% | 260 |
 | `tónico facial` → laneige cream skin cerapeptide toner & moisturizer | 0.0% | 236 |
-| `joggers women` → vuori performance jogger | 0.0% | 250 |
+| `joggers women` → vuori performance jogger | 0.0% | 251 |
 
-### last 7d (57 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `lugar para desconectar` → formentera | 265 | 1 | 0 | 0 | 0 | 0.4% |
 | `lugar para desconectar` → formentera | 265 | 1 | 0 | 0 | – | 0.4% |
 | `canción para cocinar` → la vida es un carnaval — celia cruz | 260 | 3 | 0 | 0 | 0 | 1.2% |
+| `state to road trip through` → california | 260 | 1 | 0 | 0 | 0 | 0.4% |
 | `canción para cocinar` → la vida es un carnaval — celia cruz | 260 | 3 | 0 | 0 | – | 1.2% |
-| `pregunta para hacer en una cita` → ¿tu idea de un día perfecto? | 258 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
