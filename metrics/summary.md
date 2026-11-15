@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-15 06:51 UTC
+# Social metrics — 2026-11-15 16:28 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 187, posts: 223
+- account likes: 188, posts: 225
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hydrating face mask` → summer fridays jet lag mask | 249 | 0 | 0 | 0 | 0 | 0.0% |
-| `perfume de verano` → chanel allure homme sport | 248 | 2 | 0 | 0 | 0 | 0.8% |
+| `hydrating face mask` → summer fridays jet lag mask | 253 | 0 | 0 | 0 | 0 | 0.0% |
 | `base de maquillaje` → giorgio armani luminous silk | 245 | 3 | 0 | 0 | 0 | 1.2% |
-| `cookie` → chocolate chip | 238 | 1 | 0 | 0 | 0 | 0.4% |
-| `national park to visit` → yosemite national park | 155 | 1 | 0 | 0 | 0 | 0.6% |
+| `champú en seco` → living proof perfect hair day advanced clean | 244 | 1 | 0 | 1 | 0 | 0.8% |
+| `national park to visit` → yosemite national park | 230 | 1 | 0 | 0 | 0 | 0.4% |
+| `pet` → dog | 80 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `base de maquillaje` → giorgio armani luminous silk | 1.2% | 245 |
-| `perfume de verano` → chanel allure homme sport | 0.8% | 248 |
-| `national park to visit` → yosemite national park | 0.6% | 155 |
-| `cookie` → chocolate chip | 0.4% | 238 |
-| `hydrating face mask` → summer fridays jet lag mask | 0.0% | 249 |
+| `champú en seco` → living proof perfect hair day advanced clean | 0.8% | 244 |
+| `national park to visit` → yosemite national park | 0.4% | 230 |
+| `hydrating face mask` → summer fridays jet lag mask | 0.0% | 253 |
+| `pet` → dog | 0.0% | 80 |
 
-### last 7d (56 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
