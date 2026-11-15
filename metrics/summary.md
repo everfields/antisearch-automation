@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-14 22:37 UTC
+# Social metrics — 2026-11-15 06:51 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 185, posts: 221
+- account likes: 187, posts: 223
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `state to road trip through` → california | 261 | 1 | 0 | 0 | 0 | 0.4% |
-| `joggers women` → vuori performance jogger | 252 | 0 | 0 | 0 | 0 | 0.0% |
+| `hydrating face mask` → summer fridays jet lag mask | 249 | 0 | 0 | 0 | 0 | 0.0% |
 | `perfume de verano` → chanel allure homme sport | 248 | 2 | 0 | 0 | 0 | 0.8% |
-| `base de maquillaje` → giorgio armani luminous silk | 244 | 2 | 0 | 0 | 0 | 0.8% |
-| `cookie` → chocolate chip | 237 | 1 | 0 | 0 | 0 | 0.4% |
+| `base de maquillaje` → giorgio armani luminous silk | 245 | 3 | 0 | 0 | 0 | 1.2% |
+| `cookie` → chocolate chip | 238 | 1 | 0 | 0 | 0 | 0.4% |
+| `national park to visit` → yosemite national park | 155 | 1 | 0 | 0 | 0 | 0.6% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `base de maquillaje` → giorgio armani luminous silk | 0.8% | 244 |
+| `base de maquillaje` → giorgio armani luminous silk | 1.2% | 245 |
 | `perfume de verano` → chanel allure homme sport | 0.8% | 248 |
-| `cookie` → chocolate chip | 0.4% | 237 |
-| `state to road trip through` → california | 0.4% | 261 |
-| `joggers women` → vuori performance jogger | 0.0% | 252 |
+| `national park to visit` → yosemite national park | 0.6% | 155 |
+| `cookie` → chocolate chip | 0.4% | 238 |
+| `hydrating face mask` → summer fridays jet lag mask | 0.0% | 249 |
 
-### last 7d (58 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
