@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-15 16:28 UTC
+# Social metrics — 2026-11-15 22:59 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 188, posts: 225
+- account likes: 188, posts: 226
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `hydrating face mask` → summer fridays jet lag mask | 253 | 0 | 0 | 0 | 0 | 0.0% |
-| `base de maquillaje` → giorgio armani luminous silk | 245 | 3 | 0 | 0 | 0 | 1.2% |
 | `champú en seco` → living proof perfect hair day advanced clean | 244 | 1 | 0 | 1 | 0 | 0.8% |
+| `pet` → dog | 234 | 0 | 0 | 0 | 0 | 0.0% |
 | `national park to visit` → yosemite national park | 230 | 1 | 0 | 0 | 0 | 0.4% |
-| `pet` → dog | 80 | 0 | 0 | 0 | 0 | 0.0% |
+| `bálsamo labial` → la roche-posay cicaplast lèvres | 8 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `base de maquillaje` → giorgio armani luminous silk | 1.2% | 245 |
 | `champú en seco` → living proof perfect hair day advanced clean | 0.8% | 244 |
 | `national park to visit` → yosemite national park | 0.4% | 230 |
 | `hydrating face mask` → summer fridays jet lag mask | 0.0% | 253 |
-| `pet` → dog | 0.0% | 80 |
+| `pet` → dog | 0.0% | 234 |
+| `bálsamo labial` → la roche-posay cicaplast lèvres | 0.0% | 8 |
 
-### last 7d (54 post(s))
+### last 7d (57 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
