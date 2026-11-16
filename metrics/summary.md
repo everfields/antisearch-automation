@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-15 22:59 UTC
+# Social metrics — 2026-11-16 06:50 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 188, posts: 226
+- account likes: 188, posts: 228
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hydrating face mask` → summer fridays jet lag mask | 253 | 0 | 0 | 0 | 0 | 0.0% |
 | `champú en seco` → living proof perfect hair day advanced clean | 244 | 1 | 0 | 1 | 0 | 0.8% |
-| `pet` → dog | 234 | 0 | 0 | 0 | 0 | 0.0% |
-| `national park to visit` → yosemite national park | 230 | 1 | 0 | 0 | 0 | 0.4% |
+| `pet` → dog | 235 | 0 | 0 | 0 | 0 | 0.0% |
+| `decade for music` → 1970s | 158 | 0 | 0 | 0 | 0 | 0.0% |
 | `bálsamo labial` → la roche-posay cicaplast lèvres | 8 | 0 | 0 | 0 | 0 | 0.0% |
+| `dip powder nail kit` → kiara sky dip powder starter kit | 3 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `champú en seco` → living proof perfect hair day advanced clean | 0.8% | 244 |
-| `national park to visit` → yosemite national park | 0.4% | 230 |
-| `hydrating face mask` → summer fridays jet lag mask | 0.0% | 253 |
-| `pet` → dog | 0.0% | 234 |
+| `pet` → dog | 0.0% | 235 |
 | `bálsamo labial` → la roche-posay cicaplast lèvres | 0.0% | 8 |
+| `decade for music` → 1970s | 0.0% | 158 |
+| `dip powder nail kit` → kiara sky dip powder starter kit | 0.0% | 3 |
 
-### last 7d (57 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -41,7 +41,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `day of the week` → saturday | 1.8% | 224 |
 | `edad para enamorarse` → cualquier edad | 1.7% | 241 |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.4% | 213 |
-| `time to start over` → now | 1.3% | 235 |
+| `age to stop caring` → never | 1.3% | 235 |
 
 ## instagram
 
