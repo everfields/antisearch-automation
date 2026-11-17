@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-17 04:00 UTC
+# Social metrics — 2026-11-17 16:16 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 194, posts: 232
+- account likes: 197, posts: 235
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `hora para llamar a tu madre` → 19:00 | 252 | 1 | 0 | 0 | 0 | 0.4% |
-| `decade for fashion` → 1960s | 241 | 0 | 0 | 0 | 0 | 0.0% |
-| `thing to do on a sunday` → a long walk in nature | 237 | 1 | 0 | 0 | 0 | 0.4% |
-| `playlist para correr` → beast mode — spotify | 226 | 4 | 0 | 0 | 0 | 1.8% |
-| `decade for music` → 1970s | 219 | 1 | 0 | 0 | 0 | 0.5% |
+| `thing to do on a sunday` → a long walk in nature | 245 | 1 | 0 | 0 | 0 | 0.4% |
+| `playlist para correr` → beast mode — spotify | 228 | 4 | 0 | 0 | 0 | 1.8% |
+| `corrector de ojeras` → nars radiant creamy concealer | 225 | 2 | 0 | 0 | 0 | 0.9% |
+| `a planet` → earth | 202 | 1 | 0 | 0 | 0 | 0.5% |
+| `potato dish` → gratin dauphinois | 84 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `playlist para correr` → beast mode — spotify | 1.8% | 226 |
-| `decade for music` → 1970s | 0.5% | 219 |
-| `thing to do on a sunday` → a long walk in nature | 0.4% | 237 |
-| `hora para llamar a tu madre` → 19:00 | 0.4% | 252 |
-| `decade for fashion` → 1960s | 0.0% | 241 |
+| `playlist para correr` → beast mode — spotify | 1.8% | 228 |
+| `corrector de ojeras` → nars radiant creamy concealer | 0.9% | 225 |
+| `a planet` → earth | 0.5% | 202 |
+| `thing to do on a sunday` → a long walk in nature | 0.4% | 245 |
+| `potato dish` → gratin dauphinois | 0.0% | 84 |
 
-### last 7d (55 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -39,9 +39,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
 | `day of the week` → saturday | 1.8% | 224 |
-| `playlist para correr` → beast mode — spotify | 1.8% | 226 |
-| `edad para enamorarse` → cualquier edad | 1.7% | 241 |
+| `playlist para correr` → beast mode — spotify | 1.8% | 228 |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.4% | 213 |
+| `age to stop caring` → never | 1.3% | 235 |
 
 ## instagram
 
