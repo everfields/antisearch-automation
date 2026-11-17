@@ -1,11 +1,11 @@
-# Social metrics — 2026-11-16 19:43 UTC
+# Social metrics — 2026-11-17 04:00 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 190, posts: 231
+- account likes: 194, posts: 232
 
 ### last 24h (5 post(s))
 
@@ -13,19 +13,19 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | --- | --- | --- | --- | --- | --- | --- |
 | `hora para llamar a tu madre` → 19:00 | 252 | 1 | 0 | 0 | 0 | 0.4% |
 | `decade for fashion` → 1960s | 241 | 0 | 0 | 0 | 0 | 0.0% |
+| `thing to do on a sunday` → a long walk in nature | 237 | 1 | 0 | 0 | 0 | 0.4% |
+| `playlist para correr` → beast mode — spotify | 226 | 4 | 0 | 0 | 0 | 1.8% |
 | `decade for music` → 1970s | 219 | 1 | 0 | 0 | 0 | 0.5% |
-| `playlist para correr` → beast mode — spotify | 8 | 1 | 0 | 0 | 0 | 12.5% |
-| `dip powder nail kit` → kiara sky dip powder starter kit | 3 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `playlist para correr` → beast mode — spotify | 12.5% | 8 |
+| `playlist para correr` → beast mode — spotify | 1.8% | 226 |
 | `decade for music` → 1970s | 0.5% | 219 |
+| `thing to do on a sunday` → a long walk in nature | 0.4% | 237 |
 | `hora para llamar a tu madre` → 19:00 | 0.4% | 252 |
-| `dip powder nail kit` → kiara sky dip powder starter kit | 0.0% | 3 |
 | `decade for fashion` → 1960s | 0.0% | 241 |
 
-### last 7d (56 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,9 +37,9 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `playlist para correr` → beast mode — spotify | 12.5% | 8 |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
 | `day of the week` → saturday | 1.8% | 224 |
+| `playlist para correr` → beast mode — spotify | 1.8% | 226 |
 | `edad para enamorarse` → cualquier edad | 1.7% | 241 |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.4% | 213 |
 
