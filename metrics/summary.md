@@ -1,46 +1,46 @@
-# Social metrics — 2026-11-18 11:57 UTC
+# Social metrics — 2026-11-18 20:44 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 203, posts: 238
+- account likes: 205, posts: 241
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `a star` → sun | 241 | 2 | 0 | 0 | 0 | 0.8% |
-| `plan para una tarde de lluvia` → película y chocolate caliente | 231 | 0 | 0 | 0 | 0 | 0.0% |
-| `corrector de ojeras` → nars radiant creamy concealer | 225 | 2 | 0 | 0 | 0 | 0.9% |
-| `potato dish` → gratin dauphinois | 223 | 1 | 0 | 0 | 0 | 0.4% |
-| `age to buy a house` → 30 | 212 | 3 | 0 | 0 | 0 | 1.4% |
+| `coffee drink` → flat white | 238 | 1 | 0 | 0 | 0 | 0.4% |
+| `plan de domingo` → picnic en la naturaleza | 230 | 1 | 0 | 0 | 0 | 0.4% |
+| `age to buy a house` → 30 | 218 | 3 | 0 | 0 | 0 | 1.4% |
+| `tapa para compartir` → croquetas de jamón ibérico | 79 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `age to buy a house` → 30 | 1.4% | 212 |
-| `corrector de ojeras` → nars radiant creamy concealer | 0.9% | 225 |
+| `age to buy a house` → 30 | 1.4% | 218 |
 | `a star` → sun | 0.8% | 241 |
-| `potato dish` → gratin dauphinois | 0.4% | 223 |
-| `plan para una tarde de lluvia` → película y chocolate caliente | 0.0% | 231 |
+| `plan de domingo` → picnic en la naturaleza | 0.4% | 230 |
+| `coffee drink` → flat white | 0.4% | 238 |
+| `tapa para compartir` → croquetas de jamón ibérico | 0.0% | 79 |
 
-### last 7d (53 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `state to road trip through` → california | 261 | 1 | 0 | 0 | 0 | 0.4% |
-| `canción para cocinar` → la vida es un carnaval — celia cruz | 260 | 3 | 0 | 0 | 0 | 1.2% |
-| `canción para cocinar` → la vida es un carnaval — celia cruz | 260 | 3 | 0 | 0 | – | 1.2% |
 | `colorete` → rare beauty soft pinch liquid blush | 257 | 1 | 0 | 0 | – | 0.4% |
 | `colorete` → rare beauty soft pinch liquid blush | 256 | 1 | 0 | 0 | 0 | 0.4% |
+| `joggers women` → vuori performance jogger | 255 | 0 | 0 | 0 | 0 | 0.0% |
+| `joggers women` → vuori performance jogger | 255 | 0 | 0 | 0 | – | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
-| `day of the week` → saturday | 1.8% | 224 |
+| `day of the week` → saturday | 1.8% | 225 |
 | `playlist para correr` → beast mode — spotify | 1.8% | 228 |
-| `age to buy a house` → 30 | 1.4% | 212 |
+| `playlist para correr` → beast mode — spotify | 1.8% | 228 |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.4% | 213 |
 
 ## instagram
