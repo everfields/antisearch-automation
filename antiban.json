@@ -172,7 +172,8 @@
       "a star \u2192 sun",
       "age to buy a house \u2192 30",
       "plan de domingo \u2192 picnic en la naturaleza",
-      "coffee drink \u2192 flat white"
+      "coffee drink \u2192 flat white",
+      "tapa para compartir \u2192 croquetas de jam\u00f3n ib\u00e9rico"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -496,7 +497,8 @@
       "p-a-star-71cd824a",
       "p-age-to-buy-a-house-7b3ebb04",
       "es-plan-de-domingo-454ed4f1",
-      "p-coffee-drink-45fa303a"
+      "p-coffee-drink-45fa303a",
+      "es-tapa-para-compartir-d70093d4"
     ],
     "x": [
       "p-a-feeling-725bad0d",
