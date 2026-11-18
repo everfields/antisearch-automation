@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-18 01:03 UTC
+# Social metrics — 2026-11-18 11:57 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 198, posts: 237
+- account likes: 203, posts: 238
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `a star` → sun | 241 | 2 | 0 | 0 | 0 | 0.8% |
 | `plan para una tarde de lluvia` → película y chocolate caliente | 231 | 0 | 0 | 0 | 0 | 0.0% |
 | `corrector de ojeras` → nars radiant creamy concealer | 225 | 2 | 0 | 0 | 0 | 0.9% |
 | `potato dish` → gratin dauphinois | 223 | 1 | 0 | 0 | 0 | 0.4% |
-| `a planet` → earth | 202 | 1 | 0 | 0 | 0 | 0.5% |
-| `a star` → sun | 80 | 0 | 0 | 0 | 0 | 0.0% |
+| `age to buy a house` → 30 | 212 | 3 | 0 | 0 | 0 | 1.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `age to buy a house` → 30 | 1.4% | 212 |
 | `corrector de ojeras` → nars radiant creamy concealer | 0.9% | 225 |
-| `a planet` → earth | 0.5% | 202 |
+| `a star` → sun | 0.8% | 241 |
 | `potato dish` → gratin dauphinois | 0.4% | 223 |
-| `a star` → sun | 0.0% | 80 |
 | `plan para una tarde de lluvia` → película y chocolate caliente | 0.0% | 231 |
 
-### last 7d (54 post(s))
+### last 7d (53 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -40,8 +40,8 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.9% | 213 |
 | `day of the week` → saturday | 1.8% | 224 |
 | `playlist para correr` → beast mode — spotify | 1.8% | 228 |
+| `age to buy a house` → 30 | 1.4% | 212 |
 | `regalo que no cuesta dinero` → tiempo de calidad | 1.4% | 213 |
-| `age to stop caring` → never | 1.3% | 235 |
 
 ## instagram
 
