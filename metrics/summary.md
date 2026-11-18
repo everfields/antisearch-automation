@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-17 16:16 UTC
+# Social metrics — 2026-11-18 01:03 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 197, posts: 235
+- account likes: 198, posts: 237
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `thing to do on a sunday` → a long walk in nature | 245 | 1 | 0 | 0 | 0 | 0.4% |
-| `playlist para correr` → beast mode — spotify | 228 | 4 | 0 | 0 | 0 | 1.8% |
+| `plan para una tarde de lluvia` → película y chocolate caliente | 231 | 0 | 0 | 0 | 0 | 0.0% |
 | `corrector de ojeras` → nars radiant creamy concealer | 225 | 2 | 0 | 0 | 0 | 0.9% |
+| `potato dish` → gratin dauphinois | 223 | 1 | 0 | 0 | 0 | 0.4% |
 | `a planet` → earth | 202 | 1 | 0 | 0 | 0 | 0.5% |
-| `potato dish` → gratin dauphinois | 84 | 0 | 0 | 0 | 0 | 0.0% |
+| `a star` → sun | 80 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `playlist para correr` → beast mode — spotify | 1.8% | 228 |
 | `corrector de ojeras` → nars radiant creamy concealer | 0.9% | 225 |
 | `a planet` → earth | 0.5% | 202 |
-| `thing to do on a sunday` → a long walk in nature | 0.4% | 245 |
-| `potato dish` → gratin dauphinois | 0.0% | 84 |
+| `potato dish` → gratin dauphinois | 0.4% | 223 |
+| `a star` → sun | 0.0% | 80 |
+| `plan para una tarde de lluvia` → película y chocolate caliente | 0.0% | 231 |
 
-### last 7d (56 post(s))
+### last 7d (54 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -33,7 +33,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `canción para cocinar` → la vida es un carnaval — celia cruz | 260 | 3 | 0 | 0 | 0 | 1.2% |
 | `canción para cocinar` → la vida es un carnaval — celia cruz | 260 | 3 | 0 | 0 | – | 1.2% |
 | `colorete` → rare beauty soft pinch liquid blush | 257 | 1 | 0 | 0 | – | 0.4% |
-| `cream contour` → makeup by mario softsculpt shaping stick | 256 | 1 | 0 | 0 | 1 | 0.8% |
+| `colorete` → rare beauty soft pinch liquid blush | 256 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
