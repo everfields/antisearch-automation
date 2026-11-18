@@ -168,7 +168,8 @@
       "a planet \u2192 earth",
       "corrector de ojeras \u2192 @narscosmetics",
       "potato dish \u2192 gratin dauphinois",
-      "plan para una tarde de lluvia \u2192 pel\u00edcula y chocolate caliente"
+      "plan para una tarde de lluvia \u2192 pel\u00edcula y chocolate caliente",
+      "a star \u2192 sun"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -488,7 +489,8 @@
       "p-a-planet-3183fe11",
       "es-corrector-de-ojeras-c4c50429",
       "p-potato-dish-85bb3f0b",
-      "es-plan-para-una-tarde-de-lluvia-cd9c04f7"
+      "es-plan-para-una-tarde-de-lluvia-cd9c04f7",
+      "p-a-star-71cd824a"
     ],
     "x": [
       "p-a-feeling-725bad0d",
