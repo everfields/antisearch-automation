@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-18 20:44 UTC
+# Social metrics — 2026-11-19 02:40 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 205, posts: 241
+- account likes: 206, posts: 242
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `a star` → sun | 241 | 2 | 0 | 0 | 0 | 0.8% |
-| `coffee drink` → flat white | 238 | 1 | 0 | 0 | 0 | 0.4% |
+| `coffee drink` → flat white | 239 | 1 | 0 | 0 | 0 | 0.4% |
 | `plan de domingo` → picnic en la naturaleza | 230 | 1 | 0 | 0 | 0 | 0.4% |
 | `age to buy a house` → 30 | 218 | 3 | 0 | 0 | 0 | 1.4% |
-| `tapa para compartir` → croquetas de jamón ibérico | 79 | 0 | 0 | 0 | 0 | 0.0% |
+| `tapa para compartir` → croquetas de jamón ibérico | 214 | 0 | 0 | 0 | 0 | 0.0% |
+| `liquid eyeliner` → stila stay all day waterproof liquid eye liner | 59 | 1 | 0 | 0 | 0 | 1.7% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `liquid eyeliner` → stila stay all day waterproof liquid eye liner | 1.7% | 59 |
 | `age to buy a house` → 30 | 1.4% | 218 |
-| `a star` → sun | 0.8% | 241 |
 | `plan de domingo` → picnic en la naturaleza | 0.4% | 230 |
-| `coffee drink` → flat white | 0.4% | 238 |
-| `tapa para compartir` → croquetas de jamón ibérico | 0.0% | 79 |
+| `coffee drink` → flat white | 0.4% | 239 |
+| `tapa para compartir` → croquetas de jamón ibérico | 0.0% | 214 |
 
-### last 7d (56 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -41,7 +41,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `day of the week` → saturday | 1.8% | 225 |
 | `playlist para correr` → beast mode — spotify | 1.8% | 228 |
 | `playlist para correr` → beast mode — spotify | 1.8% | 228 |
-| `regalo que no cuesta dinero` → tiempo de calidad | 1.4% | 213 |
+| `liquid eyeliner` → stila stay all day waterproof liquid eye liner | 1.7% | 59 |
 
 ## instagram
 
