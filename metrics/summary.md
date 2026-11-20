@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-19 20:49 UTC
+# Social metrics — 2026-11-20 02:25 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 208, posts: 246
+- account likes: 209, posts: 247
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `liquid eyeliner` → stila stay all day waterproof liquid eye liner | 209 | 2 | 0 | 0 | 0 | 1.0% |
 | `disfraz de halloween` → vampiro | 209 | 0 | 0 | 0 | 0 | 0.0% |
+| `juego para la sobremesa` → código secreto | 208 | 1 | 0 | 0 | 0 | 0.5% |
 | `olympic sport` → athletics | 206 | 0 | 0 | 0 | 0 | 0.0% |
 | `holiday of the year` → christmas | 183 | 1 | 0 | 0 | 0 | 0.5% |
-| `juego para la sobremesa` → código secreto | 75 | 0 | 0 | 0 | 0 | 0.0% |
+| `season to live in` → spring | 96 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `liquid eyeliner` → stila stay all day waterproof liquid eye liner | 1.0% | 209 |
 | `holiday of the year` → christmas | 0.5% | 183 |
-| `juego para la sobremesa` → código secreto | 0.0% | 75 |
+| `juego para la sobremesa` → código secreto | 0.5% | 208 |
 | `olympic sport` → athletics | 0.0% | 206 |
 | `disfraz de halloween` → vampiro | 0.0% | 209 |
+| `season to live in` → spring | 0.0% | 96 |
 
-### last 7d (58 post(s))
+### last 7d (57 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
