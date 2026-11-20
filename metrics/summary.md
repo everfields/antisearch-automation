@@ -1,4 +1,4 @@
-# Social metrics — 2026-11-20 02:25 UTC
+# Social metrics — 2026-11-20 11:56 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
@@ -7,25 +7,23 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 - followers: **8** (24h +0, 7d +0)
 - account likes: 209, posts: 247
 
-### last 24h (5 post(s))
+### last 24h (4 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `season to live in` → spring | 225 | 0 | 0 | 0 | 0 | 0.0% |
+| `juego para la sobremesa` → código secreto | 209 | 1 | 0 | 0 | 0 | 0.5% |
 | `disfraz de halloween` → vampiro | 209 | 0 | 0 | 0 | 0 | 0.0% |
-| `juego para la sobremesa` → código secreto | 208 | 1 | 0 | 0 | 0 | 0.5% |
 | `olympic sport` → athletics | 206 | 0 | 0 | 0 | 0 | 0.0% |
-| `holiday of the year` → christmas | 183 | 1 | 0 | 0 | 0 | 0.5% |
-| `season to live in` → spring | 96 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `holiday of the year` → christmas | 0.5% | 183 |
-| `juego para la sobremesa` → código secreto | 0.5% | 208 |
+| `juego para la sobremesa` → código secreto | 0.5% | 209 |
 | `olympic sport` → athletics | 0.0% | 206 |
 | `disfraz de halloween` → vampiro | 0.0% | 209 |
-| `season to live in` → spring | 0.0% | 96 |
+| `season to live in` → spring | 0.0% | 225 |
 
-### last 7d (57 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
