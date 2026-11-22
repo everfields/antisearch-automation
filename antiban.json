@@ -188,7 +188,8 @@
       "iluminador \u2192 @rarebeauty",
       "movie genre \u2192 drama",
       "reggaet\u00f3n de los 2000 \u2192 gasolina \u2014 daddy yankee",
-      "place to watch the sunset \u2192 oia, santorini"
+      "place to watch the sunset \u2192 oia, santorini",
+      "a cloud \u2192 cumulus"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -528,7 +529,8 @@
       "es-iluminador-bd0ab8d2",
       "p-movie-genre-805ab1bc",
       "es-reggaet-n-de-los-2000-ccdb0f08",
-      "p-place-to-watch-the-sunset-7da809d2"
+      "p-place-to-watch-the-sunset-7da809d2",
+      "p-a-cloud-2982ed1d"
     ],
     "x": [
       "p-a-feeling-725bad0d",
