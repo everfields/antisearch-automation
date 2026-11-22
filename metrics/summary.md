@@ -1,39 +1,39 @@
-# Social metrics — 2026-11-22 01:26 UTC
+# Social metrics — 2026-11-22 11:42 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **8** (24h +0, 7d +0)
-- account likes: 216, posts: 256
+- account likes: 216, posts: 257
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `road trip snack` → trail mix | 255 | 0 | 0 | 0 | 0 | 0.0% |
-| `iluminador` → rare beauty positive light silky touch highlighter | 218 | 0 | 0 | 0 | 0 | 0.0% |
-| `movie genre` → drama | 215 | 2 | 0 | 0 | 0 | 0.9% |
-| `reggaetón de los 2000` → gasolina — daddy yankee | 196 | 0 | 0 | 0 | 0 | 0.0% |
-| `place to watch the sunset` → oia, santorini | 33 | 0 | 0 | 0 | 0 | 0.0% |
+| `place to watch the sunset` → oia, santorini | 264 | 0 | 0 | 0 | 0 | 0.0% |
+| `reggaetón de los 2000` → gasolina — daddy yankee | 231 | 0 | 0 | 0 | 0 | 0.0% |
+| `iluminador` → rare beauty positive light silky touch highlighter | 219 | 0 | 0 | 0 | 0 | 0.0% |
+| `movie genre` → drama | 217 | 2 | 0 | 0 | 0 | 0.9% |
+| `a cloud` → cumulus | 169 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `movie genre` → drama | 0.9% | 215 |
-| `road trip snack` → trail mix | 0.0% | 255 |
-| `reggaetón de los 2000` → gasolina — daddy yankee | 0.0% | 196 |
-| `iluminador` → rare beauty positive light silky touch highlighter | 0.0% | 218 |
-| `place to watch the sunset` → oia, santorini | 0.0% | 33 |
+| `movie genre` → drama | 0.9% | 217 |
+| `reggaetón de los 2000` → gasolina — daddy yankee | 0.0% | 231 |
+| `iluminador` → rare beauty positive light silky touch highlighter | 0.0% | 219 |
+| `place to watch the sunset` → oia, santorini | 0.0% | 264 |
+| `a cloud` → cumulus | 0.0% | 169 |
 
-### last 7d (57 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
 | `powder bronzer` → nars laguna bronzing powder | 269 | 1 | 0 | 0 | 0 | 0.4% |
+| `place to watch the sunset` → oia, santorini | 264 | 0 | 0 | 0 | 0 | 0.0% |
 | `road trip snack` → trail mix | 255 | 0 | 0 | 0 | 0 | 0.0% |
 | `hora para llamar a tu madre` → 19:00 | 252 | 1 | 0 | 0 | 0 | 0.4% |
 | `hora para llamar a tu madre` → 19:00 | 252 | 1 | 0 | 0 | – | 0.4% |
-| `thing to do on a sunday` → a long walk in nature | 245 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
