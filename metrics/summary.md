@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-24 02:24 UTC
+# Social metrics — 2026-11-24 13:59 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **9** (24h +0, 7d +1)
-- account likes: 225, posts: 266
+- account likes: 226, posts: 268
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `way to spend a rainy day` → reading a good book | 279 | 1 | 0 | 0 | 1 | 0.7% |
-| `cake flavor` → chocolate | 233 | 0 | 0 | 0 | 0 | 0.0% |
-| `dúo de pop español` → amaral | 208 | 1 | 0 | 0 | 0 | 0.5% |
-| `podcast para caminar` → radio ambulante | 172 | 1 | 0 | 0 | 0 | 0.6% |
-| `makeup remover wipes` → neutrogena fragrance-free makeup remover wipes | 12 | 0 | 0 | 0 | 0 | 0.0% |
+| `hobby to pick up at 40` → hiking | 268 | 0 | 0 | 0 | 0 | 0.0% |
+| `makeup remover wipes` → neutrogena fragrance-free makeup remover wipes | 259 | 1 | 0 | 0 | 0 | 0.4% |
+| `podcast para caminar` → radio ambulante | 238 | 1 | 0 | 0 | 0 | 0.4% |
+| `cake flavor` → chocolate | 234 | 0 | 0 | 0 | 0 | 0.0% |
+| `bebida para el verano` → limonada | 13 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `way to spend a rainy day` → reading a good book | 0.7% | 279 |
-| `podcast para caminar` → radio ambulante | 0.6% | 172 |
-| `dúo de pop español` → amaral | 0.5% | 208 |
-| `makeup remover wipes` → neutrogena fragrance-free makeup remover wipes | 0.0% | 12 |
-| `cake flavor` → chocolate | 0.0% | 233 |
+| `podcast para caminar` → radio ambulante | 0.4% | 238 |
+| `makeup remover wipes` → neutrogena fragrance-free makeup remover wipes | 0.4% | 259 |
+| `cake flavor` → chocolate | 0.0% | 234 |
+| `bebida para el verano` → limonada | 0.0% | 13 |
+| `hobby to pick up at 40` → hiking | 0.0% | 268 |
 
-### last 7d (58 post(s))
+### last 7d (56 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
