@@ -202,7 +202,8 @@
       "hobby to pick up at 40 \u2192 hiking",
       "bebida para el verano \u2192 limonada",
       "burger topping \u2192 american cheese",
-      "grupo de pop de los 2000 \u2192 destiny\u2019s child"
+      "grupo de pop de los 2000 \u2192 destiny\u2019s child",
+      "breakfast food \u2192 eggs benedict"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -556,7 +557,8 @@
       "p-hobby-to-pick-up-at-40-58f2d85d",
       "es-bebida-para-el-verano-9b0de09a",
       "p-burger-topping-3d3bd0db",
-      "es-grupo-de-pop-de-los-2000-f7cb6a85"
+      "es-grupo-de-pop-de-los-2000-f7cb6a85",
+      "p-breakfast-food-742c470e"
     ],
     "x": [
       "p-a-feeling-725bad0d",
