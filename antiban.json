@@ -204,7 +204,8 @@
       "burger topping \u2192 american cheese",
       "grupo de pop de los 2000 \u2192 destiny\u2019s child",
       "breakfast food \u2192 eggs benedict",
-      "night \u2192 stargazing"
+      "night \u2192 stargazing",
+      "plan para quedar con amigos \u2192 cena en casa con juegos de mesa"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -560,7 +561,8 @@
       "p-burger-topping-3d3bd0db",
       "es-grupo-de-pop-de-los-2000-f7cb6a85",
       "p-breakfast-food-742c470e",
-      "p-night-16cb46a1"
+      "p-night-16cb46a1",
+      "es-plan-para-quedar-con-amigos-8ba486fa"
     ],
     "x": [
       "p-a-feeling-725bad0d",
