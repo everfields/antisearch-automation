@@ -206,7 +206,8 @@
       "breakfast food \u2192 eggs benedict",
       "night \u2192 stargazing",
       "plan para quedar con amigos \u2192 cena en casa con juegos de mesa",
-      "noodle dish \u2192 tonkotsu ramen"
+      "noodle dish \u2192 tonkotsu ramen",
+      "canci\u00f3n de eurovisi\u00f3n espa\u00f1ola \u2192 eres t\u00fa \u2014 mocedades"
     ],
     "x": [
       "ai model\nclaude opus 5.5",
@@ -564,7 +565,8 @@
       "p-breakfast-food-742c470e",
       "p-night-16cb46a1",
       "es-plan-para-quedar-con-amigos-8ba486fa",
-      "p-noodle-dish-ab75574d"
+      "p-noodle-dish-ab75574d",
+      "es-canci-n-de-eurovisi-n-espa-ola-d1d6dc87"
     ],
     "x": [
       "p-a-feeling-725bad0d",
