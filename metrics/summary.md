@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-25 08:53 UTC
+# Social metrics — 2026-11-25 19:27 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **9** (24h +0, 7d +1)
-- account likes: 231, posts: 272
+- account likes: 237, posts: 274
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `grupo de pop de los 2000` → destiny’s child | 268 | 2 | 0 | 0 | 1 | 1.1% |
-| `bebida para el verano` → limonada | 261 | 0 | 0 | 0 | 0 | 0.0% |
-| `burger topping` → american cheese | 208 | 1 | 0 | 0 | 0 | 0.5% |
-| `night` → stargazing | 83 | 0 | 0 | 0 | 0 | 0.0% |
-| `breakfast food` → eggs benedict | 78 | 1 | 0 | 0 | 0 | 1.3% |
+| `grupo de pop de los 2000` → destiny’s child | 269 | 2 | 0 | 0 | 1 | 1.1% |
+| `breakfast food` → eggs benedict | 254 | 3 | 0 | 0 | 0 | 1.2% |
+| `night` → stargazing | 234 | 1 | 0 | 0 | 0 | 0.4% |
+| `plan para quedar con amigos` → cena en casa con juegos de mesa | 160 | 2 | 0 | 0 | 0 | 1.2% |
+| `noodle dish` → tonkotsu ramen | 50 | 1 | 0 | 0 | 0 | 2.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `breakfast food` → eggs benedict | 1.3% | 78 |
-| `grupo de pop de los 2000` → destiny’s child | 1.1% | 268 |
-| `burger topping` → american cheese | 0.5% | 208 |
-| `bebida para el verano` → limonada | 0.0% | 261 |
-| `night` → stargazing | 0.0% | 83 |
+| `noodle dish` → tonkotsu ramen | 2.0% | 50 |
+| `plan para quedar con amigos` → cena en casa con juegos de mesa | 1.2% | 160 |
+| `breakfast food` → eggs benedict | 1.2% | 254 |
+| `grupo de pop de los 2000` → destiny’s child | 1.1% | 269 |
+| `night` → stargazing | 0.4% | 234 |
 
-### last 7d (57 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -37,10 +37,10 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
+| `noodle dish` → tonkotsu ramen | 2.0% | 50 |
 | `taco filling` → al pastor | 1.4% | 209 |
 | `taco filling` → al pastor | 1.4% | 209 |
-| `breakfast food` → eggs benedict | 1.3% | 78 |
-| `soup` → tom yum goong | 1.2% | 254 |
+| `plan para quedar con amigos` → cena en casa con juegos de mesa | 1.2% | 160 |
 | `soup` → tom yum goong | 1.2% | 254 |
 
 ## instagram
