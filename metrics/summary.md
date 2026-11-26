@@ -1,31 +1,31 @@
-# Social metrics — 2026-11-26 03:39 UTC
+# Social metrics — 2026-11-26 17:07 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **9** (24h +0, 7d +1)
-- account likes: 239, posts: 276
+- account likes: 243, posts: 279
 
 ### last 24h (5 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `noodle dish` → tonkotsu ramen | 252 | 2 | 0 | 0 | 0 | 0.8% |
-| `plan para quedar con amigos` → cena en casa con juegos de mesa | 251 | 2 | 0 | 0 | 0 | 0.8% |
-| `night` → stargazing | 236 | 1 | 0 | 0 | 0 | 0.4% |
-| `canción de eurovisión española` → eres tú — mocedades | 223 | 1 | 0 | 0 | 0 | 0.4% |
-| `dessert at thanksgiving` → pumpkin pie | 15 | 0 | 0 | 0 | 0 | 0.0% |
+| `canción de eurovisión española` → eres tú — mocedades | 278 | 1 | 0 | 0 | 0 | 0.4% |
+| `dessert at thanksgiving` → pumpkin pie | 268 | 0 | 0 | 0 | 0 | 0.0% |
+| `juego de mesa para amigos` → código secreto | 238 | 2 | 0 | 0 | 0 | 0.8% |
+| `sunday` → brunch | 238 | 1 | 0 | 0 | 0 | 0.4% |
+| `natural deodorant` → native coconut & vanilla deodorant | 9 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `plan para quedar con amigos` → cena en casa con juegos de mesa | 0.8% | 251 |
-| `noodle dish` → tonkotsu ramen | 0.8% | 252 |
-| `canción de eurovisión española` → eres tú — mocedades | 0.4% | 223 |
-| `night` → stargazing | 0.4% | 236 |
-| `dessert at thanksgiving` → pumpkin pie | 0.0% | 15 |
+| `juego de mesa para amigos` → código secreto | 0.8% | 238 |
+| `sunday` → brunch | 0.4% | 238 |
+| `canción de eurovisión española` → eres tú — mocedades | 0.4% | 278 |
+| `dessert at thanksgiving` → pumpkin pie | 0.0% | 268 |
+| `natural deodorant` → native coconut & vanilla deodorant | 0.0% | 9 |
 
-### last 7d (58 post(s))
+### last 7d (55 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -33,7 +33,7 @@ Latest snapshot per post. `–` = not available from any source (never a silent 
 | `makeup remover wipes` → neutrogena fragrance-free makeup remover wipes | 280 | 2 | 0 | 0 | – | 0.7% |
 | `way to spend a rainy day` → reading a good book | 279 | 1 | 0 | 0 | 1 | 0.7% |
 | `way to spend a rainy day` → reading a good book | 279 | 1 | 0 | 0 | – | 0.4% |
-| `hobby to pick up at 40` → hiking | 275 | 0 | 0 | 0 | 0 | 0.0% |
+| `canción de eurovisión española` → eres tú — mocedades | 278 | 1 | 0 | 0 | 0 | 0.4% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
