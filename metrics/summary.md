@@ -1,47 +1,47 @@
-# Social metrics — 2026-11-27 12:49 UTC
+# Social metrics — 2026-11-27 23:35 UTC
 
 Latest snapshot per post. `–` = not available from any source (never a silent 0).
 
 ## tiktok
 
 - followers: **9** (24h +0, 7d +1)
-- account likes: 250, posts: 283
+- account likes: 255, posts: 286
 
-### last 24h (5 post(s))
+### last 24h (6 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `natural deodorant` → native coconut & vanilla deodorant | 275 | 1 | 0 | 0 | 0 | 0.4% |
-| `canción para el coche` → highway to hell — ac/dc | 272 | 0 | 0 | 0 | 0 | 0.0% |
-| `friendship` → trust | 243 | 3 | 0 | 0 | 0 | 1.2% |
-| `luck` → serendipity | 188 | 1 | 0 | 0 | 0 | 0.5% |
-| `sitio para cenar en madrid` → diverxo | 1 | 0 | 0 | 0 | 0 | 0.0% |
+| `luck` → serendipity | 595 | 2 | 0 | 0 | 0 | 0.3% |
+| `friendship` → trust | 592 | 4 | 0 | 0 | 1 | 0.8% |
+| `sitio para cenar en madrid` → diverxo | 198 | 1 | 0 | 0 | 0 | 0.5% |
+| `sesión de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 186 | 0 | 0 | 0 | 0 | 0.0% |
+| `patience` → job | 186 | 0 | 0 | 0 | 0 | 0.0% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `friendship` → trust | 1.2% | 243 |
-| `luck` → serendipity | 0.5% | 188 |
-| `natural deodorant` → native coconut & vanilla deodorant | 0.4% | 275 |
-| `canción para el coche` → highway to hell — ac/dc | 0.0% | 272 |
-| `sitio para cenar en madrid` → diverxo | 0.0% | 1 |
+| `friendship` → trust | 0.8% | 592 |
+| `sitio para cenar en madrid` → diverxo | 0.5% | 198 |
+| `luck` → serendipity | 0.3% | 595 |
+| `courage` → moral courage | 0.0% | 21 |
+| `sesión de bizarrap` → quevedo: bzrp music sessions, vol. 52 | 0.0% | 186 |
 
-### last 7d (58 post(s))
+### last 7d (60 post(s))
 
 | top by views | views | likes | comments | shares | saves | eng. rate |
 | --- | --- | --- | --- | --- | --- | --- |
+| `canción para el coche` → highway to hell — ac/dc | 616 | 2 | 0 | 0 | 0 | 0.3% |
+| `natural deodorant` → native coconut & vanilla deodorant | 601 | 1 | 0 | 0 | 0 | 0.2% |
+| `luck` → serendipity | 595 | 2 | 0 | 0 | 0 | 0.3% |
+| `friendship` → trust | 592 | 4 | 0 | 0 | 1 | 0.8% |
 | `juego de mesa para amigos` → código secreto | 298 | 3 | 0 | 0 | 0 | 1.0% |
-| `dessert at thanksgiving` → pumpkin pie | 295 | 1 | 0 | 0 | 0 | 0.3% |
-| `canción de eurovisión española` → eres tú — mocedades | 283 | 1 | 0 | 0 | 0 | 0.4% |
-| `makeup remover wipes` → neutrogena fragrance-free makeup remover wipes | 280 | 2 | 0 | 0 | 0 | 0.7% |
-| `makeup remover wipes` → neutrogena fragrance-free makeup remover wipes | 280 | 2 | 0 | 0 | – | 0.7% |
 
 | top by engagement rate | eng. rate | views |
 | --- | --- | --- |
-| `taco filling` → al pastor | 1.4% | 209 |
-| `taco filling` → al pastor | 1.4% | 209 |
-| `friendship` → trust | 1.2% | 243 |
 | `soup` → tom yum goong | 1.2% | 254 |
 | `soup` → tom yum goong | 1.2% | 254 |
+| `breakfast food` → eggs benedict | 1.2% | 255 |
+| `breakfast food` → eggs benedict | 1.2% | 255 |
+| `noodle dish` → tonkotsu ramen | 1.2% | 258 |
 
 ## instagram
 
